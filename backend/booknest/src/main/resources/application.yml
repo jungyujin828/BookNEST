@@ -1,0 +1,12 @@
+spring:
+  profiles:
+    include: secret
+    active: dev
+
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true  # ??? 0??? ?? 1??
+
+  jpa:
+    open-in-view: false

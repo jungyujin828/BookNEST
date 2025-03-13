@@ -1,0 +1,60 @@
+package com.ssafy.booknest.domain.user.controller;
+
+import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
+import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.response.ApiResponse;
+import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.security.UserPrincipal;
+import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final AuthenticationUtil authenticationUtil;
+    private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @GetMapping("/validate/{token}")
+    public ResponseEntity<ApiResponse<Boolean>> validateToken(@PathVariable String token) {
+        TokenValidationResult result = jwtTokenProvider.validateToken(token);
+        if (!result.isValid()) {
+            return ApiResponse.success(false);
+        }
+
+        try {
+            Integer userId = jwtTokenProvider.getUserId(token);
+            Boolean exists = userService.existsById(userId);
+            return ApiResponse.success(exists);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return ApiResponse.success(false);
+        }
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        userService.deleteUser(userId);
+
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<ApiResponse<String>> test(
+            @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success("이것은 테스트입니다. userId = " + userId);
+    }
+}
