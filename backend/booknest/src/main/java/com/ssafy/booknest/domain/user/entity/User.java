@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
+import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.enums.Provider;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -46,4 +48,10 @@ public class User extends BaseEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "nest_id")
+    private Nest nest;
+
+
 }
