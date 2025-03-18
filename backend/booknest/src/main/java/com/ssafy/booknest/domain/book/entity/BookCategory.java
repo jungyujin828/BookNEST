@@ -17,15 +17,16 @@ import lombok.experimental.SuperBuilder;
 public class BookCategory {
 
     @Id
-    @Column(name ="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // id 자동 생성
+    @Column(name = "id")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)  // Lazy loading 적용 (성능 향상 가능)
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @ManyToOne
-    @JoinColumn(name="category_id")
+    @ManyToOne(fetch = FetchType.LAZY)  // Lazy loading 적용
+    @JoinColumn(name = "category_id")
     private Category category;
 
 }

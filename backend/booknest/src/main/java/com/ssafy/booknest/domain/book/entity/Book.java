@@ -1,6 +1,5 @@
 package com.ssafy.booknest.domain.book.entity;
 
-import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -41,7 +40,7 @@ public class Book extends BaseEntity {
     @Lob
     private String intro;
 
-    @Column(name="index", nullable = true)
+    @Column(name="`index`", nullable = true)
     @Lob
     private String index;
 
@@ -49,19 +48,16 @@ public class Book extends BaseEntity {
     @Lob
     private String publisherReview;
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookAuthor> bookAuthors = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book")
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BestSeller> bestSellers = new ArrayList<>();
-
-    @OneToMany(mappedBy = "book")
-    private List<Nest> nests = new ArrayList<>();
 
 }

@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "nest")
@@ -20,17 +22,22 @@ import java.time.LocalDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Nest extends BaseEntity {
 
-    @Column(name = "is_liked", nullable = false)
-    private Boolean isLiked;
-
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
     @OneToOne(mappedBy = "nest", fetch = FetchType.LAZY)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @ManyToMany
+    @JoinTable(
+            name = "book_nest",
+            joinColumns = @JoinColumn(name = "nest_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id")
+    )
+    private List<Book> books = new ArrayList<>();
+
+    // 찜 목록을 별도로 관리할 수 있는 엔티티 추가
+    @OneToMany(mappedBy = "nest", fetch = FetchType.LAZY)
+    private List<BookMark> bookMarks = new ArrayList<>();
 
 }
