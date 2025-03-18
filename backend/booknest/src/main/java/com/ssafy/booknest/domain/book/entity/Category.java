@@ -25,9 +25,6 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name="parent_id", nullable = true)
-    private String parentId;
-
     @OneToMany(mappedBy = "category")
     private List<BookCategory> bookCategories = new ArrayList<>();
 
