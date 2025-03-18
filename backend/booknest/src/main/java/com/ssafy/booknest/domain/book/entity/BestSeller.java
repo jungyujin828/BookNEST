@@ -6,17 +6,17 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
-@Table(name = "book_seller")
+@Table(name = "best_seller")
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class BestSeller extends BaseEntity {
+public class BestSeller {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name="book_id")

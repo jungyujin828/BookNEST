@@ -8,7 +8,6 @@ import lombok.experimental.SuperBuilder;
 
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,31 +36,34 @@ public class Book extends BaseEntity {
     @Column(name="image_url", nullable = false)
     private String imageUrl;
 
-    @Column(name="intro", nullable = true)
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String intro;
 
-    @Column(name="index", nullable = true)
-    @Lob
+    @Column(name= "`index`", columnDefinition = "TEXT")
     private String index;
 
-    @Column(name="publisher_review", nullable = true)
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookCategory> bookCategories = new ArrayList<>();
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookCategory> bookCategories;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookAuthor> bookAuthors = new ArrayList<>();
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookAuthor> bookAuthors;
 
-    @OneToMany(mappedBy = "book")
-    private List<BookTag> bookTags = new ArrayList<>();
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookTag> bookTags;
 
-    @OneToMany(mappedBy = "book")
-    private List<BestSeller> bestSellers = new ArrayList<>();
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BestSeller> bestSellers;
 
-    @OneToMany(mappedBy = "book")
-    private List<Nest> nests = new ArrayList<>();
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Nest> nests;
+
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Rating> ratings;
+
+    @OneToMany(mappedBy = "book" , cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 
 }
