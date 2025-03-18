@@ -15,30 +15,30 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-    // 베스트 셀러
-    public List<BookResponse> getBestSellers(Integer userId) {
-        List<Book> bestSellerBooks = bookRepository.findBestSellers();
+//    // 베스트 셀러
+//    public List<BookResponse> getBestSellers(Integer userId) {
+//        List<Book> bestSellerBooks = bookRepository.findBestSellers();
+//
+//        return bestSellerBooks.stream()
+//                .map(BookResponse::of)
+//                .collect(Collectors.toList());
+//    }
 
-        return bestSellerBooks.stream()
-                .map(BookResponse::of)
-                .collect(Collectors.toList());
-    }
+//    // 내 지역에서 가장 많이 읽은 책
+//    public List<BookResponse> getMostReadBooksByRegion(Integer userId) {
+//        List<Book> MostReadBooksByRegion = bookRepository.findMostReadBooksByRegion();
+//
+//        return MostReadBooksByRegion.stream()
+//                .map(BookResponse::of)
+//                .collect(Collectors.toList());
+//    }
 
-    // 내 지역에서 가장 많이 읽은 책
-    public List<BookResponse> getMostReadBooksByRegion(Integer userId) {
-        List<Book> MostReadBooksByRegion = bookRepository.findMostReadBooksByRegion();
-
-        return MostReadBooksByRegion.stream()
-                .map(BookResponse::of)
-                .collect(Collectors.toList());
-    }
-
-    // 내 성별과 나이대에서 많이 읽은 책
-    public List<BookResponse> getMostReadBooksByGenderAndAge(Integer userId) {
-        List<Book> MostReadBooksByGenderAndAge = bookRepository.findMostReadBooksByGenderAndAge();
-
-        return MostReadBooksByGenderAndAge.stream()
-                .map(BookResponse::of)
-                .collect(Collectors.toList());
-    }
+//    // 내 성별과 나이대에서 많이 읽은 책
+//    public List<BookResponse> getMostReadBooksByGenderAndAge(Integer userId) {
+//        List<Book> MostReadBooksByGenderAndAge = bookRepository.findMostReadBooksByGenderAndAge();
+//
+//        return MostReadBooksByGenderAndAge.stream()
+//                .map(BookResponse::of)
+//                .collect(Collectors.toList());
+//    }
 }

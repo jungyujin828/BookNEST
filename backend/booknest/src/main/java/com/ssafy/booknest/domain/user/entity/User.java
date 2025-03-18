@@ -40,8 +40,8 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column
-    private LocalDateTime birthdate;
+    @Column(length = 10)
+    private String birthdate;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
