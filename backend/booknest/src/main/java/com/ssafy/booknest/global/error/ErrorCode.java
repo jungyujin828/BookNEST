@@ -24,7 +24,11 @@ public enum ErrorCode {
     REFRESH_TOKEN_MISMATCH(401, "O005", "Refresh token mismatch"),
 
     // USER
-    USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다.");
+    USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
+
+
+    // BOOK
+    BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다.");
 
     private final int status;
     private final String code;
