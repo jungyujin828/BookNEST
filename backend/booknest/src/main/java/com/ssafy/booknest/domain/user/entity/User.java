@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
+import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.enums.Provider;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
@@ -11,8 +12,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "user")
@@ -38,12 +41,19 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column
-    private LocalDateTime birthdate;
+    @Column(length = 10)
+    private String birthdate;
 
+    @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "nest_id", unique = true)
+    private Nest nest;
+
+
 }
