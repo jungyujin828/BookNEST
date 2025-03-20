@@ -1,13 +1,17 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.LazyInitializationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,14 +19,22 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-//    // 베스트 셀러
-//    public List<BookResponse> getBestSellers(Integer userId) {
-//        List<Book> bestSellerBooks = bookRepository.findBestSellers();
-//
-//        return bestSellerBooks.stream()
-//                .map(BookResponse::of)
-//                .collect(Collectors.toList());
-//    }
+    // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
+    @Transactional(readOnly = true) // LazyInitializationException 방지
+    public List<BookResponse> getBestSellers() {
+        List<BestSeller> bestSellers = bookRepository.findBestSellers();
+
+        // 베스트셀러가 없으면 예외 발생
+        if (bestSellers.isEmpty()) {
+            throw new CustomException(ErrorCode.BOOK_NOT_FOUND);
+        }
+
+        return bestSellers.stream()
+                .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
+                .toList();
+    }
+
+
 
 //    // 내 지역에서 가장 많이 읽은 책
 //    public List<BookResponse> getMostReadBooksByRegion(Integer userId) {

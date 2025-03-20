@@ -23,6 +23,9 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_FOUND(401, "O004", "Refresh token not found"),
     REFRESH_TOKEN_MISMATCH(401, "O005", "Refresh token mismatch"),
 
+    // DB
+    DATABASE_ERROR(500, "D001", "데이터베이스 오류가 발생했습니다."),
+
     // USER
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
 

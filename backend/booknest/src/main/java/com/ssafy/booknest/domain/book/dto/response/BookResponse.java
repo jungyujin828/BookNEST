@@ -24,6 +24,7 @@ public class BookResponse {
         return BookResponse.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
+                .bookImage(book.getImageUrl())
                 .publishedDate(book.getPublishedDate())
                 .authors(book.getBookAuthors().stream()
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())
