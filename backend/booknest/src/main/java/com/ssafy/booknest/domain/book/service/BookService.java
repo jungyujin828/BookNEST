@@ -2,13 +2,12 @@ package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
-import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +17,22 @@ public class BookService {
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     public List<BookResponse> getBestSellers() {
-        List<BestSeller> bestSellers = bookRepository.findBestSellers();
+        try {
+            List<BestSeller> bestSellers = bookRepository.findBestSellers();
 
-        return bestSellers.stream()
-                .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
-                .toList();
+            if (bestSellers == null || bestSellers.isEmpty()) {
+                System.out.println("베스트셀러 목록이 비어 있습니다.");
+                return Collections.emptyList();
+            }
+
+            return bestSellers.stream()
+                    .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
+                    .toList();
+
+        } catch (Exception e) {
+            System.out.println("베스트셀러 조회 중 오류 발생: " + e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
 
