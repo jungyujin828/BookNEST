@@ -1,8 +1,8 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { ROUTES, ASSETS, OAUTH } from "../constants/paths";
+import { ASSETS, OAUTH } from "../constants/paths";
 import config from "../config";
-import InputInfoPage from "./InputInfoPage";
+// import InputInfoPage from "./InputInfoPage";
 import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
