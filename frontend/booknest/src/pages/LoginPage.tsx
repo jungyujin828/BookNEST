@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import styled from '@emotion/styled';
-import { ROUTES, ASSETS, OAUTH } from '../constants/paths';
-import config from '../config';
+import { useState } from "react";
+import styled from "@emotion/styled";
+import { ROUTES, ASSETS, OAUTH } from "../constants/paths";
+import config from "../config";
+import InputInfoPage from "./InputInfoPage";
+import { useNavigate } from "react-router-dom";
 
 const LoginContainer = styled.div`
   display: flex;
@@ -9,7 +11,7 @@ const LoginContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   min-height: 100vh;
-  background-color: #69B578;
+  background-color: #69b578;
   padding: 20px;
   text-align: center;
 `;
@@ -49,7 +51,7 @@ const ButtonSection = styled.div`
 
 const EnterButton = styled.button`
   background-color: white;
-  color: #69B578;
+  color: #69b578;
   border: none;
   padding: 15px 30px;
   border-radius: 25px;
@@ -65,7 +67,7 @@ const EnterButton = styled.button`
 `;
 
 const KakaoButton = styled.button`
-  background-color: #FEE500;
+  background-color: #fee500;
   color: #000000;
   border: none;
   padding: 15px 20px;
@@ -79,7 +81,7 @@ const KakaoButton = styled.button`
   gap: 8px;
 
   &:hover {
-    background-color: #FDD835;
+    background-color: #fdd835;
   }
 
   img {
@@ -89,7 +91,7 @@ const KakaoButton = styled.button`
 `;
 
 const NaverButton = styled.button`
-  background-color: #03C75A;
+  background-color: #03c75a;
   color: white;
   border: none;
   padding: 15px 20px;
@@ -103,7 +105,7 @@ const NaverButton = styled.button`
   gap: 8px;
 
   &:hover {
-    background-color: #02B150;
+    background-color: #02b150;
   }
 
   img {
@@ -138,16 +140,21 @@ const GoogleButton = styled.button`
 
 const LoginPage = () => {
   const [showSocialButtons, setShowSocialButtons] = useState(false);
+  const navigate = useNavigate();
 
   const handleKakaoLogin = () => {
     const params = new URLSearchParams({
       client_id: config.kakao.clientId,
       redirect_uri: config.kakao.redirectUri,
-      response_type: 'code',
+      response_type: "code",
     });
 
     const kakaoURL = `${OAUTH.KAKAO.AUTH_URL}?${params.toString()}`;
     window.location.href = kakaoURL;
+  };
+
+  const goToInputInfoPage = () => {
+    navigate("/input-info");
   };
 
   return (
@@ -161,10 +168,11 @@ const LoginPage = () => {
         </Logo>
         <Subtitle>
           나의 취향이 가득한
-          <br />
-          책 둥지를 틀다
+          <br />책 둥지를 틀다
         </Subtitle>
       </LogoSection>
+
+      <button onClick={goToInputInfoPage}>정보 입력 페이지로 이동</button>
 
       <ButtonSection>
         {!showSocialButtons ? (
@@ -192,4 +200,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage; 
+export default LoginPage;
