@@ -3,8 +3,12 @@ package com.ssafy.booknest.domain.book.service;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.LazyInitializationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,24 +20,20 @@ public class BookService {
     private final BookRepository bookRepository;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
+    @Transactional(readOnly = true) // LazyInitializationException 방지
     public List<BookResponse> getBestSellers() {
-        try {
-            List<BestSeller> bestSellers = bookRepository.findBestSellers();
+        List<BestSeller> bestSellers = bookRepository.findBestSellers();
 
-            if (bestSellers == null || bestSellers.isEmpty()) {
-                System.out.println("베스트셀러 목록이 비어 있습니다.");
-                return Collections.emptyList();
-            }
-
-            return bestSellers.stream()
-                    .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
-                    .toList();
-
-        } catch (Exception e) {
-            System.out.println("베스트셀러 조회 중 오류 발생: " + e.getMessage());
-            return Collections.emptyList();
+        // 베스트셀러가 없으면 예외 발생
+        if (bestSellers.isEmpty()) {
+            throw new CustomException(ErrorCode.BOOK_NOT_FOUND);
         }
+
+        return bestSellers.stream()
+                .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
+                .toList();
     }
+
 
 
 //    // 내 지역에서 가장 많이 읽은 책
