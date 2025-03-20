@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +16,15 @@ public class BookService {
 
     private final BookRepository bookRepository;
 
-//    // 베스트 셀러
-//    public List<BookResponse> getBestSellers(Integer userId) {
-//        List<Book> bestSellerBooks = bookRepository.findBestSellers();
-//
-//        return bestSellerBooks.stream()
-//                .map(BookResponse::of)
-//                .collect(Collectors.toList());
-//    }
+    // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
+    public List<BookResponse> getBestSellers() {
+        List<BestSeller> bestSellers = bookRepository.findBestSellers();
+
+        return bestSellers.stream()
+                .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
+                .toList();
+    }
+
 
 //    // 내 지역에서 가장 많이 읽은 책
 //    public List<BookResponse> getMostReadBooksByRegion(Integer userId) {
