@@ -3,6 +3,7 @@ package com.ssafy.booknest.domain.book.controller;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class BookController {
     private final UserService userService;
 
     @GetMapping("/best")
-    public ResponseEntity<List<BookResponse>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         // 로그인한 사용자만 접근 가능
         if (userPrincipal == null) {
@@ -33,7 +34,7 @@ public class BookController {
 
         List<BookResponse> bestSellers = bookService.getBestSellers();
 
-        return ResponseEntity.ok(bestSellers);
+        return ApiResponse.success(bestSellers);
     }
 
 //    @GetMapping("/region")
