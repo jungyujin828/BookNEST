@@ -4,7 +4,7 @@ import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { ROUTES } from "./constants/paths";
+// import { ROUTES } from "./constants/paths";
 import "./App.css";
 
 function App() {
