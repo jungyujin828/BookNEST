@@ -1,16 +1,17 @@
 package com.ssafy.booknest.domain.book.service;
 
+import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
+import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.LazyInitializationException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -35,12 +36,30 @@ public class BookService {
     }
 
 
+    // 책 상세 페이지 조회
+    @Transactional(readOnly = true)
+    public BookDetailResponse getBook(int bookId) {
+
+        Book book = bookRepository.findBookDetailById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        // 평균 평점 조회 (없으면 0.0 반환)
+        Double averageRating = bookRepository.findAverageRatingByBookId(bookId).orElse(0.0);
+
+
+        return BookDetailResponse.of(book, averageRating);
+    }
+
 
 //    // 내 지역에서 가장 많이 읽은 책
-//    public List<BookResponse> getMostReadBooksByRegion(Integer userId) {
-//        List<Book> MostReadBooksByRegion = bookRepository.findMostReadBooksByRegion();
+//    public List<BookResponse> getMostReadBooksByRegion() {
+//        List<Book> mostReadBooksByRegion = bookRepository.findMostReadBooksByRegion();
 //
-//        return MostReadBooksByRegion.stream()
+//        if (mostReadBooksByRegion.isEmpty()) {
+//            throw new CustomException(ErrorCode.BOOK_NOT_FOUND);
+//        }
+//
+//        return mostReadBooksByRegion.stream()
 //                .map(BookResponse::of)
 //                .collect(Collectors.toList());
 //    }

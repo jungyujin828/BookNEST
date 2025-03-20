@@ -16,14 +16,15 @@ import lombok.experimental.SuperBuilder;
 public class BookTag {
 
     @Id
-    @Column(name ="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Integer id;
 
-    @ManyToOne
-    @JoinColumn(name="book")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="book_id", nullable = false)
     private Book book;
 
-    @ManyToOne
-    @JoinColumn(name="tag")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="tag_id", nullable = false)
     private Tag tag;
 }
