@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 public class BookResponse {
 
     private int bookId;
-    private String bookImage;
     private String title;
     private LocalDate publishedDate;
+    private String imageUrl;
     private List<String> authors;
 
     public static BookResponse of(Book book) {
         return BookResponse.builder()
                 .bookId(book.getId())
                 .title(book.getTitle())
-                .bookImage(book.getImageUrl())
+                .imageUrl(book.getImageUrl())
                 .publishedDate(book.getPublishedDate())
                 .authors(book.getBookAuthors().stream()
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())

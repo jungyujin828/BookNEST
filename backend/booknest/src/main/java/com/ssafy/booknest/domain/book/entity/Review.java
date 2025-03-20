@@ -19,21 +19,24 @@ import java.time.LocalDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Review extends BaseEntity {
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name ="rating" , nullable = false)
+    private Double rating;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
     @Column(name =" likes" , nullable = false)
-    private Integer likes;
+    private Integer likes = 0;
 
     @Column(name="updated_at")
     private LocalDate updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id" , nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "book_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "book_id" , nullable = false)
     private Book book;
 
 }

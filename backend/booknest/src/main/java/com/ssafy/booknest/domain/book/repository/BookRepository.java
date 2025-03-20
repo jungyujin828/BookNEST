@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
@@ -16,6 +17,12 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     @Query("SELECT bs FROM BestSeller bs")
     List<BestSeller> findBestSellers();
 
+    // bookId로 책을 조회하는 메서드
+    Optional<Book> findBookDetailById(Integer bookId);
+
+    // 책 평균 평가 점수 구하기
+    @Query("SELECT ROUND(AVG(r.rating), 2) FROM Rating r WHERE r.book.id = :bookId")
+    Optional<Double> findAverageRatingByBookId(@Param("bookId") int bookId);
 
 //    // 내 지역에서 가장 많이 읽은 책
 //    List<Book> findMostReadBooksByRegion();
