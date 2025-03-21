@@ -27,7 +27,7 @@ function App() {
 
         {/* 잘못된 경로는 메인 페이지로 리다이렉트 */}
         {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-        <Route path="/input-info" element={<InputInfoPage />} />
+        <Route path="/inputInfo" element={<InputInfoPage />} />
       </Routes>
     </Router>
   );

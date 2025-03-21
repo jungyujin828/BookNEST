@@ -92,52 +92,6 @@ const Select = styled.select`
   box-sizing: border-box;
 `;
 
-const BirthDateContainer = styled.div`
-  display: flex;
-  justify-content: space-between;
-  background-color: #ffffff;
-`;
-
-const BirthYearInput = styled.input`
-  width: 30%;
-  height: 50px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 0 15px;
-  font-size: 16px;
-  box-sizing: border-box;
-  background-color: #ffffff;
-`;
-
-const BirthMonthContainer = styled.div`
-  width: 30%;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  overflow: hidden;
-`;
-
-const MonthSelect = styled.select`
-  width: 100%;
-  height: 50px;
-  border: none;
-  outline: none;
-  background-color: transparent;
-  padding: 0 15px;
-  font-size: 16px;
-`;
-
-const BirthDayInput = styled.input`
-  width: 30%;
-  height: 50px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 0 15px;
-  color: #000000;
-  font-size: 16px;
-  box-sizing: border-box;
-  background-color: #ffffff;
-`;
-
 const AddressRow = styled.div`
   display: flex;
   align-items: center;
@@ -151,6 +105,7 @@ const AddressInput = styled.input`
   border-radius: 5px;
   padding: 0 15px;
   font-size: 16px;
+  background-color: #ffffff;
 `;
 
 const AddressButton = styled.button`
