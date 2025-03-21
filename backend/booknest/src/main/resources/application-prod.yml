@@ -1,0 +1,24 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none  # 프로덕션 환경에서는 자동 테이블 생성을 비활성화
+    properties:
+      hibernate:
+        format_sql: false  # SQL 로그 포맷을 비활성화하여 성능 향상
+    defer-datasource-initialization: true  # 데이터베이스 연결 초기화 지연
+
+  # 프로덕션 환경에서는 SQL 스크립트 초기화 비활성화
+  sql:
+    init:
+      mode: never  # 항상 초기화하지 않도록 설정
+
+logging.level:
+  org.hibernate.SQL: warn  # Hibernate SQL 로그는 경고 수준으로 설정
+  com.zaxxer.hikari.HikariConfig: OFF  # HikariConfig 로그를 끔
+  com.zaxxer.hikari: OFF  # Hikari 로그를 끔
+
+oauth:
+  kakao:
+    redirect-uri: http://localhost:5173/oauth/kakao/callback  # 운영 도메인으로 변경
+  google:
+    redirect-uri: http://localhost:5173/oauth/google/callback  # 운영 도메인으로 변경
