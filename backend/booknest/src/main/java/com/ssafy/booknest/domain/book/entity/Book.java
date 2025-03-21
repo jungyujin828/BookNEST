@@ -40,7 +40,7 @@ public class Book extends BaseEntity {
     @Lob
     private String intro;
 
-    @Column(name="`index`", nullable = true)
+    @Column(name="index_column", nullable = true)
     @Lob
     private String index;
 
