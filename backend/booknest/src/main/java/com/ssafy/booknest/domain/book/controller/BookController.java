@@ -30,12 +30,7 @@ public class BookController {
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
-    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-
-        // 로그인한 사용자만 접근 가능
-        if (userPrincipal == null) {
-            return ApiResponse.error(UNAUTHORIZED_ACCESS);
-        }
+    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller() {
 
         List<BookResponse> bestSellers = bookService.getBestSellers();
 
