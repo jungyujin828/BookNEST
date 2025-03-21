@@ -1,18 +1,24 @@
 package com.ssafy.booknest.domain.book.controller;
 
+import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+
+import static com.ssafy.booknest.global.error.ErrorCode.UNAUTHORIZED_ACCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,22 +28,49 @@ public class BookController {
     private final BookService bookService;
     private final UserService userService;
 
-//    @GetMapping("/best")
-//    public ResponseEntity<List<BookResponse>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-//        Integer userId = userPrincipal.getId();
-//
-//        List<BookResponse> bestSellers = bookService.getBestSellers(userId);
-//
-//        return ResponseEntity.ok(bestSellers);
-//    }
+    // 베스트 셀러 목록 조회
+    @GetMapping("/best")
+    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
+        // 로그인한 사용자만 접근 가능
+        if (userPrincipal == null) {
+            return ApiResponse.error(UNAUTHORIZED_ACCESS);
+        }
+
+        List<BookResponse> bestSellers = bookService.getBestSellers();
+
+        return ApiResponse.success(bestSellers);
+    }
+
+    // 개별 도서 조회
+    @GetMapping("/{bookId}")
+    public ResponseEntity<ApiResponse<BookDetailResponse>> getBook(@PathVariable("bookId") Integer bookId,
+                                                                   @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        // 로그인한 사용자만 접근 가능
+        if (userPrincipal == null) {
+            return ApiResponse.error(UNAUTHORIZED_ACCESS);
+        }
+
+        BookDetailResponse bookDetail = bookService.getBook(bookId);
+
+        return ApiResponse.success(bookDetail);
+    }
+
+
+
+//    // 내 지역에서 가장 많이 읽은 책
 //    @GetMapping("/region")
-//    public ResponseEntity<List<BookResponse>> getMostReadBooksByRegion(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-//        Integer userId = userPrincipal.getId();
+//    public ResponseEntity<ApiResponse<List<BookResponse>>> getMostReadBooksByRegion(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 //
-//        List<BookResponse> mostReadBooks = bookService.getMostReadBooksByRegion(userId);
+//        // 로그인한 사용자만 접근 가능
+//        if (userPrincipal == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+//        }
 //
-//        return ResponseEntity.ok(mostReadBooks);
+//        List<BookResponse> mostReadBooks = bookService.getMostReadBooksByRegion();
+//
+//        return ApiResponse.success(mostReadBooks);
 //    }
 
 }
