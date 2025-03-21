@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 
 // 스타일 컴포넌트 정의
 const Container = styled.div`
