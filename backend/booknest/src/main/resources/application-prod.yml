@@ -17,6 +17,9 @@ logging.level:
   com.zaxxer.hikari.HikariConfig: OFF  # HikariConfig 로그를 끔
   com.zaxxer.hikari: OFF  # Hikari 로그를 끔
 
+server:
+  port: 80  # 서버 포트를 80으로 변경
+
 oauth:
   kakao:
     redirect-uri: http://localhost:5173/oauth/kakao/callback  # 운영 도메인으로 변경
