@@ -5,10 +5,9 @@ import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
+import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
-import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,10 +26,11 @@ public class BookController {
 
     private final BookService bookService;
     private final UserService userService;
+    private final AuthenticationUtil authenticationUtil;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
-    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller() {
+    public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         List<BookResponse> bestSellers = bookService.getBestSellers();
 
