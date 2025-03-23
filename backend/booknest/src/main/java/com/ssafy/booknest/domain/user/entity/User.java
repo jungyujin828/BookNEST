@@ -55,5 +55,4 @@ public class User extends BaseEntity {
     @JoinColumn(name = "nest_id", unique = true)
     private Nest nest;
 
-
 }
