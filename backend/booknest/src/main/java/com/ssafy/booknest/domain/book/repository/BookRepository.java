@@ -29,4 +29,5 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 //
 //    // 내 성별과 나이대에서 가장 많이 읽은 책
 //    List<Book> findMostReadBooksByGenderAndAge();
+
 }

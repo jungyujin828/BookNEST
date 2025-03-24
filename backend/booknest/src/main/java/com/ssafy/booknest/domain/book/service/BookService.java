@@ -1,34 +1,48 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.book.entity.Ebook;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.ebookRepository;
+import com.ssafy.booknest.domain.user.entity.Address;
+import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
+import org.hibernate.validator.constraints.ISBN;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final UserRepository userRepository;
+    private final ebookRepository ebookRepository;
+    private final KyoboService kyoboService;
+    private final Yes25Service yes25Service;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
     public List<BookResponse> getBestSellers() {
+
         List<BestSeller> bestSellers = bookRepository.findBestSellers();
 
-        // 베스트셀러가 없으면 예외 발생
-        if (bestSellers.isEmpty()) {
-            throw new CustomException(ErrorCode.BOOK_NOT_FOUND);
-        }
 
         return bestSellers.stream()
                 .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
@@ -38,17 +52,80 @@ public class BookService {
 
     // 책 상세 페이지 조회
     @Transactional(readOnly = true)
-    public BookDetailResponse getBook(int bookId) {
+    public BookDetailResponse getBook(Integer userId, Integer bookId) {
+
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Book book = bookRepository.findBookDetailById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
-        // 평균 평점 조회 (없으면 0.0 반환)
         Double averageRating = bookRepository.findAverageRatingByBookId(bookId).orElse(0.0);
-
 
         return BookDetailResponse.of(book, averageRating);
     }
+
+
+
+
+    // 구매 사이트 조회
+    @Transactional(readOnly = true)
+    public BookPurchaseResponse getPurchaseLinks(int bookId) {
+
+        Book book = bookRepository.findBookDetailById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        // ISBN 인코딩 (혹시 모를 공백, 특수문자 없애고 순수 숫자 추출을 위해 인코딩)
+        String isbn = book.getIsbn();
+        String encodedIsbn = URLEncoder.encode(isbn, StandardCharsets.UTF_8);
+
+        // 알라딘: ISBN 기반
+        String aladinUrl = "https://www.aladin.co.kr/shop/wproduct.aspx?ISBN=" + encodedIsbn;
+
+        // 교보문고: ISBN 기반 크롤링
+        String kyoboUrl = kyoboService.getKyoboUrlByIsbn(isbn);
+
+        // YES24: ISBN 기반 크롤링
+        String yes24Url = yes25Service.getYes25UrlByIsbn(isbn);
+
+
+        return BookPurchaseResponse.builder()
+                .aladinUrl(aladinUrl)
+                .kyoboUrl(kyoboUrl)
+                .yes24Url(yes24Url)
+                .build();
+    }
+
+
+
+
+    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
+    public List<String> getOnlineLibrary(Integer userId, Integer bookId) {
+
+        Book book = bookRepository.findBookDetailById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Address address = user.getAddress();
+        if (address == null) {
+            throw new CustomException(ErrorCode.ADDRESS_NOT_FOUND);
+        }
+
+        // 주소 정보에서 city, district 추출
+        String city = address.getCity();
+        String district = address.getDistrict();
+
+        // 해당 지역의 ebook 리스트 가져오기
+        List<Ebook> ebooks = ebookRepository.findByCityAndDistrict(city, district);
+
+        // redirectUrl만 뽑아서 반환
+        return ebooks.stream()
+                .map(Ebook::getRedirectUrl)
+                .collect(Collectors.toList());
+    }
+
 
 
 //    // 내 지역에서 가장 많이 읽은 책

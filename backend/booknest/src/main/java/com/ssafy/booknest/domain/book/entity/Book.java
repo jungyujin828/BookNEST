@@ -6,7 +6,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +21,9 @@ public class Book extends BaseEntity {
     private String title;
 
     @Column(name = "published_date", nullable = false)
-    private LocalDate publishedDate;
+    private String publishedDate;
 
-    @Column(name="isbn", nullable = false, length = 20)
+    @Column(name="isbn", length = 20)
     private String isbn;
 
     @Column(name="publisher", nullable= false, length = 100)
@@ -33,19 +32,16 @@ public class Book extends BaseEntity {
     @Column(name="pages", nullable = false)
     private Integer pages;
 
-    @Column(name="image_url", nullable = false)
+    @Column(name="image_url")
     private String imageUrl;
 
-    @Column(name="intro", nullable = true)
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String intro;
 
-    @Column(name="`index`", nullable = true)
-    @Lob
-    private String index;
+    @Column(name="book_index", columnDefinition = "TEXT")
+    private String bookIndex;
 
-    @Column(name="publisher_review", nullable = true)
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
