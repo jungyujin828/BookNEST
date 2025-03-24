@@ -1,10 +1,11 @@
 export const ROUTES = {
-  HOME: '/',
+  HOME: '/home',
   LOGIN: '/login',
   KAKAO_CALLBACK: '/auth/kakao/callback',
   NAVER_CALLBACK: '/auth/naver/callback',
   GOOGLE_CALLBACK: '/auth/google/callback',
   SIGNUP: '/signup',
+  INPUT_INFO: '/input-info',
 } as const;
 
 export const API_PATHS = {
@@ -15,18 +16,20 @@ export const API_PATHS = {
 
 export const ASSETS = {
   ICONS: {
-    KAKAO: '/icons/kakao-icon.png',
-    NAVER: '/icons/naver-icon.png',
-    GOOGLE: '/icons/google-icon.png',
+    KAKAO: '/icons/kakao.png',
+    NAVER: '/icons/naver.png',
+    GOOGLE: '/icons/google.png',
   },
 } as const;
 
 export const OAUTH = {
   KAKAO: {
     AUTH_URL: 'https://kauth.kakao.com/oauth/authorize',
+    SCOPE: 'profile_nickname account_email',
   },
   NAVER: {
     AUTH_URL: 'https://nid.naver.com/oauth2.0/authorize',
+    SCOPE: 'name email birthday gender',
   },
   GOOGLE: {
     AUTH_URL: 'https://accounts.google.com/o/oauth2/v2/auth',

@@ -17,6 +17,7 @@ function App() {
       <Routes>
         {/* 공개 라우트 */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+        <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
         <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
         <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
         <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
@@ -55,6 +56,7 @@ function App() {
         {/* 잘못된 경로는 메인 페이지로 리다이렉트 */}
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
         <Route path="/input-info" element={<InputInfoPage />} />
+        {/* 🗑️ */}
       </Routes>
     </Router>
   );
