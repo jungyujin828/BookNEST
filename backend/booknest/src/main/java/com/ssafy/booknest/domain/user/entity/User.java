@@ -5,10 +5,7 @@ import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.enums.Provider;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -19,7 +16,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "user")
-@Getter
+@Getter @Setter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

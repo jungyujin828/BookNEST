@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findById(Integer id);
 
+    // 닉네임 중복확인
+    boolean existsByNickname(String nickname);
+
 }

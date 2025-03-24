@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.user.controller;
 
 import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -57,4 +58,25 @@ public class UserController {
 
         return ApiResponse.success("이것은 테스트입니다. userId = " + userId);
     }
+
+    // 회원정보 수정
+    @PutMapping("/update")
+    public ResponseEntity<ApiResponse<Void>> updateUser(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody UserUpdateDto userUpdateDto) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        userService.updateUser(userId, userUpdateDto);
+
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    //닉네임 중복확인
+    @GetMapping("/nickname-check")
+    public ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
+        boolean isDuplicate = userService.isNicknameDuplicate(nickname);
+        return ApiResponse.success(isDuplicate);
+    }
+
+
 }
