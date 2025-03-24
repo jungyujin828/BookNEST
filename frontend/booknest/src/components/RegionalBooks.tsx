@@ -11,13 +11,13 @@ interface Book {
   authors: string[];
 }
 
-interface BestSellerResponse {
+interface RegionalBooksResponse {
   success: boolean;
   data: Book[];
   error: null | string;
 }
 
-const BestSellerContainer = styled.div`
+const RegionalBooksContainer = styled.div`
   padding: 16px;
   position: relative;
   
@@ -31,10 +31,22 @@ const Title = styled.h2`
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   
   @media (min-width: 768px) {
     font-size: 20px;
     margin-bottom: 20px;
+  }
+`;
+
+const LocationIcon = styled.span`
+  font-size: 20px;
+  color: #4CAF50;
+  
+  @media (min-width: 768px) {
+    font-size: 22px;
   }
 `;
 
@@ -221,14 +233,13 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const BestSeller = () => {
+const RegionalBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
 
-  // 화면 크기에 따라 스크롤 양 조절
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -246,7 +257,7 @@ const BestSeller = () => {
   };
 
   useEffect(() => {
-    const fetchBestSellers = async () => {
+    const fetchRegionalBooks = async () => {
       try {
         // TODO: 프로덕션 배포 시 아래 인증 로직 활성화 필요✅✅✅✅✅
         /*
@@ -260,11 +271,11 @@ const BestSeller = () => {
         }
         */
 
-        // API URL에서 중복된 'api' 제거
-        const apiUrl = `${config.api.baseUrl}/book/best`;
-        console.log('Fetching best sellers from:', apiUrl);
+        // baseUrl에 이미 /api가 포함되어 있으므로 /book/region만 사용
+        const apiUrl = `${config.api.baseUrl}/book/region`;
+        console.log('Fetching regional books from:', apiUrl);
         
-        const response = await axios.get<BestSellerResponse>(
+        const response = await axios.get<RegionalBooksResponse>(
           apiUrl,
           {
             headers: {
@@ -272,15 +283,14 @@ const BestSeller = () => {
               // TODO: 프로덕션 배포 시 아래 인증 헤더 활성화 필요✅✅✅✅✅
               // 'Authorization': `Bearer ${token}`,
             },
-            timeout: 5000,
           }
         );
         
         if (response.data.success && response.data.data) {
           setBooks(response.data.data);
         } else {
-          setError('베스트셀러 정보를 불러오는데 실패했습니다.');
-          setBooks([]); // 빈 배열로 초기화
+          setError('지역 인기 도서 정보를 불러오는데 실패했습니다.');
+          setBooks([]);
         }
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -313,17 +323,17 @@ const BestSeller = () => {
         } else {
           setError('알 수 없는 오류가 발생했습니다.');
         }
-        setBooks([]); // 에러 발생 시 빈 배열로 초기화
+        setBooks([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBestSellers();
+    fetchRegionalBooks();
   }, []);
 
   if (loading) {
-    return <LoadingMessage>베스트셀러 목록을 불러오는 중...</LoadingMessage>;
+    return <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
   if (error) {
@@ -336,8 +346,11 @@ const BestSeller = () => {
     : false;
 
   return (
-    <BestSellerContainer>
-      <Title>월간 베스트셀러</Title>
+    <RegionalBooksContainer>
+      <Title>
+        <LocationIcon>📍</LocationIcon>
+        우리 지역 인기 도서
+      </Title>
       <BookListContainer>
         {canScrollLeft && (
           <NavigationButton 
@@ -361,7 +374,7 @@ const BestSeller = () => {
               </BookCard>
             ))
           ) : (
-            <ErrorMessage>베스트셀러 목록이 없습니다.</ErrorMessage>
+            <ErrorMessage>지역 인기 도서 목록이 없습니다.</ErrorMessage>
           )}
         </BookList>
         {canScrollRight && (
@@ -371,8 +384,8 @@ const BestSeller = () => {
           />
         )}
       </BookListContainer>
-    </BestSellerContainer>
+    </RegionalBooksContainer>
   );
 };
 
-export default BestSeller;
+export default RegionalBooks; 

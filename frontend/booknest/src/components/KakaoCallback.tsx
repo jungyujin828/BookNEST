@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { ROUTES, API_PATHS } from '../constants/paths';
+import config from '../config';
 
 const KakaoCallback = () => {
   const navigate = useNavigate();
@@ -16,25 +18,24 @@ const KakaoCallback = () => {
         }
 
         // 백엔드로 인가 코드 전송
-        const response = await axios.post('/api/auth/kakao/callback', { code });
+        const response = await axios.post(
+          `${config.api.baseUrl}${API_PATHS.KAKAO_LOGIN}`, 
+          { code }
+        );
         
         // 응답 처리
         if (response.data.isNewUser) {
-          // 새로운 사용자인 경우 회원가입 페이지로 이동
-          navigate('/signup', { 
-            state: { 
-              kakaoData: response.data.userData,
-              token: response.data.token 
-            } 
-          });
+          // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
+          localStorage.setItem('token', response.data.token);
+          navigate('/input-info');
         } else {
           // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
           localStorage.setItem('token', response.data.token);
-          navigate('/');
+          navigate(ROUTES.HOME);
         }
       } catch (error) {
         console.error('카카오 로그인 처리 중 오류 발생:', error);
-        navigate('/login');
+        navigate(ROUTES.LOGIN);
       }
     };
 
