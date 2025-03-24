@@ -16,7 +16,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "user")
-@Getter
+@Getter @Setter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
