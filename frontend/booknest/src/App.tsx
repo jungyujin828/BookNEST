@@ -105,6 +105,9 @@ function App() {
           }
         />
 
+        {/* 기본 경로를 로그인페이지로 연결 */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+
         {/* 잘못된 경로는 에러 페이지로 연결 */}
         <Route path="*" element={<ErrorPage />} />
         <Route path="/input-info" element={<InputInfoPage />} />
