@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.user.service.UserService;
@@ -14,10 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
-
-import static com.ssafy.booknest.global.error.ErrorCode.UNAUTHORIZED_ACCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,24 +30,39 @@ public class BookController {
     @GetMapping("/best")
     public ResponseEntity<ApiResponse<List<BookResponse>>> getBestSeller(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        List<BookResponse> bestSellers = bookService.getBestSellers();
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(bestSellers);
+        return ApiResponse.success(bookService.getBestSellers());
     }
+
 
     // 개별 도서 조회
     @GetMapping("/{bookId}")
     public ResponseEntity<ApiResponse<BookDetailResponse>> getBook(@PathVariable("bookId") Integer bookId,
                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        // 로그인한 사용자만 접근 가능
-        if (userPrincipal == null) {
-            return ApiResponse.error(UNAUTHORIZED_ACCESS);
-        }
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        BookDetailResponse bookDetail = bookService.getBook(bookId);
+        return ApiResponse.success(bookService.getBook(bookId, userId));
+    }
 
-        return ApiResponse.success(bookDetail);
+
+    // 책 구매사이트 연계
+    @GetMapping("/{bookId}/purchase")
+    public ResponseEntity<ApiResponse<BookPurchaseResponse>> getPurchaseLinks(@PathVariable("bookId") Integer bookId,
+                                                                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success(bookService.getPurchaseLinks(bookId));
+    }
+
+    // 전자도서관 연계
+    @GetMapping("{bookId}/ebook")
+    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,
+                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
     }
 
 
