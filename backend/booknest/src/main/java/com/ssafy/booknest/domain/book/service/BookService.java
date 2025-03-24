@@ -15,10 +15,6 @@ import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
-import org.hibernate.validator.constraints.ISBN;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +31,7 @@ public class BookService {
     private final UserRepository userRepository;
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
-    private final Yes25Service yes25Service;
+    private final Yes24Service yes25Service;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
@@ -86,7 +82,7 @@ public class BookService {
         String kyoboUrl = kyoboService.getKyoboUrlByIsbn(isbn);
 
         // YES24: ISBN 기반 크롤링
-        String yes24Url = yes25Service.getYes25UrlByIsbn(isbn);
+        String yes24Url = yes25Service.getYes24UrlByIsbn(isbn);
 
 
         return BookPurchaseResponse.builder()

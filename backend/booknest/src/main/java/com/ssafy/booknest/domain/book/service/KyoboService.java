@@ -1,15 +1,23 @@
 package com.ssafy.booknest.domain.book.service;
 
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class KyoboService {
 
     public String getKyoboUrlByIsbn(String isbn) {
@@ -41,8 +49,8 @@ public class KyoboService {
             return null;
 
         } catch (Exception e) {
-            System.out.println("Kyobo ISBN 크롤링 실패: " + e.getMessage());
-            return null;
+            log.error("Failed to fetch Kyobo link for ISBN: {}, message: {}", isbn, e.getMessage());
+            throw new CustomException(ErrorCode.CRAWLING_FAILED);
         }
     }
 }

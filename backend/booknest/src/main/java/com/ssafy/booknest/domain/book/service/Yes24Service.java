@@ -1,14 +1,22 @@
 package com.ssafy.booknest.domain.book.service;
 
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
-public class Yes25Service {
+@Transactional
+@RequiredArgsConstructor
+public class Yes24Service {
 
-    public String getYes25UrlByIsbn(String isbn) {
+    public String getYes24UrlByIsbn(String isbn) {
         try {
             // 1. YES24 ISBN 검색 URL
             String searchUrl = "https://www.yes24.com/Product/Search?domain=ALL&query=" + isbn;
@@ -27,7 +35,8 @@ public class Yes25Service {
             }
 
         } catch (Exception e) {
-            System.out.println("YES24 크롤링 실패: " + e.getMessage());
+            log.error("Failed to fetch YES24 link for ISBN: {}, message: {}", isbn, e.getMessage());
+            throw new CustomException(ErrorCode.CRAWLING_FAILED);
         }
 
         return null;
