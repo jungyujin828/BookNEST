@@ -28,6 +28,7 @@ public enum ErrorCode {
 
     // USER
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
+    ADDRESS_NOT_FOUND(404, "U002", "주소를 찾을 수 없습니다."),
 
 
     // BOOK

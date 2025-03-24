@@ -20,7 +20,7 @@ public class BookDetailResponse {
     private int bookId;
     private Double avgRating;
     private String title;
-    private LocalDate publishedDate;
+    private String publishedDate;
     private String isbn;
     private String publisher;
     private int pages;
@@ -46,7 +46,7 @@ public class BookDetailResponse {
                 .pages(book.getPages())
                 .imageUrl(book.getImageUrl())
                 .intro(book.getIntro())
-                .index(book.getIndex())
+                .index(book.getBookIndex())
                 .publisherReview(book.getPublisherReview())
                 .authors(book.getBookAuthors().stream()
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())
