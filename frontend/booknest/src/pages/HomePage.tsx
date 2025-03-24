@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-// import React from 'react';
-=======
 import React from 'react';
 import styled from '@emotion/styled';
 import BestSeller from '../components/BestSeller';
 import RegionalBooks from '../components/RegionalBooks';
->>>>>>> origin/frontend
 
 const HomeContainer = styled.div`
   display: flex;
