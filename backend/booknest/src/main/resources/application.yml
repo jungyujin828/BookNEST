@@ -6,7 +6,7 @@ spring:
   data:
     web:
       pageable:
-        one-indexed-parameters: true  # ??? 0??? ?? 1??
+        one-indexed-parameters: true # 0이 아닌 1부터
 
   jpa:
     open-in-view: false

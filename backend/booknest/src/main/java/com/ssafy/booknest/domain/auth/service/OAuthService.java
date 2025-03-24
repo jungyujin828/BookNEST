@@ -29,6 +29,7 @@ public class OAuthService {
     private final Map<Provider, OAuthStrategy> oAuthStrategyMap;
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthRedisService authRedisService;
 
     public LoginResult handleOAuthLogin(Provider provider, String code) {
 
@@ -59,8 +60,8 @@ public class OAuthService {
             String accessToken = jwtTokenProvider.createAccessToken(userId);
             String refreshToken = jwtTokenProvider.createRefreshToken(userId);
 
-//            // Redis에 RefreshToken 저장
-//            authRedisService.saveRefreshToken(userId, refreshToken);
+            // Redis에 RefreshToken 저장
+            authRedisService.saveRefreshToken(userId, refreshToken);
 
             UserInfoResponse userInfoResponse = UserInfoResponse.of(user, isNew);
             OAuthLoginResponse oAuthLoginResponse = OAuthLoginResponse.of(accessToken, userInfoResponse);
@@ -90,13 +91,13 @@ public class OAuthService {
             throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
-//        // 2. Redis에 저장된 Refresh 토큰과 비교
+        // 2. Redis에 저장된 Refresh 토큰과 비교
         String userId = jwtTokenProvider.getUserId(refreshToken).toString();
-//        String savedRefreshToken = authRedisService.getRefreshToken(userId);
-//
-//        if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
-//            throw new CustomException(ErrorCode.REFRESH_TOKEN_MISMATCH);
-//        }
+        String savedRefreshToken = authRedisService.getRefreshToken(userId);
+
+        if (savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.REFRESH_TOKEN_MISMATCH);
+        }
 
         // 3. 새로운 Access 토큰 발급
         String newAccessToken = jwtTokenProvider.createAccessToken(userId);

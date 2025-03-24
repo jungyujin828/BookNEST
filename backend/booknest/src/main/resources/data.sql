@@ -21,7 +21,7 @@ INSERT INTO book (
     pages,
     image_url,
     intro,
-    index_column,
+    book_index,
     created_at,
     publisher_review
 ) VALUES
