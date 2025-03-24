@@ -52,7 +52,11 @@ public class User extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "nest_id", unique = true)
+    @JoinColumn(name = "nest_id")
     private Nest nest;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Address address;
+
 
 }

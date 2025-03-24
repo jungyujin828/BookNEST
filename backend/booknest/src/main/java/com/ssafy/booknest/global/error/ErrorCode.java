@@ -2,6 +2,7 @@ package com.ssafy.booknest.global.error;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
@@ -28,10 +29,13 @@ public enum ErrorCode {
 
     // USER
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
+    ADDRESS_NOT_FOUND(404, "U002", "주소를 찾을 수 없습니다."),
 
 
     // BOOK
-    BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다.");
+    BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다."),
+    CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다.");
+
 
     private final int status;
     private final String code;

@@ -48,6 +48,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// 교보문고, 예스25 구매페이지 이동을 위함 크롤링 의존성
+	implementation 'org.jsoup:jsoup:1.17.2'
 }
 
 tasks.named('test') {

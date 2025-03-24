@@ -16,7 +16,7 @@ public class BookResponse {
 
     private int bookId;
     private String title;
-    private LocalDate publishedDate;
+    private String publishedDate;
     private String imageUrl;
     private List<String> authors;
 
