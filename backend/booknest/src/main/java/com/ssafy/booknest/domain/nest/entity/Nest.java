@@ -25,7 +25,8 @@ public class Nest extends BaseEntity {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
-    @OneToOne(mappedBy = "nest", fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToMany

@@ -48,11 +48,10 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "nest_id")
+    @OneToOne(mappedBy = "user")
     private Nest nest;
 
-    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user")
     private Address address;
 
 
@@ -68,13 +67,9 @@ public class User extends BaseEntity {
         this.birthdate = birthdate;
     }
 
-    public void updateUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public void setAddress(Address address) {
         this.address = address;
     }
-
 
 }

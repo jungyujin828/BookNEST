@@ -44,9 +44,6 @@ public class UserUpdateDto {
             user.updateBirthdate(birthdate);
         }
 
-        if (updatedAt != null) {
-            user.updateUpdatedAt(updatedAt);
-        }
 
         // 주소 업데이트
         if (address != null) {
