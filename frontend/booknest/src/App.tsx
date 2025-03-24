@@ -6,7 +6,7 @@ import NaverCallback from "./components/NaverCallback";
 import GoogleCallback from "./components/GoogleCallback";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
-// import { ROUTES } from "./constants/paths";
+import { ROUTES } from "./constants/paths";
 import "./App.css";
 
 function App() {
