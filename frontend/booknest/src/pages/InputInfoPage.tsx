@@ -1,5 +1,14 @@
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import styled from "@emotion/styled";
+
+// Daum Postcode API 타입 선언
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (config: any) => any;
+    };
+  }
+}
 
 // 스타일 컴포넌트 정의
 const Container = styled.div`
@@ -146,14 +155,61 @@ const BirthDateInput = styled.input`
   background-color: #ffffff;
 `;
 
+const AddressModal = styled.div`
+  display: flex;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+`;
+
+const AddressModalContent = styled.div`
+  background-color: white;
+  padding: 20px;
+  height: 70%;
+  border-radius: 5px;
+  overflow: visible;
+  position: relative;
+`;
+
+const CloseButton = styled.button`
+  position: relative;
+  rigjt: 0;
+  border: none;
+  background-color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  color: #000000;
+`;
+
 const InputInfoPage = () => {
   const [nickname, setNickname] = useState("");
   const [gender, setGender] = useState("설정안함");
   const [birthdate, setBirthdate] = useState(""); // 8자리 생년월일 (YYYYMMDD)
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
+  const [zipcode, setZipcode] = useState(""); // 우편번호 상태 추가
   const [isNicknameValid, setIsNicknameValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+
+  // Daum Postcode 스크립트 로드
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src =
+      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
@@ -163,11 +219,58 @@ const InputInfoPage = () => {
   };
 
   const handleFindAddress = () => {
-    // 주소 검색 기능 구현
-    console.log("주소 찾는 중...");
+    setIsAddressModalOpen(true);
   };
 
-  // 생년월일 입력 처리 함수
+  const handleCloseAddressModal = () => {
+    setIsAddressModalOpen(false);
+  };
+
+  // Daum Postcode 실행 함수
+  const execDaumPostcode = () => {
+    if (window.daum && window.daum.Postcode) {
+      new window.daum.Postcode({
+        oncomplete: function (data: any) {
+          // 우편번호와 주소 정보 가져오기
+          const zonecode = data.zonecode; // 우편번호
+          let fullAddress = data.roadAddress || data.jibunAddress; // 도로명 주소 우선, 없으면 지번 주소
+          let extraAddress = "";
+
+          // 법정동명이 있을 경우 추가
+          if (data.bname !== "" && /[동|로|가]$/g.test(data.bname)) {
+            extraAddress += data.bname;
+          }
+          // 건물명이 있고, 공동주택일 경우 추가
+          if (data.buildingName !== "" && data.apartment === "Y") {
+            extraAddress +=
+              extraAddress !== ""
+                ? ", " + data.buildingName
+                : data.buildingName;
+          }
+          // 표시할 참고항목이 있을 경우 괄호까지 추가한 최종 문자열 생성
+          if (extraAddress !== "") {
+            fullAddress += ` (${extraAddress})`;
+          }
+
+          // 주소 정보 설정
+          setZipcode(zonecode);
+          setAddress(fullAddress);
+          setIsAddressModalOpen(false);
+
+          // 상세주소 입력 필드로 포커스 이동
+          document.getElementById("detailAddress")?.focus();
+        },
+      }).embed(document.getElementById("addressLayer") as HTMLElement);
+    }
+  };
+
+  // 주소 모달이 열릴 때 Daum Postcode 실행
+  useEffect(() => {
+    if (isAddressModalOpen) {
+      execDaumPostcode();
+    }
+  }, [isAddressModalOpen]);
+
   const handleBirthdateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     // 숫자만 입력 가능하도록 검증
@@ -179,17 +282,16 @@ const InputInfoPage = () => {
     }
   };
 
+  const formatBirthdate = (date: string): string => {
+    if (date.length !== 8) return "";
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
+      6,
+      8
+    )}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // 생년월일 포맷팅 (YYYYMMDD -> YYYY-MM-DD)
-    let formattedBirthdate = "";
-    if (birthdate.length === 8) {
-      const year = birthdate.substring(0, 4);
-      const month = birthdate.substring(4, 6);
-      const day = birthdate.substring(6, 8);
-      formattedBirthdate = `${year}-${month}-${day}`;
-    }
 
     // Format gender to match API requirements
     let genderCode;
@@ -208,9 +310,9 @@ const InputInfoPage = () => {
       data: {
         nickname,
         gender: genderCode,
-        birthdate: formattedBirthdate,
+        birthdate: formatBirthdate(birthdate),
         address: {
-          zipcode: address.split(" ")[0],
+          zipcode: zipcode, // 우편번호 상태 사용
           road_address: detailAddress ? `${address} ${detailAddress}` : address,
         },
         updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
@@ -307,25 +409,17 @@ const InputInfoPage = () => {
           <AddressRow>
             <AddressInput
               type="text"
-              placeholder="우편번호를 검색해주세요"
+              placeholder="주소를 검색해주세요"
               value={address}
               readOnly
             />
             <AddressButton type="button" onClick={handleFindAddress}>
-              우편번호 찾기
+              주소 검색
             </AddressButton>
           </AddressRow>
-
           <FullInput
             type="text"
-            placeholder="기본주소"
-            value={address}
-            readOnly
-          />
-
-          <FullInput
-            type="text"
-            placeholder="상세주소를 입력해주세요"
+            placeholder="상세 주소를 입력해주세요"
             value={detailAddress}
             onChange={(e) => setDetailAddress(e.target.value)}
           />
@@ -333,6 +427,18 @@ const InputInfoPage = () => {
 
         <SubmitButton type="submit">정보 입력 완료</SubmitButton>
       </form>
+
+      {isAddressModalOpen && (
+        <AddressModal>
+          <AddressModalContent>
+            <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
+            <div
+              id="addressLayer"
+              style={{ width: "100%", height: "400px" }}
+            ></div>
+          </AddressModalContent>
+        </AddressModal>
+      )}
     </Container>
   );
 };
