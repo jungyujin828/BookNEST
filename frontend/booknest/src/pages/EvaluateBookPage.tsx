@@ -62,7 +62,12 @@ const books = [
 ];
 
 // Add new state for liked books
+// 상단에 import 추가
+import { useNavigate } from "react-router-dom";
+
+// EvaluateBookPage 컴포넌트 내부 상단에 추가
 const EvaluateBookPage = () => {
+  const navigate = useNavigate();
   const [selectedBook, setSelectedBook] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
   const [ratings, setRatings] = useState<{ [key: number]: number }>({});
@@ -129,8 +134,25 @@ const EvaluateBookPage = () => {
     return stars;
   };
 
+  // return문 내부, 최상단 div 안에 버튼 추가
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
+      <button
+        onClick={() => navigate("/search")}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#4a90e2",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          marginBottom: "20px",
+          fontSize: "16px",
+        }}
+      >
+        도서 검색하기
+      </button>
+
       {books.map((book) => (
         <div key={book.id} style={{ display: "flex", padding: "15px", borderBottom: "1px solid #eee", gap: "20px" }}>
           <img
