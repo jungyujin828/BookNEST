@@ -154,7 +154,7 @@ const LoginPage = () => {
   };
 
   const goToInputInfoPage = () => {
-    navigate("/input-info");
+    navigate("/inputInfo");
   };
 
   return (
