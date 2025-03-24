@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ROUTES } from "./constants/paths";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
@@ -7,7 +8,9 @@ import GoogleCallback from "./components/GoogleCallback";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
+import Navbar from "./components/Navbar";
 import EvaluateBookPage from "./pages/EvaluateBookPage";
+import SearchPage from "./pages/SearchPage";
 import "./App.css";
 
 function App() {
@@ -43,6 +46,16 @@ function App() {
           }
         />
 
+        {/* 검색페이지 */}
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* 메인페이지 */}
         <Route
           path={ROUTES.HOME}
@@ -58,6 +71,7 @@ function App() {
         <Route path="/input-info" element={<InputInfoPage />} />
         {/* 🗑️ */}
       </Routes>
+      <Navbar />
     </Router>
   );
 }
