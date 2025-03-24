@@ -25,13 +25,9 @@ const GoogleCallback = () => {
         
         // 응답 처리
         if (response.data.isNewUser) {
-          // 새로운 사용자인 경우 회원가입 페이지로 이동
-          navigate(ROUTES.SIGNUP, { 
-            state: { 
-              googleData: response.data.userData,
-              token: response.data.token 
-            } 
-          });
+          // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
+          localStorage.setItem('token', response.data.token);
+          navigate('/input-info');
         } else {
           // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
           localStorage.setItem('token', response.data.token);

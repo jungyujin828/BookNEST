@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
+import { useNavigate } from "react-router-dom";
 
 // Daum Postcode API 타입 선언
 declare global {
@@ -128,6 +129,20 @@ const AddressButton = styled.button`
   cursor: pointer;
 `;
 
+const EvaluateButton = styled.button`
+  width: 100%;
+  background-color: #4a90e2;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 30px;
+  margin-bottom: 10px;
+`;
+
 const SubmitButton = styled.button`
   width: 100%;
   background-color: #7bc47f;
@@ -188,6 +203,7 @@ const CloseButton = styled.button`
 `;
 
 const InputInfoPage = () => {
+  const navigate = useNavigate(); // 추가: useNavigate 훅 선언
   const [nickname, setNickname] = useState("");
   const [gender, setGender] = useState("설정안함");
   const [birthdate, setBirthdate] = useState(""); // 8자리 생년월일 (YYYYMMDD)
@@ -201,8 +217,7 @@ const InputInfoPage = () => {
   // Daum Postcode 스크립트 로드
   useEffect(() => {
     const script = document.createElement("script");
-    script.src =
-      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.body.appendChild(script);
 
@@ -242,10 +257,7 @@ const InputInfoPage = () => {
           }
           // 건물명이 있고, 공동주택일 경우 추가
           if (data.buildingName !== "" && data.apartment === "Y") {
-            extraAddress +=
-              extraAddress !== ""
-                ? ", " + data.buildingName
-                : data.buildingName;
+            extraAddress += extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
           }
           // 표시할 참고항목이 있을 경우 괄호까지 추가한 최종 문자열 생성
           if (extraAddress !== "") {
@@ -284,10 +296,7 @@ const InputInfoPage = () => {
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
-    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
-      6,
-      8
-    )}`;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -345,15 +354,11 @@ const InputInfoPage = () => {
         // Redirect or show success message
       } else {
         // Handle error responses
-        setErrorMessage(
-          data.error.message || "회원 정보 업데이트에 실패했습니다."
-        );
+        setErrorMessage(data.error.message || "회원 정보 업데이트에 실패했습니다.");
       }
     } catch (error) {
       console.error("API 요청 중 오류 발생:", error);
-      setErrorMessage(
-        "서버 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주세요."
-      );
+      setErrorMessage("서버 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
     }
   };
 
@@ -376,9 +381,7 @@ const InputInfoPage = () => {
             />
             <ConfirmButton type="button">중복 확인</ConfirmButton>
           </InputRow>
-          {!isNicknameValid && (
-            <ErrorText>사용할 수 없는 닉네임입니다</ErrorText>
-          )}
+          {!isNicknameValid && <ErrorText>사용할 수 없는 닉네임입니다</ErrorText>}
         </InputGroup>
 
         <InputGroup>
@@ -407,12 +410,7 @@ const InputInfoPage = () => {
         <InputGroup>
           <Label>주소</Label>
           <AddressRow>
-            <AddressInput
-              type="text"
-              placeholder="주소를 검색해주세요"
-              value={address}
-              readOnly
-            />
+            <AddressInput type="text" placeholder="주소를 검색해주세요" value={address} readOnly />
             <AddressButton type="button" onClick={handleFindAddress}>
               주소 검색
             </AddressButton>
@@ -425,6 +423,10 @@ const InputInfoPage = () => {
           />
         </InputGroup>
 
+        <EvaluateButton type="button" onClick={() => navigate("/eval-book")}>
+          도서 평가하러 가기
+        </EvaluateButton>
+
         <SubmitButton type="submit">정보 입력 완료</SubmitButton>
       </form>
 
@@ -432,10 +434,7 @@ const InputInfoPage = () => {
         <AddressModal>
           <AddressModalContent>
             <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
-            <div
-              id="addressLayer"
-              style={{ width: "100%", height: "400px" }}
-            ></div>
+            <div id="addressLayer" style={{ width: "100%", height: "400px" }}></div>
           </AddressModalContent>
         </AddressModal>
       )}
