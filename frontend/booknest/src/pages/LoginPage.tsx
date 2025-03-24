@@ -153,6 +153,34 @@ const LoginPage = () => {
     window.location.href = kakaoURL;
   };
 
+  const handleNaverLogin = () => {
+    const state = Math.random().toString(36).substr(2, 11);
+    
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: config.naver.clientId,
+      redirect_uri: config.naver.redirectUri,
+      state: state,
+    });
+
+    const naverURL = `${OAUTH.NAVER.AUTH_URL}?${params.toString()}`;
+    window.location.href = naverURL;
+  };
+
+  const handleGoogleLogin = () => {
+    const params = new URLSearchParams({
+      client_id: config.google.clientId,
+      redirect_uri: config.google.redirectUri,
+      response_type: 'code',
+      scope: OAUTH.GOOGLE.SCOPE,
+      access_type: 'offline',
+      prompt: 'consent',
+    });
+
+    const googleURL = `${OAUTH.GOOGLE.AUTH_URL}?${params.toString()}`;
+    window.location.href = googleURL;
+  };
+
   const goToInputInfoPage = () => {
     navigate("/inputInfo");
   };
@@ -185,13 +213,13 @@ const LoginPage = () => {
               <img src={ASSETS.ICONS.KAKAO} alt="카카오 로고" />
               카카오 로그인
             </KakaoButton>
-            <NaverButton>
+            <NaverButton onClick={handleNaverLogin}>
               <img src={ASSETS.ICONS.NAVER} alt="네이버 로고" />
               네이버 로그인
             </NaverButton>
-            <GoogleButton>
+            <GoogleButton onClick={handleGoogleLogin}>
               <img src={ASSETS.ICONS.GOOGLE} alt="구글 로고" />
-              Sign in with Google
+              Google로 계속하기
             </GoogleButton>
           </>
         )}
