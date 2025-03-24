@@ -43,4 +43,15 @@ public class OAuthController {
         TokenRefreshResponse response = oAuthService.refreshToken(refreshToken);
         return ApiResponse.success(response);
     }
+
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        ResponseCookie deleteCookie = CookieUtil.deleteRefreshTokenCookie();
+
+        return ResponseEntity
+                .ok()
+                .header("Set-Cookie", deleteCookie.toString())
+                .body(new ApiResponse<>(true, null, null)); // 또는 아래처럼도 가능
+    }
 }

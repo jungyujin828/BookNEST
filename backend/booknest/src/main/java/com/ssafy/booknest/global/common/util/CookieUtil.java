@@ -16,4 +16,15 @@ public class CookieUtil {
                 .maxAge(Duration.ofDays(14)) // 14일 유효
                 .build();
     }
+
+    public static ResponseCookie deleteRefreshTokenCookie() {
+        return ResponseCookie.from("refresh_token", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(0) // 삭제
+                .sameSite("None")
+                .build();
+    }
+
 }
