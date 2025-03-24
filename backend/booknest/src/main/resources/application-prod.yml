@@ -26,8 +26,8 @@ server:
 
 oauth:
   kakao:
-    redirect-uri: http://localhost:5173/oauth/kakao/callback  # 운영 도메인으로 변경
+    redirect-uri: https://www.mybooknest.site/oauth/kakao/callback  # 운영 도메인으로 변경
   google:
-    redirect-uri: http://localhost:5173/oauth/google/callback  # 운영 도메인으로 변경
+    redirect-uri: https://www.mybooknest.site/oauth/google/callback  # 운영 도메인으로 변경
   naver:
-    redirect-uri: http://localhost:5173/oauth/naver/callback # 운영 도메인으로 변경
+    redirect-uri: https://www.mybooknest.site/oauth/naver/callback # 운영 도메인으로 변경
