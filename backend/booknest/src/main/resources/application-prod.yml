@@ -9,7 +9,7 @@ spring:
 
   data:
     redis:
-      host: localhost # 권장 x ip 주소로...
+      host: 43.203.172.46 # 권장 x ip 주소로...
 
   # 프로덕션 환경에서는 SQL 스크립트 초기화 비활성화
   sql:
