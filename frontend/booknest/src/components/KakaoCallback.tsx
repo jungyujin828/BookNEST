@@ -56,7 +56,7 @@ const KakaoCallback = () => {
         throw new Error('인증 코드를 받지 못했습니다. 다시 시도해주세요.');
       }
 
-      const response = await api.post('/auth/kakao', { code });
+      const response = await api.post('/oauth/kakao', { code });
       
       if (response.data.success) {
         const { accessToken, user } = response.data.data;
