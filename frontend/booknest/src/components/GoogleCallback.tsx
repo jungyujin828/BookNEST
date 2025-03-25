@@ -47,7 +47,6 @@ const GoogleCallback = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
     const handleGoogleLogin = async () => {
       try {
         // URL에서 인가 코드 추출
@@ -90,8 +89,9 @@ const GoogleCallback = () => {
       }
     };
     
-    handleGoogleLogin();
-  }, []);
+    useEffect(() => {
+      handleGoogleLogin();
+    }, []);
 
   const handleRetry = () => {
     setError(null);
