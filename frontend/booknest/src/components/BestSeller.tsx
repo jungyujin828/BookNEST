@@ -255,7 +255,7 @@ const BestSeller = () => {
         setLoading('bestSellers', true);
         setError('bestSellers', null);
         
-        const response = await api.get('/book/best');
+        const response = await api.get('/api/book/best');
         
         if (response.data.success && response.data.data) {
           setBestSellers(response.data.data);
