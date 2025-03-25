@@ -2,6 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import BestSeller from '../components/BestSeller';
 import RegionalBooks from '../components/RegionalBooks';
+import AuthorBook from '../components/AuthorBook';
 
 const HomeContainer = styled.div`
   display: flex;
@@ -36,6 +37,7 @@ const HomePage = () => {
       </Header>
       <BestSeller />
       <RegionalBooks />
+      <AuthorBook />
     </HomeContainer>
   );
 };
