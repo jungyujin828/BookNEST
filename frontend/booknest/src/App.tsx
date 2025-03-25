@@ -15,6 +15,7 @@ import ProfilePage from "./pages/ProfilePage";
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
 import ErrorPage from "./pages/ErrorPage";
+import BookDetailPage from "./pages/BookDetailPage";
 import "./App.css";
 
 // 개발 환경에서 테스트용 토큰 설정
@@ -106,6 +107,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* 책 상세페이지 */}
+        <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
 
         {/* 잘못된 경로는 에러 페이지로 연결 */}
         <Route path="*" element={<ErrorPage />} />
