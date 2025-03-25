@@ -34,7 +34,10 @@ public enum ErrorCode {
 
     // BOOK
     BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다."),
-    CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다.");
+    CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다."),
+    UNSUPPORTED_SEARCH_TYPE(400, "B003", "지원하지 않는 검색 타입입니다."),
+    EMPTY_KEYWORD(400, "B004", "검색어는 필수입니다.");
+
 
 
     private final int status;
