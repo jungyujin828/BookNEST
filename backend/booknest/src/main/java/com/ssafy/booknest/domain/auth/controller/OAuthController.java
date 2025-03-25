@@ -32,26 +32,4 @@ public class OAuthController {
 
         return ApiResponse.success(loginResult.getResponse(), responseCookie);
     }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshToken(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
-        if (refreshToken == null) {
-            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
-        }
-
-        TokenRefreshResponse response = oAuthService.refreshToken(refreshToken);
-        return ApiResponse.success(response);
-    }
-
-    // 로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout() {
-        ResponseCookie deleteCookie = CookieUtil.deleteRefreshTokenCookie();
-
-        return ResponseEntity
-                .ok()
-                .header("Set-Cookie", deleteCookie.toString())
-                .body(new ApiResponse<>(true, null, null)); // 또는 아래처럼도 가능
-    }
 }
