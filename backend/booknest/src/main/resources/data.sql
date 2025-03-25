@@ -77,21 +77,51 @@ INSERT INTO book (
  'Chapter 1: 인생의 곡선...',
  NOW(), '시간이 흘러도 빛나는 한국 문학의 고전');
 
-
-
 INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
-VALUES (
-           192,
-           NOW(),
-           '9788980408184',
-           '우리교육',
-           'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788980408184.jpg',
-           '2000',
-           '엄마 신발 신고 뛰기',
-           '001. 커닝(조대인)....(9)002. 엄마 신발 신고 뛰기(정란희)....(25)003. 온몸에 페인트를 칠하고 사는 이상한 나라(윤태규)....(43)004. 학(박철수)....(59)005. 키 크는 나무(박성욱)....(77)006. 도깨비불(김혜원)....(85)007. 할배 미꾸라지(김현숙)....(97)008. 상할머니 이야기(백승남)....(113)009. 물 따르는 아이(김종필)....(125)010. 송별 선물(이하얀)....(141)011. 철거 마을에 핀 해바라기(전정애)....(155)012. 멸치(김양미)....(173)',
-           '',
-           '월간 <어린이문학>은 그 동안 박기범, 김영주, 김옥, 임정자 등 지금 우리 어린이 문학을 이끌고 있는 역량 있는 작가들을 배출해 왔던 만큼, 참신한 신인 작가를 발굴하는데도 남다른 힘을 쏟고 있다. 모두 3권으로 기획되었고, 지난 1월과 3월에 나온 ''왕땅콩 갈비 게으름이 욕심쟁이 봉식이'' ''팔봉이의 굉장한 날''에 이어 이번에 나온 [엄마 신발 신고 뛰기]가 그 마지막 책이 된다. 이번 책에서도 우리 어린이들이 살아가고 있는 현실에 대한 치열한 관심들이 특히 눈에 띈다, 어린이도 하나의 분명한 인격체이며, 나름대로의 절실한 삶이 있다는 인식의 바탕이 작품마다 다양한 소재와 주제 속에 녹아 있다. [엄마 신발 신고 뛰기]라는 재미있는 활동을 통해 친구에 대한 따뜻한 마음의 눈을 뜨게 되는 이야기([엄마 신발 신고 뛰기])를 비롯해 흔히 달동네라 부르는 곳에서 가난하게 살아가는 사람들의 애틋한 바람을 의인화 기법으로 전한 이야기(''철거 마을에 핀 해바라기'')가 그렇고 얼마 전 우리에게 큰 충격을 주었던 구제 금융 사태를 바라보는 한 아이의 생각이 기특한 행동으로 이어진 이야기(''물 따르는 아이'')도 그렇다. 학업 성적에 강박감을 느끼던 한 아이의 잘못된 행동과 이를 결국엔 한 친구와의 따뜻한 관계 속에서 풀어 가는 과정을 그린 이야기(''커닝'') 또한 현재 우리 아이들이 처해 있는 현실과 심리 상태를 잘 보여주고 있다. 그밖에도 ''용대 아재''라는 바보형 인물과 한 아이와의 관계를 풋풋한 휴머니즘의 감동으로 이끌어간 작품 ''학'', 고생스럽게 살아온 어른들의 지나온 삶을 감칠맛 나는 입말체로 풀어 쓴 작품 ''상할머니 이야기'' 등 어떤 특정한 형식에 구애받지 않는 다채로움을 보여주고 있다는 점도 이들 신인들이 가진 패기와 실험의 결과가 아닐까 싶다.'
-       );
+VALUES
+-- ID: 6
+(320, NOW(), '9788936430019', '창비', 'https://image.aladin.co.kr/product/29594/76/cover500/k602935978_1.jpg', '2023-02-01',
+ '소년 탐정의 비밀노트', '', '', ''),
+-- ID: 7
+(280, NOW(), '9788983929440', '문학동네', 'https://image.aladin.co.kr/product/25636/31/cover500/k182738586_1.jpg', '2022-11-05',
+ '소년의 눈물', '', '', ''),
+-- ID: 8
+(245, NOW(), '9788954615547', '민음사', 'https://image.aladin.co.kr/product/12499/23/cover500/8954615547_1.jpg', '2016-07-15',
+ '소년과 바다', '', '', ''),
+-- ID: 9
+(312, NOW(), '9788956602958', '열린책들', 'https://image.aladin.co.kr/product/21252/50/cover500/k212632313_1.jpg', '2021-10-10',
+ '바람을 가르다', '', '', ''),
+-- ID: 10
+(198, NOW(), '9788983921406', '문학과지성사', 'https://image.aladin.co.kr/product/12150/67/cover500/k912739811_1.jpg', '2020-01-20',
+ '달빛 아래 소년', '', '', '');
+-- ID: 11
+INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
+VALUES (310, NOW(), '9788991234567', '문학사상사', 'https://image.aladin.co.kr/product/99999/11/cover500/k111111111_1.jpg', '2019-09-01',
+    '그림자 소년', '', '상처를 안고 자란 한 소년의 성장 이야기.', '사라진 아버지를 찾아가는 소년의 여정을 따라가다.');
+
+-- ID: 12
+INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
+VALUES (272, NOW(), '9788999876543', '한빛출판사', 'https://image.aladin.co.kr/product/99999/12/cover500/k222222222_1.jpg', '2021-03-15',
+        '달려라, 소년!', '', '시골 마을에서 도시로 향하는 꿈을 품은 소년의 이야기.', '소년의 열정과 도전이 가슴을 뜨겁게 만든다.');
+
+-- ID: 13
+INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
+VALUES (295, NOW(), '9788998765432', '창작과비평사', 'https://image.aladin.co.kr/product/99999/13/cover500/k333333333_1.jpg', '2018-07-22',
+        '비 오는 날의 소년', '', '어느 비 오는 날, 우연한 만남이 소년의 인생을 바꾼다.', '섬세한 감성으로 그려낸 소년의 내면 세계.');
+
+-- ID: 14
+INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
+VALUES (260, NOW(), '9788997654321', '문예출판사', 'https://image.aladin.co.kr/product/99999/14/cover500/k444444444_1.jpg', '2020-12-10',
+        '소년의 노래', '', '마을 축제를 준비하며 성장해가는 음악 소년의 이야기.', '아름다운 음악과 따뜻한 우정이 어우러진 성장소설.');
+
+-- ID: 15
+INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
+VALUES (278, NOW(), '9788996543210', '책과사람들', 'https://image.aladin.co.kr/product/99999/15/cover500/k555555555_1.jpg', '2023-08-30',
+        '소년과 개', '', '반려견과 함께 성장하는 소년의 일상 이야기.', '사랑과 책임을 배우는 따뜻한 이야기.');
+
+
+
+
 
 
 
@@ -125,6 +155,8 @@ INSERT INTO author (id, name) VALUES
                                   (5, '조지 오웰'),
                                   (6, '이경석');
 
+
+
 -- 📌 작가 - 책 매핑
 INSERT INTO book_author (book_id, author_id) VALUES
                                                  (1, 1),  -- 해리 포터 -> J.K. 롤링
@@ -132,7 +164,13 @@ INSERT INTO book_author (book_id, author_id) VALUES
                                                  (2, 2),  -- 나미야 잡화점 -> 히가시노 게이고
                                                  (3, 3),  -- 데미안 -> 헤르만 헤세
                                                  (4, 4),  -- 어린 왕자 -> 생텍쥐페리
-                                                 (5, 5);  -- 1984 -> 조지 오웰
+                                                 (5, 5),  -- 1984 -> 조지 오웰
+                                                 (6, 1),  -- 소년 탐정의 비밀노트 → J.K. 롤링
+                                                 (7, 2),  -- 소년의 눈물 → 히가시노 게이고
+                                                 (8, 3),  -- 소년과 바다 → 헤르만 헤세
+                                                 (9, 5),  -- 바람을 가르다 → 조지 오웰
+                                                (10, 4); -- 달빛 아래 소년 → 생텍쥐페리
+
 
 -- 📌 카테고리 (책의 장르 추가)
 INSERT INTO category (id, name) VALUES

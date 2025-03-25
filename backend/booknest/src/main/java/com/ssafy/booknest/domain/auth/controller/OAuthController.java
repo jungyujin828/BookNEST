@@ -32,15 +32,4 @@ public class OAuthController {
 
         return ApiResponse.success(loginResult.getResponse(), responseCookie);
     }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<TokenRefreshResponse>> refreshToken(
-            @CookieValue(name = "refresh_token", required = false) String refreshToken) {
-        if (refreshToken == null) {
-            throw new CustomException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
-        }
-
-        TokenRefreshResponse response = oAuthService.refreshToken(refreshToken);
-        return ApiResponse.success(response);
-    }
 }

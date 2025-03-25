@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class BookResponse {
 
+    private String imageUrl;
     private int bookId;
     private String title;
     private String publishedDate;
-    private String imageUrl;
     private List<String> authors;
 
     public static BookResponse of(Book book) {

@@ -3,9 +3,11 @@ package com.ssafy.booknest.domain.book.service;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Ebook;
+import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.ebookRepository;
 import com.ssafy.booknest.domain.user.entity.Address;
@@ -15,6 +17,9 @@ import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +36,7 @@ public class BookService {
     private final UserRepository userRepository;
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
-    private final Yes24Service yes25Service;
+    private final Yes24Service yes24Service;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
@@ -82,7 +87,7 @@ public class BookService {
         String kyoboUrl = kyoboService.getKyoboUrlByIsbn(isbn);
 
         // YES24: ISBN 기반 크롤링
-        String yes24Url = yes25Service.getYes24UrlByIsbn(isbn);
+        String yes24Url = yes24Service.getYes24UrlByIsbn(isbn);
 
 
         return BookPurchaseResponse.builder()
@@ -121,6 +126,37 @@ public class BookService {
                 .map(Ebook::getRedirectUrl)
                 .collect(Collectors.toList());
     }
+
+//    // 제목, 저자 기반 검색 (나중에 다시)
+//    public BookSearchResponse searchBooks(String keyword, BookSearchType type, int userPage, int size) {
+//        validateKeyword(keyword);
+//
+//        int internalPage = Math.max(userPage - 1, 0); // 내부 페이지 계산
+//
+//        Pageable pageable = PageRequest.of(internalPage, size);
+//        Page<Book> books;
+//
+//        switch (type) {
+//            case TITLE -> books = bookRepository.findByTitleContaining(keyword, pageable);
+//            case AUTHOR -> books = bookRepository.findByAuthorNameContaining(keyword, pageable);
+//            case ALL -> books = bookRepository.findByTitleOrAuthorContaining(keyword, pageable);
+//            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SEARCH_TYPE);
+//        }
+//
+//        Page<BookResponse> resultPage = books.map(BookResponse::of);
+//
+//        return BookSearchResponse.of(resultPage, userPage, BookSearchType.valueOf(type.name()));
+//    }
+//
+//    // 검색 유효성 검사
+//    private void validateKeyword(String keyword) {
+//        if (keyword == null || keyword.trim().isEmpty()) {
+//            throw new CustomException(ErrorCode.EMPTY_KEYWORD);
+//        }
+//    }
+
+
+
 
 
 
