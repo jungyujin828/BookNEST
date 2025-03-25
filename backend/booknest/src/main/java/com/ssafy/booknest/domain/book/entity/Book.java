@@ -44,19 +44,19 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookAuthor> bookAuthors = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BestSeller> bestSellers = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
 }
