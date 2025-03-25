@@ -11,13 +11,13 @@ interface Book {
   authors: string[];
 }
 
-interface RegionalBooksResponse {
+interface AgeBooksResponse {
   success: boolean;
   data: Book[];
   error: null | string;
 }
 
-const RegionalBooksContainer = styled.div`
+const AgeBooksContainer = styled.div`
   padding: 16px;
   position: relative;
   
@@ -41,9 +41,9 @@ const Title = styled.h2`
   }
 `;
 
-const LocationIcon = styled.span`
+const AgeIcon = styled.span`
   font-size: 20px;
-  color: #4CAF50;
+  color: #9C27B0;
   
   @media (min-width: 768px) {
     font-size: 22px;
@@ -233,12 +233,12 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const RegionalBooks = () => {
+const AgeBooks = () => {
   const { 
-    regionalBooks, 
+    ageBooks, 
     loading, 
     error, 
-    setRegionalBooks, 
+    setAgeBooks, 
     setLoading, 
     setError 
   } = useBookStore();
@@ -262,37 +262,37 @@ const RegionalBooks = () => {
   };
 
   useEffect(() => {
-    const fetchRegionalBooks = async () => {
+    const fetchAgeBooks = async () => {
       try {
-        setLoading('regionalBooks', true);
-        setError('regionalBooks', null);
+        setLoading('ageBooks', true);
+        setError('ageBooks', null);
         
-        const response = await api.get('/api/book/region');
+        const response = await api.get<AgeBooksResponse>('/api/book/age');
         
         if (response.data.success && response.data.data) {
-          setRegionalBooks(response.data.data);
+          setAgeBooks(response.data.data);
         } else {
-          setError('regionalBooks', '지역 인기 도서 정보를 불러오는데 실패했습니다.');
-          setRegionalBooks([]);
+          setError('ageBooks', '연령대/성별 추천 도서 정보를 불러오는데 실패했습니다.');
+          setAgeBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('regionalBooks', '서버 오류가 발생했습니다.');
-        setRegionalBooks([]);
+        setError('ageBooks', '서버 오류가 발생했습니다.');
+        setAgeBooks([]);
       } finally {
-        setLoading('regionalBooks', false);
+        setLoading('ageBooks', false);
       }
     };
 
-    fetchRegionalBooks();
-  }, [setRegionalBooks, setLoading, setError]);
+    fetchAgeBooks();
+  }, [setAgeBooks, setLoading, setError]);
 
-  if (loading.regionalBooks) {
-    return <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>;
+  if (loading.ageBooks) {
+    return <LoadingMessage>연령대/성별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error.regionalBooks) {
-    return <ErrorMessage>{error.regionalBooks}</ErrorMessage>;
+  if (error.ageBooks) {
+    return <ErrorMessage>{error.ageBooks}</ErrorMessage>;
   }
 
   const canScrollLeft = scrollPosition > 0;
@@ -301,10 +301,10 @@ const RegionalBooks = () => {
     : false;
 
   return (
-    <RegionalBooksContainer>
+    <AgeBooksContainer>
       <Title>
-        <LocationIcon>📍</LocationIcon>
-        우리 지역 인기 도서
+        <AgeIcon>👥</AgeIcon>
+        내 연령대 추천 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -314,8 +314,8 @@ const RegionalBooks = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {regionalBooks && regionalBooks.length > 0 ? (
-            regionalBooks.map((book) => (
+          {ageBooks && ageBooks.length > 0 ? (
+            ageBooks.map((book) => (
               <BookCard key={book.bookId}>
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
@@ -329,7 +329,7 @@ const RegionalBooks = () => {
               </BookCard>
             ))
           ) : (
-            <ErrorMessage>지역 인기 도서 목록이 없습니다.</ErrorMessage>
+            <ErrorMessage>연령대/성별 추천 도서 목록이 없습니다.</ErrorMessage>
           )}
         </BookList>
         {canScrollRight && (
@@ -339,8 +339,8 @@ const RegionalBooks = () => {
           />
         )}
       </BookListContainer>
-    </RegionalBooksContainer>
+    </AgeBooksContainer>
   );
 };
 
-export default RegionalBooks; 
+export default AgeBooks; 

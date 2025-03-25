@@ -24,7 +24,7 @@ if (import.meta.env.DEV && !localStorage.getItem("token")) {
     nickname: "테스트 사용자",
     isNew: false,
   };
-  localStorage.setItem("token", "test-access-token");
+  localStorage.setItem("token", "test");
   localStorage.setItem("user", JSON.stringify(testUser));
 }
 
