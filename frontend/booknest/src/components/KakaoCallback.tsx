@@ -10,11 +10,10 @@ const KakaoCallback = () => {
   useEffect(() => {
     const handleKakaoLogin = async () => {
       try {
-        console.log('kakaocallback');
+        console.log('백엔드로 요청 보내기 전');
+        
         // URL에서 인가 코드 추출
         const code = new URLSearchParams(window.location.search).get('code');
-        
-        console.log(code);
         
         if (!code) {
           throw new Error('Authorization code not found');
