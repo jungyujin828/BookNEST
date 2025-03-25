@@ -149,8 +149,12 @@ const LoginPage = () => {
       redirect_uri: config.kakao.redirectUri,
       response_type: "code",
     });
+    console.log('=====handleKakaoLogin2=====');
 
     const kakaoURL = `${OAUTH.KAKAO.AUTH_URL}?${params.toString()}`;
+
+    console.log('카카오 로그인 URL:', kakaoURL);
+    
     window.location.href = kakaoURL;
   };
 
