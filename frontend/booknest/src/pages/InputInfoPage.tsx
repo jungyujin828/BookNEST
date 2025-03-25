@@ -330,7 +330,7 @@ const InputInfoPage = () => {
     };
 
     try {
-      const response = await api.put('/user/update', payload);
+      const response = await api.put('api/user/update', payload);
 
       if (response.data.success) {
         // Handle success - maybe redirect or show success message
