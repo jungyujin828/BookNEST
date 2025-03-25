@@ -11,7 +11,7 @@ const GoogleCallback = () => {
     const handleGoogleLogin = async () => {
       try {
         // URL에서 인가 코드 추출
-        const code = new URL(window.location.href).searchParams.get('code');
+        const code = new URLSearchParams(window.location.search).get('code');
         
         if (!code) {
           throw new Error('Authorization code not found');
@@ -24,13 +24,13 @@ const GoogleCallback = () => {
         );
         
         // 응답 처리
-        if (response.data.isNewUser) {
+        if (response.data.data.user.isNew) {
           // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('token', response.data.data.accessToken);
           navigate('/input-info');
         } else {
           // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('token', response.data.data.accessToken);
           navigate(ROUTES.HOME);
         }
       } catch (error) {
