@@ -1,9 +1,9 @@
 export const ROUTES = {
   HOME: "/home",
   LOGIN: "/login",
-  KAKAO_CALLBACK: "/auth/kakao/callback",
-  NAVER_CALLBACK: "/auth/naver/callback",
-  GOOGLE_CALLBACK: "/auth/google/callback",
+  KAKAO_CALLBACK: "/oauth/kakao/callback",
+  NAVER_CALLBACK: "/oauth/naver/callback",
+  GOOGLE_CALLBACK: "/oauth/google/callback",
   SIGNUP: "/signup",
   INPUT_INFO: "/input-info",
   EVALUATE_BOOK: "/eval-book",
