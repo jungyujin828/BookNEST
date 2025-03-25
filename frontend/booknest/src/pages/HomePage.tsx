@@ -6,6 +6,23 @@ import AuthorBook from '../components/AuthorBook';
 import AgeBooks from '../components/AgeBooks';
 import CriticBooks from '../components/CriticBooks';
 import AuthorRatingBooks from '../components/AuthorRatingBooks';
+import TodayBestComments from '../components/TodayBestComments';
+
+const PageWrapper = styled.div`
+  height: 100vh;
+  overflow-y: auto;
+  
+  /* Firefox */
+  scrollbar-width: none;
+  
+  /* Chrome, Safari, Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* IE, Edge */
+  -ms-overflow-style: none;
+`;
 
 const HomeContainer = styled.div`
   display: flex;
@@ -30,21 +47,22 @@ const Title = styled.h1`
   font-size: 32px;
   font-weight: bold;
   margin: 0;
+  color: #4CAF50;
 `;
 
 const HomePage = () => {
   return (
-    <HomeContainer>
-      <Header>
-        <Title>북네스트</Title>
-      </Header>
-      <BestSeller />
-      <RegionalBooks />
-      <AuthorBook />
-      <AgeBooks />
-      <CriticBooks />
-      <AuthorRatingBooks />
-    </HomeContainer>
+    <PageWrapper>
+      <HomeContainer>
+        <TodayBestComments />
+        <BestSeller />
+        <RegionalBooks />
+        <AuthorBook />
+        <AgeBooks />
+        <CriticBooks />
+        <AuthorRatingBooks />
+      </HomeContainer>
+    </PageWrapper>
   );
 };
 
