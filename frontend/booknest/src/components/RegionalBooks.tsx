@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
-import config from '../config';
+import api from '../api/axios';
+import { useBookStore } from '../store/useBookStore';
 
 interface Book {
   bookId: number;
@@ -234,9 +234,14 @@ const LoadingMessage = styled.div`
 `;
 
 const RegionalBooks = () => {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    regionalBooks, 
+    loading, 
+    error, 
+    setRegionalBooks, 
+    setLoading, 
+    setError 
+  } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
 
@@ -259,85 +264,35 @@ const RegionalBooks = () => {
   useEffect(() => {
     const fetchRegionalBooks = async () => {
       try {
-        // TODO: 프로덕션 배포 시 아래 인증 로직 활성화 필요✅✅✅✅✅
-        /*
-        // 토큰 가져오기
-        const token = localStorage.getItem('token');
+        setLoading('regionalBooks', true);
+        setError('regionalBooks', null);
         
-        if (!token) {
-          setError('로그인이 필요한 서비스입니다.');
-          setLoading(false);
-          return;
-        }
-        */
-
-        // baseUrl에 이미 /api가 포함되어 있으므로 /book/region만 사용
-        const apiUrl = `${config.api.baseUrl}/book/region`;
-        console.log('Fetching regional books from:', apiUrl);
-        
-        const response = await axios.get<RegionalBooksResponse>(
-          apiUrl,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              // TODO: 프로덕션 배포 시 아래 인증 헤더 활성화 필요✅✅✅✅✅
-              // 'Authorization': `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await api.get('/book/region');
         
         if (response.data.success && response.data.data) {
-          setBooks(response.data.data);
+          setRegionalBooks(response.data.data);
         } else {
-          setError('지역 인기 도서 정보를 불러오는데 실패했습니다.');
-          setBooks([]);
+          setError('regionalBooks', '지역 인기 도서 정보를 불러오는데 실패했습니다.');
+          setRegionalBooks([]);
         }
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          console.error('API Error:', {
-            message: err.message,
-            status: err.response?.status,
-            data: err.response?.data,
-            config: err.config
-          });
-          
-          if (err.response) {
-            // TODO: 프로덕션 배포 시 아래 인증 에러 처리 활성화 필요✅✅✅✅✅
-            /*
-            if (err.response.status === 403) {
-              setError('로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다.');
-              // 로그인 페이지로 리다이렉트
-              setTimeout(() => {
-                window.location.href = '/login';
-              }, 2000);
-            } else {
-              setError(`서버 오류: ${err.response.status} - ${err.response.data?.message || '알 수 없는 오류가 발생했습니다.'}`);
-            }
-            */
-            setError(`서버 오류: ${err.response.status} - ${err.response.data?.message || '알 수 없는 오류가 발생했습니다.'}`);
-          } else if (err.request) {
-            setError('서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해주세요.');
-          } else {
-            setError('요청 중 오류가 발생했습니다.');
-          }
-        } else {
-          setError('알 수 없는 오류가 발생했습니다.');
-        }
-        setBooks([]);
+        console.error('API Error:', err);
+        setError('regionalBooks', '서버 오류가 발생했습니다.');
+        setRegionalBooks([]);
       } finally {
-        setLoading(false);
+        setLoading('regionalBooks', false);
       }
     };
 
     fetchRegionalBooks();
-  }, []);
+  }, [setRegionalBooks, setLoading, setError]);
 
-  if (loading) {
+  if (loading.regionalBooks) {
     return <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
+  if (error.regionalBooks) {
+    return <ErrorMessage>{error.regionalBooks}</ErrorMessage>;
   }
 
   const canScrollLeft = scrollPosition > 0;
@@ -359,8 +314,8 @@ const RegionalBooks = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {books && books.length > 0 ? (
-            books.map((book) => (
+          {regionalBooks && regionalBooks.length > 0 ? (
+            regionalBooks.map((book) => (
               <BookCard key={book.bookId}>
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 

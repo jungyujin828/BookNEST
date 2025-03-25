@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
+import api from '../api/axios';  // api 인스턴스 import 추가
 
 // Daum Postcode API 타입 선언
 declare global {
@@ -321,7 +322,7 @@ const InputInfoPage = () => {
         gender: genderCode,
         birthdate: formatBirthdate(birthdate),
         address: {
-          zipcode: zipcode, // 우편번호 상태 사용
+          zipcode: zipcode,
           road_address: detailAddress ? `${address} ${detailAddress}` : address,
         },
         updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
@@ -329,32 +330,15 @@ const InputInfoPage = () => {
     };
 
     try {
-      // Get token from localStorage or wherever it's stored
-      const token = localStorage.getItem("token");
+      const response = await api.put('/user/update', payload);
 
-      if (!token) {
-        setErrorMessage("로그인이 필요한 서비스입니다.");
-        return;
-      }
-
-      const response = await fetch("/api/user/update", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data.success) {
         // Handle success - maybe redirect or show success message
         console.log("회원 정보가 성공적으로 업데이트되었습니다.");
         // Redirect or show success message
       } else {
         // Handle error responses
-        setErrorMessage(data.error.message || "회원 정보 업데이트에 실패했습니다.");
+        setErrorMessage(response.data.error?.message || "회원 정보 업데이트에 실패했습니다.");
       }
     } catch (error) {
       console.error("API 요청 중 오류 발생:", error);
