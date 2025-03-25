@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import api from '../api/axios';
-import { ROUTES, API_PATHS } from '../constants/paths';
+import { ROUTES } from '../constants/paths';
 import { useAuthStore } from '../store/useAuthStore';
 
 const LoadingContainer = styled.div`
@@ -57,7 +57,7 @@ const GoogleCallback = () => {
           throw new Error('Authorization code not found');
         }
 
-      const response = await api.post(API_PATHS.GOOGLE_LOGIN, { code });
+      const response = await api.post('/api/oauth/google', { code });
       
       if (response.data.success) {
         const { accessToken, user } = response.data.data;

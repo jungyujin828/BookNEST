@@ -6,6 +6,7 @@ const api = axios.create({
   baseURL: config.api.baseUrl,
   headers: {
     'Content-Type': 'application/json',
+    ...(import.meta.env.DEV && { 'Authorization': 'Bearer test' })
   },
   withCredentials: true, // refresh_token을 쿠키로 받기 위해 필요
 });
@@ -51,9 +52,12 @@ api.interceptors.request.use(
       return config;
     }
 
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // 개발 환경이 아닐 때만 localStorage에서 토큰을 가져와서 설정
+    if (!import.meta.env.DEV) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

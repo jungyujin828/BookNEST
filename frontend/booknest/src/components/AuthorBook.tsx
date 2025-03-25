@@ -268,7 +268,7 @@ const AuthorBook = () => {
         setLoading('authorBooks', true);
         setError('authorBooks', null);
         
-        const response = await api.get('/book/author');
+        const response = await api.get('/api/book/author');
         
         if (response.data.success && response.data.data) {
           setAuthorBooks(response.data.data);
