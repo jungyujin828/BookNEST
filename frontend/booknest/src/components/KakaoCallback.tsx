@@ -24,13 +24,13 @@ const KakaoCallback = () => {
         );
         
         // 응답 처리
-        if (response.data.isNewUser) {
+        if (response.data.data.isNew) {
           // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('token', response.data.data.accessToken);
           navigate('/input-info');
         } else {
           // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
-          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('token', response.data.data.accessToken);
           navigate(ROUTES.HOME);
         }
       } catch (error) {
