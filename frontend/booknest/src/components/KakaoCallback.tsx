@@ -10,8 +10,6 @@ const KakaoCallback = () => {
   useEffect(() => {
     const handleKakaoLogin = async () => {
       try {
-        console.log('백엔드로 요청 보내기 전');
-        
         // URL에서 인가 코드 추출
         const code = new URLSearchParams(window.location.search).get('code');
         
@@ -24,14 +22,11 @@ const KakaoCallback = () => {
           `${config.api.baseUrl}${API_PATHS.KAKAO_LOGIN}`, 
           { code }
         );
-
-        console.log('요청보내고 돌아옴');
         
         // 응답 처리
         if (response.data.data.isNew) {
           // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
           localStorage.setItem('token', response.data.data.accessToken);
-          console.log('홈으로 오긴함');
           navigate('/input-info');
         } else {
           // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
