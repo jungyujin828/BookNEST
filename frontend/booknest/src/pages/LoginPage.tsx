@@ -155,9 +155,9 @@ const LoginPage = () => {
 
   const handleNaverLogin = () => {
     const state = Math.random().toString(36).substr(2, 11);
-    
+
     const params = new URLSearchParams({
-      response_type: 'code',
+      response_type: "code",
       client_id: config.naver.clientId,
       redirect_uri: config.naver.redirectUri,
       state: state,
@@ -171,10 +171,10 @@ const LoginPage = () => {
     const params = new URLSearchParams({
       client_id: config.google.clientId,
       redirect_uri: config.google.redirectUri,
-      response_type: 'code',
+      response_type: "code",
       scope: OAUTH.GOOGLE.SCOPE,
-      access_type: 'offline',
-      prompt: 'consent',
+      access_type: "offline",
+      prompt: "consent",
     });
 
     const googleURL = `${OAUTH.GOOGLE.AUTH_URL}?${params.toString()}`;
@@ -204,9 +204,7 @@ const LoginPage = () => {
 
       <ButtonSection>
         {!showSocialButtons ? (
-          <EnterButton onClick={() => setShowSocialButtons(true)}>
-            입장하기
-          </EnterButton>
+          <EnterButton onClick={() => setShowSocialButtons(true)}>입장하기</EnterButton>
         ) : (
           <>
             <KakaoButton onClick={handleKakaoLogin}>
