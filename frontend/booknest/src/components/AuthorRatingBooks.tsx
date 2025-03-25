@@ -11,13 +11,13 @@ interface Book {
   authors: string[];
 }
 
-interface RegionalBooksResponse {
+interface AuthorRatingBooksResponse {
   success: boolean;
   data: Book[];
   error: null | string;
 }
 
-const RegionalBooksContainer = styled.div`
+const AuthorRatingBooksContainer = styled.div`
   padding: 16px;
   position: relative;
   
@@ -41,9 +41,9 @@ const Title = styled.h2`
   }
 `;
 
-const LocationIcon = styled.span`
+const AuthorRatingIcon = styled.span`
   font-size: 20px;
-  color: #4CAF50;
+  color: #E91E63;
   
   @media (min-width: 768px) {
     font-size: 22px;
@@ -233,12 +233,12 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const RegionalBooks = () => {
+const AuthorRatingBooks = () => {
   const { 
-    regionalBooks, 
+    authorRatingBooks, 
     loading, 
     error, 
-    setRegionalBooks, 
+    setAuthorRatingBooks, 
     setLoading, 
     setError 
   } = useBookStore();
@@ -262,37 +262,37 @@ const RegionalBooks = () => {
   };
 
   useEffect(() => {
-    const fetchRegionalBooks = async () => {
+    const fetchAuthorRatingBooks = async () => {
       try {
-        setLoading('regionalBooks', true);
-        setError('regionalBooks', null);
+        setLoading('authorRatingBooks', true);
+        setError('authorRatingBooks', null);
         
-        const response = await api.get('/api/book/region');
+        const response = await api.get<AuthorRatingBooksResponse>('/api/book/authorrating');
         
         if (response.data.success && response.data.data) {
-          setRegionalBooks(response.data.data);
+          setAuthorRatingBooks(response.data.data);
         } else {
-          setError('regionalBooks', '지역 인기 도서 정보를 불러오는데 실패했습니다.');
-          setRegionalBooks([]);
+          setError('authorRatingBooks', '평점을 준 작가의 도서 정보를 불러오는데 실패했습니다.');
+          setAuthorRatingBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('regionalBooks', '서버 오류가 발생했습니다.');
-        setRegionalBooks([]);
+        setError('authorRatingBooks', '서버 오류가 발생했습니다.');
+        setAuthorRatingBooks([]);
       } finally {
-        setLoading('regionalBooks', false);
+        setLoading('authorRatingBooks', false);
       }
     };
 
-    fetchRegionalBooks();
-  }, [setRegionalBooks, setLoading, setError]);
+    fetchAuthorRatingBooks();
+  }, [setAuthorRatingBooks, setLoading, setError]);
 
-  if (loading.regionalBooks) {
-    return <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>;
+  if (loading.authorRatingBooks) {
+    return <LoadingMessage>평점을 준 작가의 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error.regionalBooks) {
-    return <ErrorMessage>{error.regionalBooks}</ErrorMessage>;
+  if (error.authorRatingBooks) {
+    return <ErrorMessage>{error.authorRatingBooks}</ErrorMessage>;
   }
 
   const canScrollLeft = scrollPosition > 0;
@@ -301,10 +301,10 @@ const RegionalBooks = () => {
     : false;
 
   return (
-    <RegionalBooksContainer>
+    <AuthorRatingBooksContainer>
       <Title>
-        <LocationIcon>📍</LocationIcon>
-        우리 지역 인기 도서
+        <AuthorRatingIcon>⭐</AuthorRatingIcon>
+        평점을 준 작가의 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -314,8 +314,8 @@ const RegionalBooks = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {regionalBooks && regionalBooks.length > 0 ? (
-            regionalBooks.map((book) => (
+          {authorRatingBooks && authorRatingBooks.length > 0 ? (
+            authorRatingBooks.map((book) => (
               <BookCard key={book.bookId}>
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
@@ -329,7 +329,7 @@ const RegionalBooks = () => {
               </BookCard>
             ))
           ) : (
-            <ErrorMessage>지역 인기 도서 목록이 없습니다.</ErrorMessage>
+            <ErrorMessage>평점을 준 작가의 도서 목록이 없습니다.</ErrorMessage>
           )}
         </BookList>
         {canScrollRight && (
@@ -339,8 +339,8 @@ const RegionalBooks = () => {
           />
         )}
       </BookListContainer>
-    </RegionalBooksContainer>
+    </AuthorRatingBooksContainer>
   );
 };
 
-export default RegionalBooks; 
+export default AuthorRatingBooks; 

@@ -3,6 +3,9 @@ import styled from '@emotion/styled';
 import BestSeller from '../components/BestSeller';
 import RegionalBooks from '../components/RegionalBooks';
 import AuthorBook from '../components/AuthorBook';
+import AgeBooks from '../components/AgeBooks';
+import CriticBooks from '../components/CriticBooks';
+import AuthorRatingBooks from '../components/AuthorRatingBooks';
 
 const HomeContainer = styled.div`
   display: flex;
@@ -38,6 +41,9 @@ const HomePage = () => {
       <BestSeller />
       <RegionalBooks />
       <AuthorBook />
+      <AgeBooks />
+      <CriticBooks />
+      <AuthorRatingBooks />
     </HomeContainer>
   );
 };
