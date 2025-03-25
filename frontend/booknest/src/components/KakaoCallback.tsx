@@ -22,6 +22,8 @@ const KakaoCallback = () => {
           `${config.api.baseUrl}${API_PATHS.KAKAO_LOGIN}`, 
           { code }
         );
+
+        console.log(response.data.data.user.nickname);
         
         // 응답 처리
         if (response.data.data.isNew) {
