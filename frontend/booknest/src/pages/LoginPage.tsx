@@ -143,6 +143,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleKakaoLogin = () => {
+    console.log('=====handleKakaoLogin=====');
     const params = new URLSearchParams({
       client_id: config.kakao.clientId,
       redirect_uri: config.kakao.redirectUri,
