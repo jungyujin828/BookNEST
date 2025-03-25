@@ -43,7 +43,7 @@ public class BookController {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(bookService.getBook(bookId, userId));
+        return ApiResponse.success(bookService.getBook(userId, bookId));
     }
 
 
