@@ -29,7 +29,8 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        userRepository.delete(user);
+        user.updateDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     public Boolean existsById(Integer userId) {

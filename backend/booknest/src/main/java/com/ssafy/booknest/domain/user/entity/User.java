@@ -68,6 +68,7 @@ public class User extends BaseEntity {
         this.birthdate = birthdate;
     }
 
+    public void updateDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 
     public void setAddress(Address address) {
         this.address = address;
