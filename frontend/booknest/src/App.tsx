@@ -1,9 +1,4 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { ROUTES } from "./constants/paths";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
@@ -22,6 +17,17 @@ import Navbar from "./components/Navbar";
 import ErrorPage from "./pages/ErrorPage";
 import "./App.css";
 
+// 개발 환경에서 테스트용 토큰 설정
+if (import.meta.env.DEV && !localStorage.getItem('token')) {
+  const testUser = {
+    id: "test-user-id",
+    nickname: "테스트 사용자",
+    isNew: false
+  };
+  localStorage.setItem('token', 'test-access-token');
+  localStorage.setItem('user', JSON.stringify(testUser));
+}
+
 function App() {
   return (
     <Router>
@@ -29,13 +35,11 @@ function App() {
       <Routes>
         {/* 공개 라우트 */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
         <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
         <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
         <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
 
         {/* 보호된 라우트 */}
-        {/* 정보입력페이지 */}
         <Route
           path={ROUTES.INPUT_INFO}
           element={
@@ -44,8 +48,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* 책평가페이지 */}
         <Route
           path={ROUTES.EVALUATE_BOOK}
           element={

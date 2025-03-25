@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { ROUTES, API_PATHS } from '../constants/paths';
-import config from '../config';
+import { useAuthStore } from '../store/useAuthStore';
 
 const NaverCallback = () => {
   const navigate = useNavigate();
+  const { login } = useAuthStore();
 
   useEffect(() => {
     const handleNaverLogin = async () => {
@@ -19,20 +20,22 @@ const NaverCallback = () => {
         }
 
         // 백엔드로 인가 코드 전송
-        const response = await axios.post(
-          `${config.api.baseUrl}${API_PATHS.NAVER_LOGIN}`, 
-          { code, state }
-        );
+        const response = await api.post(API_PATHS.NAVER_LOGIN, { code, state });
         
-        // 응답 처리
-        if (response.data.isNewUser) {
-          // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
-          localStorage.setItem('token', response.data.token);
-          navigate('/input-info');
+        if (response.data.success) {
+          const { accessToken, user } = response.data.data;
+          
+          if (user.isNew) {
+            // 새로운 사용자인 경우 회원정보 입력 페이지로 이동
+            localStorage.setItem('token', accessToken);
+            navigate(ROUTES.INPUT_INFO);
+          } else {
+            // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
+            login(accessToken, user);
+            navigate(ROUTES.HOME);
+          }
         } else {
-          // 기존 사용자인 경우 토큰 저장 후 메인 페이지로 이동
-          localStorage.setItem('token', response.data.token);
-          navigate(ROUTES.HOME);
+          throw new Error(response.data.error?.message || '로그인에 실패했습니다. 다시 시도해주세요.');
         }
       } catch (error) {
         console.error('네이버 로그인 처리 중 오류 발생:', error);
@@ -41,7 +44,7 @@ const NaverCallback = () => {
     };
 
     handleNaverLogin();
-  }, [navigate]);
+  }, [navigate, login]);
 
   return (
     <div style={{ 
