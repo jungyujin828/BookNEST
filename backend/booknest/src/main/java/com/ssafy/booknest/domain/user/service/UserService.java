@@ -30,7 +30,7 @@ public class UserService {
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
         userRepository.delete(user);
-
+        userRepository.save(user);
     }
 
     public Boolean existsById(Integer userId) {
