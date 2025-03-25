@@ -11,7 +11,7 @@ const KakaoCallback = () => {
     const handleKakaoLogin = async () => {
       try {
         // URL에서 인가 코드 추출
-        const code = new URL(window.location.href).searchParams.get('code');
+        const code = new URLSearchParams(window.location.search).get('code');
         
         if (!code) {
           throw new Error('Authorization code not found');
