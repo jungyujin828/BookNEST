@@ -9,9 +9,9 @@ export const ROUTES = {
 } as const;
 
 export const API_PATHS = {
-  KAKAO_LOGIN: '/api/auth/kakao/callback',
-  NAVER_LOGIN: '/api/auth/naver/callback',
-  GOOGLE_LOGIN: '/api/auth/google/callback',
+  KAKAO_LOGIN: '/api/oauth/kakao',
+  NAVER_LOGIN: '/api/oauth/naver',
+  GOOGLE_LOGIN: '/api/oauth/google',
 } as const;
 
 export const ASSETS = {

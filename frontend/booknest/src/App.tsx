@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { ROUTES } from "./constants/paths";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
@@ -10,30 +11,45 @@ import Header from "./components/Header";
 import EvaluateBookPage from "./pages/EvaluateBookPage";
 import "./App.css";
 
+// 개발 환경에서 테스트용 토큰 설정
+if (import.meta.env.DEV && !localStorage.getItem('token')) {
+  const testUser = {
+    id: "test-user-id",
+    nickname: "테스트 사용자",
+    isNew: false
+  };
+  localStorage.setItem('token', 'test-access-token');
+  localStorage.setItem('user', JSON.stringify(testUser));
+}
+
 function App() {
   return (
     <Router>
-      <Header /> {/* 여기에 헤더 추가 */}
+      <Header />
       <Routes>
         {/* 공개 라우트 */}
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-        <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
         <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
         <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
         <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
 
         {/* 보호된 라우트 */}
-        {/* 정보입력페이지 */}
         <Route
-          path="/input-info"
+          path={ROUTES.HOME}
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={ROUTES.INPUT_INFO}
           element={
             <ProtectedRoute>
               <InputInfoPage />
             </ProtectedRoute>
           }
         />
-
-        {/* 책평가페이지 */}
         <Route
           path="/eval-book"
           element={
@@ -43,20 +59,9 @@ function App() {
           }
         />
 
-        {/* 메인페이지 */}
-        <Route
-          path={ROUTES.HOME}
-          element={
-            <ProtectedRoute>
-              <HomePage />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* 잘못된 경로는 메인 페이지로 리다이렉트 */}
+        {/* 기본 라우트 */}
+        <Route path="/" element={<Navigate to={ROUTES.HOME} replace />} />
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
-        <Route path="/input-info" element={<InputInfoPage />} />
-        {/* 🗑️ */}
       </Routes>
     </Router>
   );

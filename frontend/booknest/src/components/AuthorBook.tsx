@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import axios from 'axios';
 import styled from '@emotion/styled';
 import api from '../api/axios';
 import { useBookStore } from '../store/useBookStore';
@@ -11,13 +12,13 @@ interface Book {
   authors: string[];
 }
 
-interface BestSellerResponse {
+interface AuthorBookResponse {
   success: boolean;
   data: Book[];
   error: null | string;
 }
 
-const BestSellerContainer = styled.div`
+const AuthorBookContainer = styled.div`
   padding: 16px;
   position: relative;
   
@@ -31,10 +32,22 @@ const Title = styled.h2`
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   
   @media (min-width: 768px) {
     font-size: 20px;
     margin-bottom: 20px;
+  }
+`;
+
+const AuthorIcon = styled.span`
+  font-size: 20px;
+  color: #FF5722;
+  
+  @media (min-width: 768px) {
+    font-size: 22px;
   }
 `;
 
@@ -221,12 +234,12 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const BestSeller = () => {
+const AuthorBook = () => {
   const { 
-    bestSellers, 
+    authorBooks, 
     loading, 
     error, 
-    setBestSellers, 
+    setAuthorBooks, 
     setLoading, 
     setError 
   } = useBookStore();
@@ -250,37 +263,37 @@ const BestSeller = () => {
   };
 
   useEffect(() => {
-    const fetchBestSellers = async () => {
+    const fetchAuthorBooks = async () => {
       try {
-        setLoading('bestSellers', true);
-        setError('bestSellers', null);
+        setLoading('authorBooks', true);
+        setError('authorBooks', null);
         
-        const response = await api.get('/book/best');
+        const response = await api.get('/book/author');
         
         if (response.data.success && response.data.data) {
-          setBestSellers(response.data.data);
+          setAuthorBooks(response.data.data);
         } else {
-          setError('bestSellers', '베스트셀러 정보를 불러오는데 실패했습니다.');
-          setBestSellers([]);
+          setError('authorBooks', '화제의 작가 도서 정보를 불러오는데 실패했습니다.');
+          setAuthorBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('bestSellers', '서버 오류가 발생했습니다.');
-        setBestSellers([]);
+        setError('authorBooks', '서버 오류가 발생했습니다.');
+        setAuthorBooks([]);
       } finally {
-        setLoading('bestSellers', false);
+        setLoading('authorBooks', false);
       }
     };
 
-    fetchBestSellers();
-  }, [setBestSellers, setLoading, setError]);
+    fetchAuthorBooks();
+  }, [setAuthorBooks, setLoading, setError]);
 
-  if (loading.bestSellers) {
-    return <LoadingMessage>베스트셀러 목록을 불러오는 중...</LoadingMessage>;
+  if (loading.authorBooks) {
+    return <LoadingMessage>화제의 작가 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error.bestSellers) {
-    return <ErrorMessage>{error.bestSellers}</ErrorMessage>;
+  if (error.authorBooks) {
+    return <ErrorMessage>{error.authorBooks}</ErrorMessage>;
   }
 
   const canScrollLeft = scrollPosition > 0;
@@ -289,8 +302,11 @@ const BestSeller = () => {
     : false;
 
   return (
-    <BestSellerContainer>
-      <Title>월간 베스트셀러</Title>
+    <AuthorBookContainer>
+      <Title>
+        <AuthorIcon>✍️</AuthorIcon>
+        화제의 작가 도서
+      </Title>
       <BookListContainer>
         {canScrollLeft && (
           <NavigationButton 
@@ -299,8 +315,8 @@ const BestSeller = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {bestSellers && bestSellers.length > 0 ? (
-            bestSellers.map((book) => (
+          {authorBooks && authorBooks.length > 0 ? (
+            authorBooks.map((book) => (
               <BookCard key={book.bookId}>
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
@@ -314,7 +330,7 @@ const BestSeller = () => {
               </BookCard>
             ))
           ) : (
-            <ErrorMessage>베스트셀러 목록이 없습니다.</ErrorMessage>
+            <ErrorMessage>화제의 작가 도서 목록이 없습니다.</ErrorMessage>
           )}
         </BookList>
         {canScrollRight && (
@@ -324,8 +340,8 @@ const BestSeller = () => {
           />
         )}
       </BookListContainer>
-    </BestSellerContainer>
+    </AuthorBookContainer>
   );
 };
 
-export default BestSeller;
+export default AuthorBook;
