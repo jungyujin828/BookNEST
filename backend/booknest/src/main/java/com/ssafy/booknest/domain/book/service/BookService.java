@@ -104,7 +104,7 @@ public class BookService {
 
     // 한줄평 등록
     @Transactional
-    public void saveComment(Integer userId, Integer bookId, ReviewRequestDto dto) {
+    public void saveReview(Integer userId, Integer bookId, ReviewRequestDto dto) {
         // 1. 입력값 검증 (Fail-Fast)
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
@@ -140,7 +140,7 @@ public class BookService {
 
     // 한줄평 수정
     @Transactional
-    public void updateComment(Integer userId, Integer bookId, ReviewRequestDto dto) {
+    public void updateReview(Integer userId, Integer bookId, ReviewRequestDto dto) {
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
         }
@@ -152,7 +152,8 @@ public class BookService {
     }
 
     // 한줄평 삭제
-    public void deleteComment(Integer userId, Integer bookId) {
+    @Transactional
+    public void deleteReview(Integer userId, Integer bookId) {
         Review review = reviewRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 

@@ -80,36 +80,36 @@ public class BookController {
 
     // 한줄평 등록
     @PostMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> addComment(
+    public ResponseEntity<ApiResponse<Void>> addReview(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody ReviewRequestDto reviewRequest
     ) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.saveComment(userId, bookId, reviewRequest);
+        bookService.saveReview(userId, bookId, reviewRequest);
         return ApiResponse.success(HttpStatus.OK);
     }
 
     // 한줄평 수정
     @PutMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> updateComment(
+    public ResponseEntity<ApiResponse<Void>> updateReview(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody ReviewRequestDto reviewRequest
     ){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.updateComment(userId, bookId, reviewRequest);
+        bookService.updateReview(userId, bookId, reviewRequest);
         return ApiResponse.success(HttpStatus.OK);
     }
 
     // 한줄평 삭제
-    @DeleteMapping("/{bookId}/comment")
-    public ResponseEntity<ApiResponse<Void>> deleteComment(
+    @DeleteMapping("/{bookId}/review")
+    public ResponseEntity<ApiResponse<Void>> deleteReview(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.deleteComment(userId, bookId);
+        bookService.deleteReview(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
     }
 
