@@ -1,9 +1,11 @@
 package com.ssafy.booknest.domain.book.controller;
 
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
+import com.ssafy.booknest.domain.book.entity.Review;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.user.service.UserService;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URLEncoder;
@@ -74,6 +77,42 @@ public class BookController {
 
         return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
     }
+
+    // 한줄평 등록
+    @PostMapping("/{bookId}/comment")
+    public ResponseEntity<ApiResponse<Void>> addComment(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequestDto reviewRequest
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.saveComment(userId, bookId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 수정
+    @PutMapping("/{bookId}/comment")
+    public ResponseEntity<ApiResponse<Void>> updateComment(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequestDto reviewRequest
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.updateComment(userId, bookId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 삭제
+    @DeleteMapping("/{bookId}/comment")
+    public ResponseEntity<ApiResponse<Void>> deleteComment(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.deleteComment(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
 
 //    // 책 검색 (제목, 저자)
 //    @GetMapping("/search")
