@@ -10,7 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "review")
+@Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,7 +24,7 @@ public class Review extends BaseEntity {
     private String content;
 
     @Builder.Default
-    @Column(name =" likes")
+    @Column(name =" likes" , nullable = false)
     private Integer likes = 0;
 
     @LastModifiedDate
