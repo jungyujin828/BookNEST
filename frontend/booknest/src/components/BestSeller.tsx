@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useBookStore } from '../store/useBookStore';
 
@@ -68,6 +69,13 @@ const BookCard = styled.div`
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
   
   @media (min-width: 768px) {
     flex: 0 0 200px;
@@ -232,6 +240,7 @@ const BestSeller = () => {
   } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -247,6 +256,10 @@ const BestSeller = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
+  };
+
+  const handleBookClick = (bookId: number) => {
+    navigate(`/book-detail/${bookId}`);
   };
 
   useEffect(() => {
@@ -301,7 +314,10 @@ const BestSeller = () => {
         <BookList ref={bookListRef}>
           {bestSellers && bestSellers.length > 0 ? (
             bestSellers.map((book) => (
-              <BookCard key={book.bookId}>
+              <BookCard 
+                key={book.bookId}
+                onClick={() => handleBookClick(book.bookId)}
+              >
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
                   alt={book.title}

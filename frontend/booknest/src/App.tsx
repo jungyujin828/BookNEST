@@ -15,17 +15,18 @@ import ProfilePage from "./pages/ProfilePage";
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
 import ErrorPage from "./pages/ErrorPage";
+import BookDetailPage from "./pages/BookDetailPage";
 import "./App.css";
 
 // 개발 환경에서 테스트용 토큰 설정
-if (import.meta.env.DEV && !localStorage.getItem('token')) {
+if (import.meta.env.DEV && !localStorage.getItem("token")) {
   const testUser = {
     id: "test-user-id",
     nickname: "테스트 사용자",
-    isNew: false
+    isNew: false,
   };
-  localStorage.setItem('token', 'test');
-  localStorage.setItem('user', JSON.stringify(testUser));
+  localStorage.setItem("token", "test");
+  localStorage.setItem("user", JSON.stringify(testUser));
 }
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
       <Header />
       <Routes>
         {/* 공개 라우트 */}
+        <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
         <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
         <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
@@ -106,6 +108,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* 책 상세페이지 */}
+        <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
 
         {/* 잘못된 경로는 에러 페이지로 연결 */}
         <Route path="*" element={<ErrorPage />} />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import { useNavigate } from "react-router-dom";
-import api from '../api/axios';  // api 인스턴스 import 추가
+import api from "../api/axios"; // api 인스턴스 import 추가
 
 // Daum Postcode API 타입 선언
 declare global {
@@ -210,6 +210,7 @@ const InputInfoPage = () => {
   const [birthdate, setBirthdate] = useState(""); // 8자리 생년월일 (YYYYMMDD)
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
+  const [oldAddress, setOldAddress] = useState("");
   const [zipcode, setZipcode] = useState(""); // 우편번호 상태 추가
   const [isNicknameValid, setIsNicknameValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -230,6 +231,8 @@ const InputInfoPage = () => {
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setNickname(text);
+    console.log("입력된 닉네임:", text);
+
     // Validate nickname (example: max 10 characters)
     setIsNicknameValid(text.length <= 10);
   };
@@ -248,8 +251,9 @@ const InputInfoPage = () => {
       new window.daum.Postcode({
         oncomplete: function (data: any) {
           // 우편번호와 주소 정보 가져오기
-          const zonecode = data.zonecode; // 우편번호
-          let fullAddress = data.roadAddress || data.jibunAddress; // 도로명 주소 우선, 없으면 지번 주소
+          const zonecode = data.zonecode;
+          let fullAddress = data.roadAddress || data.jibunAddress;
+          let oldAddress = data.jibunAddress; // 지번 주소 저장
           let extraAddress = "";
 
           // 법정동명이 있을 경우 추가
@@ -268,9 +272,9 @@ const InputInfoPage = () => {
           // 주소 정보 설정
           setZipcode(zonecode);
           setAddress(fullAddress);
+          setOldAddress(oldAddress); // 지번 주소 상태 설정
           setIsAddressModalOpen(false);
 
-          // 상세주소 입력 필드로 포커스 이동
           document.getElementById("detailAddress")?.focus();
         },
       }).embed(document.getElementById("addressLayer") as HTMLElement);
@@ -300,10 +304,34 @@ const InputInfoPage = () => {
     return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   };
 
+  // 닉네임 중복 확인 함수 추가
+  const checkNicknameDuplicate = async () => {
+    console.log("닉네임 중복 확인 시작");
+    try {
+      const response = await api.get(`/api/user/nickname-check`, {
+        params: { nickname },
+      });
+
+      console.log("서버 응답 전체:", response); // 전체 응답 데이터 확인
+      if (response.data.success) {
+        const isDuplicate = response.data.data;
+        console.log("서버 응답 데이터:", response.data); // 응답 데이터 구조 확인
+        setIsNicknameValid(!isDuplicate);
+        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "");
+        console.log("닉네임 중복 확인 결과:", isDuplicate ? "중복된 닉네임입니다" : "사용 가능한 닉네임입니다");
+        console.log("닉네임:", nickname);
+        console.log("닉네임 중복 확인 완료");
+      }
+    } catch (error) {
+      setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
+      console.log("닉네임 중복 확인 중 오류 발생:", error);
+    }
+  };
+
+  // handleSubmit 함수 수정
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Format gender to match API requirements
     let genderCode;
     if (gender === "남성") {
       genderCode = "M";
@@ -312,37 +340,29 @@ const InputInfoPage = () => {
     } else if (gender === "기타") {
       genderCode = "O";
     } else {
-      genderCode = ""; // 설정안함은 빈 문자열
+      genderCode = "";
     }
 
-    // Create request payload
     const payload = {
-      data: {
-        nickname,
-        gender: genderCode,
-        birthdate: formatBirthdate(birthdate),
-        address: {
-          zipcode: zipcode,
-          road_address: detailAddress ? `${address} ${detailAddress}` : address,
-        },
-        updated_at: new Date().toISOString().replace("T", " ").substring(0, 19),
+      nickname,
+      gender: genderCode,
+      birthdate: formatBirthdate(birthdate),
+      address: {
+        zipcode,
+        roadAddress: detailAddress ? `${address} ${detailAddress}` : address,
+        oldAddress: oldAddress, // 지번 주소 추가
       },
     };
 
     try {
-      const response = await api.put('api/user/update', payload);
-
+      const response = await api.put("/api/user/update", payload);
       if (response.data.success) {
-        // Handle success - maybe redirect or show success message
         console.log("회원 정보가 성공적으로 업데이트되었습니다.");
-        // Redirect or show success message
-      } else {
-        // Handle error responses
-        setErrorMessage(response.data.error?.message || "회원 정보 업데이트에 실패했습니다.");
+        navigate("/eval-book");
       }
-    } catch (error) {
-      console.error("API 요청 중 오류 발생:", error);
-      setErrorMessage("서버 연결에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.error?.message || "회원 정보 업데이트에 실패했습니다.";
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -363,9 +383,11 @@ const InputInfoPage = () => {
               value={nickname}
               onChange={handleNicknameChange}
             />
-            <ConfirmButton type="button">중복 확인</ConfirmButton>
+            <ConfirmButton type="button" onClick={checkNicknameDuplicate}>
+              중복 확인
+            </ConfirmButton>
           </InputRow>
-          {!isNicknameValid && <ErrorText>사용할 수 없는 닉네임입니다</ErrorText>}
+          {!isNicknameValid && <ErrorText>이미 사용중인 닉네임입니다</ErrorText>}
         </InputGroup>
 
         <InputGroup>
