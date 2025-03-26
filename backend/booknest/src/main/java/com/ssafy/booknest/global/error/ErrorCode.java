@@ -35,7 +35,12 @@ public enum ErrorCode {
     BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다."),
     CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다."),
     UNSUPPORTED_SEARCH_TYPE(400, "B003", "지원하지 않는 검색 타입입니다."),
-    EMPTY_KEYWORD(400, "B004", "검색어는 필수입니다.");
+    EMPTY_KEYWORD(400, "B004", "검색어는 필수입니다."),
+    EMPTY_REVIEW_CONTENT(400, "B005", "한줄평이 입력되지 않았습니다."),
+    REVIEW_ALREADY_EXISTS(400, "B006", "이미 작성한 한줄평이 존재합니다."),
+    REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다");
+
+
 
 
 

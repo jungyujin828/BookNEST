@@ -5,8 +5,9 @@ import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Review extends BaseEntity {
 
-    @Column(name ="rating" , nullable = false)
+    @Column(name ="rating")
     private Double rating;
 
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -26,8 +27,9 @@ public class Review extends BaseEntity {
     @Column(name =" likes" , nullable = false)
     private Integer likes = 0;
 
+    @LastModifiedDate
     @Column(name="updated_at")
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id" , nullable = false)
@@ -37,4 +39,15 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "book_id" , nullable = false)
     private Book book;
 
+    public void updateRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void updateLikes(Integer likes) {
+        this.likes = likes;
+    }
 }
