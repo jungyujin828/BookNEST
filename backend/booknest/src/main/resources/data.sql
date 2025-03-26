@@ -131,7 +131,7 @@ VALUES (278, NOW(), '9788996543210', '책과사람들', 'https://image.aladin.co
 
 
 -- ✅ 서재에 책 추가
-INSERT INTO book_nest (book_id, user_id)
+INSERT INTO book_nest (book_id, nest_id)
 VALUES
     (1, 1),
     (2, 1),
