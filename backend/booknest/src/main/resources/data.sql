@@ -7,6 +7,16 @@ VALUES
     (3, '테스트맨3', 'GOOGLE', 987654321, NOW(), NOW()),
     (4, '테스트맨4', 'KAKAO', 554433221, NOW(), NOW()),
     (5, '테스트맨5', 'NAVER', 667788990, NOW(), NOW());
+-- ✅ Nest 테이블 (명시적으로 ID 추가)
+INSERT INTO nest (id, user_id, created_at, updated_at)
+VALUES
+    (1, 1, NOW(), NOW()),
+    (2, 2, NOW(), NOW()),
+    (3, 3, NOW(), NOW()),
+    (4, 4, NOW(), NOW()),
+    (5, 5, NOW(), NOW());
+
+
 -- 주소 테이블 더미데이터 (user_id 1~5)
 INSERT INTO address
 (road_address, old_address, zipcode, city, district, user_id, created_at)
@@ -22,11 +32,11 @@ VALUES
 
 -- Ebook 테이블 더미데이터
 INSERT INTO ebook (name, city, district, redirect_url, created_at) VALUES
-                                                                       ('강남 개발 가이드', '서울시', '강남구', 'https://example.com/ebook-seoul', NOW()),
-                                                                       ('해운대 여행 안내서', '부산시', '해운대구', 'https://example.com/ebook-busan', NOW()),
-                                                                       ('대구 맛집 리스트', '대구시', '수성구', 'https://example.com/ebook-daegu', NOW()),
-                                                                       ('송도 부동산 리포트', '인천시', '연수구', 'https://example.com/ebook-incheon', NOW()),
-                                                                       ('대전 IT 스타트업 백서', '대전시', '유성구', 'https://example.com/ebook-daejeon', NOW());
+                                                                       ('강남구전자도서관', '서울시', '강남구', 'https://example.com/ebook-seoul', NOW()),
+                                                                       ('구미시립도서관', '경북', '구미시', 'https://gumilib.yes24library.com/', NOW()),
+                                                                       ('대구전자도서관', '대구시', '수성구', 'https://example.com/ebook-daegu', NOW()),
+                                                                       ('강북문화정보도서관', '서울시', '강북구', 'https://ebook.gblib.or.kr/Kyobo_T3/Default.asp', NOW()),
+                                                                       ('대전유성구전자도서관', '대전시', '유성구', 'https://example.com/ebook-daejeon', NOW());
 
 
 -- Book 테이블 더미 데이터 (한글 유명 책 5권)
