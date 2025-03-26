@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.book.controller;
 
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
@@ -73,6 +74,17 @@ public class BookController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
         return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
+    }
+
+    @PutMapping("/{bookId}/comment")
+    public ResponseEntity<ApiResponse<Void>> updateComment(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequestDto ReviewRequest
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.updateComment(userId, bookId, ReviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
     }
 
 //    // 책 검색 (제목, 저자)

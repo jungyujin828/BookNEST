@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.book.service;
 
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
@@ -7,8 +8,10 @@ import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Ebook;
+import com.ssafy.booknest.domain.book.entity.Review;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.repository.ebookRepository;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
@@ -25,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +42,7 @@ public class BookService {
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final ReviewRepository reviewRepository;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
@@ -95,6 +101,36 @@ public class BookService {
                 .kyoboUrl(kyoboUrl)
                 .yes24Url(yes24Url)
                 .build();
+    }
+
+    // 한줄평 등록 및 수정
+    @Transactional
+    public void updateComment(Integer userId, Integer bookId, ReviewRequestDto dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Optional<Review> optionalReview = reviewRepository.findByUserIdAndBookId(userId, bookId);
+
+        if (optionalReview.isPresent()) {
+            // 수정
+            Review review = optionalReview.get();
+            if (dto.getContent() != null && !dto.getContent().isBlank()) {
+                review.updateContent(dto.getContent());
+            }
+        } else {
+            // 등록
+            if (dto.getContent() != null && !dto.getContent().isBlank()) {
+                Review review = Review.builder()
+                        .user(user)
+                        .book(bookRepository.findById(bookId)
+                                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND)))
+                        .content(dto.getContent())
+                        .createdAt(LocalDateTime.now())
+                        .build();
+
+                reviewRepository.save(review);
+            }
+        }
     }
 
 

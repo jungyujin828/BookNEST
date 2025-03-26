@@ -107,7 +107,7 @@ VALUES
 -- ID: 11
 INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
 VALUES (310, NOW(), '9788991234567', '문학사상사', 'https://image.aladin.co.kr/product/99999/11/cover500/k111111111_1.jpg', '2019-09-01',
-    '그림자 소년', '', '상처를 안고 자란 한 소년의 성장 이야기.', '사라진 아버지를 찾아가는 소년의 여정을 따라가다.');
+        '그림자 소년', '', '상처를 안고 자란 한 소년의 성장 이야기.', '사라진 아버지를 찾아가는 소년의 여정을 따라가다.');
 
 -- ID: 12
 INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
@@ -130,9 +130,14 @@ VALUES (278, NOW(), '9788996543210', '책과사람들', 'https://image.aladin.co
         '소년과 개', '', '반려견과 함께 성장하는 소년의 일상 이야기.', '사랑과 책임을 배우는 따뜻한 이야기.');
 
 
-
-
-
+-- ✅ 서재에 책 추가
+INSERT INTO book_nest (book_id, nest_id)
+VALUES
+    (1, 1),
+    (2, 1),
+    (3, 1),
+    (4, 1),
+    (5, 1);
 
 
 INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
@@ -179,7 +184,7 @@ INSERT INTO book_author (book_id, author_id) VALUES
                                                  (7, 2),  -- 소년의 눈물 → 히가시노 게이고
                                                  (8, 3),  -- 소년과 바다 → 헤르만 헤세
                                                  (9, 5),  -- 바람을 가르다 → 조지 오웰
-                                                (10, 4); -- 달빛 아래 소년 → 생텍쥐페리
+                                                 (10, 4); -- 달빛 아래 소년 → 생텍쥐페리
 
 
 -- 📌 카테고리 (책의 장르 추가)
@@ -218,7 +223,7 @@ INSERT INTO book_tag (book_id, tag_id) VALUES
                                            (1, 3),  -- 철학적인
                                            (1, 4);  -- 동화 같은
 
--- 📌 리뷰 추가 (회원 1~5번이 책 1~5번을 리뷰)
+-- 📌 중복 제거된 리뷰 INSERT문
 INSERT INTO review (user_id, book_id, rating, content, likes, created_at, updated_at)
 VALUES
     (1, 1, 4.8, '정말 재미있는 판타지 소설이에요!', 15, '2024-03-01 12:00:00', '2024-03-01 12:00:00'),
@@ -226,11 +231,12 @@ VALUES
     (3, 3, 4.7, '인생의 의미에 대해 생각하게 해줍니다.', 20, '2024-03-03 10:15:00', '2024-03-03 10:15:00'),
     (4, 4, 4.9, '어린 왕자는 정말 명작이죠.', 30, '2024-03-04 09:20:00', '2024-03-04 09:20:00'),
     (5, 5, 4.5, '1984는 소름 돋는 디스토피아 소설입니다.', 25, '2024-03-05 18:45:00', '2024-03-05 18:45:00'),
-    (1, 1, 4.8, '판타지 장르 중 최고예요! 완전 추천합니다.', 25, '2024-03-01 10:00:00', '2024-03-01 10:00:00'),
     (2, 1, 4.5, '해리 포터의 세계관이 너무 매력적이에요.', 20, '2024-03-02 12:00:00', '2024-03-02 12:00:00'),
     (3, 1, 4.9, '어릴 때도 재미있었고, 어른이 되어도 감동적이네요.', 30, '2024-03-03 15:30:00', '2024-03-03 15:30:00'),
     (4, 1, 4.6, '책보다 영화가 더 익숙하지만 원작이 최고네요.', 18, '2024-03-04 09:45:00', '2024-03-04 09:45:00'),
     (5, 1, 5.0, '역대급 명작 판타지. 모든 시리즈 소장했습니다.', 50, '2024-03-05 20:20:00', '2024-03-05 20:20:00');
+
+
 
 -- 📌 평가 (회원 1~5번이 책 1~5번을 평가)
 INSERT INTO rating (user_id, book_id, rating, created_at, updated_at)
