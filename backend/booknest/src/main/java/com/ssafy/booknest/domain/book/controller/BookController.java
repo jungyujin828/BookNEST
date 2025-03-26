@@ -79,7 +79,7 @@ public class BookController {
     }
 
     // 한줄평 등록
-    @PostMapping("/{bookId}/comment")
+    @PostMapping("/{bookId}/review")
     public ResponseEntity<ApiResponse<Void>> addComment(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -91,7 +91,7 @@ public class BookController {
     }
 
     // 한줄평 수정
-    @PutMapping("/{bookId}/comment")
+    @PutMapping("/{bookId}/review")
     public ResponseEntity<ApiResponse<Void>> updateComment(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
