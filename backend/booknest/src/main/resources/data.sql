@@ -130,9 +130,14 @@ VALUES (278, NOW(), '9788996543210', '책과사람들', 'https://image.aladin.co
         '소년과 개', '', '반려견과 함께 성장하는 소년의 일상 이야기.', '사랑과 책임을 배우는 따뜻한 이야기.');
 
 
-
-
-
+-- ✅ 서재에 책 추가
+INSERT INTO nest (book_id, user_id)
+VALUES
+    (1, 1),
+    (2, 1),
+    (3, 1),
+    (4, 1),
+    (5, 1);
 
 
 INSERT INTO book (pages, created_at, isbn, publisher, image_url, published_date, title, book_index, intro, publisher_review)
