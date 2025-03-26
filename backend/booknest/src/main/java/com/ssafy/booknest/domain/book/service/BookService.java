@@ -1,14 +1,15 @@
 package com.ssafy.booknest.domain.book.service;
 
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
-import com.ssafy.booknest.domain.book.entity.BestSeller;
-import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Ebook;
+import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.repository.ebookRepository;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
@@ -25,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +40,8 @@ public class BookService {
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final ReviewRepository reviewRepository;
+    private final RatingRepository ratingRepository;
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
@@ -97,6 +102,69 @@ public class BookService {
                 .build();
     }
 
+    // 한줄평 등록
+    @Transactional
+    public void saveReview(Integer userId, Integer bookId, ReviewRequestDto dto) {
+        // 1. 입력값 검증 (Fail-Fast)
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
+            throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
+        }
+
+        // 2. 중복 체크
+        if (reviewRepository.existsByUserIdAndBookId(userId, bookId)) {
+            throw new CustomException(ErrorCode.REVIEW_ALREADY_EXISTS);
+        }
+
+        // 3. 필수 객체 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        // 4. 평점이 있으면 포함해서 빌더에 설정
+        Optional<Rating> ratingOptional = ratingRepository.getRatingByUserIdAndBookId(userId, bookId);
+
+        Review review = Review.builder()
+                .user(user)
+                .book(book)
+                .content(dto.getContent())
+                .rating(ratingOptional.map(Rating::getRating).orElse(null)) // 평점이 없으면 null
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        reviewRepository.save(review);
+    }
+
+
+
+    // 한줄평 수정
+    @Transactional
+    public void updateReview(Integer userId, Integer bookId, ReviewRequestDto dto) {
+        if (dto.getContent() == null || dto.getContent().isBlank()) {
+            throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
+        }
+
+        Review review = reviewRepository.findByUserIdAndBookId(userId, bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        review.updateContent(dto.getContent());
+    }
+
+    // 한줄평 삭제
+    @Transactional
+    public void deleteReview(Integer userId, Integer bookId) {
+        Review review = reviewRepository.findByUserIdAndBookId(userId, bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        reviewRepository.delete(review);
+    }
+
+
 
 
 
@@ -126,6 +194,9 @@ public class BookService {
                 .map(Ebook::getRedirectUrl)
                 .collect(Collectors.toList());
     }
+
+
+
 
 //    // 제목, 저자 기반 검색 (나중에 다시)
 //    public BookSearchResponse searchBooks(String keyword, BookSearchType type, int userPage, int size) {
