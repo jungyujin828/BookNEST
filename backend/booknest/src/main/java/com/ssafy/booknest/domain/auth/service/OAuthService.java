@@ -7,6 +7,9 @@ import com.ssafy.booknest.domain.auth.dto.response.OAuthLoginResponse;
 import com.ssafy.booknest.domain.auth.dto.response.TokenRefreshResponse;
 import com.ssafy.booknest.domain.auth.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.auth.service.strategy.OAuthStrategy;
+import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.nest.repository.NestRepository;
+import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Provider;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
@@ -30,6 +33,7 @@ public class OAuthService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthRedisService authRedisService;
+    private final NestRepository nestRepository;
 
     public LoginResult handleOAuthLogin(Provider provider, String code) {
 
@@ -80,8 +84,13 @@ public class OAuthService {
                 .provider(provider)
                 .providerId(userInfo.getId())
                 .build();
+        Nest newNest = Nest.builder()
+                .user(newUser)
+                .build();
+        User user = userRepository.save(newUser);
+        nestRepository.save(newNest);
 
-        return userRepository.save(newUser);
+        return user;
     }
 
     public TokenRefreshResponse refreshToken(String refreshToken) {

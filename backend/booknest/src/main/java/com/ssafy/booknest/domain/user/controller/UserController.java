@@ -77,8 +77,4 @@ public class UserController {
         boolean isDuplicate = userService.isNicknameDuplicate(nickname);
         return ApiResponse.success(isDuplicate);
     }
-
-
-
-
 }
