@@ -1,10 +1,7 @@
 package com.ssafy.booknest.domain.book.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -24,6 +21,7 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "category")
     private List<BookCategory> bookCategories = new ArrayList<>();
 

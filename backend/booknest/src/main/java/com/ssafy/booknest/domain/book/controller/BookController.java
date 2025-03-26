@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.book.controller;
 
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
@@ -74,6 +75,42 @@ public class BookController {
 
         return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
     }
+
+    // 한줄평 등록
+    @PostMapping("/{bookId}/review")
+    public ResponseEntity<ApiResponse<Void>> addReview(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequestDto reviewRequest
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.saveReview(userId, bookId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 수정
+    @PutMapping("/{bookId}/review")
+    public ResponseEntity<ApiResponse<Void>> updateReview(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequestDto reviewRequest
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.updateReview(userId, bookId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 삭제
+    @DeleteMapping("/{bookId}/review")
+    public ResponseEntity<ApiResponse<Void>> deleteReview(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.deleteReview(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
 
 //    // 책 검색 (제목, 저자)
 //    @GetMapping("/search")

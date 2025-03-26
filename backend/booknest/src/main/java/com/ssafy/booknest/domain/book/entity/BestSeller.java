@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "best_seller")
 @Getter
-@SuperBuilder
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BestSeller {

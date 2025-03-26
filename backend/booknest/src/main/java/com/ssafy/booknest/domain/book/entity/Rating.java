@@ -8,22 +8,24 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.LastModifiedDate;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rating")
+@Table(name = "rating", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rating extends BaseEntity {
 
-    @Column(name ="rating", nullable = false)
+    @Column(name ="rating")
     private Double rating;
 
+    @LastModifiedDate
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne
     @JoinColumn(name="user_id")
