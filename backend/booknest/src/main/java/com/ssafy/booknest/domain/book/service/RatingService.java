@@ -79,7 +79,7 @@ public class RatingService {
         rating.updateRating(dto.getScore());
 
         // 만약에 이미 Review 테이블에 평점 있으면 이것도 수정
-        if(review.isPresent()) {
+        if (review.isPresent() && review.get().getRating() != null) {
             review.get().updateRating(dto.getScore());
         }
     }
@@ -96,7 +96,7 @@ public class RatingService {
 
         Optional<Review> review = reviewRepository.findByUserIdAndBookId(userId, bookId);
 
-        if (review.isPresent()) {
+        if (review.isPresent() && review.get().getRating() != null) {
             review.get().updateRating(null);  // 평점만 null 처리
         }
 
