@@ -69,14 +69,6 @@ public class BookController {
         return ApiResponse.success(bookService.getPurchaseLinks(bookId));
     }
 
-    // 전자도서관 연계
-    @GetMapping("/{bookId}/ebook")
-    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,
-                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
-    }
 
     // 한줄평 등록
     @PostMapping("/{bookId}/review")
@@ -112,6 +104,27 @@ public class BookController {
         bookService.deleteReview(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
     }
+
+    // 도서 찜하기
+    @PutMapping("/{bookId}/like")
+    public ResponseEntity<ApiResponse<Void>> likeBook(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        bookService.likeBook(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+
+    // 전자도서관 연계
+//    @GetMapping("/{bookId}/ebook")
+//    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,
+//                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
+//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+//
+//        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
+//    }
 
 
 //    // 책 검색 (제목, 저자)

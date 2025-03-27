@@ -164,36 +164,42 @@ public class BookService {
         reviewRepository.delete(review);
     }
 
-
-
-
-
-    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
-    public List<String> getOnlineLibrary(Integer userId, Integer bookId) {
-
-        Book book = bookRepository.findBookDetailById(bookId)
-                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        Address address = user.getAddress();
-        if (address == null) {
-            throw new CustomException(ErrorCode.ADDRESS_NOT_FOUND);
-        }
-
-        // 주소 정보에서 city, district 추출
-        String city = address.getCity();
-        String district = address.getDistrict();
-
-        // 해당 지역의 ebook 리스트 가져오기
-        List<Ebook> ebooks = ebookRepository.findByCityAndDistrict(city, district);
-
-        // redirectUrl만 뽑아서 반환
-        return ebooks.stream()
-                .map(Ebook::getRedirectUrl)
-                .collect(Collectors.toList());
+    // 도서 찜하기
+    public void likeBook(Integer userId, Integer bookId) {
+        Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId);
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
     }
+
+
+
+
+
+//    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
+//    public List<String> getOnlineLibrary(Integer userId, Integer bookId) {
+//
+//        Book book = bookRepository.findBookDetailById(bookId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+//
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+//
+//        Address address = user.getAddress();
+//        if (address == null) {
+//            throw new CustomException(ErrorCode.ADDRESS_NOT_FOUND);
+//        }
+//
+//        // 주소 정보에서 city, district 추출
+//        String city = address.getCity();
+//        String district = address.getDistrict();
+//
+//        // 해당 지역의 ebook 리스트 가져오기
+//        List<Ebook> ebooks = ebookRepository.findByCityAndDistrict(city, district);
+//
+//        // redirectUrl만 뽑아서 반환
+//        return ebooks.stream()
+//                .map(Ebook::getRedirectUrl)
+//                .collect(Collectors.toList());
+//    }
 
 
 
