@@ -65,12 +65,15 @@ public class ReviewService {
 
     // 한줄평 수정
     @Transactional
-    public void updateReview(Integer userId, Integer bookId, ReviewRequest dto) {
+    public void updateReview(Integer userId, Integer reviewId, ReviewRequest dto) {
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
         }
 
-        Review review = reviewRepository.findByUserIdAndBookId(userId, bookId)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         review.updateContent(dto.getContent());
@@ -79,8 +82,11 @@ public class ReviewService {
 
     // 한줄평 삭제
     @Transactional
-    public void deleteReview(Integer userId, Integer bookId) {
-        Review review = reviewRepository.findByUserIdAndBookId(userId, bookId)
+    public void deleteReview(Integer userId, Integer reviewId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
         if (!review.getUser().getId().equals(userId)) {

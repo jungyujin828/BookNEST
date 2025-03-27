@@ -1,0 +1,62 @@
+package com.ssafy.booknest.domain.book.controller;
+
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
+import com.ssafy.booknest.domain.book.service.BookService;
+import com.ssafy.booknest.domain.book.service.RatingService;
+import com.ssafy.booknest.domain.book.service.ReviewService;
+import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.response.ApiResponse;
+import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.security.UserPrincipal;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/book")
+public class ReviewController {
+
+    private final BookService bookService;
+    private final UserService userService;
+    private final AuthenticationUtil authenticationUtil;
+    private final ReviewService reviewService;
+    private final RatingService ratingService;
+
+    // 한줄평 등록
+    @PostMapping("/{bookId}/review")
+    public ResponseEntity<ApiResponse<Void>> addReview(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequest reviewRequest
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.saveReview(userId, bookId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 수정
+    @PutMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponse<Void>> updateReview(
+            @PathVariable("reviewId") Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody ReviewRequest reviewRequest
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.updateReview(userId, reviewId, reviewRequest);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 한줄평 삭제
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponse<Void>> deleteReview(
+            @PathVariable("reviewId") Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.deleteReview(userId, reviewId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+}

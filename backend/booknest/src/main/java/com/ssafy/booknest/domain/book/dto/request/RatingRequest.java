@@ -11,4 +11,5 @@ public class RatingRequest {
 
     @NotNull
     private Double score;
+
 }
