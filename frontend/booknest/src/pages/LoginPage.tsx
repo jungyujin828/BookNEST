@@ -14,55 +14,89 @@ const LoginContainer = styled.div`
   background-color: #69b578;
   padding: 20px;
   text-align: center;
+  
+  @media (min-width: 768px) {
+    padding: 40px;
+  }
 `;
 
 const LogoSection = styled.div`
-  margin-top: 80px;
+  margin-top: 60px;
   color: white;
   text-align: center;
+  
+  @media (min-width: 768px) {
+    margin-top: 80px;
+  }
+  
+  @media (min-width: 1024px) {
+    margin-top: 100px;
+  }
 `;
 
 const Logo = styled.div`
-  font-size: 48px;
+  font-size: 36px;
   font-weight: bold;
   line-height: 1.2;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
   .book-icon {
     display: inline-block;
     margin-left: 10px;
   }
+  
+  @media (min-width: 768px) {
+    font-size: 48px;
+    margin-bottom: 20px;
+  }
 `;
 
 const Subtitle = styled.p`
-  font-size: 18px;
-  margin-top: 20px;
+  font-size: 16px;
+  margin-top: 16px;
   color: white;
+  
+  @media (min-width: 768px) {
+    font-size: 18px;
+    margin-top: 20px;
+  }
 `;
 
 const ButtonSection = styled.div`
   width: 100%;
-  max-width: 400px;
-  margin-bottom: 40px;
+  max-width: 320px;
+  margin-bottom: 30px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  
+  @media (min-width: 768px) {
+    max-width: 400px;
+    margin-bottom: 40px;
+    gap: 12px;
+  }
 `;
 
 const EnterButton = styled.button`
   background-color: white;
   color: #69b578;
   border: none;
-  padding: 15px 30px;
+  padding: 12px 24px;
   border-radius: 25px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 
   &:hover {
     background-color: #f0f0f0;
+  }
+  
+  @media (min-width: 768px) {
+    padding: 15px 30px;
+    font-size: 18px;
+    margin-bottom: 20px;
   }
 `;
 
@@ -199,7 +233,20 @@ const LoginPage = () => {
         </Subtitle>
       </LogoSection>
 
-      <button onClick={goToInputInfoPage}>정보 입력 페이지로 이동</button>
+      {/* 개발용 버튼은 스타일링 추가 또는 제거 고려 */}
+      <button 
+        onClick={goToInputInfoPage}
+        style={{ 
+          padding: '8px 16px', 
+          borderRadius: '8px',
+          border: 'none',
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          color: 'white',
+          marginBottom: '20px'
+        }}
+      >
+        정보 입력 페이지로 이동
+      </button>
 
       <ButtonSection>
         {!showSocialButtons ? (
