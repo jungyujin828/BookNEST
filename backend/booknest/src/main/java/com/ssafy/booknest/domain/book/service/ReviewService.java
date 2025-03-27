@@ -1,6 +1,10 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
+import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.entity.Review;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -94,5 +99,20 @@ public class ReviewService {
         }
 
         reviewRepository.delete(review);
+    }
+
+
+    // 사용자 한줄평 목록
+    @Transactional(readOnly = true)
+    public List<UserReviewResponse> getReviews(Integer userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        List<Review> reviewList = reviewRepository.findByUserId(userId);
+
+        return reviewList.stream()
+                .map(review -> UserReviewResponse.of(review))
+                .toList();
     }
 }

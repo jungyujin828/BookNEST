@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.entity.Review;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -101,5 +103,18 @@ public class RatingService {
         }
 
         ratingRepository.delete(rating);
+    }
+
+    // 사용자 평점 목록 조회
+    @Transactional(readOnly = true)
+    public List<UserRatingResponse> getRatings(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Rating> ratingList = ratingRepository.findByUser(user);
+
+        return ratingList.stream()
+                .map(rating -> UserRatingResponse.of(rating))
+                .toList();
     }
 }

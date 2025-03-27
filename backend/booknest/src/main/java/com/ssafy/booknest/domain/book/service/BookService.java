@@ -3,7 +3,9 @@ package com.ssafy.booknest.domain.book.service;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.book.entity.*;
+import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
@@ -14,6 +16,9 @@ import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,8 +136,6 @@ public class BookService {
 //                .map(Ebook::getRedirectUrl)
 //                .collect(Collectors.toList());
 //    }
-
-
 
 
 //    // 제목, 저자 기반 검색 (나중에 다시)

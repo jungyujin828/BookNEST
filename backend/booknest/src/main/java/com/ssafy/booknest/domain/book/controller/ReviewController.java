@@ -1,6 +1,8 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
+import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
@@ -13,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,4 +63,17 @@ public class ReviewController {
         reviewService.deleteReview(userId, reviewId);
         return ApiResponse.success(HttpStatus.OK);
     }
+
+    // 한줄평 목록 조회
+    @GetMapping("/review")
+    public ResponseEntity<ApiResponse<List<UserReviewResponse>>> getReviews(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<UserReviewResponse> responseList = reviewService.getReviews(userId);
+
+        return ApiResponse.success(responseList);
+    }
+
 }

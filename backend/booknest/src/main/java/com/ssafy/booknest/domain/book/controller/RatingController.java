@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,5 +60,17 @@ public class RatingController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         ratingService.deleteRating(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 사용자 평점 목록 조회
+    @GetMapping("/rating")
+    public ResponseEntity<ApiResponse<List<UserRatingResponse>>> getRatings(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<UserRatingResponse> responseList = ratingService.getRatings(userId);
+
+        return ApiResponse.success(responseList);
     }
 }
