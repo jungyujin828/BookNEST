@@ -1,0 +1,60 @@
+package com.ssafy.booknest.domain.follow.service;
+
+import com.ssafy.booknest.domain.follow.dto.request.FollowRequest;
+import com.ssafy.booknest.domain.follow.entity.Follow;
+import com.ssafy.booknest.domain.follow.repository.FollowRepository;
+import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class FollowService {
+
+    private final FollowRepository followRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public void followUser(Integer userId, FollowRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        User follower = userRepository.findById(request.getFollowerId()).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if(user.getId() != follower.getId()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        User following = userRepository.findById(request.getFollowingId()).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Follow follow = Follow.builder()
+                .follower(follower)
+                .following(following)
+                .build();
+        followRepository.save(follow);
+    }
+
+    @Transactional
+    public void unfollowUser(Integer userId, FollowRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        User follower = userRepository.findById(request.getFollowerId()).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if(user.getId() != follower.getId()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        User following = userRepository.findById(request.getFollowingId()).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        followRepository.deleteByFollowerAndFollowing(follower, following);
+    }
+}
