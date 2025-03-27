@@ -1,6 +1,5 @@
 package com.ssafy.booknest.domain.follow.controller;
 
-import com.ssafy.booknest.domain.follow.dto.request.FollowRequest;
 import com.ssafy.booknest.domain.follow.service.FollowService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -9,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,19 +21,19 @@ public class FollowController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<Void>> followUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody FollowRequest request){
+            @RequestParam("targetUserId") Integer targetUserId){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        followService.followUser(userId, request);
+        followService.followUser(userId, targetUserId);
 
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    @PostMapping("/unfollow")
+    @DeleteMapping("")
     public ResponseEntity<ApiResponse<Void>> unfollowUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody FollowRequest request){
+            @RequestParam("targetUserId") Integer targetUserId){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        followService.unfollowUser(userId, request);
+        followService.unfollowUser(userId, targetUserId);
 
         return ApiResponse.success(HttpStatus.OK);
     }
