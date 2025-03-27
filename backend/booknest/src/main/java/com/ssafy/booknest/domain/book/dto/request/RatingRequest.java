@@ -1,20 +1,14 @@
 package com.ssafy.booknest.domain.book.dto.request;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewRequestDto {
+public class RatingRequest {
 
     @NotNull
-    private String content;
-
     private Double score;
-
 }

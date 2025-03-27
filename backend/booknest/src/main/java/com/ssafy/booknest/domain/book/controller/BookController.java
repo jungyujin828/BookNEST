@@ -1,34 +1,24 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
+import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
-import com.ssafy.booknest.domain.book.entity.Review;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.service.BookService;
+import com.ssafy.booknest.domain.book.service.RatingService;
+import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
-import com.ssafy.booknest.global.error.ErrorCode;
-import com.ssafy.booknest.global.error.exception.CustomException;
 import com.ssafy.booknest.global.security.UserPrincipal;
-import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static com.ssafy.booknest.global.error.ErrorCode.BOOK_NOT_FOUND;
-import static com.ssafy.booknest.global.error.ErrorCode.UNAUTHORIZED_ACCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +28,8 @@ public class BookController {
     private final BookService bookService;
     private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
+    private final ReviewService reviewService;
+    private final RatingService ratingService;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -75,10 +67,10 @@ public class BookController {
     public ResponseEntity<ApiResponse<Void>> addReview(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequestDto reviewRequest
+            @RequestBody ReviewRequest reviewRequest
     ) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.saveReview(userId, bookId, reviewRequest);
+        reviewService.saveReview(userId, bookId, reviewRequest);
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -87,10 +79,10 @@ public class BookController {
     public ResponseEntity<ApiResponse<Void>> updateReview(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequestDto reviewRequest
+            @RequestBody ReviewRequest reviewRequest
     ){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.updateReview(userId, bookId, reviewRequest);
+        reviewService.updateReview(userId, bookId, reviewRequest);
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -101,20 +93,55 @@ public class BookController {
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.deleteReview(userId, bookId);
+        reviewService.deleteReview(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    // 도서 찜하기
-    @PutMapping("/{bookId}/like")
-    public ResponseEntity<ApiResponse<Void>> likeBook(
+    // 도서 평점 등록
+    @PostMapping("/{bookId}/rating")
+    public ResponseEntity<ApiResponse<Void>> createBookRating(
             @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody RatingRequest dto
     ){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.likeBook(userId, bookId);
+        ratingService.createBookRating(userId, bookId, dto);
+        return ApiResponse.success(HttpStatus.CREATED);
+    }
+
+    // 도서 평점 수정
+    @PutMapping("/{bookId}/rating")
+    public ResponseEntity<ApiResponse<Void>> updateRating(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody RatingRequest dto
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        ratingService.updateRating(userId, bookId, dto);
         return ApiResponse.success(HttpStatus.OK);
     }
+
+    // 도서 평점 삭제
+    @DeleteMapping("/{bookId}/rating")
+    public ResponseEntity<ApiResponse<Void>> deleteRating(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        ratingService.deleteRating(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+
+    //    // 도서 찜하기
+//    @PutMapping("/{bookId}/like")
+//    public ResponseEntity<ApiResponse<Void>> likeBook(
+//            @PathVariable("bookId") Integer bookId,
+//            @AuthenticationPrincipal UserPrincipal userPrincipal
+//    ){
+//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+//        bookService.likeBook(userId, bookId);
+//        return ApiResponse.success(HttpStatus.OK);
+//    }
 
 
     // 전자도서관 연계

@@ -13,14 +13,14 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rating")
+@Table(name = "rating", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rating extends BaseEntity {
 
-    @Column(name ="rating")
+    @Column(name ="rating", nullable = false)
     private Double rating;
 
     @LastModifiedDate
@@ -35,4 +35,7 @@ public class Rating extends BaseEntity {
     @JoinColumn(name="book_id")
     private Book book;
 
+    public void updateRating(Double rating) {
+        this.rating = rating;
+    }
 }

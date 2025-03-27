@@ -13,4 +13,7 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
 
     boolean existsByUserIdAndBookId(Integer userId, Integer bookId);
+
+
+    boolean existsByUserIdAndBookIdAndRatingIsNotNull(Integer userId, Integer bookId);
 }

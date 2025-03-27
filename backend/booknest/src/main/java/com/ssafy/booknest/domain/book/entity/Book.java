@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "book")
@@ -44,19 +45,30 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookAuthor> bookAuthors = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookTag> bookTags = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BestSeller> bestSellers = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
+
+    public String getAuthors() {
+        return bookAuthors.stream()
+                .map(bookAuthor -> bookAuthor.getAuthor().getName()) // 저자 이름 가져오기
+                .collect(Collectors.joining(", ")); // 쉼표(,)로 구분하여 문자열로 변환
+    }
 
 }
