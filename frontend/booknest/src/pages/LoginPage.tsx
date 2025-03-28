@@ -195,7 +195,9 @@ const LoginPage = () => {
 
       <ButtonSection>
         {!showSocialButtons ? (
-          <EnterButton onClick={() => setShowSocialButtons(true)}>입장하기</EnterButton>
+          <EnterButton onClick={() => setShowSocialButtons(true)}>
+            입장하기
+          </EnterButton>
         ) : (
           <>
             <KakaoButton onClick={handleKakaoLogin}>
