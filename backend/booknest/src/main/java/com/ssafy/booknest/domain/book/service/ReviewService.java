@@ -81,8 +81,8 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
-        review.updateContent(dto.getContent());
 
+        review.updateContent(dto.getContent());
     }
 
     // 한줄평 삭제
@@ -114,5 +114,16 @@ public class ReviewService {
         return reviewList.stream()
                 .map(review -> UserReviewResponse.of(review))
                 .toList();
+    }
+
+    // 한줄평 좋아요
+    @Transactional
+    public void saveLike(Integer userId, Integer reviewId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        reviewRepository.saveLike(userId, reviewId);
     }
 }

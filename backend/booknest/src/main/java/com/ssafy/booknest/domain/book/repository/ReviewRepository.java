@@ -19,4 +19,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     boolean existsByUserIdAndBookIdAndRatingIsNotNull(Integer userId, Integer bookId);
 
     List<Review> findByUserId(Integer userId);
+
+    void saveLike(Integer userId, Integer reviewId);
 }
