@@ -6,7 +6,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserUpdateDto {
+public class UserUpdateRequest {
     private String nickname;
     private String gender; // "M", "F", "O"
     private String birthdate;
