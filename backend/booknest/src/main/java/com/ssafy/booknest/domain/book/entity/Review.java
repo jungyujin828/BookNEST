@@ -24,7 +24,7 @@ public class Review extends BaseEntity {
     private String content;
 
     @Builder.Default
-    @Column(name =" likes" , nullable = false)
+    @Column(name ="likes" , nullable = false)
     private Integer likes = 0;
 
     @Column(name="updated_at")
@@ -50,5 +50,20 @@ public class Review extends BaseEntity {
     public void updateLikes(Integer likes) {
         this.likes = likes;
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+
+    public int getLikesCount() {
+        return this.likes != null ? this.likes : 0;
     }
 }

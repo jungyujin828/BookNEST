@@ -75,6 +75,10 @@ public class RatingService {
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
 
+        if (!rating.getUser().getId().equals(userId)) {
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
         Optional<Review> review = reviewRepository.findByUserIdAndBookId(userId, bookId);
 
         // 평점 수정

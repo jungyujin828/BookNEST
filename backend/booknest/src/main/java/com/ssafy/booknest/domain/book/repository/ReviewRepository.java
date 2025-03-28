@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.repository;
 
 import com.ssafy.booknest.domain.book.entity.Review;
+import com.ssafy.booknest.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,13 +13,10 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     Optional<Review> findByUserIdAndBookId(Integer userId, Integer bookId);
 
-
     boolean existsByUserIdAndBookId(Integer userId, Integer bookId);
-
 
     boolean existsByUserIdAndBookIdAndRatingIsNotNull(Integer userId, Integer bookId);
 
     List<Review> findByUserId(Integer userId);
 
-    void saveLike(Integer userId, Integer reviewId);
 }

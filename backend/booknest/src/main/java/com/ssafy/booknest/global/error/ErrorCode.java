@@ -39,12 +39,15 @@ public enum ErrorCode {
     EMPTY_REVIEW_CONTENT(400, "B005", "한줄평이 입력되지 않았습니다."),
     REVIEW_ALREADY_EXISTS(400, "B006", "이미 작성한 한줄평이 존재합니다."),
     REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다"),
-
+    REVIEW_ALREADY_LIKED(400, "B007", "이미 한줄평에 좋아요가 있습니다."),
+    REVIEW_LIKE_NOT_FOUND(404, "B008", "한줄평 좋아요가 없습니다"),
 
     // RATING
     EMPTY_RATING_CONTENT(400, "R001", "점수가 입력되지 않았습니다"),
     RATING_ALREADY_EXISTS(400, "R002", "등록인데 이미 데이터베이스에 점수가 있습니다."),
     RATING_NOT_FOUND(404, "R003", "점수가 등록되어 있지 않습니다.");
+
+
 
 
     private final int status;

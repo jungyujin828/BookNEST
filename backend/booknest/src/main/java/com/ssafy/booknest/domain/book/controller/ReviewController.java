@@ -80,10 +80,22 @@ public class ReviewController {
     // 한줄평 좋아요
     @PostMapping("/{reviewId}/like")
     public ResponseEntity<ApiResponse<Void>> likeReview(
-            @PathVariable("reviewId") Integer reviewId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        reviewService.saveLike(userId, reviewId);
+            @PathVariable Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal)
+    {
+        Integer likerId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.likeReview(likerId, reviewId);
         return ApiResponse.success(HttpStatus.CREATED);
+    }
+
+    // 한줄평 좋아요 취소
+    @DeleteMapping("/{reviewId}/like")
+    public ResponseEntity<ApiResponse<Void>> unlikeReview(
+            @PathVariable Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.unlikeReview(userId, reviewId);
+        return ApiResponse.success(HttpStatus.NO_CONTENT); // 삭제는 보통 204
     }
 }
