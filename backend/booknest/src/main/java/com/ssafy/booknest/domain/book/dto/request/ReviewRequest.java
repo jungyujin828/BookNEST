@@ -7,11 +7,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReviewRequestDto {
+public class ReviewRequest {
 
     @NotNull
     private String content;
-
-    private Double score;
 
 }

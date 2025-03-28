@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ebookRepository extends JpaRepository<Ebook, Long> {
+public interface ebookRepository extends JpaRepository<Ebook, Integer> {
 
     List<Ebook> findByCityAndDistrict(String city, String district);
 }

@@ -27,7 +27,6 @@ public class Review extends BaseEntity {
     @Column(name =" likes" , nullable = false)
     private Integer likes = 0;
 
-    @LastModifiedDate
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
@@ -45,9 +44,11 @@ public class Review extends BaseEntity {
 
     public void updateContent(String content) {
         this.content = content;
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void updateLikes(Integer likes) {
         this.likes = likes;
+        this.updatedAt = LocalDateTime.now();
     }
 }

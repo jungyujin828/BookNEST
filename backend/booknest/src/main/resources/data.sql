@@ -224,8 +224,6 @@ INSERT INTO book_tag (book_id, tag_id) VALUES
                                            (1, 4);  -- 동화 같은
 
 -- 📌 리뷰 추가 (회원 1~5번이 책 1~5번을 리뷰)
--- 📌 리뷰 추가 (각 유저가 한 책에 대해 하나의 리뷰만 남김)
--- 📌 중복 제거된 리뷰 INSERT문
 INSERT INTO review (user_id, book_id, rating, content, likes, created_at, updated_at)
 VALUES
     (1, 1, 4.8, '정말 재미있는 판타지 소설이에요!', 15, '2024-03-01 12:00:00', '2024-03-01 12:00:00'),
