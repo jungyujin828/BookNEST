@@ -38,9 +38,7 @@ public enum ErrorCode {
     EMPTY_REVIEW_CONTENT(400, "B005", "한줄평이 입력되지 않았습니다."),
     REVIEW_ALREADY_EXISTS(400, "B006", "이미 작성한 한줄평이 존재합니다."),
     REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다"),
-    EMPTY_RATING(404, "B008", "평점이 존재하지 않습니다.");
-
-
+    EMPTY_RATING(404, "B008", "평점이 존재하지 않습니다."),
 
     // RATING
     EMPTY_RATING_CONTENT(400, "R001", "점수가 입력되지 않았습니다"),
