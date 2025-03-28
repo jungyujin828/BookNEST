@@ -2,7 +2,7 @@ package com.ssafy.booknest.domain.user.dto.request;
 
 import lombok.*;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,9 +13,9 @@ public class UserUpdateDto {
     private AddressDto address;
 
     @Getter
+    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    @Builder
     public static class AddressDto {
         private String zipcode;
         private String roadAddress;

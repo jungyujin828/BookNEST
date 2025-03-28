@@ -30,7 +30,6 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
     ADDRESS_NOT_FOUND(404, "U002", "주소를 찾을 수 없습니다."),
 
-
     // BOOK
     BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다."),
     CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다."),
@@ -39,6 +38,8 @@ public enum ErrorCode {
     EMPTY_REVIEW_CONTENT(400, "B005", "한줄평이 입력되지 않았습니다."),
     REVIEW_ALREADY_EXISTS(400, "B006", "이미 작성한 한줄평이 존재합니다."),
     REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다"),
+    EMPTY_RATING(404, "B008", "평점이 존재하지 않습니다.");
+
 
 
     // RATING

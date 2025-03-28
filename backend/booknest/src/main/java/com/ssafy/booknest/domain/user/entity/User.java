@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
+import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.enums.Provider;
@@ -13,6 +14,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -49,11 +51,22 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "profile_url")
+    private String profileUrl;
+
     @OneToOne(mappedBy = "user")
     private Nest nest;
 
     @OneToOne(mappedBy = "user")
     private Address address;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followingUsers = new ArrayList<>(); // 내가 팔로우하는 사람 목록
+
+    @Builder.Default
+    @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>(); // 나를 팔로우하는 사람 목록
 
 
     public void updateNickname(String nickname) {
