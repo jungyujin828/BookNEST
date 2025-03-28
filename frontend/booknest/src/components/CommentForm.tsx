@@ -20,7 +20,11 @@ interface ReviewRequest {
 interface ReviewResponse {
   success: boolean;
   data: null;
-  error: null | string;
+  error: null | {
+    code: string;
+    message: string;
+    retryAfter?: number;
+  };
 }
 
 const FormContainer = styled.div`
@@ -127,78 +131,78 @@ const CommentForm = ({
   isEdit = false,
   onCancel
 }: CommentFormProps) => {
-  const [comment, setComment] = useState(initialContent);
+  const [content, setContent] = useState(initialContent);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setComment(initialContent);
+    setContent(initialContent);
   }, [initialContent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) {
-      setError('댓글 내용을 입력해주세요.');
+    if (!content.trim()) {
+      setError('한줄평이 입력되지 않았습니다.');
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-
     try {
-      const requestData: ReviewRequest = {
-        content: comment.trim()
+      setIsSubmitting(true);
+      setError(null);
+
+      const requestData = {
+        content: content.trim()
       };
 
       console.log('Sending request with data:', requestData);
 
-      let response;
       if (isEdit && reviewId) {
         // 수정 요청
-        response = await api.put<ReviewResponse>(
+        const response = await api.put<ReviewResponse>(
           `/api/book/review/${reviewId}`,
           requestData,
           {
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
         );
+
+        if (response.data.success) {
+          setContent('');
+          onCommentSubmit();
+          onCancel?.(); // 수정 모드 종료
+        } else {
+          setError(response.data.error?.message || '한줄평 수정에 실패했습니다.');
+        }
       } else {
-        // 새로운 댓글 작성 요청
-        response = await api.post<ReviewResponse>(
+        // 새 리뷰 작성 요청
+        const response = await api.post<ReviewResponse>(
           `/api/book/${bookId}/review`,
           requestData,
           {
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
         );
-      }
 
-      console.log('Server response:', response.data);
-
-      if (response.data.success) {
-        if (!isEdit) {
-          setComment('');
-        }
-        if (onCommentSubmit) {
+        if (response.data.success) {
+          setContent('');
           onCommentSubmit();
+        } else {
+          setError(response.data.error?.message || '한줄평 등록에 실패했습니다.');
         }
-      } else {
-        setError(response.data.error?.message || (isEdit ? '댓글 수정에 실패했습니다.' : '댓글 등록에 실패했습니다.'));
       }
     } catch (err) {
       console.error('Full error object:', err);
       if (axios.isAxiosError(err)) {
-        console.error('Response data:', err.response?.data);
-        if (err.response?.status === 400) {
-          setError(err.response.data.error?.message || '잘못된 요청입니다. 내용을 확인해주세요.');
-        } else if (err.response?.status === 401) {
-          setError('로그인이 필요합니다.');
-        } else {
-          setError(err.response?.data?.error?.message || (isEdit ? '댓글 수정에 실패했습니다.' : '댓글 등록에 실패했습니다.'));
-        }
+        console.log('Response data:', err.response?.data);
+        const errorMessage = err.response?.data?.error?.message || '서버 오류가 발생했습니다.';
+        setError(errorMessage);
       } else {
-        setError(isEdit ? '댓글 수정 중 오류가 발생했습니다.' : '댓글 등록 중 오류가 발생했습니다.');
+        setError('서버 오류가 발생했습니다.');
       }
     } finally {
       setIsSubmitting(false);
@@ -228,7 +232,11 @@ const CommentForm = ({
       console.error('Delete API Error:', err);
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
-          setError('로그인이 필요합니다.');
+          setError('로그인이 필요한 서비스입니다.');
+        } else if (err.response?.status === 403) {
+          setError('이 요청을 수행할 권한이 없습니다.');
+        } else if (err.response?.status === 404) {
+          setError('도서를 찾을 수 없습니다.');
         } else {
           setError(err.response?.data?.error?.message || '리뷰 삭제에 실패했습니다.');
         }
@@ -241,7 +249,7 @@ const CommentForm = ({
   };
 
   const handleCancel = () => {
-    setComment(initialContent);
+    setContent(initialContent);
     setError(null);
   };
 
@@ -250,8 +258,8 @@ const CommentForm = ({
       <Title>{isEdit ? '코멘트 수정' : '코멘트 작성'}</Title>
       <Form onSubmit={handleSubmit}>
         <TextArea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
           placeholder="이 책에 대한 의견을 남겨주세요..."
           disabled={isSubmitting || isDeleting}
         />
