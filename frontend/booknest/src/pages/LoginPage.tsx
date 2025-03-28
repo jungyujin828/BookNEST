@@ -4,171 +4,133 @@ import { ASSETS, OAUTH } from "../constants/paths";
 import config from "../config";
 // import InputInfoPage from "./InputInfoPage";
 import { useNavigate } from "react-router-dom";
+import { theme } from "../styles/theme";
 
 const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
   min-height: 100vh;
-  background-color: #69b578;
-  padding: 20px;
+  background-color: #6dbe64;
+  padding: 1.25rem;
   text-align: center;
-  
-  @media (min-width: 768px) {
-    padding: 40px;
+  position: relative;
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 5rem;
   }
 `;
 
 const LogoSection = styled.div`
-  margin-top: 60px;
+  position: absolute;
+  top: 25vh;
+  left: 50%;
+  transform: translateX(-50%);
   color: white;
   text-align: center;
-  
-  @media (min-width: 768px) {
-    margin-top: 80px;
-  }
-  
-  @media (min-width: 1024px) {
-    margin-top: 100px;
-  }
-`;
 
-const Logo = styled.div`
-  font-size: 36px;
-  font-weight: bold;
-  line-height: 1.2;
-  margin-bottom: 16px;
-
-  .book-icon {
-    display: inline-block;
-    margin-left: 10px;
-  }
-  
-  @media (min-width: 768px) {
-    font-size: 48px;
-    margin-bottom: 20px;
-  }
-`;
-
-const Subtitle = styled.p`
-  font-size: 16px;
-  margin-top: 16px;
-  color: white;
-  
-  @media (min-width: 768px) {
-    font-size: 18px;
-    margin-top: 20px;
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    position: static;
+    transform: none;
+    text-align: left;
+    margin-left: 3rem;
   }
 `;
 
 const ButtonSection = styled.div`
+  position: absolute;
+  bottom: 15vh;
   width: 100%;
-  max-width: 320px;
-  margin-bottom: 30px;
+  max-width: 20rem;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  
-  @media (min-width: 768px) {
-    max-width: 400px;
-    margin-bottom: 40px;
-    gap: 12px;
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    position: static;
+    margin-right: 3rem;
+    align-self: center;
   }
+`;
+
+const Logo = styled.div`
+  font-size: 5.5rem;
+  font-weight: 600;
+  line-height: 0.8;
+  white-space: pre-line;
+  display: flex;
+  flex-direction: column;
+
+  & > span:first-of-type {
+    text-align: left;
+    margin-left: -2.5rem;
+  }
+
+  & > span:last-of-type {
+    text-align: right;
+    margin-right: -2.5rem;
+  }
+
+  // 책아이콘 추가해야함
+  .book-icon {
+    display: none;
+  }
+`;
+
+const Subtitle = styled.p`
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0d7323;
+  margin-right: -2.5rem;
 `;
 
 const EnterButton = styled.button`
   background-color: white;
   color: #69b578;
   border: none;
-  padding: 12px 24px;
-  border-radius: 25px;
-  font-size: 16px;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  font-size: 1.25rem;
   font-weight: bold;
   cursor: pointer;
   width: 100%;
-  margin-bottom: 16px;
 
   &:hover {
     background-color: #f0f0f0;
   }
-  
-  @media (min-width: 768px) {
-    padding: 15px 30px;
-    font-size: 18px;
-    margin-bottom: 20px;
-  }
 `;
 
 const KakaoButton = styled.button`
-  background-color: #fee500;
-  color: #000000;
-  border: none;
-  padding: 15px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &:hover {
-    background-color: #fdd835;
-  }
+  padding: 0.9375rem 1.25rem; // 15px 20px
+  border-radius: 0.75rem; // 12px
+  gap: 0.5rem; // 8px
 
   img {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem; // 24px
+    height: 1.5rem; // 24px
   }
 `;
 
 const NaverButton = styled.button`
-  background-color: #03c75a;
-  color: white;
-  border: none;
-  padding: 15px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &:hover {
-    background-color: #02b150;
-  }
+  padding: 0.9375rem 1.25rem; // 15px 20px
+  border-radius: 0.75rem; // 12px
+  gap: 0.5rem; // 8px
 
   img {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem; // 24px
+    height: 1.5rem; // 24px
   }
 `;
 
 const GoogleButton = styled.button`
-  background-color: white;
-  color: #000000;
-  border: 1px solid #ddd;
-  padding: 15px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &:hover {
-    background-color: #f5f5f5;
-  }
+  padding: 0.9375rem 1.25rem; // 15px 20px
+  border-radius: 0.75rem; // 12px
+  gap: 0.5rem; // 8px
 
   img {
-    width: 24px;
-    height: 24px;
+    width: 1.5rem; // 24px
+    height: 1.5rem; // 24px
   }
 `;
 
@@ -222,31 +184,14 @@ const LoginPage = () => {
     <LoginContainer>
       <LogoSection>
         <Logo>
-          Book
-          <br />
-          NEST
-          <span className="book-icon">📖</span>
+          <span>Book</span>
+          <span>NEST</span>
         </Logo>
         <Subtitle>
           나의 취향이 가득한
           <br />책 둥지를 틀다
         </Subtitle>
       </LogoSection>
-
-      {/* 개발용 버튼은 스타일링 추가 또는 제거 고려 */}
-      <button 
-        onClick={goToInputInfoPage}
-        style={{ 
-          padding: '8px 16px', 
-          borderRadius: '8px',
-          border: 'none',
-          backgroundColor: 'rgba(255, 255, 255, 0.2)',
-          color: 'white',
-          marginBottom: '20px'
-        }}
-      >
-        정보 입력 페이지로 이동
-      </button>
 
       <ButtonSection>
         {!showSocialButtons ? (
