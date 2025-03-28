@@ -14,32 +14,28 @@ declare global {
 
 // 스타일 컴포넌트 정의
 const Container = styled.div`
-  max-width: 600px;
+  max-width: 37.5rem; // 600px
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.25rem; // 20px
   background-color: #fff;
 `;
 
 const Title = styled.h1`
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 10px;
-`;
-
-const Subtitle = styled.p`
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 30px;
+  font-size: 32px;
+  margin-bottom: 1rem;
+  color: #00c473;
+  text-align: center;
+  width: 100%;
 `;
 
 const InputGroup = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 1.25rem; // 20px
 `;
 
 const Label = styled.label`
   display: block;
-  font-size: 16px;
-  margin-bottom: 8px;
+  font-size: 16px; // 16px
+  margin-bottom: 0.5rem; // 8px
   font-weight: 500;
 `;
 
@@ -54,11 +50,10 @@ const InputRow = styled.div`
 
 const Input = styled.input`
   flex: 1;
-  height: 50px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 0 15px;
-  color: #000000;
+  height: 3.125rem; // 50px
+  border: 0.0625rem solid #ddd; // 1px
+  border-radius: 0.3125rem; // 5px
+  padding: 0 0.9375rem; // 0 15px
   font-size: 16px;
   box-sizing: border-box;
   background-color: #ffffff;
@@ -71,10 +66,10 @@ const FullInput = styled(Input)`
 
 const ConfirmButton = styled.button`
   background-color: #7bc47f;
-  padding: 15px 20px;
-  border: none;
-  border-radius: 5px;
-  margin-left: 10px;
+  padding: 0.9375rem 1.25rem; // 15px 20px
+  border-radius: 0.3125rem; // 5px
+  border-style: none;
+  margin-left: 0.625rem; // 10px
   color: #fff;
   font-weight: bold;
   cursor: pointer;
@@ -82,6 +77,11 @@ const ConfirmButton = styled.button`
 
 const ErrorText = styled.p`
   color: #ff0000;
+  margin-top: 5px;
+`;
+
+const SuccessText = styled.p`
+  color: #2ea043;
   margin-top: 5px;
 `;
 
@@ -130,20 +130,6 @@ const AddressButton = styled.button`
   cursor: pointer;
 `;
 
-const EvaluateButton = styled.button`
-  width: 100%;
-  background-color: #4a90e2;
-  padding: 15px;
-  border: none;
-  border-radius: 5px;
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 30px;
-  margin-bottom: 10px;
-`;
-
 const SubmitButton = styled.button`
   width: 100%;
   background-color: #7bc47f;
@@ -186,9 +172,9 @@ const AddressModal = styled.div`
 
 const AddressModalContent = styled.div`
   background-color: white;
-  padding: 20px;
+  padding: 1.25rem; // 20px
   height: 70%;
-  border-radius: 5px;
+  border-radius: 0.3125rem; // 5px
   overflow: visible;
   position: relative;
 `;
@@ -231,10 +217,41 @@ const InputInfoPage = () => {
   const handleNicknameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setNickname(text);
-    console.log("입력된 닉네임:", text);
-
-    // Validate nickname (example: max 10 characters)
     setIsNicknameValid(text.length <= 10);
+    setErrorMessage("");
+  };
+
+  // 닉네임 중복 확인 함수 수정
+  const checkNicknameDuplicate = async () => {
+    // 이모지 및 공백 체크
+    const hasEmoji = /[\p{Emoji}]/u.test(nickname);
+    const isOnlyWhitespace = /^\s*$/.test(nickname);
+
+    if (hasEmoji) {
+      setIsNicknameValid(false);
+      setErrorMessage("이모지는 사용할 수 없습니다.");
+      return;
+    }
+
+    if (isOnlyWhitespace) {
+      setIsNicknameValid(false);
+      setErrorMessage("공백만으로는 닉네임을 설정할 수 없습니다.");
+      return;
+    }
+
+    try {
+      const response = await api.get(`/api/user/nickname-check`, {
+        params: { nickname },
+      });
+
+      if (response.data.success) {
+        const isDuplicate = response.data.data;
+        setIsNicknameValid(!isDuplicate);
+        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
+      }
+    } catch (error) {
+      setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
+    }
   };
 
   const handleFindAddress = () => {
@@ -288,44 +305,56 @@ const InputInfoPage = () => {
     }
   }, [isAddressModalOpen]);
 
+  // state 추가
+  const [birthdateError, setBirthdateError] = useState("");
+
   const handleBirthdateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // 숫자만 입력 가능하도록 검증
     if (value === "" || /^\d+$/.test(value)) {
-      // 최대 8자리까지만 입력 가능
       if (value.length <= 8) {
         setBirthdate(value);
+        setBirthdateError(""); // 입력 시 에러 메시지 초기화
+
+        if (value.length === 8) {
+          const year = parseInt(value.substring(0, 4));
+          const month = parseInt(value.substring(4, 6));
+          const day = parseInt(value.substring(6, 8));
+
+          const currentYear = new Date().getFullYear();
+
+          if (year < 1900 || year > currentYear) {
+            setBirthdateError("올바른 연도를 입력해주세요");
+            return;
+          }
+          if (month < 1 || month > 12) {
+            setBirthdateError("올바른 월을 입력해주세요");
+            return;
+          }
+          if (day < 1 || day > 31) {
+            setBirthdateError("올바른 일자를 입력해주세요");
+            return;
+          }
+        }
       }
     }
   };
+
+  // JSX 부분 수정
+  <InputGroup>
+    <Label>생년월일</Label>
+    <BirthDateInput
+      type="text"
+      placeholder="생년월일 8자리를 입력해주세요 (예: 19990101)"
+      value={birthdate}
+      onChange={handleBirthdateChange}
+      maxLength={8}
+    />
+    {birthdateError && <ErrorText>{birthdateError}</ErrorText>}
+  </InputGroup>;
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
     return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
-  };
-
-  // 닉네임 중복 확인 함수 추가
-  const checkNicknameDuplicate = async () => {
-    console.log("닉네임 중복 확인 시작");
-    try {
-      const response = await api.get(`/api/user/nickname-check`, {
-        params: { nickname },
-      });
-
-      console.log("서버 응답 전체:", response); // 전체 응답 데이터 확인
-      if (response.data.success) {
-        const isDuplicate = response.data.data;
-        console.log("서버 응답 데이터:", response.data); // 응답 데이터 구조 확인
-        setIsNicknameValid(!isDuplicate);
-        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "");
-        console.log("닉네임 중복 확인 결과:", isDuplicate ? "중복된 닉네임입니다" : "사용 가능한 닉네임입니다");
-        console.log("닉네임:", nickname);
-        console.log("닉네임 중복 확인 완료");
-      }
-    } catch (error) {
-      setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
-      console.log("닉네임 중복 확인 중 오류 발생:", error);
-    }
   };
 
   // handleSubmit 함수 수정
@@ -368,8 +397,7 @@ const InputInfoPage = () => {
 
   return (
     <Container>
-      <Title>회원정보 입력</Title>
-      <Subtitle>추가 정보를 입력하여 북네스트를 시작해보세요!</Subtitle>
+      <Title>BookNEST</Title>
 
       <form onSubmit={handleSubmit}>
         <InputGroup>
@@ -387,14 +415,15 @@ const InputInfoPage = () => {
               중복 확인
             </ConfirmButton>
           </InputRow>
-          {!isNicknameValid && <ErrorText>이미 사용중인 닉네임입니다</ErrorText>}
+          {!isNicknameValid && errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+          {isNicknameValid && errorMessage && <SuccessText>{errorMessage}</SuccessText>}
         </InputGroup>
 
         <InputGroup>
           <Label>성별</Label>
           <SelectContainer>
             <Select value={gender} onChange={(e) => setGender(e.target.value)}>
-              <option value="설정안함">선택해주세요</option>
+              <option value="설정안함">설정안함</option>
               <option value="남성">남성</option>
               <option value="여성">여성</option>
               <option value="기타">기타</option>
@@ -428,10 +457,6 @@ const InputInfoPage = () => {
             onChange={(e) => setDetailAddress(e.target.value)}
           />
         </InputGroup>
-
-        <EvaluateButton type="button" onClick={() => navigate("/eval-book")}>
-          도서 평가하러 가기
-        </EvaluateButton>
 
         <SubmitButton type="submit">정보 입력 완료</SubmitButton>
       </form>
