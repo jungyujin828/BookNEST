@@ -30,6 +30,7 @@ public enum ErrorCode {
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
     ADDRESS_NOT_FOUND(404, "U002", "주소를 찾을 수 없습니다."),
 
+
     // BOOK
     BOOK_NOT_FOUND(404, "B001", "도서를 찾을 수 없습니다."),
     CRAWLING_FAILED(500, "B002", "크롤링 중 오류가 발생했습니다."),
@@ -38,6 +39,8 @@ public enum ErrorCode {
     EMPTY_REVIEW_CONTENT(400, "B005", "한줄평이 입력되지 않았습니다."),
     REVIEW_ALREADY_EXISTS(400, "B006", "이미 작성한 한줄평이 존재합니다."),
     REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다"),
+    REVIEW_ALREADY_LIKED(400, "B007", "이미 한줄평에 좋아요가 있습니다."),
+    REVIEW_LIKE_NOT_FOUND(404, "B008", "한줄평 좋아요가 없습니다"),
     EMPTY_RATING(404, "B008", "평점이 존재하지 않습니다."),
 
     // RATING
@@ -46,7 +49,11 @@ public enum ErrorCode {
     RATING_NOT_FOUND(404, "R003", "점수가 등록되어 있지 않습니다."),
 
     // NEST
-    BOOKNEST_NOT_FOUND(404, "N001", "둥지도서를 찾을 수 없습니다.");
+    BOOKNEST_NOT_FOUND(404, "N001", "둥지도서를 찾을 수 없습니다."),
+    NEST_NOT_FOUND(404, "N002", "둥지가 등록되어 있지 않습니다."),
+    ALREADY_BOOKMARKED(400, "N003", "이미 찜이 되어있습니다."),
+    BOOKMARK_NOT_FOUND(404, "N004", "찜이 등록되어 있지 않습니다.");
+
 
 
     private final int status;

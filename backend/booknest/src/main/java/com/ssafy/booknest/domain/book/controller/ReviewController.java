@@ -1,7 +1,6 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
@@ -76,4 +75,25 @@ public class ReviewController {
         return ApiResponse.success(responseList);
     }
 
+    // 한줄평 좋아요
+    @PostMapping("/{reviewId}/like")
+    public ResponseEntity<ApiResponse<Void>> likeReview(
+            @PathVariable Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal)
+    {
+        Integer likerId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.likeReview(likerId, reviewId);
+        return ApiResponse.success(HttpStatus.CREATED);
+    }
+
+    // 한줄평 좋아요 취소
+    @DeleteMapping("/{reviewId}/like")
+    public ResponseEntity<ApiResponse<Void>> unlikeReview(
+            @PathVariable Integer reviewId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        reviewService.unlikeReview(userId, reviewId);
+        return ApiResponse.success(HttpStatus.NO_CONTENT); // 삭제는 보통 204
+    }
 }

@@ -12,11 +12,15 @@ import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
+import com.ssafy.booknest.domain.nest.dto.response.BookMarkListResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
+import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
@@ -28,6 +32,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NestService {
@@ -37,8 +43,12 @@ public class NestService {
     private final RatingRepository ratingRepository;
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
+    private final NestRepository nestRepository;
+    private final BookMarkRepository bookMarkRepository;
     private final RatingService ratingService;
     private final ReviewService reviewService;
+
+
 
     @Transactional
     public CustomPage<NestBookListResponse> getNestBookList(Integer userId, Integer nestId, Integer nestUserId, Pageable pageable) {
@@ -90,7 +100,6 @@ public class NestService {
                 ratingService.updateRating(user.getId(), book.getId(), dto);
             }
         }
-
         // 사용자의 기존 리뷰 조회
         Review userReview = reviewRepository.findByUserIdAndBookId(user.getId(), book.getId()).orElse(null);
         String newReview = request.getReview();
@@ -107,8 +116,6 @@ public class NestService {
         }
 
         // 찜 여부 조회
-
-
         BookNest bookNest = bookNestRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElse(null);
         if (bookNest == null) {
             bookNest = BookNest.builder()
@@ -145,4 +152,63 @@ public class NestService {
 
         bookNestRepository.delete(bookNest);
     }
+
+    // 찜하기 등록
+    @Transactional
+    public void addBookMark(Integer userId, Integer bookId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Nest nest = nestRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NEST_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        if (bookMarkRepository.existsByNestIdAndBookId(nest.getId(), bookId)) {
+            throw new CustomException(ErrorCode.ALREADY_BOOKMARKED);
+        }
+
+        BookMark bookMark = BookMark.builder()
+                .nest(nest)
+                .book(book)
+                .build();
+
+        bookMarkRepository.save(bookMark);
+    }
+
+    // 찜하기 취소
+    @Transactional
+    public void removeBookMark(Integer userId, Integer bookId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+
+        Nest nest = nestRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NEST_NOT_FOUND));
+
+
+        BookMark bookMark = bookMarkRepository.findByNestIdAndBookId(nest.getId(), bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
+
+
+        bookMarkRepository.delete(bookMark);
+    }
+
+    // 찜목록 조회
+    @Transactional(readOnly = true)
+    public List<BookMarkListResponse> getBookMarkList(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Nest nest = nestRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.NEST_NOT_FOUND));
+
+        return nest.getBookMarks().stream()
+                .map(bookMark -> BookMarkListResponse.of(bookMark.getBook(), bookMark.getCreatedAt()))
+                .toList();
+    }
+
+
 }

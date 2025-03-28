@@ -4,20 +4,23 @@ import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
-import com.ssafy.booknest.domain.book.entity.BestSeller;
-import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.entity.Review;
+import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewLikeRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +34,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final RatingRepository ratingRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     // 한줄평 등록
     @Transactional
@@ -119,4 +123,43 @@ public class ReviewService {
                 .map(review -> UserReviewResponse.of(review))
                 .toList();
     }
+
+    // 한줄평 좋아요
+    @Transactional
+    public void likeReview(Integer userId, Integer reviewId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        if (reviewLikeRepository.existsByUserAndReview(user, review)) {
+            throw new CustomException(ErrorCode.REVIEW_ALREADY_LIKED);
+        }
+
+        reviewLikeRepository.save(
+                ReviewLike.builder()
+                        .user(user)
+                        .review(review)
+                        .build()
+        );
+        review.incrementLikes();
+    }
+
+    // 한줄평 좋아요 취소
+    @Transactional
+    public void unlikeReview(Integer userId, Integer reviewId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        ReviewLike reviewLike = reviewLikeRepository.findByUserAndReview(user, review)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_LIKE_NOT_FOUND));
+
+        reviewLikeRepository.delete(reviewLike);
+        review.decrementLikes();
+    }
+
 }
