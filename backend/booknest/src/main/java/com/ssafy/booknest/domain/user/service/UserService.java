@@ -1,5 +1,9 @@
 package com.ssafy.booknest.domain.user.service;
 
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.follow.repository.FollowRepository;
+import com.ssafy.booknest.domain.user.dto.request.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
@@ -23,6 +27,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final FollowRepository followRepository;
+    private final RatingRepository ratingRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public void deleteUser(Integer userId) {
@@ -107,5 +114,21 @@ public class UserService {
     // 닉네임 중복확인
     public boolean isNicknameDuplicate(String nickname) {
         return userRepository.existsByNickname(nickname);
+    }
+
+    // 유저 정보 조회
+    public UserInfoResponse getUserInfo(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Address address = addressRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        Integer followers = followRepository.countFollowers(userId); // 팔로워 수 조회
+        Integer followings = followRepository.countFollowings(userId); // 팔로잉 수 조회
+        Integer totalRatings = ratingRepository.countRatings(userId);
+        Integer totalReviews = reviewRepository.countReviews(userId);
+
+        return UserInfoResponse.of(user, address, followers, followings, totalRatings, totalReviews);
     }
 }

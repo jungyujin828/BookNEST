@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.nest.entity;
 
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -8,14 +9,10 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @Table(name = "book_mark")
 @Getter
-@Builder
+@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class BookMark {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class BookMark extends BaseEntity {
 
     // 찜 목록을 책과 연결
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,8 +23,4 @@ public class BookMark {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nest_id")
     private Nest nest;
-
-    // 찜 여부 (추가적인 상태 정보로 사용할 수 있음)
-    @Column(name = "is_bookmarked", nullable = false)
-    private Boolean isBookmarked;
 }

@@ -1,6 +1,8 @@
 package com.ssafy.booknest.domain.nest.controller;
 
+import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.NestRequest;
+import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
 import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.global.common.CustomPage;
@@ -9,6 +11,7 @@ import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -31,4 +34,12 @@ public class NestController {
         Integer nestUserId = nestRequest.getUserId();
         return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
     }
+
+//    @PostMapping("")
+//    public ResponseEntity<ApiResponse<AddBookNestResponse>> addBookNest(
+//            @AuthenticationPrincipal UserPrincipal userPrincipal,
+//            @RequestBody AddBookNestRequest addBookNestRequest){
+//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+//        return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
+//    }
 }

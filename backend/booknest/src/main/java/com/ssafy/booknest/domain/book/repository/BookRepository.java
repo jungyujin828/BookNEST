@@ -30,14 +30,14 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 //    // 책 제목 기반 검색
 //    @EntityGraph(attributePaths = {"bookAuthors", "bookAuthors.author"})
 //    Page<Book> findByTitleContaining(String keyword, Pageable pageable);
-
+//
 //    // 책 저자 기반 검색
 //    @Query("SELECT DISTINCT b FROM Book b " +
 //            "JOIN FETCH b.bookAuthors ba " +
 //            "JOIN FETCH ba.author a " +
 //            "WHERE a.name LIKE %:keyword%")
 //    Page<Book> findByAuthorNameContaining(@Param("keyword") String keyword, Pageable pageable);
-
+//
 //    // 책 + 저자 기반 검색
 //    @Query(
 //            value = "SELECT DISTINCT b FROM Book b " +

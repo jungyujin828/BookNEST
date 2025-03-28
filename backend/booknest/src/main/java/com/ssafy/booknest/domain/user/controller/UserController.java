@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.user.controller;
 
 import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
+import com.ssafy.booknest.domain.user.dto.request.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
@@ -76,5 +77,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<Boolean>> checkNickname(@RequestParam String nickname) {
         boolean isDuplicate = userService.isNicknameDuplicate(nickname);
         return ApiResponse.success(isDuplicate);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<ApiResponse<UserInfoResponse>> getUserInfo(
+            @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success(userService.getUserInfo(userId));
     }
 }

@@ -1,32 +1,26 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequestDto;
+import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.service.BookService;
+import com.ssafy.booknest.domain.book.service.RatingService;
+import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
-import com.ssafy.booknest.global.error.ErrorCode;
-import com.ssafy.booknest.global.error.exception.CustomException;
 import com.ssafy.booknest.global.security.UserPrincipal;
-import com.ssafy.booknest.global.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static com.ssafy.booknest.global.error.ErrorCode.BOOK_NOT_FOUND;
-import static com.ssafy.booknest.global.error.ErrorCode.UNAUTHORIZED_ACCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +30,8 @@ public class BookController {
     private final BookService bookService;
     private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
+    private final ReviewService reviewService;
+    private final RatingService ratingService;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -67,49 +63,29 @@ public class BookController {
         return ApiResponse.success(bookService.getPurchaseLinks(bookId));
     }
 
+
+
+
+    //    // 도서 찜하기
+//    @PutMapping("/{bookId}/like")
+//    public ResponseEntity<ApiResponse<Void>> likeBook(
+//            @PathVariable("bookId") Integer bookId,
+//            @AuthenticationPrincipal UserPrincipal userPrincipal
+//    ){
+//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+//        bookService.likeBook(userId, bookId);
+//        return ApiResponse.success(HttpStatus.OK);
+//    }
+
+
     // 전자도서관 연계
-    @GetMapping("/{bookId}/ebook")
-    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,
-                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
-    }
-
-    // 한줄평 등록
-    @PostMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> addReview(
-            @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequestDto reviewRequest
-    ) {
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.saveReview(userId, bookId, reviewRequest);
-        return ApiResponse.success(HttpStatus.OK);
-    }
-
-    // 한줄평 수정
-    @PutMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> updateReview(
-            @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequestDto reviewRequest
-    ){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.updateReview(userId, bookId, reviewRequest);
-        return ApiResponse.success(HttpStatus.OK);
-    }
-
-    // 한줄평 삭제
-    @DeleteMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> deleteReview(
-            @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.deleteReview(userId, bookId);
-        return ApiResponse.success(HttpStatus.OK);
-    }
+//    @GetMapping("/{bookId}/ebook")
+//    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,
+//                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
+//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+//
+//        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
+//    }
 
 
 //    // 책 검색 (제목, 저자)
