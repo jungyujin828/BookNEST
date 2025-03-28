@@ -49,11 +49,11 @@ public class FollowService {
         followRepository.deleteByFollowerAndFollowing(follower, following);
     }
 
-    public CustomPage<FollowResponse> getFollowingList(Integer userId, Pageable pageable) {
+    public CustomPage<FollowResponse> getFollowingList(Integer userId, Integer targetUserId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Page<User> followingUsers = followRepository.findFollowingUsers(userId, pageable);
+        Page<User> followingUsers = followRepository.findFollowingUsers(targetUserId, pageable);
 
         return new CustomPage<>(followingUsers.map(followingUser -> {
             Integer totalRatings = ratingRepository.countRatings(followingUser.getId());
@@ -61,11 +61,11 @@ public class FollowService {
         }));
     }
 
-    public CustomPage<FollowResponse> getFollowerList(Integer userId, Pageable pageable) {
+    public CustomPage<FollowResponse> getFollowerList(Integer userId, Integer targetUserId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Page<User> followerUsers = followRepository.findFollwerUsers(userId, pageable);
+        Page<User> followerUsers = followRepository.findFollwerUsers(targetUserId, pageable);
 
         return new CustomPage<>(followerUsers.map(followingUser -> {
             Integer totalRatings = ratingRepository.countRatings(followingUser.getId());

@@ -46,19 +46,21 @@ public class FollowController {
     @GetMapping("/following")
     public ResponseEntity<ApiResponse<CustomPage<FollowResponse>>> getFollowingList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam("targetUserId") Integer targetUserId,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(followService.getFollowingList(userId, pageable));
+        return ApiResponse.success(followService.getFollowingList(userId, targetUserId, pageable));
     }
 
     @GetMapping("/follower")
     public ResponseEntity<ApiResponse<CustomPage<FollowResponse>>> getFollowerList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam("targetUserId") Integer targetUserId,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(followService.getFollowerList(userId, pageable));
+        return ApiResponse.success(followService.getFollowerList(userId, targetUserId, pageable));
     }
 
 }
