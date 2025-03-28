@@ -49,9 +49,11 @@ public enum ErrorCode {
     RATING_NOT_FOUND(404, "R003", "점수가 등록되어 있지 않습니다."),
 
     // NEST
-    NEST_NOT_FOUND(404, "N001", "둥지가 등록되어 있지 않습니다."),
-    ALREADY_BOOKMARKED(400, "N002", "이미 찜이 되어있습니다."),
-    BOOKMARK_NOT_FOUND(404, "N003", "찜이 등록되어 있지 않습니다.");
+    BOOKNEST_NOT_FOUND(404, "N001", "둥지도서를 찾을 수 없습니다."),
+    NEST_NOT_FOUND(404, "N002", "둥지가 등록되어 있지 않습니다."),
+    ALREADY_BOOKMARKED(400, "N003", "이미 찜이 되어있습니다."),
+    BOOKMARK_NOT_FOUND(404, "N004", "찜이 등록되어 있지 않습니다.");
+
 
 
     private final int status;
