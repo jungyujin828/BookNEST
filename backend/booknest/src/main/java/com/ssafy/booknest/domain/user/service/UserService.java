@@ -3,8 +3,8 @@ package com.ssafy.booknest.domain.user.service;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
-import com.ssafy.booknest.domain.user.dto.request.UserInfoResponse;
-import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
+import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
@@ -46,7 +46,7 @@ public class UserService {
 
     // 회원정보 수정
     @Transactional
-    public void updateUser(Integer userId, UserUpdateDto dto) {
+    public void updateUser(Integer userId, UserUpdateRequest dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -67,7 +67,7 @@ public class UserService {
 
         // 주소
         if (dto.getAddress() != null) {
-            UserUpdateDto.AddressDto addr = dto.getAddress();
+            UserUpdateRequest.AddressDto addr = dto.getAddress();
             Address current = user.getAddress();
 
             String city = extractCity(addr.getRoadAddress());
