@@ -1,8 +1,8 @@
 package com.ssafy.booknest.domain.user.controller;
 
 import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
-import com.ssafy.booknest.domain.user.dto.request.UserInfoResponse;
-import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
+import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -64,10 +64,10 @@ public class UserController {
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<Void>> updateUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody UserUpdateDto userUpdateDto) {
+            @RequestBody UserUpdateRequest dto) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        userService.updateUser(userId, userUpdateDto);
+        userService.updateUser(userId, dto);
 
         return ApiResponse.success(HttpStatus.OK);
     }

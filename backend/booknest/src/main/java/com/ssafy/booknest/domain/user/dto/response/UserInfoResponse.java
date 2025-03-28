@@ -1,4 +1,4 @@
-package com.ssafy.booknest.domain.user.dto.request;
+package com.ssafy.booknest.domain.user.dto.response;
 
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;

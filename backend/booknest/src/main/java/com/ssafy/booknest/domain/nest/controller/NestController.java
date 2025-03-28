@@ -35,11 +35,11 @@ public class NestController {
         return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
     }
 
-//    @PostMapping("")
-//    public ResponseEntity<ApiResponse<AddBookNestResponse>> addBookNest(
-//            @AuthenticationPrincipal UserPrincipal userPrincipal,
-//            @RequestBody AddBookNestRequest addBookNestRequest){
-//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-//        return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
-//    }
+    @PostMapping("")
+    public ResponseEntity<ApiResponse<AddBookNestResponse>> addBookNest(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody AddBookNestRequest addBookNestRequest){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
+    }
 }
