@@ -42,22 +42,12 @@ const refreshToken = async () => {
   }
 };
 
-// 요청 인터셉터
+// Request interceptor to add Authorization header
 api.interceptors.request.use(
   (config) => {
-    // OAuth 관련 엔드포인트는 토큰 없이 요청
-    if (config.url?.startsWith('/api/oauth/')) {
-      // OAuth 요청의 경우 Content-Type만 포함
-      config.headers['Content-Type'] = 'application/json';
-      return config;
-    }
-
-    // 개발 환경이 아닐 때만 localStorage에서 토큰을 가져와서 설정
-    if (!import.meta.env.DEV) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
