@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.nest.controller;
 
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
+import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.NestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
@@ -32,6 +33,7 @@ public class NestController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         Integer nestId = nestRequest.getNestId();
         Integer nestUserId = nestRequest.getUserId();
+
         return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
     }
 
@@ -40,6 +42,17 @@ public class NestController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AddBookNestRequest addBookNestRequest){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
         return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("")
+    public ResponseEntity<ApiResponse<Void>> deleteBookNest(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody DeleteBookNestRequest request) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        nestService.deleteBookNest(userId, request);
+
+        return ApiResponse.success(HttpStatus.OK);
     }
 }
