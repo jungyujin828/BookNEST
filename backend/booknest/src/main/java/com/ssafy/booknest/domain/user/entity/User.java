@@ -51,6 +51,9 @@ public class User extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "profile_url")
+    private String profileUrl;
+
     @OneToOne(mappedBy = "user")
     private Nest nest;
 

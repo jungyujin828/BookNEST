@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Rating extends BaseEntity {
 
-    @Column(name ="rating")
+    @Column(name ="rating", nullable = false)
     private Double rating;
 
     @LastModifiedDate
