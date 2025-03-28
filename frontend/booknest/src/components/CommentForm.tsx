@@ -222,7 +222,7 @@ const CommentForm = ({
           onCommentDelete(reviewId);
         }
       } else {
-        setError(response.data.error?.message || '리뷰 삭제에 실패했습니다.');
+        // setError(response.data.error?.message || '리뷰 삭제에 실패했습니다.');
       }
     } catch (err) {
       console.error('Delete API Error:', err);
