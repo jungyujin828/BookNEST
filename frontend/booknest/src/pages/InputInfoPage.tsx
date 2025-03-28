@@ -321,6 +321,18 @@ const InputInfoPage = () => {
           const day = parseInt(value.substring(6, 8));
 
           const currentYear = new Date().getFullYear();
+          const currentMonth = new Date().getMonth() + 1;
+          const currentDay = new Date().getDate();
+
+          // 미래 날짜 체크
+          if (
+            year > currentYear ||
+            (year === currentYear && month > currentMonth) ||
+            (year === currentYear && month === currentMonth && day > currentDay)
+          ) {
+            setBirthdateError("미래의 날짜는 입력할 수 없습니다");
+            return;
+          }
 
           if (year < 1900 || year > currentYear) {
             setBirthdateError("올바른 연도를 입력해주세요");
@@ -440,6 +452,7 @@ const InputInfoPage = () => {
             onChange={handleBirthdateChange}
             maxLength={8}
           />
+          {birthdateError && <ErrorText>{birthdateError}</ErrorText>}
         </InputGroup>
 
         <InputGroup>
