@@ -64,20 +64,6 @@ public class BookController {
     }
 
 
-
-
-    //    // 도서 찜하기
-//    @PutMapping("/{bookId}/like")
-//    public ResponseEntity<ApiResponse<Void>> likeBook(
-//            @PathVariable("bookId") Integer bookId,
-//            @AuthenticationPrincipal UserPrincipal userPrincipal
-//    ){
-//        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-//        bookService.likeBook(userId, bookId);
-//        return ApiResponse.success(HttpStatus.OK);
-//    }
-
-
     // 전자도서관 연계
 //    @GetMapping("/{bookId}/ebook")
 //    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,

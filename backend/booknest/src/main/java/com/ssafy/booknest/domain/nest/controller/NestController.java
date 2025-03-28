@@ -1,8 +1,11 @@
 package com.ssafy.booknest.domain.nest.controller;
 
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
+import com.ssafy.booknest.domain.nest.dto.request.BookMarkRequest;
+import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.NestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
+import com.ssafy.booknest.domain.nest.dto.response.BookMarkListResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
 import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.global.common.CustomPage;
@@ -15,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class NestController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         Integer nestId = nestRequest.getNestId();
         Integer nestUserId = nestRequest.getUserId();
+
         return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
     }
 
@@ -40,6 +46,55 @@ public class NestController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AddBookNestRequest addBookNestRequest){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
         return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
+    }
+
+    // 찜하기 등록
+    @PostMapping("/bookmark")
+    public ResponseEntity<ApiResponse<Void>> addBookMark(
+            @RequestBody BookMarkRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        Integer bookId = request.getBookId();
+
+        nestService.addBookMark(userId, bookId);
+        return ApiResponse.success(HttpStatus.CREATED);
+    }
+
+    // 찜하기 취소
+    @DeleteMapping("/bookmark")
+    public ResponseEntity<ApiResponse<Void>> removeBookMark(
+            @RequestBody BookMarkRequest request,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        Integer bookId = request.getBookId();
+
+        nestService.removeBookMark(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 찜목록 조회
+    @GetMapping("/bookmark")
+    public ResponseEntity<ApiResponse<List<BookMarkListResponse>>> getBookMarkList(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<BookMarkListResponse> responseList = nestService.getBookMarkList(userId);
+
+        return ApiResponse.success(responseList);
+    }
+
+
+    @DeleteMapping("")
+    public ResponseEntity<ApiResponse<Void>> deleteBookNest(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody DeleteBookNestRequest request) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        nestService.deleteBookNest(userId, request);
+
+        return ApiResponse.success(HttpStatus.OK);
     }
 }

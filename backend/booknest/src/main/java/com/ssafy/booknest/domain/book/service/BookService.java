@@ -10,7 +10,8 @@ import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.repository.ebookRepository;
-import com.ssafy.booknest.domain.user.entity.Address;
+import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
@@ -25,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +37,7 @@ public class BookService {
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
-    private final ReviewRepository reviewRepository;
-    private final RatingRepository ratingRepository;
+
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true) // LazyInitializationException 방지
@@ -100,18 +97,6 @@ public class BookService {
                 .yes24Url(yes24Url)
                 .build();
     }
-
-
-
-
-
-//    // 도서 찜하기
-//    public void likeBook(Integer userId, Integer bookId) {
-//        BookMark bookMark = bookMarkRepsitory
-//
-//    }
-
-
 
 
 
