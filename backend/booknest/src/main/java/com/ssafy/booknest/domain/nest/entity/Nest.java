@@ -32,6 +32,7 @@ public class Nest extends BaseEntity {
     @OneToMany(mappedBy = "nest", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookNest> bookNests = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "nest", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookMark> bookMarks = new ArrayList<>();
 

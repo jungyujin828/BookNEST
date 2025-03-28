@@ -1,6 +1,10 @@
 package com.ssafy.booknest.domain.user.service;
 
-import com.ssafy.booknest.domain.user.dto.request.UserUpdateDto;
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.follow.repository.FollowRepository;
+import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
@@ -23,6 +27,9 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final AddressRepository addressRepository;
+    private final FollowRepository followRepository;
+    private final RatingRepository ratingRepository;
+    private final ReviewRepository reviewRepository;
 
     @Transactional
     public void deleteUser(Integer userId) {
@@ -39,7 +46,7 @@ public class UserService {
 
     // 회원정보 수정
     @Transactional
-    public void updateUser(Integer userId, UserUpdateDto dto) {
+    public void updateUser(Integer userId, UserUpdateRequest dto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -60,7 +67,7 @@ public class UserService {
 
         // 주소
         if (dto.getAddress() != null) {
-            UserUpdateDto.AddressDto addr = dto.getAddress();
+            UserUpdateRequest.AddressDto addr = dto.getAddress();
             Address current = user.getAddress();
 
             String city = extractCity(addr.getRoadAddress());
@@ -107,5 +114,21 @@ public class UserService {
     // 닉네임 중복확인
     public boolean isNicknameDuplicate(String nickname) {
         return userRepository.existsByNickname(nickname);
+    }
+
+    // 유저 정보 조회
+    public UserInfoResponse getUserInfo(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Address address = addressRepository.findByUserId(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.ADDRESS_NOT_FOUND));
+
+        Integer followers = followRepository.countFollowers(userId); // 팔로워 수 조회
+        Integer followings = followRepository.countFollowings(userId); // 팔로잉 수 조회
+        Integer totalRatings = ratingRepository.countRatings(userId);
+        Integer totalReviews = reviewRepository.countReviews(userId);
+
+        return UserInfoResponse.of(user, address, followers, followings, totalRatings, totalReviews);
     }
 }

@@ -1,8 +1,6 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.ReviewLikeRequest;
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;

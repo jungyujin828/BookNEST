@@ -64,18 +64,6 @@ public class BookController {
     }
 
 
-    // 도서 찜하기
-    @PutMapping("/{bookId}/bookMark")
-    public ResponseEntity<ApiResponse<Void>> addBookMark(
-            @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        bookService.addBookMark(userId, bookId);
-        return ApiResponse.success(HttpStatus.OK);
-    }
-
-
     // 전자도서관 연계
 //    @GetMapping("/{bookId}/ebook")
 //    public ResponseEntity<ApiResponse<List<String>>> getOnlineLibrary(@PathVariable("bookId") Integer bookId,

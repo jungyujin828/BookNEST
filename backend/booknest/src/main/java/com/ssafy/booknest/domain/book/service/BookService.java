@@ -11,6 +11,7 @@ import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.repository.ebookRepository;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
@@ -96,16 +97,6 @@ public class BookService {
                 .yes24Url(yes24Url)
                 .build();
     }
-
-
-
-//    // 도서 찜하기
-//    public void likeBook(Integer userId, Integer bookId) {
-//        BookMark bookMark = bookMarkRepsitory
-//
-//    }
-
-
 
 
 
