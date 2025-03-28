@@ -55,7 +55,7 @@ const MainContent = styled.main<{ isLoginPage: boolean }>`
 
 const AppContent = () => {
   const location = useLocation();
-  const hideNavigation = ["/login"];
+  const hideNavigation = ["/login", "/input-info"];
   const shouldHideNavigation = hideNavigation.includes(location.pathname);
 
   return (
