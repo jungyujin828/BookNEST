@@ -10,7 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "follow")
+@Table(
+        name = "follow",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"follower_id", "following_id"})
+        }
+)
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -24,5 +29,4 @@ public class Follow extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "following_id", nullable = false)
     private User following; // 팔로우를 받는 사람
-
 }

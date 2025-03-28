@@ -2,6 +2,8 @@ package com.ssafy.booknest.domain.follow.repository;
 
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.user.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,10 @@ public interface FollowRepository extends JpaRepository<Follow, Integer> {
     // 특정 사용자가 팔로우하는 사람(팔로잉) 수 조회
     @Query("SELECT COUNT(f) FROM Follow f WHERE f.follower.id = :userId")
     Integer countFollowings(@Param("userId") Integer userId);
+
+    @Query("SELECT f.following FROM Follow f WHERE f.follower.id = :userId")
+    Page<User> findFollowingUsers(@Param("userId") Integer userId, Pageable pageable);
+
+    @Query("SELECT f.follower FROM Follow f WHERE f.following.id = :userId")
+    Page<User> findFollwerUsers(@Param("userId") Integer userId, Pageable pageable);
 }
