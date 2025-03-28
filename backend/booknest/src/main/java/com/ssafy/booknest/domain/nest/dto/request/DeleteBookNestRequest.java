@@ -6,13 +6,9 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AddBookNestRequest {
-    @NotNull
-    private Integer bookId;
+public class DeleteBookNestRequest {
     @NotNull
     private Integer nestId;
-
-    private Double rating;
-
-    private String review;
+    @NotNull
+    private Integer bookId;
 }

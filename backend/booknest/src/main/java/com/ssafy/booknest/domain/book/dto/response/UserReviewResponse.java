@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserReviewResponse {
+    private Integer reviewerId;
     private Integer bookId;
     private Integer reviewId;
     private String review;
@@ -23,6 +24,7 @@ public class UserReviewResponse {
 
     public static UserReviewResponse of(Review review) {
         return UserReviewResponse.builder()
+                .reviewerId(review.getUser().getId())
                 .bookId(review.getBook().getId())
                 .reviewId(review.getId())
                 .review(review.getContent())

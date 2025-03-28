@@ -10,6 +10,7 @@ import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
+import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
 import com.ssafy.booknest.domain.nest.dto.response.BookMarkListResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
@@ -99,7 +100,6 @@ public class NestService {
                 ratingService.updateRating(user.getId(), book.getId(), dto);
             }
         }
-
         // 사용자의 기존 리뷰 조회
         Review userReview = reviewRepository.findByUserIdAndBookId(user.getId(), book.getId()).orElse(null);
         String newReview = request.getReview();
@@ -115,6 +115,7 @@ public class NestService {
             }
         }
 
+        // 찜 여부 조회
         BookNest bookNest = bookNestRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElse(null);
         if (bookNest == null) {
             bookNest = BookNest.builder()
@@ -131,6 +132,25 @@ public class NestService {
                 .review(newReview)
                 .createdAt(bookNest.getCreatedAt())
                 .build();
+    }
+
+    @Transactional
+    public void deleteBookNest(Integer userId, DeleteBookNestRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(request.getBookId()).orElseThrow(() ->
+                new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        Nest nest = user.getNest();
+        if(nest.getId() != request.getNestId()){
+            throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
+        }
+
+        BookNest bookNest = bookNestRepository.findByNestIdAndBookId(book.getId(), nest.getId()).orElseThrow(() ->
+                new CustomException(ErrorCode.BOOKNEST_NOT_FOUND));
+
+        bookNestRepository.delete(bookNest);
     }
 
     // 찜하기 등록
@@ -189,5 +209,6 @@ public class NestService {
                 .map(bookMark -> BookMarkListResponse.of(bookMark.getBook(), bookMark.getCreatedAt()))
                 .toList();
     }
+
 
 }

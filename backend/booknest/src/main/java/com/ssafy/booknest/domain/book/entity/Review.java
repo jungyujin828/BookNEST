@@ -47,11 +47,6 @@ public class Review extends BaseEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void updateLikes(Integer likes) {
-        this.likes = likes;
-        this.updatedAt = LocalDateTime.now();
-    }
-
     public void incrementLikes() {
         this.likes++;
     }
@@ -60,10 +55,5 @@ public class Review extends BaseEntity {
         if (this.likes > 0) {
             this.likes--;
         }
-    }
-
-
-    public int getLikesCount() {
-        return this.likes != null ? this.likes : 0;
     }
 }
