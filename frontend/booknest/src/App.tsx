@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { theme } from "./styles/theme"; // theme import 추가
 import { ROUTES } from "./constants/paths";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
@@ -33,7 +39,19 @@ if (import.meta.env.DEV && !localStorage.getItem("token")) {
 
 const AppLayout = styled.div``;
 
-const MainContent = styled.main``;
+const MainContent = styled.main<{ isLoginPage: boolean }>`
+  padding-top: ${(props) =>
+    props.isLoginPage ? "0" : theme.layout.headerHeight};
+  padding-bottom: ${(props) =>
+    props.isLoginPage ? "0" : theme.layout.navbarHeight};
+  height: ${(props) => (props.isLoginPage ? "100vh" : "auto")};
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    padding-top: ${(props) =>
+      props.isLoginPage ? "0" : theme.layout.headerHeight};
+    padding-bottom: 0;
+  }
+`;
 
 const AppContent = () => {
   const location = useLocation();
@@ -43,7 +61,7 @@ const AppContent = () => {
   return (
     <AppLayout>
       {!shouldHideNavigation && <Header />}
-      <MainContent>
+      <MainContent isLoginPage={shouldHideNavigation}>
         <div className="container">
           <Routes>
             {/* 공개 라우트 */}
