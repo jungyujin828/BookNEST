@@ -54,35 +54,35 @@ INSERT INTO book (
 ) VALUES
 -- 1. 듀얼 브레인
 ('듀얼 브레인', '2025-03-19', '9791194368175', '상상스퀘어', 308,
- 'https://image.aladin.co.kr/product/32898/78/cover500/k572935390_1.jpg',
+ 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791194368175.jpg',
  'AI 시대의 실용적 생존 가이드. 인간과 AI의 공진화에 대한 통찰.',
  'Chapter 1: 공진화의 시작...',
  NOW(), 'AI 시대, 어떻게 함께 살아갈 것인가에 대한 현실적 해답'),
 
 -- 2. 소년이 온다
 ('소년이 온다', '2014-05-19', '9788936434120', '창비', 216,
- 'https://image.aladin.co.kr/product/4091/47/cover500/8936434123_1.jpg',
+ 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788936434120.jpg',
  '5.18 광주를 배경으로 한강이 쓴 고통과 연대의 이야기.',
  'Chapter 1: 동호의 기록...',
  NOW(), '결코 지워지지 않을 상처, 그리고 그 고요한 저항의 이야기'),
 
 -- 3. 이제야 보이네
 ('이제야 보이네', '2025-03-19', '9791130664361', '다산북스', 324,
- 'https://image.aladin.co.kr/product/32899/91/cover500/k872935392_1.jpg',
+ 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791130664361.jpg',
  '김창완 첫 산문집 30주년 개정판. 삶을 향한 따뜻한 시선.',
  'Chapter 1: 지금 이 순간을 말하다...',
  NOW(), '30년을 돌아와 삶을 말하는 김창완의 진심'),
 
 -- 4. 데일 카네기 인간관계론 + 자기관리론 + 성공대화론
 ('데일 카네기 자기계발 시리즈 합본', '2020-05-10', '9791164452712', '더스토리', 1168,
- 'https://image.aladin.co.kr/product/23917/30/cover500/k912632315_1.jpg',
+ 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9791187142560.jpg',
  '자기관리와 인간관계, 성공 대화를 위한 카네기의 핵심 노하우.',
  'Part 1: 인간관계론 / Part 2: 자기관리론 / Part 3: 성공대화론',
  NOW(), '세월이 흘러도 여전히 강력한 자기계발 바이블'),
 
 -- 5. 모순
 ('모순', '2013-04-01', '9788998441012', '쓰다', 308,
- 'https://image.aladin.co.kr/product/21798/40/cover500/k712635486_1.jpg',
+ 'https://contents.kyobobook.co.kr/sih/fit-in/458x0/pdt/9788998441012.jpg',
  '양귀자의 대표작. 평범한 듯 깊은 인생의 아이러니를 그리다.',
  'Chapter 1: 인생의 곡선...',
  NOW(), '시간이 흘러도 빛나는 한국 문학의 고전');
