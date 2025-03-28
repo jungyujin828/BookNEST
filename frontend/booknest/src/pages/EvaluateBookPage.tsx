@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // useEffect 추가
+import { useNavigate } from "react-router-dom"; // useNavigate 추가
 import WriteCommentModal from "../components/WriteCommentModal";
+import api from "../api/axios";
 
 // Modify HeartIcon component to accept filled prop
 const HeartIcon = ({ filled = false }) => (
@@ -34,44 +36,38 @@ const StarIcon = ({ filled = false, half = false }) => (
   </svg>
 );
 
-const books = [
-  {
-    id: 1,
-    title: "모순",
-    author: "양귀자",
-    image: "/images/mosun.jpg",
-  },
-  {
-    id: 2,
-    title: "코스모스",
-    author: "칼 세이건",
-    image: "/images/cosmos.jpg",
-  },
-  {
-    id: 3,
-    title: "침묵의 봄",
-    author: "레이첼 카슨",
-    image: "/images/silent-spring.jpg",
-  },
-  {
-    id: 4,
-    title: "참을 수 없는 존재의 가벼움",
-    author: "밀란 쿤데라",
-    image: "/images/unbearable.jpg",
-  },
-];
+// Book 타입 정의 추가
+interface Book {
+  bookId: number;
+  title: string;
+  publishedDate: string;
+  imageUrl: string;
+  authors: string[];
+}
 
-// Add new state for liked books
-// 상단에 import 추가
-import { useNavigate } from "react-router-dom";
-
-// EvaluateBookPage 컴포넌트 내부 상단에 추가
 const EvaluateBookPage = () => {
   const navigate = useNavigate();
   const [selectedBook, setSelectedBook] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
   const [ratings, setRatings] = useState<{ [key: number]: number }>({});
   const [likedBooks, setLikedBooks] = useState<{ [key: number]: boolean }>({});
+  const [books, setBooks] = useState<Book[]>([]); // 책 목록 상태 추가
+
+  // 베스트셀러 목록을 불러오는 useEffect 추가
+  useEffect(() => {
+    const fetchBestSellers = async () => {
+      try {
+        const response = await api.get("/api/book/best"); // 실제 API 엔드포인트로 수정 필요
+        if (response.data.success) {
+          setBooks(response.data.data);
+        }
+      } catch (error) {
+        console.error("베스트셀러 목록을 불러오는데 실패했습니다:", error);
+      }
+    };
+
+    fetchBestSellers();
+  }, []);
 
   // Add handleLike function
   const handleLike = (bookId: number) => {
@@ -81,11 +77,68 @@ const EvaluateBookPage = () => {
     }));
   };
 
-  const handleRating = (bookId: number, rating: number) => {
-    setRatings((prev) => ({
-      ...prev,
-      [bookId]: rating,
-    }));
+  // 기존 별점 데이터를 가져오는 함수 추가
+  const fetchUserRatings = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await api.get("/api/book/{bookId}/rating", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (response.data.success) {
+        const userRatings = response.data.data.ratedBooks.reduce((acc: any, book: any) => {
+          acc[book.bookId] = book.rating;
+          return acc;
+        }, {});
+        setRatings(userRatings);
+      }
+    } catch (error) {
+      console.error("기존 별점 데이터를 불러오는데 실패했습니다:", error);
+    }
+  };
+
+  // useEffect에 fetchUserRatings 추가
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchUserRatings();
+    };
+    fetchData();
+  }, []);
+
+  const handleRating = async (bookId: number, rating: number) => {
+    try {
+      // 로컬 상태 업데이트
+      setRatings((prev) => ({
+        ...prev,
+        [bookId]: rating,
+      }));
+
+      // API 호출
+      const token = localStorage.getItem("token");
+      const response = await api.post(
+        `/api/book/${bookId}/rating`,
+        {
+          rating: rating,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      console.error("별점 등록 실패:", error);
+      // 에러 발생 시 로컬 상태 롤백
+      setRatings((prev) => ({
+        ...prev,
+        [bookId]: prev[bookId] || 0,
+      }));
+    }
   };
 
   const renderStars = (bookId: number) => {
@@ -152,11 +205,28 @@ const EvaluateBookPage = () => {
       >
         도서 검색하기
       </button>
-
+      <button
+        onClick={() => navigate("/home")}
+        style={{
+          padding: "10px 20px",
+          backgroundColor: "#808080",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          marginBottom: "10px",
+          fontSize: "16px",
+        }}
+      >
+        건너뛰기
+      </button>
       {books.map((book) => (
-        <div key={book.id} style={{ display: "flex", padding: "15px", borderBottom: "1px solid #eee", gap: "20px" }}>
+        <div
+          key={book.bookId}
+          style={{ display: "flex", padding: "15px", borderBottom: "1px solid #eee", gap: "20px" }}
+        >
           <img
-            src={book.image}
+            src={book.imageUrl}
             alt={book.title}
             style={{
               width: "120px",
@@ -166,11 +236,11 @@ const EvaluateBookPage = () => {
           />
           <div style={{ flex: 1 }}>
             <h2 style={{ margin: "0 0 8px 0" }}>{book.title}</h2>
-            <p style={{ color: "#666", margin: "0 0 16px 0" }}>{book.author}</p>
-            <div style={{ display: "flex", gap: "5px", color: "#ffd700" }}>{renderStars(book.id)}</div>
+            <p style={{ color: "#666", margin: "0 0 16px 0" }}>{book.authors.join(", ")}</p>
+            <div style={{ display: "flex", gap: "5px", color: "#ffd700" }}>{renderStars(book.bookId)}</div>
             <div style={{ display: "flex", gap: "20px", marginTop: "20px", color: "#666", cursor: "pointer" }}>
-              <span onClick={() => handleLike(book.id)}>
-                <HeartIcon filled={likedBooks[book.id]} />
+              <span onClick={() => handleLike(book.bookId)}>
+                <HeartIcon filled={likedBooks[book.bookId]} />
               </span>
               <span
                 onClick={() => {
@@ -180,11 +250,7 @@ const EvaluateBookPage = () => {
               >
                 <PencilIcon />
               </span>
-              <span
-                onClick={() => {
-                  /* 관심없음 기능 */
-                }}
-              >
+              <span onClick={() => {}}>
                 <BanIcon />
               </span>
             </div>
