@@ -24,6 +24,7 @@ import ErrorPage from "./pages/ErrorPage";
 import BookDetailPage from "./pages/BookDetailPage";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
+import { useAuthStore } from "./store/useAuthStore";
 
 // 개발 환경에서 테스트용 토큰 설정
 if (import.meta.env.DEV && !localStorage.getItem("token")) {
@@ -55,6 +56,7 @@ const MainContent = styled.main<{ isLoginPage: boolean }>`
 
 const AppContent = () => {
   const location = useLocation();
+  const { userDetail } = useAuthStore();
   const hideNavigation = ["/login", "/input-info"];
   const shouldHideNavigation = hideNavigation.includes(location.pathname);
 
@@ -132,6 +134,14 @@ const AppContent = () => {
             {/* 프로필페이지 */}
             <Route
               path={ROUTES.PROFILE}
+              element={
+                <ProtectedRoute>
+                  <Navigate to={`/profile/${userDetail?.nickname}`} replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile/:nickname"
               element={
                 <ProtectedRoute>
                   <ProfilePage />

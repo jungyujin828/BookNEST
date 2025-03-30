@@ -2,6 +2,8 @@ import styled from "@emotion/styled";
 // 임시이미지.. 정말 칠하다...
 import chillGuy from "../assets/chill.jpg";
 
+// userID를 불러와서 주소에 표시하도록 바꿔야댐 백에 요청하자
+
 const ProfileContainer = styled.div`
   padding: 1rem;
 `;
@@ -42,6 +44,7 @@ const UserProfile = styled.div`
 const UserBasicInfo = styled.div`
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 20px;
 `;
 
@@ -49,6 +52,7 @@ const UserNameSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
+  flex-grow: 1;
 `;
 
 const UserLevel = styled.div`
@@ -57,11 +61,12 @@ const UserLevel = styled.div`
 `;
 
 const EditButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   border: 1px solid #ddd;
   background: white;
   cursor: pointer;
+  width: 8rem;
   &:hover {
     background: #f5f5f5;
   }
@@ -89,8 +94,9 @@ const UserStats = styled.div`
   justify-content: space-around;
   display: flex;
   gap: 40px;
-  margin-top: 10px;
   position: relative;
+  align-items: center;
+  min-height: 5rem;
 
   div {
     text-align: center;
@@ -172,11 +178,24 @@ const AuthorItem = styled.div`
 `;
 
 import { useAuthStore } from "../store/useAuthStore";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { userDetail } = useAuthStore();
+  const navigate = useNavigate();
+  const { nickname } = useParams();
 
-  console.log("User Detail Info:", userDetail);
+  useEffect(() => {
+    // URL에 nickname이 없으면 현재 로그인된 사용자의 프로필로 리다이렉트
+    if (!nickname && userDetail?.nickname) {
+      navigate(`/profile/${userDetail.nickname}`);
+    }
+  }, [nickname, userDetail?.nickname, navigate]);
+
+  // 현재 프로필이 로그인한 사용자의 것인지 확인
+  const isOwnProfile = userDetail?.nickname === nickname;
 
   return (
     <ProfileContainer>
@@ -211,25 +230,29 @@ const ProfilePage = () => {
               </IconContainer>
               <UserName>{userDetail?.nickname || "사용자"}</UserName>
               <UserLevel>
-                팔로워 {userDetail?.followers || 0} | 팔로잉{" "}
-                {userDetail?.followings || 0}
+                팔로워 <strong>{userDetail?.followers || 0}</strong> | 팔로잉{" "}
+                <strong>{userDetail?.followings || 0}</strong>
               </UserLevel>
-              <EditButton>프로필 수정</EditButton>
+              <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>
+                프로필 수정
+              </EditButton>
             </UserNameSection>
           </UserBasicInfo>
         </UserInfo>
-        <hr />
-        <UserStats>
-          <div>
-            <strong>{userDetail?.totalRatings || 0}</strong>
-            <div>평가</div>
-          </div>
-          <div>
-            <strong>{userDetail?.totalReviews || 0}</strong>
-            <div>코멘트</div>
-          </div>
-        </UserStats>
       </UserProfile>
+
+      <hr />
+
+      <UserStats>
+        <div>
+          <strong>{userDetail?.totalRatings || 0}</strong>
+          <div>평가</div>
+        </div>
+        <div>
+          <strong>{userDetail?.totalReviews || 0}</strong>
+          <div>코멘트</div>
+        </div>
+      </UserStats>
 
       <hr />
 

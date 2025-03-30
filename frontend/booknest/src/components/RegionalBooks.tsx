@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import styled from '@emotion/styled';
-import api from '../api/axios';
-import { useBookStore } from '../store/useBookStore';
+import { useEffect, useRef, useState } from "react";
+import styled from "@emotion/styled";
+import api from "../api/axios";
+import { useBookStore } from "../store/useBookStore";
 
 interface Book {
   bookId: number;
@@ -20,7 +20,7 @@ interface RegionalBooksResponse {
 const RegionalBooksContainer = styled.div`
   padding: 16px;
   position: relative;
-  
+
   @media (min-width: 768px) {
     padding: 20px;
   }
@@ -34,7 +34,7 @@ const Title = styled.h2`
   display: flex;
   align-items: center;
   gap: 8px;
-  
+
   @media (min-width: 768px) {
     font-size: 20px;
     margin-bottom: 20px;
@@ -43,8 +43,8 @@ const Title = styled.h2`
 
 const LocationIcon = styled.span`
   font-size: 20px;
-  color: #4CAF50;
-  
+  color: #4caf50;
+
   @media (min-width: 768px) {
     font-size: 22px;
   }
@@ -56,7 +56,7 @@ const BookListContainer = styled.div`
   overflow: hidden;
   margin: 0 -16px;
   padding: 0 16px;
-  
+
   @media (min-width: 768px) {
     margin: 0;
     padding: 0;
@@ -68,7 +68,7 @@ const BookList = styled.div`
   gap: 12px;
   transition: transform 0.3s ease;
   padding: 10px 0;
-  
+
   @media (min-width: 768px) {
     gap: 20px;
   }
@@ -80,7 +80,7 @@ const BookCard = styled.div`
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  
+
   @media (min-width: 768px) {
     flex: 0 0 200px;
   }
@@ -91,7 +91,7 @@ const BookImage = styled.img`
   height: 200px;
   object-fit: cover;
   background-color: #f5f5f5;
-  
+
   @media (min-width: 768px) {
     height: 280px;
   }
@@ -99,7 +99,7 @@ const BookImage = styled.img`
 
 const BookInfo = styled.div`
   padding: 12px;
-  
+
   @media (min-width: 768px) {
     padding: 15px;
   }
@@ -113,7 +113,7 @@ const BookTitle = styled.h3`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  
+
   @media (min-width: 768px) {
     font-size: 16px;
     margin-bottom: 8px;
@@ -127,7 +127,7 @@ const BookAuthor = styled.p`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  
+
   @media (min-width: 768px) {
     font-size: 14px;
     margin-bottom: 5px;
@@ -137,16 +137,16 @@ const BookAuthor = styled.p`
 const BookDate = styled.p`
   font-size: 11px;
   color: #999;
-  
+
   @media (min-width: 768px) {
     font-size: 12px;
   }
 `;
 
-const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
+const NavigationButton = styled.button<{ direction: "left" | "right" }>`
   position: absolute;
   top: 50%;
-  ${props => props.direction === 'left' ? 'left: 4px;' : 'right: 4px;'}
+  ${(props) => (props.direction === "left" ? "left: 4px;" : "right: 4px;")}
   transform: translateY(-50%);
   width: 36px;
   height: 36px;
@@ -162,7 +162,8 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   transition: all 0.2s ease-in-out;
 
   @media (min-width: 768px) {
-    ${props => props.direction === 'left' ? 'left: -18px;' : 'right: -18px;'}
+    ${(props) =>
+      props.direction === "left" ? "left: -18px;" : "right: -18px;"}
     width: 44px;
     height: 44px;
   }
@@ -184,14 +185,17 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   }
 
   &::before {
-    content: '';
+    content: "";
     width: 10px;
     height: 10px;
     border-top: 2.5px solid #555;
     border-right: 2.5px solid #555;
-    transform: ${props => props.direction === 'left' ? 'rotate(-135deg) translateX(2px)' : 'rotate(45deg) translateX(-2px)'};
+    transform: ${(props) =>
+      props.direction === "left"
+        ? "rotate(-135deg) translateX(2px)"
+        : "rotate(45deg) translateX(-2px)"};
     transition: border-color 0.2s ease;
-    
+
     @media (min-width: 768px) {
       width: 12px;
       height: 12px;
@@ -213,7 +217,7 @@ const ErrorMessage = styled.div`
   border-radius: 8px;
   margin: 16px 0;
   font-size: 14px;
-  
+
   @media (min-width: 768px) {
     padding: 20px;
     margin: 20px 0;
@@ -226,7 +230,7 @@ const LoadingMessage = styled.div`
   padding: 32px;
   color: #666;
   font-size: 14px;
-  
+
   @media (min-width: 768px) {
     padding: 40px;
     font-size: 16px;
@@ -234,28 +238,29 @@ const LoadingMessage = styled.div`
 `;
 
 const RegionalBooks = () => {
-  const { 
-    regionalBooks, 
-    loading, 
-    error, 
-    setRegionalBooks, 
-    setLoading, 
-    setError 
+  const {
+    regionalBooks,
+    loading,
+    error,
+    setRegionalBooks,
+    setLoading,
+    setError,
   } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  const handleScroll = (direction: "left" | "right") => {
     if (!bookListRef.current) return;
 
-    const newPosition = direction === 'left' 
-      ? Math.max(0, scrollPosition - SCROLL_AMOUNT)
-      : Math.min(
-          bookListRef.current.scrollWidth - bookListRef.current.clientWidth,
-          scrollPosition + SCROLL_AMOUNT
-        );
+    const newPosition =
+      direction === "left"
+        ? Math.max(0, scrollPosition - SCROLL_AMOUNT)
+        : Math.min(
+            bookListRef.current.scrollWidth - bookListRef.current.clientWidth,
+            scrollPosition + SCROLL_AMOUNT
+          );
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
@@ -264,23 +269,26 @@ const RegionalBooks = () => {
   useEffect(() => {
     const fetchRegionalBooks = async () => {
       try {
-        setLoading('regionalBooks', true);
-        setError('regionalBooks', null);
-        
-        const response = await api.get('/api/book/region');
-        
+        setLoading("regionalBooks", true);
+        setError("regionalBooks", null);
+
+        const response = await api.get("/api/book/region");
+
         if (response.data.success && response.data.data) {
           setRegionalBooks(response.data.data);
         } else {
-          setError('regionalBooks', '지역 인기 도서 정보를 불러오는데 실패했습니다.');
+          setError(
+            "regionalBooks",
+            "지역 인기 도서 정보를 불러오는데 실패했습니다."
+          );
           setRegionalBooks([]);
         }
       } catch (err) {
-        console.error('API Error:', err);
-        setError('regionalBooks', '서버 오류가 발생했습니다.');
+        console.error("API Error:", err);
+        setError("regionalBooks", "서버 오류가 발생했습니다.");
         setRegionalBooks([]);
       } finally {
-        setLoading('regionalBooks', false);
+        setLoading("regionalBooks", false);
       }
     };
 
@@ -288,7 +296,9 @@ const RegionalBooks = () => {
   }, [setRegionalBooks, setLoading, setError]);
 
   if (loading.regionalBooks) {
-    return <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>;
+    return (
+      <LoadingMessage>지역 인기 도서 목록을 불러오는 중...</LoadingMessage>
+    );
   }
 
   if (error.regionalBooks) {
@@ -296,8 +306,9 @@ const RegionalBooks = () => {
   }
 
   const canScrollLeft = scrollPosition > 0;
-  const canScrollRight = bookListRef.current 
-    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+  const canScrollRight = bookListRef.current
+    ? scrollPosition <
+      bookListRef.current.scrollWidth - bookListRef.current.clientWidth
     : false;
 
   return (
@@ -308,22 +319,22 @@ const RegionalBooks = () => {
       </Title>
       <BookListContainer>
         {canScrollLeft && (
-          <NavigationButton 
-            direction="left" 
-            onClick={() => handleScroll('left')}
+          <NavigationButton
+            direction="left"
+            onClick={() => handleScroll("left")}
           />
         )}
         <BookList ref={bookListRef}>
           {regionalBooks && regionalBooks.length > 0 ? (
             regionalBooks.map((book) => (
               <BookCard key={book.bookId}>
-                <BookImage 
-                  src={book.imageUrl || '/images/default-book.png'} 
+                <BookImage
+                  src={book.imageUrl || "/images/default-book.png"}
                   alt={book.title}
                 />
                 <BookInfo>
                   <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors.join(', ')}</BookAuthor>
+                  <BookAuthor>{book.authors.join(", ")}</BookAuthor>
                   <BookDate>{book.publishedDate}</BookDate>
                 </BookInfo>
               </BookCard>
@@ -333,9 +344,9 @@ const RegionalBooks = () => {
           )}
         </BookList>
         {canScrollRight && (
-          <NavigationButton 
-            direction="right" 
-            onClick={() => handleScroll('right')}
+          <NavigationButton
+            direction="right"
+            onClick={() => handleScroll("right")}
           />
         )}
       </BookListContainer>
@@ -343,4 +354,4 @@ const RegionalBooks = () => {
   );
 };
 
-export default RegionalBooks; 
+export default RegionalBooks;
