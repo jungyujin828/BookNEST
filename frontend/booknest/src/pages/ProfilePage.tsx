@@ -1,19 +1,9 @@
 import styled from "@emotion/styled";
+// 임시이미지.. 정말 칠하다...
+import chillGuy from "../assets/chill.jpg";
 
 const ProfileContainer = styled.div`
-  padding: 20px;
-`;
-
-const IconButton = styled.button``;
-
-const IconContainer = styled.div``;
-
-const UserProfile = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
+  padding: 1rem;
 `;
 
 const UserInfo = styled.div`
@@ -22,6 +12,31 @@ const UserInfo = styled.div`
   gap: 20px;
   width: 100%;
   justify-content: space-between;
+`;
+
+const IconContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+`;
+
+const IconButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+`;
+
+const UserProfile = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
 `;
 
 const UserBasicInfo = styled.div`
@@ -58,8 +73,8 @@ const UserName = styled.h2`
 `;
 
 const ProfileImage = styled.div`
-  width: 80px;
-  height: 80px;
+  width: 10rem;
+  height: 10rem;
   border-radius: 50%;
   overflow: hidden;
   img {
@@ -156,17 +171,20 @@ const AuthorItem = styled.div`
   }
 `;
 
+import { useAuthStore } from "../store/useAuthStore";
+
 const ProfilePage = () => {
+  const { userDetail } = useAuthStore();
+
+  console.log("User Detail Info:", userDetail);
+
   return (
     <ProfileContainer>
       <UserProfile>
         <UserInfo>
           <UserBasicInfo>
             <ProfileImage>
-              <img
-                src="/path-to-profile-image.jpg"
-                alt="사용자 이미지 받아서 넣기"
-              />
+              <img src={chillGuy} alt="profile" />
             </ProfileImage>
             <UserNameSection>
               <IconContainer>
@@ -191,8 +209,11 @@ const ProfilePage = () => {
                   </svg>
                 </IconButton>
               </IconContainer>
-              <UserName>배고픈 올빼미</UserName>
-              <UserLevel>팔로워 28 | 팔로잉 30</UserLevel>
+              <UserName>{userDetail?.nickname || "사용자"}</UserName>
+              <UserLevel>
+                팔로워 {userDetail?.followers || 0} | 팔로잉{" "}
+                {userDetail?.followings || 0}
+              </UserLevel>
               <EditButton>프로필 수정</EditButton>
             </UserNameSection>
           </UserBasicInfo>
@@ -200,11 +221,11 @@ const ProfilePage = () => {
         <hr />
         <UserStats>
           <div>
-            <strong>128</strong>
+            <strong>{userDetail?.totalRatings || 0}</strong>
             <div>평가</div>
           </div>
           <div>
-            <strong>31</strong>
+            <strong>{userDetail?.totalReviews || 0}</strong>
             <div>코멘트</div>
           </div>
         </UserStats>
