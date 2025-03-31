@@ -46,9 +46,12 @@ public class SecurityConfig {
 //                요청 URL별 인증 설정
                 .authorizeHttpRequests(authorize ->
                         authorize
-                                .requestMatchers("/api/**").permitAll()
+                                .requestMatchers(
+                                        "/api/**"
+                                ).permitAll()
                                 .anyRequest().authenticated()
                 )
+
 //                JWT 인증 필터 추가
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
