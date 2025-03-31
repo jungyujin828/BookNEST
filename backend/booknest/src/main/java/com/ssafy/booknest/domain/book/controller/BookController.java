@@ -43,7 +43,7 @@ public class BookController {
     }
 
 
-    // 개별 도서 조회
+    // 도서 상세
     @GetMapping("/{bookId}")
     public ResponseEntity<ApiResponse<BookDetailResponse>> getBook(@PathVariable("bookId") Integer bookId,
                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
