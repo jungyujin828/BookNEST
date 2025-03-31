@@ -61,6 +61,7 @@ const NestPage = () => {
 
       {activeTab === '둥지' ? (
         // <NestBookList />
+        ''
       ) : (
         <div>찜 목록 (준비 중)</div>
       )}
