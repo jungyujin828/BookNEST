@@ -27,7 +27,7 @@ public class UserInfoResponse {
                 .nickname(user.getNickname())
                 .gender(user.getGender())
                 .birthDate(user.getBirthdate())
-                .profileURL("https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png")
+                .profileURL(user.getProfileUrl())
                 .roadAddress(address.getRoadAddress())
                 .zipcode(address.getZipcode())
                 .followers(followers)
