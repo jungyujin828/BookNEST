@@ -1,19 +1,7 @@
 import styled from "@emotion/styled";
 
 const ProfileContainer = styled.div`
-  padding: 20px;
-`;
-
-const IconButton = styled.button``;
-
-const IconContainer = styled.div``;
-
-const UserProfile = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 30px;
+  padding: 1rem;
 `;
 
 const UserInfo = styled.div`
@@ -24,9 +12,35 @@ const UserInfo = styled.div`
   justify-content: space-between;
 `;
 
+const IconContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+`;
+
+const IconButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+`;
+
+const UserProfile = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+`;
+
 const UserBasicInfo = styled.div`
   display: flex;
   align-items: center;
+  width: 100%;
   gap: 20px;
 `;
 
@@ -34,6 +48,7 @@ const UserNameSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
+  flex-grow: 1;
 `;
 
 const UserLevel = styled.div`
@@ -42,11 +57,12 @@ const UserLevel = styled.div`
 `;
 
 const EditButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
   border: 1px solid #ddd;
   background: white;
   cursor: pointer;
+  width: 8rem;
   &:hover {
     background: #f5f5f5;
   }
@@ -58,8 +74,8 @@ const UserName = styled.h2`
 `;
 
 const ProfileImage = styled.div`
-  width: 80px;
-  height: 80px;
+  width: 10rem;
+  height: 10rem;
   border-radius: 50%;
   overflow: hidden;
   img {
@@ -74,8 +90,9 @@ const UserStats = styled.div`
   justify-content: space-around;
   display: flex;
   gap: 40px;
-  margin-top: 10px;
   position: relative;
+  align-items: center;
+  min-height: 5rem;
 
   div {
     text-align: center;
@@ -156,59 +173,72 @@ const AuthorItem = styled.div`
   }
 `;
 
+import { useAuthStore } from "../store/useAuthStore";
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 const ProfilePage = () => {
+  const { userDetail } = useAuthStore();
+  const navigate = useNavigate();
+  const { userId } = useParams(); // nickname -> userId로 변경
+
+  useEffect(() => {
+    // URL에 userId가 없으면 현재 로그인된 사용자의 프로필로 리다이렉트
+    if (!userId && userDetail?.userId) {
+      navigate(`/profile/${userDetail.userId}`);
+    }
+  }, [userId, userDetail?.userId, navigate]);
+
+  // 현재 프로필이 로그인한 사용자의 것인지 확인
+  const isOwnProfile = userDetail?.userId === Number(userId);
+
   return (
     <ProfileContainer>
       <UserProfile>
         <UserInfo>
           <UserBasicInfo>
             <ProfileImage>
-              <img
-                src="/path-to-profile-image.jpg"
-                alt="사용자 이미지 받아서 넣기"
-              />
+              <img src={userDetail?.profileURL} alt="profile" />
             </ProfileImage>
             <UserNameSection>
               <IconContainer>
                 <IconButton>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                   </svg>
                 </IconButton>
                 <IconButton>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
                   </svg>
                 </IconButton>
               </IconContainer>
-              <UserName>배고픈 올빼미</UserName>
-              <UserLevel>팔로워 28 | 팔로잉 30</UserLevel>
-              <EditButton>프로필 수정</EditButton>
+              <UserName>{userDetail?.nickname || "사용자"}</UserName>
+              <UserLevel>
+                팔로워 <strong>{userDetail?.followers || 0}</strong> |{" "}
+                <span onClick={() => navigate(`/profile/${userId}/followings`)} style={{ cursor: "pointer" }}>
+                  팔로잉 <strong>{userDetail?.followings || 0}</strong>
+                </span>
+              </UserLevel>
+              <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>프로필 수정</EditButton>
             </UserNameSection>
           </UserBasicInfo>
         </UserInfo>
-        <hr />
-        <UserStats>
-          <div>
-            <strong>128</strong>
-            <div>평가</div>
-          </div>
-          <div>
-            <strong>31</strong>
-            <div>코멘트</div>
-          </div>
-        </UserStats>
       </UserProfile>
+
+      <hr />
+
+      <UserStats>
+        <div>
+          <strong>{userDetail?.totalRatings || 0}</strong>
+          <div>평가</div>
+        </div>
+        <div>
+          <strong>{userDetail?.totalReviews || 0}</strong>
+          <div>코멘트</div>
+        </div>
+      </UserStats>
 
       <hr />
 
