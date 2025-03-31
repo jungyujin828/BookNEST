@@ -35,10 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
 //            String token = resolveToken(request);
             String testToken1 = "test";
             String testToken2 = "test2";
+            String testToken3 = "test3";
+            String testToken4 = "test4";
+            String testToken5 = "test5";
 
             if (StringUtils.hasText(token)) {
                 // test 계정 처리
-                if (testToken1.equals(token) || testToken2.equals(token)) {
+                if (testToken1.equals(token) || testToken2.equals(token) || testToken3.equals(token) || testToken4.equals(token) || testToken5.equals(token)) {
                     Authentication authentication = TestUserMaker.getAuthentication(token);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
