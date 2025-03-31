@@ -34,10 +34,16 @@ public class OAuthController {
         return ApiResponse.success(loginResult.getResponse(), responseCookie);
     }
 
+
     // 네이버 전용 endpoint
     @PostMapping("/naver")
     public ResponseEntity<ApiResponse<OAuthLoginResponse>> naverLogin(
             @RequestBody OAuthLoginRequest request) {
+
+        // 🧪 디버깅 로그 추가
+        System.out.println("🧪 [NAVER] 로그인 요청 받음");
+        System.out.println("🧪 [NAVER] code = " + request.getCode());
+        System.out.println("🧪 [NAVER] state = " + request.getState());
 
         LoginResult loginResult = oAuthService.handleNaverOAuthLogin(
                 request.getCode(),
@@ -47,4 +53,5 @@ public class OAuthController {
         ResponseCookie responseCookie = CookieUtil.makeRefreshTokenCookie(loginResult.getRefreshToken());
         return ApiResponse.success(loginResult.getResponse(), responseCookie);
     }
+
 }
