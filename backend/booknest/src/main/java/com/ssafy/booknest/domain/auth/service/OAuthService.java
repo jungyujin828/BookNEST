@@ -9,7 +9,9 @@ import com.ssafy.booknest.domain.auth.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.auth.service.strategy.NaverOAuthStrategy;
 import com.ssafy.booknest.domain.auth.service.strategy.OAuthStrategy;
 import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.nest.entity.TodayBook;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
+import com.ssafy.booknest.domain.nest.repository.TodayBookRepository;
 import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Provider;
@@ -35,6 +37,7 @@ public class OAuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AuthRedisService authRedisService;
     private final NestRepository nestRepository;
+    private final TodayBookRepository todayBookRepository;
 
     public LoginResult handleOAuthLogin(Provider provider, String code) {
 
@@ -84,12 +87,17 @@ public class OAuthService {
                 .provider(provider)
                 .providerId(userInfo.getId())
                 .profileUrl("https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png")
+                .archeType("갓 태어난 참새")
                 .build();
         Nest newNest = Nest.builder()
                 .user(newUser)
                 .build();
+        TodayBook todayBook = TodayBook.builder()
+                .user(newUser)
+                .build();
         User user = userRepository.save(newUser);
         nestRepository.save(newNest);
+        todayBookRepository.save(todayBook);
 
         return user;
     }

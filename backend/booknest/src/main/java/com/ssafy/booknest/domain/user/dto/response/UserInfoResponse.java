@@ -11,6 +11,7 @@ import lombok.Getter;
 public class UserInfoResponse {
     private Integer userId;
     private String nickname;
+    private String archetype;
     private Gender gender;
     private String birthDate;
     private String roadAddress;
@@ -25,6 +26,7 @@ public class UserInfoResponse {
         return UserInfoResponse.builder()
                 .userId(user.getId())
                 .nickname(user.getNickname())
+                .archetype(user.getArcheType())
                 .gender(user.getGender())
                 .birthDate(user.getBirthdate())
                 .profileURL(user.getProfileUrl())

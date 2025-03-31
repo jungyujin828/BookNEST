@@ -1,14 +1,22 @@
 
 -- ✅ 1️⃣ User 테이블 (명시적으로 ID 추가)
-INSERT INTO user (id, nickname, provider, provider_id, created_at, updated_at)
+INSERT INTO user (id, nickname, archetype, provider, provider_id, created_at, updated_at, profile_url)
 VALUES
-    (1, '테스트맨1', 'KAKAO', 112312312, NOW(), NOW()),
-    (2, '테스트맨2', 'NAVER', 1231440, NOW(), NOW()),
-    (3, '테스트맨3', 'GOOGLE', 987654321, NOW(), NOW()),
-    (4, '테스트맨4', 'KAKAO', 554433221, NOW(), NOW()),
-    (5, '테스트맨5', 'NAVER', 667788990, NOW(), NOW());
+    (1, '테스트맨1', '갓 태어난 참새', 'KAKAO', 112312312, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (2, '테스트맨2', '예민한 앵무새', 'NAVER', 1231440, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (3, '테스트맨3', '갓 태어난 참새', 'GOOGLE', 987654321, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (4, '테스트맨4', '갓 태어난 참새', 'KAKAO', 554433221, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (5, '테스트맨5', '갓 태어난 참새', 'NAVER', 667788990, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png');
 -- ✅ Nest 테이블 (명시적으로 ID 추가)
 INSERT INTO nest (id, user_id, created_at, updated_at)
+VALUES
+    (1, 1, NOW(), NOW()),
+    (2, 2, NOW(), NOW()),
+    (3, 3, NOW(), NOW()),
+    (4, 4, NOW(), NOW()),
+    (5, 5, NOW(), NOW());
+-- ✅ TodayBook 테이블 (명시적으로 ID 추가)
+INSERT INTO today_book (id, user_id, created_at, updated_at)
 VALUES
     (1, 1, NOW(), NOW()),
     (2, 2, NOW(), NOW()),
