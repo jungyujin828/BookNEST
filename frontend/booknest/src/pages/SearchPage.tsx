@@ -1,101 +1,171 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
-// Styled Components
+interface Book {
+  bookId: string;
+  title: string;
+  imageURL: string;
+  authors: string;
+}
+
+interface SearchResponse {
+  content: Book[];
+  pageNumber: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+  first: boolean;
+  last: boolean;
+}
+
 const SearchContainer = styled.div`
-  padding: 20px;
-  background-color: #f5f5f5;
+  padding: 16px;
 `;
 
-const SearchBar = styled.div`
-  display: flex;
-  align-items: center;
-  background-color: white;
-  border-radius: 25px;
-  padding: 8px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+const SearchBarContainer = styled.div`
+  position: relative;
+  margin-bottom: 20px;
 `;
 
 const SearchInput = styled.input`
-  flex: 1;
+  width: 100%;
+  padding: 12px 40px 12px 40px;
+  border-radius: 100px;
   border: none;
-  outline: none;
-  padding: 8px;
+  background-color: #f1f1f1;
   font-size: 16px;
+  outline: none;
+
   &::placeholder {
-    color: #999;
+    color: #666;
   }
 `;
 
 const SearchIcon = styled.span`
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #666;
-  margin-right: 8px;
 `;
 
 const ClearButton = styled.button`
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: #666;
   cursor: pointer;
-  padding: 4px;
+  color: #666;
+  padding: 0;
+`;
+
+const BookList = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const BookCard = styled.div`
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+`;
+
+const BookCover = styled.img`
+  width: 80px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+`;
+
+const BookInfo = styled.div`
+  flex: 1;
+`;
+
+const BookTitle = styled.h3`
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+`;
+
+const BookAuthor = styled.p`
+  margin: 0;
+  color: #666;
+  font-size: 14px;
 `;
 
 const SearchPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [books, setBooks] = useState<Book[]>([]);
 
   const handleSearch = async () => {
-    if (!searchTerm.trim()) return;
-
-    setIsLoading(true);
     try {
-      const response = await api.get("/api/books/search", {
+      const response = await api.get("/api/search/book", {
         params: {
-          keyword: searchTerm,
+          title: searchTerm,
           page: 1,
           size: 10,
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
 
       if (response.data.success) {
-        setSearchResults(response.data.data.content);
+        setBooks(response.data.data.content);
       }
     } catch (error) {
-      console.error("검색 중 오류 발생:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Failed to search books:", error);
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
   };
 
   const handleClear = () => {
     setSearchTerm("");
-    setSearchResults([]);
+    setBooks([]);
   };
 
   return (
     <SearchContainer>
-      <SearchBar>
+      <SearchBarContainer>
         <SearchIcon>🔍</SearchIcon>
         <SearchInput
           type="text"
-          value={searchTerm}
-          onChange={handleInputChange}
           placeholder="도서, 작가, 유저 검색"
-          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
         {searchTerm && <ClearButton onClick={handleClear}>✕</ClearButton>}
-      </SearchBar>
-      {/* SearchTag 컴포넌트는 여기에 추가될 예정 */}
-      {/* 검색 결과 표시 영역은 나중에 구현 */}
+      </SearchBarContainer>
+
+      <BookList>
+        {books.map((book) => (
+          <BookCard key={book.bookId} onClick={() => navigate(`/book-detail/${book.bookId}`)}>
+            <BookCover src={book.imageURL} alt={book.title} />
+            <BookInfo>
+              <BookTitle>{book.title}</BookTitle>
+              <BookAuthor>{book.authors}</BookAuthor>
+            </BookInfo>
+          </BookCard>
+        ))}
+      </BookList>
     </SearchContainer>
   );
 };
