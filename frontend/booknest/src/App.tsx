@@ -17,6 +17,8 @@ import BookDetailPage from "./pages/BookDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import FollowingPage from "./pages/FollowingPage";
 import ErrorPage from "./pages/ErrorPage";
+import MyEvaluatedBookPage from "./pages/MyEvaluatedBookPage";
+import MyCommentPage from "./pages/MycommentPage";
 import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
@@ -144,7 +146,23 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-            ;{/* 책 상세페이지 */}
+            <Route
+              path={ROUTES.MY_EVALUATED_BOOKS}
+              element={
+                <ProtectedRoute>
+                  <MyEvaluatedBookPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.MY_COMMENTS}
+              element={
+                <ProtectedRoute>
+                  <MyCommentPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 책 상세페이지 */}
             <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
             {/* 잘못된 경로는 에러 페이지로 연결 */}
             <Route path="*" element={<ErrorPage />} />

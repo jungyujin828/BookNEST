@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { ROUTES } from '../constants/paths';
 
 const ProfileContainer = styled.div`
   padding: 1rem;
@@ -86,33 +87,40 @@ const ProfileImage = styled.div`
 `;
 
 const UserStats = styled.div`
-  width: 100%;
-  justify-content: space-around;
   display: flex;
-  gap: 40px;
-  position: relative;
-  align-items: center;
-  min-height: 5rem;
+  gap: 24px;
+  margin-top: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   div {
+    flex: 1;
     text-align: center;
-  }
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
 
-  div:first-of-type::after {
-    content: "";
-    position: absolute;
-    right: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 70%;
-    width: 1px;
-    background-color: #ddd;
-  }
+    &:hover {
+      background-color: #f5f5f5;
+    }
 
-  strong {
-    display: block;
-    font-size: 1.5rem;
-    margin-bottom: 4px;
+    strong {
+      display: block;
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    div {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+      padding: 0;
+      background: none;
+    }
   }
 `;
 
@@ -230,11 +238,11 @@ const ProfilePage = () => {
       <hr />
 
       <UserStats>
-        <div>
+        <div onClick={() => navigate(ROUTES.MY_EVALUATED_BOOKS)}>
           <strong>{userDetail?.totalRatings || 0}</strong>
           <div>평가</div>
         </div>
-        <div>
+        <div onClick={() => navigate(ROUTES.MY_COMMENTS)}>
           <strong>{userDetail?.totalReviews || 0}</strong>
           <div>코멘트</div>
         </div>

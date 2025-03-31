@@ -1,21 +1,70 @@
-import React from "react";
+import React, { useState } from "react";
+import styled from "styled-components";
+import NestBookList from "../components/NestBookList";
+
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+const TabContainer = styled.div`
+  display: flex;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+`;
+
+const Tab = styled.button<{ $active: boolean }>`
+  padding: 10px 20px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: ${props => props.$active ? 'bold' : 'normal'};
+  color: ${props => props.$active ? '#4a90e2' : '#666'};
+  cursor: pointer;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: ${props => props.$active ? '#4a90e2' : 'transparent'};
+  }
+
+  &:hover {
+    color: #4a90e2;
+  }
+`;
 
 const NestPage = () => {
-  return (
-    <div className="nest-container">
-      <h1>내 책장</h1>
-      <div className="nest-content">
-        <section className="book-list-section">
-          <h2>내가 읽은 책들</h2>
-          {/* 책 목록이 들어갈 자리 */}
-        </section>
+  const [activeTab, setActiveTab] = useState<'둥지' | '찜'>('둥지');
 
-        <section className="reading-status">
-          <h2>독서 현황</h2>
-          {/* 독서 통계나 현황이 들어갈 자리 */}
-        </section>
-      </div>
-    </div>
+  return (
+    <Container>
+      <TabContainer>
+        <Tab 
+          $active={activeTab === '둥지'} 
+          onClick={() => setActiveTab('둥지')}
+        >
+          둥지
+        </Tab>
+        <Tab 
+          $active={activeTab === '찜'} 
+          onClick={() => setActiveTab('찜')}
+        >
+          찜
+        </Tab>
+      </TabContainer>
+
+      {activeTab === '둥지' ? (
+        <NestBookList />
+      ) : (
+        <div>찜 목록 (준비 중)</div>
+      )}
+    </Container>
   );
 };
 
