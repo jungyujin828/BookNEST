@@ -373,6 +373,7 @@ const InputInfoPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // handleSubmit 함수 내부의 성별 처리 로직 수정
     let genderCode;
     if (gender === "남성") {
       genderCode = "M";
@@ -381,7 +382,7 @@ const InputInfoPage = () => {
     } else if (gender === "기타") {
       genderCode = "O";
     } else {
-      genderCode = "";
+      genderCode = "N"; // "설정안함"일 때 "N"으로 설정
     }
 
     const payload = {

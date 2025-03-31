@@ -7,6 +7,9 @@ import CommentForm from '../components/CommentForm';
 import RatingStars from '../components/RatingStars';
 import { useBookStore } from '../store/useBookStore';
 import axios from 'axios';
+import useRatingStore from '../store/useRatingStore';
+import BookmarkButton from '../components/BookmarkButton';
+import AddToNestButton from '../components/AddToNestButton';
 
 interface Review {
   reviewId: number;
@@ -292,6 +295,7 @@ const ErrorMessage = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 16px;
 `;
@@ -317,6 +321,20 @@ const PurchaseButton = styled.button`
   }
 `;
 
+const BookHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+`;
+
+const BookTitle = styled.h1`
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+`;
+
 const BookDetailPage = () => {
   const { bookId } = useParams();
   const [book, setBook] = useState<BookDetail | null>(null);
@@ -338,6 +356,8 @@ const BookDetailPage = () => {
 
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  const { userRatings } = useRatingStore();
 
   useEffect(() => {
     const fetchBookDetail = async () => {
@@ -493,163 +513,176 @@ const BookDetailPage = () => {
 
   return (
     <Container>
-      <TopSection>
-        <ImageSection>
-          <BookImage src={book.imageUrl} alt={book.title} />
-          <ButtonContainer>
-            <PurchaseButton onClick={handlePurchaseClick}>
-              구매하기
-            </PurchaseButton>
-          </ButtonContainer>
-        </ImageSection>
-        <InfoSection>
-          <Title>{book.title}</Title>
-          <RatingContainer>
-            <RatingRow>
-              <RatingLabel>평균 평점</RatingLabel>
-              <RatingText>{book.avgRating.toFixed(1)}</RatingText>
-            </RatingRow>
-            <RatingRow>
-              <RatingLabel>내 평점</RatingLabel>
-              <RatingStars 
-                bookId={book.bookId}
-                onRatingChange={handleRatingChange}
-              />
-            </RatingRow>
-          </RatingContainer>
-          <AuthorInfo>
-            저자: {book.authors.join(', ')}
-          </AuthorInfo>
-          <BasicInfo>
-            <InfoItem>
-              <Label>출판사</Label>
-              <Value>{book.publisher}</Value>
-            </InfoItem>
-            <InfoItem>
-              <Label>출판일</Label>
-              <Value>{book.publishedDate}</Value>
-            </InfoItem>
-            <InfoItem>
-              <Label>ISBN</Label>
-              <Value>{book.isbn}</Value>
-            </InfoItem>
-            <InfoItem>
-              <Label>페이지</Label>
-              <Value>{book.pages}쪽</Value>
-            </InfoItem>
-          </BasicInfo>
-          <TagsContainer>
-            {book.tags.map((tag, index) => (
-              <Tag key={index}>{tag}</Tag>
-            ))}
-          </TagsContainer>
-        </InfoSection>
-      </TopSection>
+      {book && (
+        <>
+          <BookHeader>
+            <BookTitle>{book.title}</BookTitle>
+            <BookmarkButton bookId={book.bookId} />
+          </BookHeader>
+          <TopSection>
+            <ImageSection>
+              <BookImage src={book.imageUrl} alt={book.title} />
+              <ButtonContainer>
+                <AddToNestButton 
+                  bookId={book.bookId} 
+                  currentRating={userRatings[book.bookId] || 0}
+                />
+                <PurchaseButton onClick={handlePurchaseClick}>
+                  구매하기
+                </PurchaseButton>
+              </ButtonContainer>
+            </ImageSection>
+            <InfoSection>
+              <Title>{book.title}</Title>
+              <RatingContainer>
+                <RatingRow>
+                  <RatingLabel>평균 평점</RatingLabel>
+                  <RatingText>{book.avgRating.toFixed(1)}</RatingText>
+                </RatingRow>
+                <RatingRow>
+                  <RatingLabel>내 평점</RatingLabel>
+                  <RatingStars 
+                    bookId={book.bookId}
+                    onRatingChange={handleRatingChange}
+                  />
+                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || '0.0'}</RatingText>
+                </RatingRow>
+              </RatingContainer>
+              <AuthorInfo>
+                저자: {book.authors.join(', ')}
+              </AuthorInfo>
+              <BasicInfo>
+                <InfoItem>
+                  <Label>출판사</Label>
+                  <Value>{book.publisher}</Value>
+                </InfoItem>
+                <InfoItem>
+                  <Label>출판일</Label>
+                  <Value>{book.publishedDate}</Value>
+                </InfoItem>
+                <InfoItem>
+                  <Label>ISBN</Label>
+                  <Value>{book.isbn}</Value>
+                </InfoItem>
+                <InfoItem>
+                  <Label>페이지</Label>
+                  <Value>{book.pages}쪽</Value>
+                </InfoItem>
+              </BasicInfo>
+              <TagsContainer>
+                {book.tags.map((tag, index) => (
+                  <Tag key={index}>{tag}</Tag>
+                ))}
+              </TagsContainer>
+            </InfoSection>
+          </TopSection>
 
-      <Section>
-        <SectionTitle>책 소개</SectionTitle>
-        <Content>{book.intro}</Content>
-      </Section>
+          <Section>
+            <SectionTitle>책 소개</SectionTitle>
+            <Content>{book.intro}</Content>
+          </Section>
 
-      <Section>
-        <SectionTitle>목차</SectionTitle>
-        <Content>{book.index}</Content>
-      </Section>
+          <Section>
+            <SectionTitle>목차</SectionTitle>
+            <Content>{book.index}</Content>
+          </Section>
 
-      <Section>
-        <SectionTitle>출판사 서평</SectionTitle>
-        <Content>{book.publisherReview}</Content>
-      </Section>
+          <Section>
+            <SectionTitle>출판사 서평</SectionTitle>
+            <Content>{book.publisherReview}</Content>
+          </Section>
 
-      <CommentForm 
-        bookId={Number(bookId)} 
-        onCommentSubmit={handleCommentSubmit}
-      />
+          <CommentForm 
+            bookId={Number(bookId)} 
+            onCommentSubmit={handleCommentSubmit}
+          />
 
-      <ReviewSection>
-        <SectionTitle>리뷰</SectionTitle>
-        {book.reviews && book.reviews.length > 0 ? (
-          [...book.reviews]
-            .sort((a, b) => {
-              // 현재 사용자의 리뷰를 맨 위로
-              if (currentUserId && currentUserId === a.reviewerName) return -1;
-              if (currentUserId && currentUserId === b.reviewerName) return 1;
-              // 그 다음 최신순으로 정렬
-              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-            })
-            .map((review) => {
-              const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
-              console.log('Review details:', {
-                reviewId: review.reviewId,
-                reviewerName: review.reviewerName,
-                currentUserId: currentUserId,
-                isUserReview: isUserReview
-              });
-              return (
-                <ReviewCard 
-                  key={review.reviewId}
-                  isUserReview={isUserReview}
-                >
-                  <ReviewHeader>
-                    <ReviewInfo>
-                      <ReviewerName>{review.reviewerName}</ReviewerName>
-                      <ReviewDate>
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </ReviewDate>
-                    </ReviewInfo>
-                  </ReviewHeader>
-                  {editingReviewId === review.reviewId ? (
-                    <CommentForm 
-                      bookId={Number(bookId)}
-                      reviewId={review.reviewId}
-                      initialContent={review.content}
-                      isEdit={true}
-                      onCommentSubmit={handleCommentSubmit}
-                      onCommentDelete={handleCommentDelete}
-                      onCancel={handleCancelEdit}
-                    />
-                  ) : (
-                    <>
-                      <ReviewContent>
-                        <ReviewText>{review.content}</ReviewText>
-                        {isUserReview && (
-                          <ReviewActions>
-                            <ActionButton onClick={() => handleEditClick(review.reviewId)}>
-                              수정
-                            </ActionButton>
-                            <ActionButton 
-                              className="delete"
-                              onClick={() => {
-                                if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-                                  handleCommentDelete(review.reviewId);
-                                }
-                              }}
-                            >
-                              삭제
-                            </ActionButton>
-                          </ReviewActions>
-                        )}
-                      </ReviewContent>
-                      <LikeCount>좋아요 {review.likes}개</LikeCount>
-                    </>
-                  )}
-                </ReviewCard>
-              );
-            })
-        ) : (
-          <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-            아직 작성된 리뷰가 없습니다.
-          </div>
-        )}
-      </ReviewSection>
+          <ReviewSection>
+            <SectionTitle>리뷰</SectionTitle>
+            {book.reviews && book.reviews.length > 0 ? (
+              [...book.reviews]
+                .sort((a, b) => {
+                  // 현재 사용자의 리뷰를 맨 위로
+                  if (currentUserId && currentUserId === a.reviewerName) return -1;
+                  if (currentUserId && currentUserId === b.reviewerName) return 1;
+                  // 그 다음 최신순으로 정렬
+                  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                })
+                .map((review) => {
+                  const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
+                  console.log('Review details:', {
+                    reviewId: review.reviewId,
+                    reviewerName: review.reviewerName,
+                    currentUserId: currentUserId,
+                    isUserReview: isUserReview
+                  });
+                  return (
+                    <ReviewCard 
+                      key={review.reviewId}
+                      isUserReview={isUserReview}
+                    >
+                      <ReviewHeader>
+                        <ReviewInfo>
+                          <ReviewerName>{review.reviewerName}</ReviewerName>
+                          <ReviewDate>
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </ReviewDate>
+                        </ReviewInfo>
+                      </ReviewHeader>
+                      {editingReviewId === review.reviewId ? (
+                        <CommentForm 
+                          bookId={Number(bookId)}
+                          reviewId={review.reviewId}
+                          initialContent={review.content}
+                          isEdit={true}
+                          onCommentSubmit={handleCommentSubmit}
+                          onCommentDelete={handleCommentDelete}
+                          onCancel={handleCancelEdit}
+                        />
+                      ) : (
+                        <>
+                          <ReviewContent>
+                            <ReviewText>{review.content}</ReviewText>
+                            {isUserReview && (
+                              <ReviewActions>
+                                <ActionButton onClick={() => handleEditClick(review.reviewId)}>
+                                  수정
+                                </ActionButton>
+                                <ActionButton 
+                                  className="delete"
+                                  onClick={() => {
+                                    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+                                      handleCommentDelete(review.reviewId);
+                                    }
+                                  }}
+                                >
+                                  삭제
+                                </ActionButton>
+                              </ReviewActions>
+                            )}
+                          </ReviewContent>
+                          <LikeCount>좋아요 {review.likes}개</LikeCount>
+                        </>
+                      )}
+                    </ReviewCard>
+                  );
+                })
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                아직 작성된 리뷰가 없습니다.
+              </div>
+            )}
+          </ReviewSection>
 
-      <PurchaseModal
-        isOpen={isPurchaseModalOpen}
-        onClose={handlePurchaseModalClose}
-        purchaseUrls={purchaseUrls}
-        isLoading={storeLoading.purchaseUrls}
-        error={storeError.purchaseUrls}
-      />
+          <PurchaseModal
+            isOpen={isPurchaseModalOpen}
+            onClose={handlePurchaseModalClose}
+            purchaseUrls={purchaseUrls}
+            isLoading={storeLoading.purchaseUrls}
+            error={storeError.purchaseUrls}
+          />
+        </>
+      )}
     </Container>
   );
 };
