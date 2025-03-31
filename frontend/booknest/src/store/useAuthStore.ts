@@ -9,13 +9,14 @@ interface User {
 }
 
 interface UserDetailInfo {
+  userId: number;
   nickname: string;
   gender: string;
   birthDate: string;
   roadAddress: string;
   zipcode: string;
+  profileURL: string;
   followers: number;
-
   followings: number;
   totalRatings: number;
   totalReviews: number;

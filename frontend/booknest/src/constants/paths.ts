@@ -11,12 +11,15 @@ export const ROUTES = {
   TODAYS: "/todays",
   NEST: "/nest",
   PROFILE: "/profile",
+  PROFILE_DETAIL: "/profile/:userId",
+  PROFILE_FOLLOWING: "/profile/:userId/followings",
 } as const;
 
 export const API_PATHS = {
-  KAKAO_LOGIN: '/api/oauth/kakao',
-  NAVER_LOGIN: '/api/oauth/naver',
-  GOOGLE_LOGIN: '/api/oauth/google',
+  KAKAO_LOGIN: "/api/oauth/kakao",
+  NAVER_LOGIN: "/api/oauth/naver",
+  GOOGLE_LOGIN: "/api/oauth/google",
+  FOLLOWING: "/api/follow/following",
 } as const;
 
 export const ASSETS = {

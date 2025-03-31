@@ -1,11 +1,8 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { theme } from "./styles/theme"; // theme import 추가
 import { ROUTES } from "./constants/paths";
+import Header from "./components/Header";
+import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
@@ -13,15 +10,14 @@ import NaverCallback from "./components/NaverCallback";
 import GoogleCallback from "./components/GoogleCallback";
 import HomePage from "./pages/HomePage";
 import TodaysPage from "./pages/TodaysPage";
-import ProtectedRoute from "./components/ProtectedRoute";
 import EvaluateBookPage from "./pages/EvaluateBookPage";
 import SearchPage from "./pages/SearchPage";
 import NestPage from "./pages/NestPage";
-import ProfilePage from "./pages/ProfilePage";
-import Header from "./components/Header";
-import Navbar from "./components/Navbar";
-import ErrorPage from "./pages/ErrorPage";
 import BookDetailPage from "./pages/BookDetailPage";
+import ProfilePage from "./pages/ProfilePage";
+import FollowingPage from "./pages/FollowingPage";
+import ErrorPage from "./pages/ErrorPage";
+import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
@@ -41,15 +37,12 @@ if (import.meta.env.DEV && !localStorage.getItem("token")) {
 const AppLayout = styled.div``;
 
 const MainContent = styled.main<{ isLoginPage: boolean }>`
-  padding-top: ${(props) =>
-    props.isLoginPage ? "0" : theme.layout.headerHeight};
-  padding-bottom: ${(props) =>
-    props.isLoginPage ? "0" : theme.layout.navbarHeight};
+  padding-top: ${(props) => (props.isLoginPage ? "0" : theme.layout.headerHeight)};
+  padding-bottom: ${(props) => (props.isLoginPage ? "0" : theme.layout.navbarHeight)};
   height: ${(props) => (props.isLoginPage ? "100vh" : "auto")};
 
   @media (min-width: ${theme.breakpoints.desktop}) {
-    padding-top: ${(props) =>
-      props.isLoginPage ? "0" : theme.layout.headerHeight};
+    padding-top: ${(props) => (props.isLoginPage ? "0" : theme.layout.headerHeight)};
     padding-bottom: 0;
   }
 `;
@@ -72,7 +65,6 @@ const AppContent = () => {
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
             <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
             <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
-
             {/* 보호된 라우트 */}
             <Route
               path={ROUTES.INPUT_INFO}
@@ -90,7 +82,6 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* 검색페이지 */}
             <Route
               path={ROUTES.SEARCH}
@@ -100,7 +91,6 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* 오늘의 책 */}
             <Route
               path={ROUTES.TODAYS}
@@ -110,7 +100,6 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* 메인페이지 */}
             <Route
               path={ROUTES.HOME}
@@ -120,7 +109,6 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* 둥지페이지 */}
             <Route
               path={ROUTES.NEST}
@@ -130,28 +118,34 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
-
             {/* 프로필페이지 */}
             <Route
               path={ROUTES.PROFILE}
               element={
                 <ProtectedRoute>
-                  <Navigate to={`/profile/${userDetail?.nickname}`} replace />
+                  <Navigate to={`/profile/${userDetail?.userId}`} replace />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/profile/:nickname"
+              path={ROUTES.PROFILE_DETAIL}
               element={
                 <ProtectedRoute>
                   <ProfilePage />
                 </ProtectedRoute>
               }
             />
-
-            {/* 책 상세페이지 */}
+            {/* 팔로잉페이지  */}
+            <Route
+              path={ROUTES.PROFILE_FOLLOWING}
+              element={
+                <ProtectedRoute>
+                  <FollowingPage />
+                </ProtectedRoute>
+              }
+            />
+            ;{/* 책 상세페이지 */}
             <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
-
             {/* 잘못된 경로는 에러 페이지로 연결 */}
             <Route path="*" element={<ErrorPage />} />
             <Route path="/input-info" element={<InputInfoPage />} />

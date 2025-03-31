@@ -78,7 +78,8 @@ const HomePage = () => {
         return;
       }
 
-      const response = await api.get("/user/info", {
+      const response = await api.get("/api/user/info", {
+        // '/api' prefix 추가
         headers: { Authorization: `Bearer ${token}` },
       });
 
