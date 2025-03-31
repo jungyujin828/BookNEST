@@ -22,7 +22,14 @@ public class TestUserMaker {
             userId = 1;
         } else if ("test2".equals(token)) {
             userId = 2;
-        } else {
+        } else if ("test3".equals(token)) {
+            userId = 3;
+        } else if ("test4".equals(token)) {
+            userId = 4;
+        } else if ("test5".equals(token)) {
+            userId = 5;
+        }
+        else {
             return null;
         }
 
