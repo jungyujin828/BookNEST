@@ -19,7 +19,7 @@ public class UserMypageResponse {
         return UserMypageResponse.builder()
                 .nestId(user.getNest().getId())
                 .nickname(user.getNickname())
-                .profileURL("https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png")
+                .profileURL(user.getProfileUrl())
                 .followers(followers)
                 .followings(followings)
                 .totalRatings(totalRatings)
