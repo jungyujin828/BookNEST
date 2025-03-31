@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class OAuthController {
     private final OAuthService oAuthService;
 
+
     @PostMapping("/{provider}")
     public ResponseEntity<ApiResponse<OAuthLoginResponse>> socialLogin(
             @PathVariable String provider,
@@ -30,6 +31,20 @@ public class OAuthController {
         // RefreshToken을 HttpOnly 쿠키로 설정
         ResponseCookie responseCookie = CookieUtil.makeRefreshTokenCookie(loginResult.getRefreshToken());
 
+        return ApiResponse.success(loginResult.getResponse(), responseCookie);
+    }
+
+    // 네이버 전용 endpoint
+    @PostMapping("/naver")
+    public ResponseEntity<ApiResponse<OAuthLoginResponse>> naverLogin(
+            @RequestBody OAuthLoginRequest request) {
+
+        LoginResult loginResult = oAuthService.handleNaverOAuthLogin(
+                request.getCode(),
+                request.getState()
+        );
+
+        ResponseCookie responseCookie = CookieUtil.makeRefreshTokenCookie(loginResult.getRefreshToken());
         return ApiResponse.success(loginResult.getResponse(), responseCookie);
     }
 }

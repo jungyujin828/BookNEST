@@ -6,4 +6,5 @@ import java.io.IOException;
 
 public interface OAuthStrategy {
     OAuthUserInfo getUserInfo(String code) throws IOException;
+
 }

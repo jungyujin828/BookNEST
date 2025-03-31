@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
@@ -72,5 +73,16 @@ public class RatingController {
         List<UserRatingResponse> responseList = ratingService.getRatings(userId);
 
         return ApiResponse.success(responseList);
+    }
+
+    // 내가 입력한 점수 불려오기
+    @GetMapping("/{bookId}/rating")
+    public ResponseEntity<ApiResponse<MyRatingResponse>> getMyRating(
+            @PathVariable Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        MyRatingResponse response = ratingService.getUserRating(userId, bookId);
+        return ApiResponse.success(response);
     }
 }

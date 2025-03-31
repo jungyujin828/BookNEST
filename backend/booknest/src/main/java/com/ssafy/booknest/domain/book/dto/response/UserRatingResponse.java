@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRatingResponse {
+public class   UserRatingResponse {
 
     private Integer bookId;
     private Integer ratingId;
