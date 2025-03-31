@@ -3,6 +3,7 @@ package com.ssafy.booknest.domain.user.controller;
 import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
 import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
+import com.ssafy.booknest.domain.user.dto.response.UserMypageResponse;
 import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -85,5 +86,14 @@ public class UserController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
         return ApiResponse.success(userService.getUserInfo(userId));
+    }
+
+    @GetMapping("/mypage")
+    public ResponseEntity<ApiResponse<UserMypageResponse>> getUserMypage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam("targetUserId") Integer targetUserId) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success(userService.getUserMypage(userId, targetUserId));
     }
 }

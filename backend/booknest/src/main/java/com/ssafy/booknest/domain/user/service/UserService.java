@@ -5,6 +5,7 @@ import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
+import com.ssafy.booknest.domain.user.dto.response.UserMypageResponse;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
@@ -130,5 +131,20 @@ public class UserService {
         Integer totalReviews = reviewRepository.countReviews(userId);
 
         return UserInfoResponse.of(user, address, followers, followings, totalRatings, totalReviews);
+    }
+
+    public UserMypageResponse getUserMypage(Integer userId, Integer targetUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        User targetUser = userRepository.findById(targetUserId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Integer followers = followRepository.countFollowers(targetUserId); // 팔로워 수 조회
+        Integer followings = followRepository.countFollowings(targetUserId); // 팔로잉 수 조회
+        Integer totalRatings = ratingRepository.countRatings(targetUserId);
+        Integer totalReviews = reviewRepository.countReviews(targetUserId);
+
+        return UserMypageResponse.of(targetUser, followers, followings, totalRatings, totalReviews);
     }
 }

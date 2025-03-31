@@ -80,7 +80,6 @@ public class OAuthService {
 
     private User createUser(OAuthUserInfo userInfo, Provider provider) {
         User newUser = User.builder()
-                .nickname(userInfo.getNickname())
                 .provider(provider)
                 .providerId(userInfo.getId())
                 .build();
