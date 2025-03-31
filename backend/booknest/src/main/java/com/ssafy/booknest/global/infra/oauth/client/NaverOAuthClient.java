@@ -1,6 +1,7 @@
 package com.ssafy.booknest.global.infra.oauth.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.booknest.global.infra.oauth.constants.NaverOAuthConstants;
 import com.ssafy.booknest.global.infra.oauth.dto.naver.NaverTokenResponse;
 import com.ssafy.booknest.global.infra.oauth.dto.naver.NaverUserResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,21 +26,18 @@ public class NaverOAuthClient {
     @Value("${oauth.naver.redirect-uri}")
     private String redirectUri;
 
-    private static final String TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
-    private static final String USER_INFO_URL = "https://openapi.naver.com/v1/nid/me";
-
     public NaverTokenResponse getToken(String code, String state) throws IOException {
         RequestBody formBody = new FormBody.Builder()
-                .add("grant_type", "authorization_code")
-                .add("client_id", clientId)
-                .add("client_secret", clientSecret)
-                .add("redirect_uri", redirectUri)
-                .add("code", code)
-                .add("state", state)
+                .add(NaverOAuthConstants.Parameters.GRANT_TYPE, NaverOAuthConstants.GrantTypes.AUTHORIZATION_CODE)
+                .add(NaverOAuthConstants.Parameters.CLIENT_ID, clientId)
+                .add(NaverOAuthConstants.Parameters.CLIENT_SECRET, clientSecret)
+                .add(NaverOAuthConstants.Parameters.REDIRECT_URI, redirectUri)
+                .add(NaverOAuthConstants.Parameters.CODE, code)
+                .add(NaverOAuthConstants.Parameters.STATE, state) // ⭐️ state 추가!
                 .build();
 
         Request request = new Request.Builder()
-                .url(TOKEN_URL)
+                .url(NaverOAuthConstants.Urls.TOKEN)
                 .post(formBody)
                 .build();
 
@@ -51,7 +49,7 @@ public class NaverOAuthClient {
 
     public NaverUserResponse getUserInfo(String accessToken) throws IOException {
         Request request = new Request.Builder()
-                .url(USER_INFO_URL)
+                .url(NaverOAuthConstants.Urls.USER_INFO)
                 .header("Authorization", "Bearer " + accessToken)
                 .get()
                 .build();

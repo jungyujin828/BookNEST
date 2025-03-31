@@ -1,21 +1,20 @@
 package com.ssafy.booknest.global.infra.oauth.dto.naver;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@NoArgsConstructor
+@Setter
 public class NaverUserResponse {
-
+    private String resultcode;
+    private String message;
     private NaverAccount response;
 
     @Getter
-    @NoArgsConstructor
+    @Setter
     public static class NaverAccount {
         private String id;
         private String email;
         private String nickname;
-        private String name;
-        private String profile_image;
     }
 }
