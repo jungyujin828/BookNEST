@@ -15,7 +15,8 @@ import SearchPage from "./pages/SearchPage";
 import NestPage from "./pages/NestPage";
 import BookDetailPage from "./pages/BookDetailPage";
 import ProfilePage from "./pages/ProfilePage";
-import FollowingPage from "./pages/FollowingPage";
+import FollowingsPage from "./pages/FollowingsPage";
+import FollowersPage from "./pages/FollowersPage";
 import ErrorPage from "./pages/ErrorPage";
 import MyEvaluatedBookPage from "./pages/MyEvaluatedBookPage";
 import MyCommentPage from "./pages/MycommentPage";
@@ -142,7 +143,16 @@ const AppContent = () => {
               path={ROUTES.PROFILE_FOLLOWING}
               element={
                 <ProtectedRoute>
-                  <FollowingPage />
+                  <FollowingsPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 팔로워페이지 */}
+            <Route
+              path={ROUTES.PROFILE_FOLLOWERS}
+              element={
+                <ProtectedRoute>
+                  <FollowersPage />
                 </ProtectedRoute>
               }
             />
