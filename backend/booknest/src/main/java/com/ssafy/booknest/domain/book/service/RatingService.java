@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Rating;
@@ -120,5 +121,13 @@ public class RatingService {
         return ratingList.stream()
                 .map(rating -> UserRatingResponse.of(rating))
                 .toList();
+    }
+
+    // 사용자의 해당 책 평점 가져오기
+    public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
+        Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
+
+        return MyRatingResponse.of(rating);
     }
 }
