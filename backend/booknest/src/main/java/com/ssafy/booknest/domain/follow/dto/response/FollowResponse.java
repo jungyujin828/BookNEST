@@ -17,8 +17,8 @@ public class FollowResponse {
         return FollowResponse.builder()
                 .userId(user.getId())
                 .nickname(user.getNickname())
-                .profileURL("https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png")
-                .archeType("갓 태어난 참새")
+                .profileURL(user.getProfileUrl())
+                .archeType(user.getArcheType())
                 .totalRatings(totalRatings)
                 .build();
     }
