@@ -17,7 +17,8 @@ spring:
       mode: always  # 항상 초기화하지 않도록 설정
 
   elasticsearch:
-    uris: "43.203.172.46:9200"
+    uris: "43.203.172.46:9200"  # Elasticsearch 서버 URI
+    username: elastic
 
 logging.level:
   org.hibernate.SQL: warn  # Hibernate SQL 로그는 경고 수준으로 설정
