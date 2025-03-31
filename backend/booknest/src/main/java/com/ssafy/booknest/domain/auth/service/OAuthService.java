@@ -81,9 +81,9 @@ public class OAuthService {
 
     private User createUser(OAuthUserInfo userInfo, Provider provider) {
         User newUser = User.builder()
-                .nickname(userInfo.getNickname())
                 .provider(provider)
                 .providerId(userInfo.getId())
+                .profileUrl("https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png")
                 .build();
         Nest newNest = Nest.builder()
                 .user(newUser)
