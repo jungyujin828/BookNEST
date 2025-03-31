@@ -5,8 +5,24 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
+// Import theme for breakpoints
+import { theme } from "../styles/theme";
+
+const BlankBox = styled.div`
+  background-color: #fafafa;
+  min-height: 100vh;
+`;
+
 const ProfileContainer = styled.div`
+  background-color: #ffffff;
   padding: 1rem;
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    border-left: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+    width: 640px;
+    margin: 0 auto;
+  }
 `;
 
 const UserInfo = styled.div`
@@ -223,110 +239,112 @@ const ProfilePage = () => {
   const displayData = profileData || userDetail;
 
   return (
-    <ProfileContainer>
-      <UserProfile>
-        <UserInfo>
-          <UserBasicInfo>
-            <ProfileImage>
-              <img src={displayData?.profileURL} alt="profile" />
-            </ProfileImage>
-            <UserNameSection>
-              <IconContainer>
-                <IconButton>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                  </svg>
-                </IconButton>
-                <IconButton>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13-.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
-                  </svg>
-                </IconButton>
-              </IconContainer>
-              <UserName>{displayData?.nickname || "사용자"}</UserName>
-              <UserLevel>
-                <span onClick={() => navigate(`/profile/${userId}/followers`)} style={{ cursor: "pointer" }}>
-                  팔로워 <strong>{displayData?.followers || 0}</strong>
-                </span>
-                {" | "}
-                <span onClick={() => navigate(`/profile/${userId}/followings`)} style={{ cursor: "pointer" }}>
-                  팔로잉 <strong>{displayData?.followings || 0}</strong>
-                </span>
-              </UserLevel>
-              <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>프로필 수정</EditButton>
-            </UserNameSection>
-          </UserBasicInfo>
-        </UserInfo>
-      </UserProfile>
+    <BlankBox>
+      <ProfileContainer>
+        <UserProfile>
+          <UserInfo>
+            <UserBasicInfo>
+              <ProfileImage>
+                <img src={displayData?.profileURL} alt="profile" />
+              </ProfileImage>
+              <UserNameSection>
+                <IconContainer>
+                  <IconButton>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  </IconButton>
+                  <IconButton>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13-.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                    </svg>
+                  </IconButton>
+                </IconContainer>
+                <UserName>{displayData?.nickname || "사용자"}</UserName>
+                <UserLevel>
+                  <span onClick={() => navigate(`/profile/${userId}/followers`)} style={{ cursor: "pointer" }}>
+                    팔로워 <strong>{displayData?.followers || 0}</strong>
+                  </span>
+                  {" | "}
+                  <span onClick={() => navigate(`/profile/${userId}/followings`)} style={{ cursor: "pointer" }}>
+                    팔로잉 <strong>{displayData?.followings || 0}</strong>
+                  </span>
+                </UserLevel>
+                <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>프로필 수정</EditButton>
+              </UserNameSection>
+            </UserBasicInfo>
+          </UserInfo>
+        </UserProfile>
 
-      <hr />
+        <hr />
 
-      <UserStats>
-        <div>
-          <strong>{userDetail?.totalRatings || 0}</strong>
-          <div>평가</div>
-        </div>
-        <div>
-          <strong>{userDetail?.totalReviews || 0}</strong>
-          <div>코멘트</div>
-        </div>
-      </UserStats>
+        <UserStats>
+          <div>
+            <strong>{userDetail?.totalRatings || 0}</strong>
+            <div>평가</div>
+          </div>
+          <div>
+            <strong>{userDetail?.totalReviews || 0}</strong>
+            <div>코멘트</div>
+          </div>
+        </UserStats>
 
-      <hr />
+        <hr />
 
-      <Section>
-        <SectionTitle>아키타입</SectionTitle>
-        <ArchetypeCard>
-          <h4>명랑한 아이기꾼 앵무새</h4>
-          <p>"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."</p>
-          <DonutChart>{/* 도넛 차트 구현 필요 */}</DonutChart>
-        </ArchetypeCard>
-      </Section>
+        <Section>
+          <SectionTitle>아키타입</SectionTitle>
+          <ArchetypeCard>
+            <h4>명랑한 아이기꾼 앵무새</h4>
+            <p>"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."</p>
+            <DonutChart>{/* 도넛 차트 구현 필요 */}</DonutChart>
+          </ArchetypeCard>
+        </Section>
 
-      <hr />
+        <hr />
 
-      <Section>
-        <SectionTitle>선호태그</SectionTitle>
-        <TagCloud>
-          <Tag color="#ff69b4">서양</Tag>
-          <Tag color="#4169e1">디스토피아</Tag>
-          <Tag color="#32cd32">고등학생</Tag>
-          <Tag color="#ffa500">영화</Tag>
-          <Tag color="#8a2be2">인문학</Tag>
-          <Tag color="#ff4500">영화화</Tag>
-          <Tag color="#2e8b57">로맨스</Tag>
-        </TagCloud>
-      </Section>
+        <Section>
+          <SectionTitle>선호태그</SectionTitle>
+          <TagCloud>
+            <Tag color="#ff69b4">서양</Tag>
+            <Tag color="#4169e1">디스토피아</Tag>
+            <Tag color="#32cd32">고등학생</Tag>
+            <Tag color="#ffa500">영화</Tag>
+            <Tag color="#8a2be2">인문학</Tag>
+            <Tag color="#ff4500">영화화</Tag>
+            <Tag color="#2e8b57">로맨스</Tag>
+          </TagCloud>
+        </Section>
 
-      <hr />
+        <hr />
 
-      <Section>
-        <SectionTitle>BEST 한줄평</SectionTitle>
-        <BestReview>
-          <p>"우리는 행복하지만, 이 행복이 근심을 모르는 것"</p>
-          <div>❤️ 203</div>
-        </BestReview>
-      </Section>
+        <Section>
+          <SectionTitle>BEST 한줄평</SectionTitle>
+          <BestReview>
+            <p>"우리는 행복하지만, 이 행복이 근심을 모르는 것"</p>
+            <div>❤️ 203</div>
+          </BestReview>
+        </Section>
 
-      <hr />
-      <Section>
-        <SectionTitle>선호하는 작가</SectionTitle>
-        <AuthorList>
-          <AuthorItem>
-            <img src="/author1.jpg" alt="김초엽" />
-            <div>김초엽</div>
-          </AuthorItem>
-          <AuthorItem>
-            <img src="/author2.jpg" alt="J.K 롤링" />
-            <div>J.K 롤링</div>
-          </AuthorItem>
-          <AuthorItem>
-            <img src="/author3.jpg" alt="칼 세이건" />
-            <div>칼 세이건</div>
-          </AuthorItem>
-        </AuthorList>
-      </Section>
-    </ProfileContainer>
+        <hr />
+        <Section>
+          <SectionTitle>선호하는 작가</SectionTitle>
+          <AuthorList>
+            <AuthorItem>
+              <img src="/author1.jpg" alt="김초엽" />
+              <div>김초엽</div>
+            </AuthorItem>
+            <AuthorItem>
+              <img src="/author2.jpg" alt="J.K 롤링" />
+              <div>J.K 롤링</div>
+            </AuthorItem>
+            <AuthorItem>
+              <img src="/author3.jpg" alt="칼 세이건" />
+              <div>칼 세이건</div>
+            </AuthorItem>
+          </AuthorList>
+        </Section>
+      </ProfileContainer>
+    </BlankBox>
   );
 };
 
