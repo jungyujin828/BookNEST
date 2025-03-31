@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import styled from '@emotion/styled';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { FaStar } from 'react-icons/fa';
 import api from '../api/axios';
+import useRatingStore from '../store/useRatingStore';
 
 interface RatingStarsProps {
   bookId: number;
-  initialRating?: number;
-  onRatingChange?: (newRating: number) => void;
+  onRatingChange: (rating: number) => void;
 }
 
 const StarContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 `;
 
 const StarWrapper = styled.div`
@@ -21,58 +22,80 @@ const StarWrapper = styled.div`
   cursor: pointer;
 `;
 
-const Star = styled.span<{ filled: boolean }>`
-  position: absolute;
+const Star = styled(FaStar)<{ filled: boolean; hovered: boolean }>`
+  color: ${props => props.filled || props.hovered ? '#FFD700' : '#E0E0E0'};
   font-size: 24px;
-  color: ${props => props.filled ? '#ffd700' : '#e0e0e0'};
   transition: color 0.2s ease;
-  
+`;
+
+const CancelButton = styled.button<{ visible: boolean }>`
+  display: ${props => props.visible ? 'block' : 'none'};
+  padding: 4px 8px;
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+
   &:hover {
-    color: #ffd700;
+    background-color: #cc0000;
   }
 `;
 
-const RatingStars: React.FC<RatingStarsProps> = ({ bookId, initialRating = 0, onRatingChange }) => {
-  const [rating, setRating] = useState(initialRating);
+const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const fetchUserRating = async () => {
-      try {
-        const response = await api.get(`/api/book/${bookId}/rating`);
-        if (response.data.success) {
-          setRating(response.data.data.score);
-        }
-      } catch (error) {
-        console.error('Failed to fetch user rating:', error);
-      }
-    };
-
-    fetchUserRating();
-  }, [bookId]);
+  const { userRatings, setUserRating } = useRatingStore();
+  const currentRating = userRatings[bookId] || 0;
 
   const handleStarClick = async (score: number) => {
-    if (isSubmitting) return;
-    
-    // 즉시 UI 업데이트
-    setRating(score);
-    
     try {
-      setIsSubmitting(true);
-      const response = await api.post(`/api/book/${bookId}/rating`, {
-        score
+      // Optimistic update
+      setUserRating(bookId, score);
+      onRatingChange(score);
+
+      console.log('Submitting rating:', {
+        bookId,
+        score,
+        currentRating,
+        method: currentRating > 0 ? 'PUT' : 'POST'
       });
 
-      if (response.data.success) {
-        onRatingChange?.(score);
+      // If there's an existing rating, use PUT, otherwise use POST
+      const method = currentRating > 0 ? 'put' : 'post';
+      const response = await api[method](`/api/book/${bookId}/rating`, {
+        score: score
+      });
+
+      console.log('Rating response:', response.data);
+
+      if (!response.data.success) {
+        throw new Error(response.data.error?.message || `Failed to ${method} rating`);
       }
     } catch (error) {
-      // 에러 발생 시 이전 평점으로 되돌림
-      setRating(rating);
-      console.error('Failed to submit rating:', error);
-    } finally {
-      setIsSubmitting(false);
+      console.error(`Failed to ${currentRating > 0 ? 'update' : 'create'} rating:`, error);
+      // Revert optimistic update on error
+      setUserRating(bookId, currentRating);
+      onRatingChange(currentRating);
+    }
+  };
+
+  const handleCancelRating = async () => {
+    try {
+      // Optimistic update
+      setUserRating(bookId, 0);
+      onRatingChange(0);
+
+      const response = await api.delete(`/api/book/${bookId}/rating`);
+      if (!response.data.success) {
+        throw new Error(response.data.error?.message || 'Failed to delete rating');
+      }
+    } catch (error) {
+      console.error('Failed to delete rating:', error);
+      // Revert optimistic update on error
+      setUserRating(bookId, currentRating);
+      onRatingChange(currentRating);
     }
   };
 
@@ -84,7 +107,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, initialRating = 0, on
     setHoveredRating(null);
   };
 
-  const displayRating = hoveredRating !== null ? hoveredRating : rating;
+  const displayRating = hoveredRating !== null ? hoveredRating : currentRating;
 
   return (
     <StarContainer>
@@ -95,9 +118,15 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, initialRating = 0, on
           onMouseEnter={() => handleStarHover(star)}
           onMouseLeave={handleStarLeave}
         >
-          <Star filled={displayRating >= star}>★</Star>
+          <Star filled={displayRating >= star} hovered={star <= hoveredRating} />
         </StarWrapper>
       ))}
+      <CancelButton 
+        visible={currentRating > 0} 
+        onClick={handleCancelRating}
+      >
+        평점 취소
+      </CancelButton>
     </StarContainer>
   );
 };
