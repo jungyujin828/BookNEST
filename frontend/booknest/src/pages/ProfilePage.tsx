@@ -216,7 +216,10 @@ const ProfilePage = () => {
               </IconContainer>
               <UserName>{userDetail?.nickname || "사용자"}</UserName>
               <UserLevel>
-                팔로워 <strong>{userDetail?.followers || 0}</strong> |{" "}
+                <span onClick={() => navigate(`/profile/${userId}/followers`)} style={{ cursor: "pointer" }}>
+                  팔로워 <strong>{userDetail?.followers || 0}</strong>
+                </span>{" "}
+                |{" "}
                 <span onClick={() => navigate(`/profile/${userId}/followings`)} style={{ cursor: "pointer" }}>
                   팔로잉 <strong>{userDetail?.followings || 0}</strong>
                 </span>
