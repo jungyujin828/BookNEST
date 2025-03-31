@@ -17,21 +17,36 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
     private final NaverOAuthClient naverOAuthClient;
 
+    //  기존 인터페이스 오버라이드
     @Override
     public OAuthUserInfo getUserInfo(String code) throws IOException {
+        // 기본 구현에서는 state 고정
+        return getUserInfo(code, "default-state");
+    }
+
+    // 네이버 전용 오버로딩 메서드
+    public OAuthUserInfo getUserInfo(String code, String state) throws IOException {
         try {
-            // 보통 네이버는 state도 필요함
-            String state = "dummy-state"; // 실제 구현에서는 세션 또는 프론트에서 전달받은 state 사용
-
+            // 1. 액세스 토큰 발급
             NaverTokenResponse tokenResponse = naverOAuthClient.getToken(code, state);
-            NaverUserResponse userResponse = naverOAuthClient.getUserInfo(tokenResponse.getAccessToken());
 
+            // 2. 사용자 정보 요청
+            NaverUserResponse userResponse = naverOAuthClient.getUserInfo(tokenResponse.getAccessToken());
+            NaverUserResponse.NaverAccount user = userResponse.getResponse();
+
+            // 3. 유효성 검사
+            if (user == null || user.getId() == null) {
+                throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
+            }
+
+            // 4. 사용자 정보 매핑
             return OAuthUserInfo.builder()
-                    .id(userResponse.getResponse().getId())
-                    .email(userResponse.getResponse().getEmail())
-                    .nickname(userResponse.getResponse().getNickname())
+                    .id(user.getId())
+                    .email(user.getEmail())
+                    .nickname(user.getNickname())
                     .build();
-        } catch (Exception e) {
+
+        } catch (IOException e) {
             throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
         }
     }

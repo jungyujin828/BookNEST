@@ -6,6 +6,7 @@ import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
 import com.ssafy.booknest.domain.auth.dto.response.OAuthLoginResponse;
 import com.ssafy.booknest.domain.auth.dto.response.TokenRefreshResponse;
 import com.ssafy.booknest.domain.auth.dto.response.UserInfoResponse;
+import com.ssafy.booknest.domain.auth.service.strategy.NaverOAuthStrategy;
 import com.ssafy.booknest.domain.auth.service.strategy.OAuthStrategy;
 import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
@@ -112,5 +113,43 @@ public class OAuthService {
         String newAccessToken = jwtTokenProvider.createAccessToken(userId);
 
         return new TokenRefreshResponse(newAccessToken);
+    }
+
+    public LoginResult handleNaverOAuthLogin(String code, String state) {
+        // 1. 전략 가져오기
+        OAuthStrategy strategy = oAuthStrategyMap.get(Provider.NAVER);
+        if (!(strategy instanceof NaverOAuthStrategy)) {
+            throw new CustomException(ErrorCode.INVALID_OAUTH_PROVIDER);
+        }
+
+        // 2. 유저 정보 조회 (state 포함)
+        OAuthUserInfo userInfo;
+        try {
+            userInfo = ((NaverOAuthStrategy) strategy).getUserInfo(code, state);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
+        }
+
+
+        // 3. 기존 회원 확인
+        Optional<User> existingUser = userRepository.findByProviderAndProviderId(Provider.NAVER, userInfo.getId());
+        boolean isNew = existingUser.isEmpty();
+
+        // 4. 회원 생성 또는 기존 사용자 가져오기
+        User user = existingUser.orElseGet(() -> createUser(userInfo, Provider.NAVER));
+
+        // 5. 토큰 발급
+        String userId = user.getId().toString();
+        String accessToken = jwtTokenProvider.createAccessToken(userId);
+        String refreshToken = jwtTokenProvider.createRefreshToken(userId);
+
+        // 6. Redis에 RefreshToken 저장
+        authRedisService.saveRefreshToken(userId, refreshToken);
+
+        // 7. 응답 생성
+        UserInfoResponse userInfoResponse = UserInfoResponse.of(user, isNew);
+        OAuthLoginResponse loginResponse = OAuthLoginResponse.of(accessToken, userInfoResponse);
+
+        return LoginResult.of(loginResponse, refreshToken);
     }
 }

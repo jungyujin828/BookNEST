@@ -19,4 +19,6 @@ public class NaverTokenResponse {
 
     @JsonProperty("expires_in")
     private Integer expiresIn;
+
+
 }
