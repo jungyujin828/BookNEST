@@ -1,4 +1,10 @@
 import styled from "@emotion/styled";
+import { ROUTES } from '../constants/paths';
+import { useAuthStore } from "../store/useAuthStore";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 const ProfileContainer = styled.div`
   padding: 1rem;
@@ -86,33 +92,40 @@ const ProfileImage = styled.div`
 `;
 
 const UserStats = styled.div`
-  width: 100%;
-  justify-content: space-around;
   display: flex;
-  gap: 40px;
-  position: relative;
-  align-items: center;
-  min-height: 5rem;
+  gap: 24px;
+  margin-top: 24px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   div {
+    flex: 1;
     text-align: center;
-  }
+    cursor: pointer;
+    padding: 12px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
 
-  div:first-of-type::after {
-    content: "";
-    position: absolute;
-    right: 50%;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 70%;
-    width: 1px;
-    background-color: #ddd;
-  }
+    &:hover {
+      background-color: #f5f5f5;
+    }
 
-  strong {
-    display: block;
-    font-size: 1.5rem;
-    margin-bottom: 4px;
+    strong {
+      display: block;
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    div {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+      padding: 0;
+      background: none;
+    }
   }
 `;
 
@@ -173,25 +186,49 @@ const AuthorItem = styled.div`
   }
 `;
 
-import { useAuthStore } from "../store/useAuthStore";
-import { useParams } from "react-router-dom";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-
 const ProfilePage = () => {
   const { userDetail } = useAuthStore();
   const navigate = useNavigate();
-  const { userId } = useParams(); // nickname -> userId로 변경
+  const { userId } = useParams();
+  const [profileData, setProfileData] = useState(null);
+
+  // 현재 프로필이 로그인한 사용자의 것인지 확인
+  const isOwnProfile = userDetail?.userId === Number(userId);
 
   useEffect(() => {
     // URL에 userId가 없으면 현재 로그인된 사용자의 프로필로 리다이렉트
     if (!userId && userDetail?.userId) {
       navigate(`/profile/${userDetail.userId}`);
+      return;
+    }
+
+    // userId가 있으면 해당 유저의 프로필 정보를 가져옴
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get("/api/user/mypage", {
+          params: {
+            targetUserId: userId,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setProfileData(response.data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+      }
+    };
+
+    if (userId) {
+      fetchUserProfile();
     }
   }, [userId, userDetail?.userId, navigate]);
 
-  // 현재 프로필이 로그인한 사용자의 것인지 확인
-  const isOwnProfile = userDetail?.userId === Number(userId);
+  // profileData를 사용하도록 JSX 수정
+  const displayData = profileData || userDetail;
 
   return (
     <ProfileContainer>
@@ -199,7 +236,7 @@ const ProfilePage = () => {
         <UserInfo>
           <UserBasicInfo>
             <ProfileImage>
-              <img src={userDetail?.profileURL} alt="profile" />
+              <img src={displayData?.profileURL} alt="profile" />
             </ProfileImage>
             <UserNameSection>
               <IconContainer>
@@ -210,18 +247,18 @@ const ProfilePage = () => {
                 </IconButton>
                 <IconButton>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                    <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13-.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
                   </svg>
                 </IconButton>
               </IconContainer>
-              <UserName>{userDetail?.nickname || "사용자"}</UserName>
+              <UserName>{displayData?.nickname || "사용자"}</UserName>
               <UserLevel>
                 <span onClick={() => navigate(`/profile/${userId}/followers`)} style={{ cursor: "pointer" }}>
-                  팔로워 <strong>{userDetail?.followers || 0}</strong>
-                </span>{" "}
-                |{" "}
+                  팔로워 <strong>{displayData?.followers || 0}</strong>
+                </span>
+                {" | "}
                 <span onClick={() => navigate(`/profile/${userId}/followings`)} style={{ cursor: "pointer" }}>
-                  팔로잉 <strong>{userDetail?.followings || 0}</strong>
+                  팔로잉 <strong>{displayData?.followings || 0}</strong>
                 </span>
               </UserLevel>
               <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>프로필 수정</EditButton>
@@ -233,11 +270,11 @@ const ProfilePage = () => {
       <hr />
 
       <UserStats>
-        <div>
+        <div onClick={() => navigate(ROUTES.MY_EVALUATED_BOOKS)}>
           <strong>{userDetail?.totalRatings || 0}</strong>
           <div>평가</div>
         </div>
-        <div>
+        <div onClick={() => navigate(ROUTES.MY_COMMENTS)}>
           <strong>{userDetail?.totalReviews || 0}</strong>
           <div>코멘트</div>
         </div>

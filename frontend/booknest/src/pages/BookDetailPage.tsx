@@ -9,6 +9,7 @@ import { useBookStore } from '../store/useBookStore';
 import axios from 'axios';
 import useRatingStore from '../store/useRatingStore';
 import BookmarkButton from '../components/BookmarkButton';
+import AddToNestButton from '../components/AddToNestButton';
 
 interface Review {
   reviewId: number;
@@ -294,6 +295,7 @@ const ErrorMessage = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
+  flex-direction: column;
   gap: 12px;
   margin-top: 16px;
 `;
@@ -521,6 +523,10 @@ const BookDetailPage = () => {
             <ImageSection>
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
+                <AddToNestButton 
+                  bookId={book.bookId} 
+                  currentRating={userRatings[book.bookId] || 0}
+                />
                 <PurchaseButton onClick={handlePurchaseClick}>
                   구매하기
                 </PurchaseButton>
