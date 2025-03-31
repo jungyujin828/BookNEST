@@ -13,6 +13,7 @@ export const ROUTES = {
   PROFILE: "/profile",
   PROFILE_DETAIL: "/profile/:userId",
   PROFILE_FOLLOWING: "/profile/:userId/followings",
+  PROFILE_FOLLOWERS: "/profile/:userId/followers",
 } as const;
 
 export const API_PATHS = {
