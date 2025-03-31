@@ -14,6 +14,8 @@ export const ROUTES = {
   PROFILE_DETAIL: "/profile/:userId",
   PROFILE_FOLLOWING: "/profile/:userId/followings",
   PROFILE_FOLLOWERS: "/profile/:userId/followers",
+  MY_EVALUATED_BOOKS: "/my-evaluated-books",
+  MY_COMMENTS: "/my-comments",
 } as const;
 
 export const API_PATHS = {
