@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useAuthStore } from '../store/useAuthStore';
+import { FaStar, FaStarHalfAlt } from 'react-icons/fa';
 
-interface Book {
+interface NestBook {
   bookId: number;
   title: string;
   authors: string;
@@ -13,8 +14,7 @@ interface Book {
   userReview: string;
 }
 
-interface NestResponse {
-  content: Book[];
+interface PaginationInfo {
   pageNumber: number;
   totalPages: number;
   totalElements: number;
@@ -23,168 +23,484 @@ interface NestResponse {
   last: boolean;
 }
 
+interface UserInfo {
+  userId: number;
+  nestId: number;
+  nickname: string;
+  archetype: string;
+  gender: string;
+  birthDate: string;
+  roadAddress: string;
+  zipcode: string;
+  profileURL: string;
+  followers: number;
+  followings: number;
+  totalRatings: number;
+  totalReviews: number;
+}
+
+interface NestBookListProps {
+  userId?: number;
+  nestId?: number;
+}
+
 const Container = styled.div`
-  max-width: 768px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
 `;
 
-const PageTitle = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 24px;
-  text-align: center;
-`;
+const BookGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
 
-const BookList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`;
-
-const BookCard = styled.div`
-  background-color: #f8f9fa;
-  border-radius: 12px;
-  padding: 20px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  display: flex;
-  gap: 20px;
-
-  &:hover {
-    transform: translateY(-2px);
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
   }
 `;
 
-const BookImage = styled.img`
-  width: 100px;
-  height: 145px;
-  object-fit: cover;
+const BookCard = styled.div`
+  display: flex;
+  flex-direction: column;
   border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+  background-color: white;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const BookCover = styled.div`
+  position: relative;
+  height: 260px;
+
+  @media (max-width: 768px) {
+    height: 220px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const BookInfo = styled.div`
-  flex: 1;
+  padding: 16px;
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
 `;
 
-const BookTitle = styled.h2`
-  font-size: 18px;
+const BookTitle = styled.h3`
+  margin: 0 0 8px 0;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const BookAuthor = styled.div`
+const BookAuthor = styled.p`
+  margin: 0 0 12px 0;
   font-size: 14px;
   color: #666;
-  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
-const Rating = styled.div`
-  color: #f8c41b;
-  font-size: 16px;
+const RatingContainer = styled.div`
+  display: flex;
+  align-items: center;
   margin-bottom: 8px;
 `;
 
-const Review = styled.p`
-  font-size: 16px;
-  color: #333;
-  line-height: 1.5;
-  margin: 0;
-  font-style: italic;
+const StarContainer = styled.div`
+  display: flex;
+  color: #f8d254;
+  margin-right: 8px;
 `;
 
-const ErrorMessage = styled.div`
-  color: #dc3545;
+const RatingValue = styled.span`
+  font-size: 14px;
+  color: #444;
+`;
+
+const ReviewText = styled.p`
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  color: #555;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+`;
+
+const PageButton = styled.button<{ isActive?: boolean }>`
+  background-color: ${props => props.isActive ? '#4CAF50' : 'white'};
+  color: ${props => props.isActive ? 'white' : '#333'};
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  margin: 0 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+
+  &:hover {
+    background-color: ${props => props.isActive ? '#45a049' : '#f5f5f5'};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const EmptyState = styled.div`
   text-align: center;
-  padding: 20px;
-  background-color: #f8d7da;
-  border-radius: 8px;
-  margin: 20px 0;
+  padding: 48px;
+  color: #666;
 `;
 
-const NestBookList: React.FC = () => {
-  const [books, setBooks] = useState<Book[]>([]);
+const LoadingState = styled.div`
+  text-align: center;
+  padding: 48px;
+  color: #666;
+`;
+
+const ErrorState = styled.div`
+  text-align: center;
+  padding: 48px;
+  color: #e53935;
+  background-color: #ffebee;
+  border-radius: 8px;
+`;
+
+const LoginRequiredState = styled.div`
+  text-align: center;
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #eaeaea;
+`;
+
+const LoginButton = styled.button`
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #45a049;
+  }
+`;
+
+const renderRatingStars = (rating: number) => {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating - fullStars >= 0.5;
+  const stars = [];
+
+  for (let i = 0; i < fullStars; i++) {
+    stars.push(<FaStar key={`full-${i}`} />);
+  }
+
+  if (hasHalfStar) {
+    stars.push(<FaStarHalfAlt key="half" />);
+  }
+
+  return stars;
+};
+
+const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId: propNestId }) => {
+  const [books, setBooks] = useState<NestBook[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    pageNumber: 1,
+    totalPages: 1,
+    totalElements: 0,
+    pageSize: 10,
+    first: true,
+    last: true
+  });
+  
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { userDetail } = useAuthStore();
+  const [isAuthError, setIsAuthError] = useState(false);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      if (!userDetail) {
-        setError('사용자 정보를 찾을 수 없습니다.');
-        setLoading(false);
-        return;
+  // 사용자 정보 조회
+  const fetchUserInfo = async () => {
+    try {
+      console.log("사용자 정보 조회 시작");
+      const response = await api.get('/api/user/info');
+      console.log("사용자 정보 응답:", response.data);
+      
+      if (response.data.success && response.data.data) {
+        setUserInfo(response.data.data);
+        return response.data.data;
+      }
+      return null;
+    } catch (err) {
+      console.error("사용자 정보 조회 실패:", err);
+      return null;
+    }
+  };
+
+  const fetchNestBooks = async (page = 1, currentUserId?: number, currentNestId?: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setIsAuthError(false);
+
+      // 우선순위: props로 전달된 값 > 사용자 정보에서 가져온 값
+      const effectiveUserId = propUserId || currentUserId;
+      const effectiveNestId = propNestId || currentNestId;
+
+      // API 스펙에 맞게 Query Parameter 수정
+      const params: Record<string, any> = { 
+        page: page, 
+        size: 10 
+      };
+      
+      // userId와 nestId 값이 있는 경우만 파라미터에 추가
+      if (effectiveUserId !== undefined && effectiveUserId !== null) {
+        params.userId = effectiveUserId;
+      }
+      
+      if (effectiveNestId !== undefined && effectiveNestId !== null) {
+        params.nestId = effectiveNestId;
       }
 
-      try {
-        console.log('User Detail:', userDetail);
-        console.log('Current Token:', localStorage.getItem('token'));
-        console.log('API Default Headers:', api.defaults.headers);
-        
-        console.log('Request URL:', `${api.defaults.baseURL}/api/nest`);
-        
-        const response = await api.get('/api/nest');
+      // 디버깅 정보 출력
+      console.log("API 요청 파라미터:", params);
+      console.log("토큰:", localStorage.getItem('token'));
+      
+      // axios 인터셉터가 토큰을 자동으로 추가하므로 명시적 헤더 설정 제거
+      const response = await api.get('/api/nest', { params });
 
-        console.log('Response Config:', response.config);
-        console.log('Response Headers:', response.headers);
-        console.log('Response Data:', response.data);
+      console.log("API 응답:", response.data);
 
-        if (response.data.success) {
-          if (response.data.data.content) {
-            setBooks(response.data.data.content);
-          } else {
-            setBooks([]);
-          }
+      if (response.data.success) {
+        if (response.data.data && response.data.data.content) {
+          setBooks(response.data.data.content);
+          setPagination({
+            pageNumber: response.data.data.pageNumber,
+            totalPages: response.data.data.totalPages,
+            totalElements: response.data.data.totalElements,
+            pageSize: response.data.data.pageSize,
+            first: response.data.data.first,
+            last: response.data.data.last
+          });
+        } else if (response.data.data && Array.isArray(response.data.data)) {
+          // 다른 형태의 응답인 경우 처리 (배열로 직접 오는 경우)
+          setBooks(response.data.data);
+          setPagination({
+            pageNumber: 1,
+            totalPages: 1,
+            totalElements: response.data.data.length,
+            pageSize: response.data.data.length,
+            first: true,
+            last: true
+          });
         } else {
-          setError(response.data.error?.message || '서재 목록을 불러오는데 실패했습니다.');
+          // 데이터가 없는 경우
+          setBooks([]);
+          setPagination({
+            pageNumber: 1,
+            totalPages: 1,
+            totalElements: 0,
+            pageSize: 10,
+            first: true,
+            last: true
+          });
         }
-      } catch (error: any) {
-        console.error('Error fetching nest books:', error);
-        if (error.response?.status === 401) {
-          setError('로그인이 필요한 서비스입니다.');
-        } else if (error.response?.status === 403) {
-          setError('이 요청을 수행할 권한이 없습니다.');
-        } else if (error.response?.status === 404) {
-          setError('둥지에서 등록된 책 목록 데이터를 찾을 수 없습니다.');
-        } else if (error.response?.status === 429) {
-          setError('요청 횟수를 초과했습니다. 잠시 후 다시 시도해주세요.');
-        } else if (error.response?.status === 500) {
-          setError('서버 내부 오류가 발생했습니다.');
+      } else {
+        throw new Error(response.data.error?.message || '데이터를 불러오는데 실패했습니다.');
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch nest books:', err);
+      console.error('Error details:', err.response?.data || err.message);
+      console.error('Error status:', err.response?.status);
+      
+      // 403 에러 (인증 관련) 처리
+      if (err.response && (err.response.status === 403 || err.response.status === 401)) {
+        setIsAuthError(true);
+        setError('로그인이 필요한 서비스입니다.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('둥지 도서 목록을 불러오는데 실패했습니다.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 사용자 정보를 먼저 조회하고, 그 후 도서 목록 조회
+  useEffect(() => {
+    const initializeData = async () => {
+      // props로 userId나 nestId가 전달되지 않은 경우 사용자 정보 조회
+      if (!propUserId && !propNestId) {
+        const userInfoData = await fetchUserInfo();
+        if (userInfoData) {
+          // 조회한 사용자 정보로 도서 목록 요청
+          await fetchNestBooks(currentPage, userInfoData.userId, userInfoData.nestId);
         } else {
-          setError('서재 목록을 불러오는데 실패했습니다.');
+          // 사용자 정보 조회 실패 시 그냥 페이지네이션으로만 요청
+          await fetchNestBooks(currentPage);
         }
-      } finally {
-        setLoading(false);
+      } else {
+        // props로 전달된 값이 있는 경우 그대로 사용
+        await fetchNestBooks(currentPage, propUserId, propNestId);
       }
     };
 
-    fetchBooks();
-  }, [userDetail]);
+    initializeData();
+  }, [currentPage, propUserId, propNestId]);
 
-  if (loading) return <Container>로딩 중...</Container>;
-  if (error) return <Container><ErrorMessage>{error}</ErrorMessage></Container>;
-  if (books.length === 0) return <Container>등록된 책이 없습니다.</Container>;
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleLoginClick = () => {
+    // 현재 URL을 저장하고 로그인 페이지로 리다이렉트
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    navigate('/login');
+  };
+
+  // 페이지네이션 버튼 생성
+  const renderPagination = () => {
+    const pageButtons = [];
+    const maxVisibleButtons = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
+    let endPage = Math.min(pagination.totalPages, startPage + maxVisibleButtons - 1);
+    
+    // 표시되는 페이지 버튼 수 조정
+    if (endPage - startPage + 1 < maxVisibleButtons && startPage > 1) {
+      startPage = Math.max(1, endPage - maxVisibleButtons + 1);
+    }
+
+    // 이전 페이지 버튼
+    pageButtons.push(
+      <PageButton 
+        key="prev" 
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={pagination.first}
+      >
+        이전
+      </PageButton>
+    );
+
+    // 페이지 번호 버튼
+    for (let i = startPage; i <= endPage; i++) {
+      pageButtons.push(
+        <PageButton
+          key={i}
+          isActive={i === currentPage}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </PageButton>
+      );
+    }
+
+    // 다음 페이지 버튼
+    pageButtons.push(
+      <PageButton 
+        key="next" 
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={pagination.last}
+      >
+        다음
+      </PageButton>
+    );
+
+    return pageButtons;
+  };
+
+  if (loading && books.length === 0) {
+    return <LoadingState>둥지 도서 목록을 불러오는 중...</LoadingState>;
+  }
+
+  if (isAuthError) {
+    return (
+      <LoginRequiredState>
+        <div>로그인이 필요한 서비스입니다.</div>
+        <LoginButton onClick={handleLoginClick}>로그인 하기</LoginButton>
+      </LoginRequiredState>
+    );
+  }
+
+  if (error && !isAuthError) {
+    return <ErrorState>{error}</ErrorState>;
+  }
+
+  if (books.length === 0) {
+    return <EmptyState>둥지에 추가한 도서가 없습니다.</EmptyState>;
+  }
 
   return (
     <Container>
-      <PageTitle>내 서재</PageTitle>
-      <BookList>
+      <BookGrid>
         {books.map((book) => (
-          <BookCard key={book.bookId}>
-            <BookImage src={book.imageUrl} alt={book.title} />
-            <BookInfo>
-              <BookTitle>{book.title}</BookTitle>
-              <BookAuthor>{book.authors}</BookAuthor>
-              <Rating>★ {book.userRating.toFixed(1)}</Rating>
-              {book.userReview && <Review>"{book.userReview}"</Review>}
-            </BookInfo>
+          <BookCard key={`${book.bookId}-${book.createdAt}`}>
+            <Link to={`/book/${book.bookId}`}>
+              <BookCover>
+                <img src={book.imageUrl} alt={book.title} />
+              </BookCover>
+              <BookInfo>
+                <BookTitle>{book.title}</BookTitle>
+                <BookAuthor>{book.authors}</BookAuthor>
+                <RatingContainer>
+                  <StarContainer>
+                    {renderRatingStars(book.userRating)}
+                  </StarContainer>
+                  <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
+                </RatingContainer>
+                {book.userReview && (
+                  <ReviewText>{book.userReview}</ReviewText>
+                )}
+              </BookInfo>
+            </Link>
           </BookCard>
         ))}
-      </BookList>
+      </BookGrid>
+      
+      {pagination.totalPages > 1 && (
+        <PaginationContainer>
+          {renderPagination()}
+        </PaginationContainer>
+      )}
     </Container>
   );
 };

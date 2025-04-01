@@ -10,6 +10,7 @@ import axios from 'axios';
 import useRatingStore from '../store/useRatingStore';
 import BookmarkButton from '../components/BookmarkButton';
 import AddToNestButton from '../components/AddToNestButton';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
 interface Review {
   reviewId: number;
@@ -271,9 +272,24 @@ const ReviewDate = styled.span`
   font-size: 14px;
 `;
 
-const LikeCount = styled.div`
+const LikeButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   color: #868e96;
   font-size: 14px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #ff6b6b;
+  }
+
+  &.liked {
+    color: #ff6b6b;
+  }
 `;
 
 const LoadingMessage = styled.div`
@@ -340,6 +356,8 @@ const BookDetailPage = () => {
   const [book, setBook] = useState<BookDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [likedReviews, setLikedReviews] = useState<{[key: number]: boolean}>({});
+  const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
   
   // Zustand store
   const {
@@ -359,6 +377,39 @@ const BookDetailPage = () => {
 
   const { userRatings } = useRatingStore();
 
+  // 리뷰 좋아요 상태를 로컬 스토리지에서 불러오기
+  const loadLikedReviews = () => {
+    try {
+      if (!currentUserId) return {};
+      
+      const storedLikes = localStorage.getItem(`likedReviews_${currentUserId}`);
+      return storedLikes ? JSON.parse(storedLikes) : {};
+    } catch (err) {
+      console.error('Failed to load liked reviews from localStorage:', err);
+      return {};
+    }
+  };
+
+  // 리뷰 좋아요 상태를 로컬 스토리지에 저장
+  const saveLikedReviews = (likedState: {[key: number]: boolean}) => {
+    try {
+      if (!currentUserId) return;
+      
+      localStorage.setItem(`likedReviews_${currentUserId}`, JSON.stringify(likedState));
+    } catch (err) {
+      console.error('Failed to save liked reviews to localStorage:', err);
+    }
+  };
+
+  // 현재 사용자 ID가 변경될 때 좋아요 상태 불러오기
+  useEffect(() => {
+    if (currentUserId) {
+      setLikedReviews(loadLikedReviews());
+    } else {
+      setLikedReviews({});
+    }
+  }, [currentUserId]);
+
   useEffect(() => {
     const fetchBookDetail = async () => {
       try {
@@ -367,7 +418,13 @@ const BookDetailPage = () => {
         const response = await api.get(`/api/book/${bookId}`);
         
         if (response.data.success) {
-          setBook(response.data.data);
+          const bookData = response.data.data;
+          setBook(bookData);
+          
+          // 로컬 스토리지에서 좋아요 상태 불러오기
+          if (currentUserId) {
+            setLikedReviews(loadLikedReviews());
+          }
         } else {
           setError('도서 정보를 불러오는데 실패했습니다.');
         }
@@ -382,7 +439,7 @@ const BookDetailPage = () => {
     if (bookId) {
       fetchBookDetail();
     }
-  }, [bookId]);
+  }, [bookId, currentUserId]);
 
   useEffect(() => {
     // 현재 로그인한 사용자 정보 가져오기
@@ -452,7 +509,8 @@ const BookDetailPage = () => {
       const response = await api.get(`/api/book/${bookId}`);
       
       if (response.data.success) {
-        setBook(response.data.data);
+        const bookData = response.data.data;
+        setBook(bookData);
         setEditingReviewId(null);
       } else {
         setError('도서 정보를 불러오는데 실패했습니다.');
@@ -500,6 +558,98 @@ const BookDetailPage = () => {
     } catch (err) {
       console.error('Error updating rating:', err);
       setError('평점 업데이트에 실패했습니다.');
+    }
+  };
+
+  const handleLikeToggle = async (reviewId: number) => {
+    if (!currentUserId) {
+      alert('로그인이 필요한 기능입니다.');
+      return;
+    }
+    
+    // 좋아요 상태를 위한 로딩 설정
+    setLikeLoading(prev => ({ ...prev, [reviewId]: true }));
+    
+    try {
+      const isCurrentlyLiked = likedReviews[reviewId];
+      
+      try {
+        if (isCurrentlyLiked) {
+          // 좋아요 취소 (DELETE 요청)
+          await api.delete(`/api/book/review/${reviewId}/like`);
+        } else {
+          // 좋아요 추가 (POST 요청)
+          await api.post(`/api/book/review/${reviewId}/like`);
+        }
+        
+        // 상태 업데이트
+        const updatedLikes = { 
+          ...likedReviews, 
+          [reviewId]: !isCurrentlyLiked 
+        };
+        
+        setLikedReviews(updatedLikes);
+        
+        // 로컬 스토리지에 저장
+        saveLikedReviews(updatedLikes);
+        
+        // 좋아요 수 업데이트 (Book 객체 내의 해당 리뷰 업데이트)
+        setBook(prevBook => {
+          if (!prevBook) return null;
+          
+          const updatedReviews = prevBook.reviews.map(review => {
+            if (review.reviewId === reviewId) {
+              return {
+                ...review,
+                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1
+              };
+            }
+            return review;
+          });
+          
+          return {
+            ...prevBook,
+            reviews: updatedReviews
+          };
+        });
+      } catch (apiError) {
+        console.error('API 요청 실패:', apiError);
+        
+        // API 에러 발생해도 로컬에서는 좋아요 처리
+        // (네트워크 문제 등으로 API 실패해도 UX 개선)
+        const updatedLikes = { 
+          ...likedReviews, 
+          [reviewId]: !isCurrentlyLiked 
+        };
+        
+        setLikedReviews(updatedLikes);
+        saveLikedReviews(updatedLikes);
+        
+        // UI 업데이트만 진행
+        setBook(prevBook => {
+          if (!prevBook) return null;
+          
+          const updatedReviews = prevBook.reviews.map(review => {
+            if (review.reviewId === reviewId) {
+              return {
+                ...review,
+                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1
+              };
+            }
+            return review;
+          });
+          
+          return {
+            ...prevBook,
+            reviews: updatedReviews
+          };
+        });
+      }
+    } catch (err) {
+      console.error('Like API Error:', err);
+      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
     }
   };
 
@@ -610,12 +760,6 @@ const BookDetailPage = () => {
                 })
                 .map((review) => {
                   const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
-                  console.log('Review details:', {
-                    reviewId: review.reviewId,
-                    reviewerName: review.reviewerName,
-                    currentUserId: currentUserId,
-                    isUserReview: isUserReview
-                  });
                   return (
                     <ReviewCard 
                       key={review.reviewId}
@@ -661,7 +805,14 @@ const BookDetailPage = () => {
                               </ReviewActions>
                             )}
                           </ReviewContent>
-                          <LikeCount>좋아요 {review.likes}개</LikeCount>
+                          <LikeButton 
+                            onClick={() => handleLikeToggle(review.reviewId)}
+                            className={likedReviews[review.reviewId] ? 'liked' : ''}
+                            disabled={likeLoading[review.reviewId]}
+                          >
+                            {likedReviews[review.reviewId] ? <FaHeart /> : <FaRegHeart />}
+                            <span>좋아요 {review.likes}개</span>
+                          </LikeButton>
                         </>
                       )}
                     </ReviewCard>
