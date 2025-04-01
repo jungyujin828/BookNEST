@@ -19,19 +19,19 @@ const Tab = styled.button<{ $active: boolean }>`
   border: none;
   background: none;
   font-size: 16px;
-  font-weight: ${props => props.$active ? 'bold' : 'normal'};
-  color: ${props => props.$active ? '#4a90e2' : '#666'};
+  font-weight: ${(props) => (props.$active ? "bold" : "normal")};
+  color: ${(props) => (props.$active ? "#4a90e2" : "#666")};
   cursor: pointer;
   position: relative;
 
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: -1px;
     left: 0;
     width: 100%;
     height: 2px;
-    background-color: ${props => props.$active ? '#4a90e2' : 'transparent'};
+    background-color: ${(props) => (props.$active ? "#4a90e2" : "transparent")};
   }
 
   &:hover {
@@ -40,21 +40,15 @@ const Tab = styled.button<{ $active: boolean }>`
 `;
 
 const NestPage = () => {
-  const [activeTab, setActiveTab] = useState<'둥지' | '찜'>('둥지');
+  const [activeTab, setActiveTab] = useState<"둥지" | "찜">("둥지");
 
   return (
     <Container>
       <TabContainer>
-        <Tab 
-          $active={activeTab === '둥지'} 
-          onClick={() => setActiveTab('둥지')}
-        >
+        <Tab $active={activeTab === "둥지"} onClick={() => setActiveTab("둥지")}>
           둥지
         </Tab>
-        <Tab 
-          $active={activeTab === '찜'} 
-          onClick={() => setActiveTab('찜')}
-        >
+        <Tab $active={activeTab === "찜"} onClick={() => setActiveTab("찜")}>
           찜
         </Tab>
       </TabContainer>

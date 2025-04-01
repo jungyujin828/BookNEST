@@ -1,10 +1,12 @@
 import styled from "@emotion/styled";
-import { ROUTES } from '../constants/paths';
+import { ROUTES } from "../constants/paths";
 import { useAuthStore } from "../store/useAuthStore";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import LogoutModal from "../components/LogoutModal";
+import DeleteAccountModal from "../components/DeleteAccountModal";
 
 // Import theme for breakpoints
 import { theme } from "../styles/theme";
@@ -38,6 +40,7 @@ const IconContainer = styled.div`
   display: flex;
   justify-content: flex-end;
   width: 100%;
+  position: relative;
 `;
 
 const IconButton = styled.button`
@@ -202,12 +205,62 @@ const AuthorItem = styled.div`
   }
 `;
 
+const SettingsDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+`;
+
+const DropdownItem = styled.button`
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: #f5f5f5;
+  }
+`;
+
 const ProfilePage = () => {
-  const { userDetail } = useAuthStore();
+  const { userDetail, setUserDetail } = useAuthStore();
   const navigate = useNavigate();
   const { userId } = useParams();
   const [profileData, setProfileData] = useState(null);
+  // 여기로 상태 관리 코드 이동
+  const [showSettings, setShowSettings] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  // 페이지 진입 시 현재 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchCurrentUserInfo = async () => {
+      try {
+        const response = await api.get("/api/user/info", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setUserDetail(response.data.data);
+        }
+      } catch (error) {
+        console.error("사용자 정보 가져오기 실패:", error);
+      }
+    };
+
+    fetchCurrentUserInfo();
+  }, [setUserDetail]);
+
+  // 기존 코드 유지...
   // 현재 프로필이 로그인한 사용자의 것인지 확인
   const isOwnProfile = userDetail?.userId === Number(userId);
 
@@ -262,12 +315,21 @@ const ProfilePage = () => {
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                     </svg>
                   </IconButton>
-                  <IconButton>
+                  <IconButton onClick={() => setShowSettings(!showSettings)}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13-.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                      <path d="M19.43 12.98c.04-.32.07-.64.07-.98 0-.34-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.12-.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98 0 .33.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zm-7.43 2.52c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
                     </svg>
                   </IconButton>
+                  {showSettings && (
+                    <SettingsDropdown>
+                      <DropdownItem onClick={() => setShowLogoutModal(true)}>로그아웃</DropdownItem>
+                      <DropdownItem onClick={() => setShowDeleteModal(true)}>회원탈퇴</DropdownItem>
+                    </SettingsDropdown>
+                  )}
                 </IconContainer>
+                {/* 모달 컴포넌트 추가 */}
+                {showLogoutModal && <LogoutModal onClose={() => setShowLogoutModal(false)} />}
+                {showDeleteModal && <DeleteAccountModal onClose={() => setShowDeleteModal(false)} />}
                 <UserName>{displayData?.nickname || "사용자"}</UserName>
                 <UserLevel>
                   <span onClick={() => navigate(`/profile/${userId}/followers`)} style={{ cursor: "pointer" }}>
@@ -286,16 +348,16 @@ const ProfilePage = () => {
 
         <hr />
 
-      <UserStats>
-        <div onClick={() => navigate(ROUTES.MY_EVALUATED_BOOKS)}>
-          <strong>{userDetail?.totalRatings || 0}</strong>
-          <div>평가</div>
-        </div>
-        <div onClick={() => navigate(ROUTES.MY_COMMENTS)}>
-          <strong>{userDetail?.totalReviews || 0}</strong>
-          <div>코멘트</div>
-        </div>
-      </UserStats>
+        <UserStats>
+          <div onClick={() => navigate(ROUTES.MY_EVALUATED_BOOKS)}>
+            <strong>{userDetail?.totalRatings || 0}</strong>
+            <div>평가</div>
+          </div>
+          <div onClick={() => navigate(ROUTES.MY_COMMENTS)}>
+            <strong>{userDetail?.totalReviews || 0}</strong>
+            <div>코멘트</div>
+          </div>
+        </UserStats>
 
         <hr />
 
