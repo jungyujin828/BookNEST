@@ -49,9 +49,13 @@ public class NaverOAuthClient {
     }
 
     public NaverUserResponse getUserInfo(String accessToken) throws IOException {
+        String authHeader = "Bearer " + accessToken;
+        System.out.println("✅ [NAVER] accessToken: " + accessToken);
+        System.out.println("✅ [NAVER] Authorization 헤더: " + authHeader);
+
         Request request = new Request.Builder()
                 .url(NaverOAuthConstants.Urls.USER_INFO)
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", authHeader)
                 .get()
                 .build();
 
@@ -63,7 +67,6 @@ public class NaverOAuthClient {
             System.out.println("✅ 응답 본문: " + responseBody);
 
             if (!response.isSuccessful()) {
-                // 💥 실패 응답일 경우 로그로 남기고 예외 던지기
                 System.out.println("❌ [NAVER] 사용자 정보 요청 실패 - 상태 코드: " + code);
                 System.out.println("❌ [NAVER] 응답 본문: " + responseBody);
                 throw new IOException("사용자 정보 요청 실패 - code: " + code);
@@ -71,6 +74,6 @@ public class NaverOAuthClient {
 
             return objectMapper.readValue(responseBody, NaverUserResponse.class);
         }
-
     }
+
 }
