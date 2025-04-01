@@ -21,32 +21,40 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
     private final NaverOAuthClient naverOAuthClient;
 
-    //  기존 인터페이스 오버라이드
     @Override
     public OAuthUserInfo getUserInfo(String code) throws IOException {
-        // 기본 구현에서는 state 고정
         return getUserInfo(code, "default-state");
     }
 
-    // 네이버 전용 오버로딩 메서드
     public OAuthUserInfo getUserInfo(String code, String state) throws IOException {
         log.info("🧪 [NAVER] 로그인 요청 수신 - code: {}, state: {}", code, state);
 
         try {
             // 1. 액세스 토큰 발급 요청
             NaverTokenResponse tokenResponse = naverOAuthClient.getToken(code, state);
-            log.info("✅ [NAVER] 액세스 토큰 발급 성공 - tokenResponse: {}", tokenResponse);
+
+            // ✅ 디버깅: 토큰 응답 정보 자세히 출력
+            log.info("✅ [NAVER] access_token = {}", tokenResponse.getAccessToken());
+            log.info("✅ [NAVER] refresh_token = {}", tokenResponse.getRefreshToken());
+            log.info("✅ [NAVER] token_type = {}", tokenResponse.getTokenType());
+            log.info("✅ [NAVER] expires_in = {}", tokenResponse.getExpiresIn());
+            // 필요시 scope 도 출력 (토큰 응답에 포함된다면)
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                log.info("✅ [NAVER] 전체 토큰 응답 JSON = {}", mapper.writeValueAsString(tokenResponse));
+            } catch (Exception e) {
+                log.warn("⚠️ [NAVER] 토큰 응답 JSON 변환 실패", e);
+            }
 
             // 2. 사용자 정보 조회 요청
             NaverUserResponse userResponse = naverOAuthClient.getUserInfo(tokenResponse.getAccessToken());
 
-            // ✅ 응답을 JSON 문자열로 출력 (디버깅용)
+            // ✅ 사용자 정보 전체 JSON 출력
             try {
                 ObjectMapper mapper = new ObjectMapper();
-                String json = mapper.writeValueAsString(userResponse);
-                log.info("✅ [NAVER] 전체 응답 JSON: {}", json);
+                log.info("✅ [NAVER] 사용자 응답 JSON = {}", mapper.writeValueAsString(userResponse));
             } catch (Exception e) {
-                log.warn("⚠️ [NAVER] 응답 JSON 변환 실패", e);
+                log.warn("⚠️ [NAVER] 사용자 응답 JSON 변환 실패", e);
             }
 
             // 3. 사용자 정보 추출
@@ -63,20 +71,18 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
             log.info("✅ [NAVER] 사용자 정보 - id: {}, email: {}, nickname: {}", user.getId(), user.getEmail(), user.getNickname());
 
-            // 4. 닉네임이 없는 경우 기본 닉네임 생성
+            // 닉네임 없으면 기본값 생성
             String nickname = user.getNickname();
             if (nickname == null || nickname.isBlank()) {
                 nickname = "naver_user_" + UUID.randomUUID().toString().substring(0, 8);
                 log.info("✅ [NAVER] 닉네임 없음 - 기본 닉네임 설정: {}", nickname);
             }
 
-            // 5. 이메일이 없는 경우 로그만 남김 (에러는 발생시키지 않음)
             String email = user.getEmail();
             if (email == null || email.isBlank()) {
                 log.warn("⚠️ [NAVER] 이메일이 제공되지 않음");
             }
 
-            // 6. 사용자 정보 객체 반환
             return OAuthUserInfo.builder()
                     .id(user.getId())
                     .email(email)
@@ -91,6 +97,4 @@ public class NaverOAuthStrategy implements OAuthStrategy {
             throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
         }
     }
-
 }
-
