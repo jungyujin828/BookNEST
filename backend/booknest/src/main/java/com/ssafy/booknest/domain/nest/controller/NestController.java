@@ -3,7 +3,6 @@ package com.ssafy.booknest.domain.nest.controller;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.BookMarkRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
-import com.ssafy.booknest.domain.nest.dto.request.NestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
 import com.ssafy.booknest.domain.nest.dto.response.BookMarkListResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
@@ -31,14 +30,13 @@ public class NestController {
 
     @GetMapping("")
     public ResponseEntity<ApiResponse<CustomPage<NestBookListResponse>>> getNestBookList(
-            @RequestBody NestRequest nestRequest,
+            @RequestParam("userId") Integer targetUserId,
+            @RequestParam("nestId") Integer nestId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        Integer nestId = nestRequest.getNestId();
-        Integer nestUserId = nestRequest.getUserId();
 
-        return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
+        return ApiResponse.success(nestService.getNestBookList(userId, nestId, targetUserId, pageable));
     }
 
     @PostMapping("")

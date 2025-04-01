@@ -65,6 +65,10 @@ public class Book extends BaseEntity {
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<IgnoredBook> ignoredBooks = new ArrayList<>();
+
     public String getAuthors() {
         return bookAuthors.stream()
                 .map(bookAuthor -> bookAuthor.getAuthor().getName()) // 저자 이름 가져오기
