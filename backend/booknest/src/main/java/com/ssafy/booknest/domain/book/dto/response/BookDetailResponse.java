@@ -2,6 +2,7 @@ package com.ssafy.booknest.domain.book.dto.response;
 
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 public class BookDetailResponse {
 
     private int bookId;
+    private Boolean isBookMarked;
     private Double avgRating;
     private String title;
     private String publishedDate;
@@ -35,9 +37,13 @@ public class BookDetailResponse {
 
     private List<ReviewResponse> reviews;
 
-    public static BookDetailResponse of(Book book, Double avgRating) {
+    public static BookDetailResponse of(Book book, Double avgRating, Integer userId) {
+        boolean isBookMarked = (userId != null) && book.getBookMarks().stream()
+                .anyMatch(bookMark -> bookMark.getNest().getUser().getId().equals(userId));
+
         return BookDetailResponse.builder()
                 .bookId(book.getId())
+                .isBookMarked(isBookMarked)
                 .avgRating(avgRating)
                 .title(book.getTitle())
                 .publishedDate(book.getPublishedDate())
@@ -58,8 +64,9 @@ public class BookDetailResponse {
                         .map(bookCategory -> bookCategory.getCategory().getName())
                         .collect(Collectors.toList()))
                 .reviews(book.getReviews().stream()
-                        .map(ReviewResponse::of)
+                        .map(review -> ReviewResponse.of(review, userId))
                         .collect(Collectors.toList()))
                 .build();
     }
+
 }
