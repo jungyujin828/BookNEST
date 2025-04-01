@@ -29,18 +29,18 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
     // 네이버 전용 오버로딩 메서드
     public OAuthUserInfo getUserInfo(String code, String state) throws IOException {
-        log.info("✅ [NAVER] 로그인 코드 수신 - code: {}, state: {}", code, state);
+        log.info("🧪 [NAVER] code: {}, state: {}", code, state);
         try {
             // 1. 액세스 토큰 발급 요청
             NaverTokenResponse tokenResponse = naverOAuthClient.getToken(code, state);
-            log.info("✅ [NAVER] 액세스 토큰 발급 성공 - tokenResponse: {}", tokenResponse);
+            log.info("🧪 [NAVER] tokenResponse: {}", tokenResponse);
 
             // 2. 사용자 정보 조회 요청
             NaverUserResponse userResponse = naverOAuthClient.getUserInfo(tokenResponse.getAccessToken());
-            log.info("✅ [NAVER] 사용자 정보 조회 성공 - userResponse: {}", userResponse);
+            log.info("🧪 [NAVER] userResponse: {}", userResponse);
 
             NaverUserResponse.NaverAccount user = userResponse.getResponse();
-            log.info("✅ [NAVER] 사용자 정보 추출 - userId: {}, email: {}, nickname: {}", user.getId(), user.getEmail(), user.getNickname());
+            log.info("🧪 [NAVER] userId: {}, email: {}, nickname: {}", user.getId(), user.getEmail(), user.getNickname());
 
             // 3. 유효성 검사
             if (user == null || user.getId() == null) {
@@ -62,10 +62,13 @@ public class NaverOAuthStrategy implements OAuthStrategy {
                     .nickname(nickname)
                     .build();
 
+
+
         } catch (IOException e) {
             log.error("❌ [NAVER] 사용자 정보 처리 중 오류 발생", e);
             throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
         }
+
     }
 }
 

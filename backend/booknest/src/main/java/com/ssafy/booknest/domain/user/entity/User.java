@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
+import com.ssafy.booknest.domain.nest.entity.TodayBook;
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.enums.Gender;
@@ -34,6 +35,9 @@ public class User extends BaseEntity {
     @Column(name = "provider_id", nullable = false)
     private String providerId;
 
+    @Column(name = "archetype", nullable = false)
+    private String archeType;
+
     @Column(length = 50)
     private String nickname;
 
@@ -58,6 +62,9 @@ public class User extends BaseEntity {
     private Nest nest;
 
     @OneToOne(mappedBy = "user")
+    private TodayBook todayBook;
+
+    @OneToOne(mappedBy = "user")
     private Address address;
 
     @Builder.Default
@@ -67,7 +74,6 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers = new ArrayList<>(); // 나를 팔로우하는 사람 목록
-
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
