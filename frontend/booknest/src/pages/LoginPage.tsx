@@ -156,6 +156,7 @@ const LoginPage = () => {
       client_id: config.naver.clientId,
       redirect_uri: config.naver.redirectUri,
       state: state,
+      scope: "email nickname",
     });
 
     const naverURL = `${OAUTH.NAVER.AUTH_URL}?${params.toString()}`;
