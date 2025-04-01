@@ -19,7 +19,7 @@ import FollowingsPage from "./pages/FollowingsPage";
 import FollowersPage from "./pages/FollowersPage";
 import ErrorPage from "./pages/ErrorPage";
 import MyEvaluatedBookPage from "./pages/MyEvaluatedBookPage";
-import MyCommentPage from "./pages/MycommentPage";
+import MyCommentPage from "./pages/MyCommentPage";
 import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
