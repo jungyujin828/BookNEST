@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import styled from '@emotion/styled';
-import api from '../api/axios';
-import PurchaseModal from '../components/PurchaseModal';
-import CommentForm from '../components/CommentForm';
-import RatingStars from '../components/RatingStars';
-import { useBookStore } from '../store/useBookStore';
-import axios from 'axios';
-import useRatingStore from '../store/useRatingStore';
-import BookmarkButton from '../components/BookmarkButton';
-import AddToNestButton from '../components/AddToNestButton';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import styled from "@emotion/styled";
+import api from "../api/axios";
+import PurchaseModal from "../components/PurchaseModal";
+import CommentForm from "../components/CommentForm";
+import RatingStars from "../components/RatingStars";
+import { useBookStore } from "../store/useBookStore";
+import axios from "axios";
+import useRatingStore from "../store/useRatingStore";
+import BookmarkButton from "../components/BookmarkButton";
+import AddToNestButton from "../components/AddToNestButton";
 
 interface Review {
   reviewId: number;
@@ -66,45 +66,63 @@ interface UserInfo {
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 `;
 
 const TopSection = styled.div`
+  position: relative;
   display: flex;
-  gap: 40px;
-  margin-bottom: 40px;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 24px;
-  }
+  z-index: 1;
 `;
 
-const ImageSection = styled.div`
-  flex: 0 0 300px;
-  
-  @media (max-width: 768px) {
-    flex: none;
-    text-align: center;
-  }
+const BookImageBg = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40rem;
+  object-fit: cover;
+  filter: brightness(0.2);
+`;
+
+const BookCoverSection = styled.div`
+  position: relative;
+  top: 17rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  width: fit-content;
 `;
 
 const BookImage = styled.img`
-  width: 100%;
-  max-width: 300px;
+  position: relative;
+  width: 10rem;
+  max-width: 100%;
   height: auto;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
 `;
 
 const InfoSection = styled.div`
-  flex: 1;
+  position: relative;
+  top: 17rem;
+  left: 3rem;
+  width: fit-content;
+  z-index: 100;
+`;
+
+const BookTitleInfo = styled.div`
+  width: fit-content;
 `;
 
 const Title = styled.h1`
   font-size: 28px;
   margin-bottom: 16px;
-  color: #333;
+  color: white;
+`;
+
+const BookActionSection = styled.div`
+  display: flex;
+  width: fit-content;
 `;
 
 const RatingContainer = styled.div`
@@ -124,6 +142,7 @@ const RatingLabel = styled.span`
   font-size: 16px;
   color: #666;
   min-width: 80px;
+  color: white;
 `;
 
 const RatingText = styled.span`
@@ -167,6 +186,7 @@ const TagsContainer = styled.div`
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 24px;
+  width: fit-content;
 `;
 
 const Tag = styled.span`
@@ -199,10 +219,10 @@ const ReviewSection = styled.div`
 
 const ReviewCard = styled.div<{ isUserReview?: boolean }>`
   padding: 16px;
-  border: 1px solid ${props => props.isUserReview ? '#4CAF50' : '#dee2e6'};
+  border: 1px solid ${(props) => (props.isUserReview ? "#4CAF50" : "#dee2e6")};
   border-radius: 8px;
   margin-bottom: 16px;
-  background-color: ${props => props.isUserReview ? '#f8fff8' : '#fff'};
+  background-color: ${(props) => (props.isUserReview ? "#f8fff8" : "#fff")};
 `;
 
 const ReviewHeader = styled.div`
@@ -295,52 +315,18 @@ const ErrorMessage = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+  justify-content: start;
+  z-index: 1000;
 `;
 
-const PurchaseButton = styled.button`
-  flex: 1;
-  padding: 12px 24px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-
-  &:hover {
-    background-color: #45a049;
-  }
-
-  &:active {
-    background-color: #3d8b40;
-  }
-`;
-
-const BookHeader = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-`;
-
-const BookTitle = styled.h1`
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-`;
+const PurchaseButton = styled.button``;
 
 const BookDetailPage = () => {
   const { bookId } = useParams();
   const [book, setBook] = useState<BookDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Zustand store
   const {
     purchaseUrls,
@@ -348,7 +334,7 @@ const BookDetailPage = () => {
     error: storeError,
     setPurchaseUrls,
     setLoading: setStoreLoading,
-    setError: setStoreError
+    setError: setStoreError,
   } = useBookStore();
 
   // 모달 상태
@@ -365,15 +351,15 @@ const BookDetailPage = () => {
         setLoading(true);
         setError(null);
         const response = await api.get(`/api/book/${bookId}`);
-        
+
         if (response.data.success) {
           setBook(response.data.data);
         } else {
-          setError('도서 정보를 불러오는데 실패했습니다.');
+          setError("도서 정보를 불러오는데 실패했습니다.");
         }
       } catch (err) {
-        console.error('API Error:', err);
-        setError('서버 오류가 발생했습니다.');
+        console.error("API Error:", err);
+        setError("서버 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -388,29 +374,29 @@ const BookDetailPage = () => {
     // 현재 로그인한 사용자 정보 가져오기
     const fetchCurrentUser = async () => {
       try {
-        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>('/api/user/info');
-        console.log('User info response:', response.data);
+        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
+        console.log("User info response:", response.data);
         if (response.data.success && response.data.data) {
-          console.log('User data:', response.data.data);
+          console.log("User data:", response.data.data);
           // nickname으로 사용자 식별
           const nickname = response.data.data.nickname;
-          console.log('User nickname:', nickname);
+          console.log("User nickname:", nickname);
           setCurrentUserId(nickname);
-          console.log('Current user nickname set to:', nickname);
+          console.log("Current user nickname set to:", nickname);
         } else {
-          console.log('No user data in response');
+          console.log("No user data in response");
           setCurrentUserId(null);
         }
       } catch (err) {
         // 403 에러는 로그인하지 않은 상태이므로 무시
         if (axios.isAxiosError(err)) {
-          console.log('Error status:', err.response?.status);
-          console.log('Error data:', err.response?.data);
+          console.log("Error status:", err.response?.status);
+          console.log("Error data:", err.response?.data);
           if (err.response?.status === 403) {
             setCurrentUserId(null);
-            console.log('User not logged in');
+            console.log("User not logged in");
           } else {
-            console.error('Failed to fetch current user:', err);
+            console.error("Failed to fetch current user:", err);
             setCurrentUserId(null);
           }
         }
@@ -421,22 +407,22 @@ const BookDetailPage = () => {
 
   const handlePurchaseClick = async () => {
     try {
-      setStoreLoading('purchaseUrls', true);
-      setStoreError('purchaseUrls', null);
+      setStoreLoading("purchaseUrls", true);
+      setStoreError("purchaseUrls", null);
       setIsPurchaseModalOpen(true);
 
       const response = await api.get(`/api/book/${bookId}/purchase`);
-      
+
       if (response.data.success) {
         setPurchaseUrls(response.data.data);
       } else {
-        setStoreError('purchaseUrls', '구매 링크를 불러오는데 실패했습니다.');
+        setStoreError("purchaseUrls", "구매 링크를 불러오는데 실패했습니다.");
       }
     } catch (err) {
-      console.error('Purchase API Error:', err);
-      setStoreError('purchaseUrls', '서버 오류가 발생했습니다.');
+      console.error("Purchase API Error:", err);
+      setStoreError("purchaseUrls", "서버 오류가 발생했습니다.");
     } finally {
-      setStoreLoading('purchaseUrls', false);
+      setStoreLoading("purchaseUrls", false);
     }
   };
 
@@ -450,16 +436,16 @@ const BookDetailPage = () => {
       setLoading(true);
       setError(null);
       const response = await api.get(`/api/book/${bookId}`);
-      
+
       if (response.data.success) {
         setBook(response.data.data);
         setEditingReviewId(null);
       } else {
-        setError('도서 정보를 불러오는데 실패했습니다.');
+        setError("도서 정보를 불러오는데 실패했습니다.");
       }
     } catch (err) {
-      console.error('API Error:', err);
-      setError('서버 오류가 발생했습니다.');
+      console.error("API Error:", err);
+      setError("서버 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -472,11 +458,11 @@ const BookDetailPage = () => {
         // 삭제 성공 후 목록 새로고침
         await handleCommentSubmit();
       } else {
-        setError('리뷰 삭제에 실패했습니다.');
+        setError("리뷰 삭제에 실패했습니다.");
       }
     } catch (err) {
-      console.error('Delete API Error:', err);
-      setError('서버 오류가 발생했습니다.');
+      console.error("Delete API Error:", err);
+      setError("서버 오류가 발생했습니다.");
     }
   };
 
@@ -490,16 +476,16 @@ const BookDetailPage = () => {
 
   const handleRatingChange = async (newRating: number) => {
     try {
-      setBook(prevBook => {
+      setBook((prevBook) => {
         if (!prevBook) return null;
         return {
           ...prevBook,
-          avgRating: newRating
+          avgRating: newRating,
         };
       });
     } catch (err) {
-      console.error('Error updating rating:', err);
-      setError('평점 업데이트에 실패했습니다.');
+      console.error("Error updating rating:", err);
+      setError("평점 업데이트에 실패했습니다.");
     }
   };
 
@@ -508,67 +494,42 @@ const BookDetailPage = () => {
   }
 
   if (error || !book) {
-    return <ErrorMessage>{error || '도서 정보를 찾을 수 없습니다.'}</ErrorMessage>;
+    return <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>;
   }
 
   return (
     <Container>
       {book && (
         <>
-          <BookHeader>
-            <BookTitle>{book.title}</BookTitle>
-            <BookmarkButton bookId={book.bookId} />
-          </BookHeader>
+          <BookImageBg src={book.imageUrl} alt={book.title} />
           <TopSection>
-            <ImageSection>
+            <BookCoverSection>
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
-                <AddToNestButton 
-                  bookId={book.bookId} 
-                  currentRating={userRatings[book.bookId] || 0}
-                />
-                <PurchaseButton onClick={handlePurchaseClick}>
-                  구매하기
-                </PurchaseButton>
+                <AddToNestButton bookId={book.bookId} currentRating={userRatings[book.bookId] || 0} />
+                <BookmarkButton bookId={book.bookId} />
               </ButtonContainer>
-            </ImageSection>
+            </BookCoverSection>
             <InfoSection>
-              <Title>{book.title}</Title>
-              <RatingContainer>
-                <RatingRow>
-                  <RatingLabel>평균 평점</RatingLabel>
-                  <RatingText>{book.avgRating.toFixed(1)}</RatingText>
-                </RatingRow>
-                <RatingRow>
-                  <RatingLabel>내 평점</RatingLabel>
-                  <RatingStars 
-                    bookId={book.bookId}
-                    onRatingChange={handleRatingChange}
-                  />
-                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || '0.0'}</RatingText>
-                </RatingRow>
-              </RatingContainer>
-              <AuthorInfo>
-                저자: {book.authors.join(', ')}
-              </AuthorInfo>
-              <BasicInfo>
-                <InfoItem>
-                  <Label>출판사</Label>
-                  <Value>{book.publisher}</Value>
-                </InfoItem>
-                <InfoItem>
-                  <Label>출판일</Label>
-                  <Value>{book.publishedDate}</Value>
-                </InfoItem>
-                <InfoItem>
-                  <Label>ISBN</Label>
-                  <Value>{book.isbn}</Value>
-                </InfoItem>
-                <InfoItem>
-                  <Label>페이지</Label>
-                  <Value>{book.pages}쪽</Value>
-                </InfoItem>
-              </BasicInfo>
+              <BookTitleInfo>
+                <Title>{book.title}</Title>
+                <AuthorInfo>저자: {book.authors.join(", ")}</AuthorInfo>
+              </BookTitleInfo>
+              <BookActionSection>
+                <RatingContainer>
+                  <RatingRow>
+                    <RatingLabel>평균 평점</RatingLabel>
+                    <RatingText> {book.avgRating.toFixed(1)}</RatingText>
+                  </RatingRow>
+                  <RatingRow>
+                    <RatingLabel>내 평점</RatingLabel>
+                    <RatingStars bookId={book.bookId} onRatingChange={handleRatingChange} />
+                    <RatingText>{userRatings[book.bookId]?.toFixed(1) || "0.0"}</RatingText>
+                  </RatingRow>
+                </RatingContainer>
+                <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
+              </BookActionSection>
+
               <TagsContainer>
                 {book.tags.map((tag, index) => (
                   <Tag key={index}>{tag}</Tag>
@@ -576,6 +537,25 @@ const BookDetailPage = () => {
               </TagsContainer>
             </InfoSection>
           </TopSection>
+
+          <BasicInfo>
+            <InfoItem>
+              <Label>출판사</Label>
+              <Value>{book.publisher}</Value>
+            </InfoItem>
+            <InfoItem>
+              <Label>출판일</Label>
+              <Value>{book.publishedDate}</Value>
+            </InfoItem>
+            <InfoItem>
+              <Label>ISBN</Label>
+              <Value>{book.isbn}</Value>
+            </InfoItem>
+            <InfoItem>
+              <Label>페이지</Label>
+              <Value>{book.pages}쪽</Value>
+            </InfoItem>
+          </BasicInfo>
 
           <Section>
             <SectionTitle>책 소개</SectionTitle>
@@ -592,10 +572,7 @@ const BookDetailPage = () => {
             <Content>{book.publisherReview}</Content>
           </Section>
 
-          <CommentForm 
-            bookId={Number(bookId)} 
-            onCommentSubmit={handleCommentSubmit}
-          />
+          <CommentForm bookId={Number(bookId)} onCommentSubmit={handleCommentSubmit} />
 
           <ReviewSection>
             <SectionTitle>리뷰</SectionTitle>
@@ -609,28 +586,24 @@ const BookDetailPage = () => {
                   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                 })
                 .map((review) => {
-                  const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
-                  console.log('Review details:', {
+                  const isUserReview =
+                    currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
+                  console.log("Review details:", {
                     reviewId: review.reviewId,
                     reviewerName: review.reviewerName,
                     currentUserId: currentUserId,
-                    isUserReview: isUserReview
+                    isUserReview: isUserReview,
                   });
                   return (
-                    <ReviewCard 
-                      key={review.reviewId}
-                      isUserReview={isUserReview}
-                    >
+                    <ReviewCard key={review.reviewId} isUserReview={isUserReview}>
                       <ReviewHeader>
                         <ReviewInfo>
                           <ReviewerName>{review.reviewerName}</ReviewerName>
-                          <ReviewDate>
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </ReviewDate>
+                          <ReviewDate>{new Date(review.createdAt).toLocaleDateString()}</ReviewDate>
                         </ReviewInfo>
                       </ReviewHeader>
                       {editingReviewId === review.reviewId ? (
-                        <CommentForm 
+                        <CommentForm
                           bookId={Number(bookId)}
                           reviewId={review.reviewId}
                           initialContent={review.content}
@@ -645,13 +618,11 @@ const BookDetailPage = () => {
                             <ReviewText>{review.content}</ReviewText>
                             {isUserReview && (
                               <ReviewActions>
-                                <ActionButton onClick={() => handleEditClick(review.reviewId)}>
-                                  수정
-                                </ActionButton>
-                                <ActionButton 
+                                <ActionButton onClick={() => handleEditClick(review.reviewId)}>수정</ActionButton>
+                                <ActionButton
                                   className="delete"
                                   onClick={() => {
-                                    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+                                    if (window.confirm("정말로 이 리뷰를 삭제하시겠습니까?")) {
                                       handleCommentDelete(review.reviewId);
                                     }
                                   }}
@@ -668,9 +639,7 @@ const BookDetailPage = () => {
                   );
                 })
             ) : (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                아직 작성된 리뷰가 없습니다.
-              </div>
+              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>아직 작성된 리뷰가 없습니다.</div>
             )}
           </ReviewSection>
 
