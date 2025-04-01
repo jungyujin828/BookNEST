@@ -9,6 +9,7 @@ import lombok.Getter;
 public class UserMypageResponse {
     private Integer nestId;
     private String nickname;
+    private String archetype;
     private String profileURL;
     private Integer followers;
     private Integer followings;
@@ -19,6 +20,7 @@ public class UserMypageResponse {
         return UserMypageResponse.builder()
                 .nestId(user.getNest().getId())
                 .nickname(user.getNickname())
+                .archetype(user.getArcheType())
                 .profileURL(user.getProfileUrl())
                 .followers(followers)
                 .followings(followings)
