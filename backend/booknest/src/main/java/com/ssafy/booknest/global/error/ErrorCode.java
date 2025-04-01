@@ -41,7 +41,8 @@ public enum ErrorCode {
     REVIEW_NOT_FOUND(404, "B007", "한줄평을 찾을 수 없습니다"),
     REVIEW_ALREADY_LIKED(400, "B007", "이미 한줄평에 좋아요가 있습니다."),
     REVIEW_LIKE_NOT_FOUND(404, "B008", "한줄평 좋아요가 없습니다"),
-    EMPTY_RATING(404, "B008", "평점이 존재하지 않습니다."),
+    EMPTY_RATING(404, "B009", "평점이 존재하지 않습니다."),
+    ALREADY_IGNORED_BOOK(400, "B010", "이미 관심없음을 표시한 책입니다."),
 
     // RATING
     EMPTY_RATING_CONTENT(400, "R001", "점수가 입력되지 않았습니다"),

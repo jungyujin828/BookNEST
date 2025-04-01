@@ -31,3 +31,5 @@ oauth:
     redirect-uri: http://localhost:5173/oauth/kakao/callback  # 운영 도메인으로 변경
   google:
     redirect-uri: http://localhost:5173/oauth/google/callback  # 운영 도메인으로 변경
+  naver:
+    redirect-uri: http://localhost:5173/oauth/naver/callback

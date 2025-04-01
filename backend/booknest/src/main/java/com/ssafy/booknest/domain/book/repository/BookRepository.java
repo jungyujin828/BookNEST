@@ -27,6 +27,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("SELECT ROUND(AVG(r.rating), 2) FROM Rating r WHERE r.book.id = :bookId")
     Optional<Double> findAverageRatingByBookId(@Param("bookId") int bookId);
 
+
 //    // 책 제목 기반 검색
 //    @EntityGraph(attributePaths = {"bookAuthors", "bookAuthors.author"})
 //    Page<Book> findByTitleContaining(String keyword, Pageable pageable);

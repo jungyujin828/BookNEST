@@ -85,4 +85,15 @@ public class RatingController {
         MyRatingResponse response = ratingService.getUserRating(userId, bookId);
         return ApiResponse.success(response);
     }
+
+    // 취향분석에서 책 관심없음
+    @PostMapping("/{bookId}/ignore")
+    public ResponseEntity<ApiResponse<Void>> ignoreBook(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        ratingService.ignoreBook(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
 }
