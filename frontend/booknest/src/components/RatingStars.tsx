@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaStar } from 'react-icons/fa';
 import api from '../api/axios';
@@ -12,35 +12,20 @@ interface RatingStarsProps {
 const StarContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 `;
 
-const StarWrapper = styled.div`
-  position: relative;
-  width: 24px;
-  height: 24px;
+const StarButton = styled.button<{ $active: boolean }>`
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-`;
-
-const Star = styled(FaStar)<{ filled: boolean; hovered: boolean }>`
-  color: ${props => props.filled || props.hovered ? '#FFD700' : '#E0E0E0'};
+  color: ${props => props.$active ? '#f8c41b' : '#ddd'};
   font-size: 24px;
   transition: color 0.2s ease;
-`;
-
-const CancelButton = styled.button<{ visible: boolean }>`
-  display: ${props => props.visible ? 'block' : 'none'};
-  padding: 4px 8px;
-  background-color: #ff4444;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: #cc0000;
+    color: #f8c41b;
   }
 `;
 
@@ -48,6 +33,27 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const { userRatings, setUserRating } = useRatingStore();
   const currentRating = userRatings[bookId] || 0;
+
+  useEffect(() => {
+    const fetchRating = async () => {
+      try {
+        const response = await api.get(`/api/book/${bookId}/rating`);
+        if (response.data.success && response.data.data) {
+          const { rating } = response.data.data;
+          setUserRating(bookId, rating);
+          onRatingChange(rating);
+        }
+      } catch (error) {
+        console.error('Failed to fetch rating:', error);
+        // 404 에러는 평점이 없는 경우이므로 무시
+        if (error.response?.status !== 404) {
+          console.error('Error fetching rating:', error);
+        }
+      }
+    };
+
+    fetchRating();
+  }, [bookId, setUserRating, onRatingChange]);
 
   const handleStarClick = async (score: number) => {
     try {
@@ -107,26 +113,34 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
     setHoveredRating(null);
   };
 
-  const displayRating = hoveredRating !== null ? hoveredRating : currentRating;
-
   return (
     <StarContainer>
-      {[1, 2, 3, 4, 5].map((star) => (
-        <StarWrapper
-          key={star}
-          onClick={() => handleStarClick(star)}
-          onMouseEnter={() => handleStarHover(star)}
+      {[1, 2, 3, 4, 5].map((score) => (
+        <StarButton
+          key={score}
+          $active={score <= (hoveredRating || currentRating)}
+          onClick={() => handleStarClick(score)}
+          onMouseEnter={() => handleStarHover(score)}
           onMouseLeave={handleStarLeave}
         >
-          <Star filled={displayRating >= star} hovered={star <= hoveredRating} />
-        </StarWrapper>
+          <FaStar />
+        </StarButton>
       ))}
-      <CancelButton 
-        visible={currentRating > 0} 
-        onClick={handleCancelRating}
-      >
-        평점 취소
-      </CancelButton>
+      {currentRating > 0 && (
+        <button
+          onClick={handleCancelRating}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#666',
+            cursor: 'pointer',
+            marginLeft: '8px',
+            fontSize: '14px'
+          }}
+        >
+          취소
+        </button>
+      )}
     </StarContainer>
   );
 };

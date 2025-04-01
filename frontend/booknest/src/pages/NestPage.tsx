@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-// import NestBookList from "../components/NestBookList";
+import NestBookList from "../components/NestBookList";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -53,9 +53,8 @@ const NestPage = () => {
         </Tab>
       </TabContainer>
 
-      {activeTab === '둥지' ? (
-        // <NestBookList />
-        ''
+      {activeTab === "둥지" ? (
+        <NestBookList />
       ) : (
         <div>찜 목록 (준비 중)</div>
       )}
