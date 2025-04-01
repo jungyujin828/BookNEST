@@ -4,11 +4,15 @@ import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.book.entity.IgnoredBook;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.entity.Review;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.IgnoredBookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
@@ -29,6 +33,7 @@ public class RatingService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final RatingRepository ratingRepository;
+    private final IgnoredBookRepository ignoredBookRepository;
 
     // 평점 등록
     @Transactional
@@ -130,4 +135,29 @@ public class RatingService {
 
         return MyRatingResponse.of(rating);
     }
+
+    // 도서 관심없음
+    @Transactional
+    public void ignoreBook(Integer userId, Integer bookId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        // 이미 관심없음 처리된 경우 예외 발생
+        if (ignoredBookRepository.existsByUserAndBook(user, book)) {
+            throw new CustomException(ErrorCode.ALREADY_IGNORED_BOOK);
+        }
+
+        IgnoredBook ignoredBook = IgnoredBook.builder()
+                .user(user)
+                .book(book)
+                .build();
+
+        ignoredBookRepository.save(ignoredBook);
+    }
+
+
+
 }
