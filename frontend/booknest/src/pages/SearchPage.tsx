@@ -31,8 +31,8 @@ const SearchBarContainer = styled.div`
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 12px 40px 12px 40px;
-  border-radius: 100px;
+  padding: 12px 45px;
+  border-radius: 10px;
   border: none;
   background-color: #f1f1f1;
   font-size: 16px;
@@ -49,6 +49,30 @@ const SearchIcon = styled.span`
   top: 50%;
   transform: translateY(-50%);
   color: #666;
+  width: 16px;
+  height: 16px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #666;
+    border-radius: 50%;
+    top: 0;
+    left: 0;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 6px;
+    background-color: #666;
+    transform: rotate(-45deg);
+    bottom: 0;
+    right: 0;
+  }
 `;
 
 const ClearButton = styled.button`
@@ -56,11 +80,36 @@ const ClearButton = styled.button`
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
   background: none;
   border: none;
   cursor: pointer;
-  color: #666;
   padding: 0;
+
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 16px;
+    background-color: #666;
+    top: 0;
+    left: 50%;
+  }
+
+  &::before {
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  &::after {
+    transform: translateX(-50%) rotate(-45deg);
+  }
+
+  &:hover::before,
+  &:hover::after {
+    background-color: #333;
+  }
 `;
 
 const BookList = styled.div`
@@ -144,7 +193,7 @@ const SearchPage = () => {
   return (
     <SearchContainer>
       <SearchBarContainer>
-        <SearchIcon>🔍</SearchIcon>
+        <SearchIcon />
         <SearchInput
           type="text"
           placeholder="도서, 작가, 유저 검색"
@@ -152,7 +201,7 @@ const SearchPage = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyPress={handleKeyPress}
         />
-        {searchTerm && <ClearButton onClick={handleClear}>✕</ClearButton>}
+        {searchTerm && <ClearButton onClick={handleClear} />}
       </SearchBarContainer>
 
       <BookList>
