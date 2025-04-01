@@ -68,7 +68,7 @@ public class Book extends BaseEntity {
 
     @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<BookMark> BookMarks = new ArrayList<>();
+    private List<IgnoredBook> ignoredBooks = new ArrayList<>();
 
     public String getAuthors() {
         return bookAuthors.stream()

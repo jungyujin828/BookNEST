@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
+import com.ssafy.booknest.domain.book.entity.IgnoredBook;
 import com.ssafy.booknest.domain.nest.entity.TodayBook;
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.nest.entity.Nest;
@@ -74,6 +75,10 @@ public class User extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers = new ArrayList<>(); // 나를 팔로우하는 사람 목록
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IgnoredBook> ignoredBooks = new ArrayList<>(); // 내가 관심없어 하는 도서 목록
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;

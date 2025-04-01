@@ -4,11 +4,9 @@ import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.BookMarkRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
-import com.ssafy.booknest.domain.nest.dto.request.NestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
 import com.ssafy.booknest.domain.nest.dto.response.BookMarkListResponse;
 import com.ssafy.booknest.domain.nest.dto.response.NestBookListResponse;
-import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
@@ -19,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,14 +31,13 @@ public class NestController {
 
     @GetMapping("")
     public ResponseEntity<ApiResponse<CustomPage<NestBookListResponse>>> getNestBookList(
-            @RequestBody NestRequest nestRequest,
+            @RequestParam("userId") Integer targetUserId,
+            @RequestParam("nestId") Integer nestId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        Integer nestId = nestRequest.getNestId();
-        Integer nestUserId = nestRequest.getUserId();
 
-        return ApiResponse.success(nestService.getNestBookList(userId, nestId, nestUserId, pageable));
+        return ApiResponse.success(nestService.getNestBookList(userId, nestId, targetUserId, pageable));
     }
 
     @PostMapping("")
