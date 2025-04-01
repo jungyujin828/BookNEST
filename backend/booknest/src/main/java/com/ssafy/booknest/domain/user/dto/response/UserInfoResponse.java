@@ -10,6 +10,7 @@ import lombok.Getter;
 @Builder
 public class UserInfoResponse {
     private Integer userId;
+    private Integer nestId;
     private String nickname;
     private String archetype;
     private Gender gender;
@@ -25,6 +26,7 @@ public class UserInfoResponse {
     public static UserInfoResponse of(User user, Address address, Integer followers, Integer followings, Integer totalRatings, Integer totalReviews){
         return UserInfoResponse.builder()
                 .userId(user.getId())
+                .nestId(user.getNest().getId())
                 .nickname(user.getNickname())
                 .archetype(user.getArcheType())
                 .gender(user.getGender())
