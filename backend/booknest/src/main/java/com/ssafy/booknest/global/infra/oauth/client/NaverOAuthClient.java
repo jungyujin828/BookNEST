@@ -42,8 +42,9 @@ public class NaverOAuthClient {
                 .build();
 
         try (Response response = okHttpClient.newCall(request).execute()) {
-            assert response.body() != null;
-            return objectMapper.readValue(response.body().string(), NaverTokenResponse.class);
+            String responseBody = response.body() != null ? response.body().string() : "";
+            System.out.println("✅ 토큰 응답 본문: " + responseBody);
+            return objectMapper.readValue(responseBody, NaverTokenResponse.class);
         }
     }
 
@@ -55,8 +56,21 @@ public class NaverOAuthClient {
                 .build();
 
         try (Response response = okHttpClient.newCall(request).execute()) {
-            assert response.body() != null;
-            return objectMapper.readValue(response.body().string(), NaverUserResponse.class);
+            int code = response.code();
+            String responseBody = response.body() != null ? response.body().string() : "";
+
+            System.out.println("✅ 응답 상태 코드: " + code);
+            System.out.println("✅ 응답 본문: " + responseBody);
+
+            if (!response.isSuccessful()) {
+                // 💥 실패 응답일 경우 로그로 남기고 예외 던지기
+                System.out.println("❌ [NAVER] 사용자 정보 요청 실패 - 상태 코드: " + code);
+                System.out.println("❌ [NAVER] 응답 본문: " + responseBody);
+                throw new IOException("사용자 정보 요청 실패 - code: " + code);
+            }
+
+            return objectMapper.readValue(responseBody, NaverUserResponse.class);
         }
+
     }
 }
