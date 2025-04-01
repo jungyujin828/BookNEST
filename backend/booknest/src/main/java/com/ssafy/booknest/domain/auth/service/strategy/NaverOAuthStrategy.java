@@ -31,11 +31,11 @@ public class NaverOAuthStrategy implements OAuthStrategy {
     public OAuthUserInfo getUserInfo(String code, String state) throws IOException {
         log.info("🧪 [NAVER] code: {}, state: {}", code, state);
         try {
-            // 1. 액세스 토큰 발급
+            // 1. 액세스 토큰 발급 요청
             NaverTokenResponse tokenResponse = naverOAuthClient.getToken(code, state);
             log.info("🧪 [NAVER] tokenResponse: {}", tokenResponse);
 
-            // 2. 사용자 정보 요청
+            // 2. 사용자 정보 조회 요청
             NaverUserResponse userResponse = naverOAuthClient.getUserInfo(tokenResponse.getAccessToken());
             log.info("🧪 [NAVER] userResponse: {}", userResponse);
 
@@ -44,17 +44,18 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
             // 3. 유효성 검사
             if (user == null || user.getId() == null) {
+                log.warn("⚠️ [NAVER] 사용자 정보가 유효하지 않음 (user or userId is null)");
                 throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
             }
 
-            // 4. 사용자 정보 매핑
+            // 4. 닉네임이 없을 경우 기본 닉네임 생성
             String nickname = user.getNickname();
             if (nickname == null || nickname.isBlank()) {
-                // 닉네임이 없으면 임의의 닉네임 생성
                 nickname = "naver_user_" + UUID.randomUUID().toString().substring(0, 8);
+                log.info("✅ [NAVER] 닉네임이 없어 기본 닉네임 생성 - nickname: {}", nickname);
             }
 
-            // 4. 사용자 정보 매핑
+            // 5. 사용자 정보 매핑 후 반환
             return OAuthUserInfo.builder()
                     .id(user.getId())
                     .email(user.getEmail())
@@ -64,7 +65,7 @@ public class NaverOAuthStrategy implements OAuthStrategy {
 
 
         } catch (IOException e) {
-            log.error("🧪 [NAVER] 사용자 정보 처리 실패", e);
+            log.error("❌ [NAVER] 사용자 정보 처리 중 오류 발생", e);
             throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
         }
 
