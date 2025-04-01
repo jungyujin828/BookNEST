@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import SearchBar from "../components/SearchBar";
 
 interface Book {
   bookId: string;
@@ -192,17 +193,7 @@ const SearchPage = () => {
 
   return (
     <SearchContainer>
-      <SearchBarContainer>
-        <SearchIcon />
-        <SearchInput
-          type="text"
-          placeholder="도서, 작가, 유저 검색"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={handleKeyPress}
-        />
-        {searchTerm && <ClearButton onClick={handleClear} />}
-      </SearchBarContainer>
+      <SearchBar searchTerm={searchTerm} onSearch={handleSearch} onSearchChange={setSearchTerm} onClear={handleClear} />
 
       <BookList>
         {books.map((book) => (
