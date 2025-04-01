@@ -76,9 +76,9 @@ public class ReviewController {
     }
 
     // 한줄평 좋아요
-    @PostMapping("/{reviewId}/like")
+    @PostMapping("/review/{reviewId}/like")
     public ResponseEntity<ApiResponse<Void>> likeReview(
-            @PathVariable Integer reviewId,
+            @PathVariable("reviewId") Integer reviewId,
             @AuthenticationPrincipal UserPrincipal userPrincipal)
     {
         Integer likerId = authenticationUtil.getCurrentUserId(userPrincipal);
@@ -87,9 +87,9 @@ public class ReviewController {
     }
 
     // 한줄평 좋아요 취소
-    @DeleteMapping("/{reviewId}/like")
+    @DeleteMapping("/review/{reviewId}/like")
     public ResponseEntity<ApiResponse<Void>> unlikeReview(
-            @PathVariable Integer reviewId,
+            @PathVariable("reviewId") Integer reviewId,
             @AuthenticationPrincipal UserPrincipal userPrincipal
     ) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);

@@ -56,16 +56,15 @@ public class BookService {
     @Transactional(readOnly = true)
     public BookDetailResponse getBook(Integer userId, Integer bookId) {
 
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new CustomException(ErrorCode.USER_NOT_FOUND));
-
         Book book = bookRepository.findBookDetailById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
-        Double averageRating = bookRepository.findAverageRatingByBookId(bookId).orElse(0.0);
+        Double averageRating = bookRepository.findAverageRatingByBookId(bookId)
+                .orElse(0.0);
 
-        return BookDetailResponse.of(book, averageRating);
+        return BookDetailResponse.of(book, averageRating, userId);
     }
+
 
 
 

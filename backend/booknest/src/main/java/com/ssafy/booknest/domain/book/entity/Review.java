@@ -8,6 +8,8 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "review", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "book_id"}))
@@ -37,6 +39,10 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id" , nullable = false)
     private Book book;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "review")
+    private List<ReviewLike> reviewLikes = new ArrayList<>();
 
     public void updateRating(Double rating) {
         this.rating = rating;
