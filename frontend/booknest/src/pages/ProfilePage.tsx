@@ -112,38 +112,34 @@ const ProfileImage = styled.div`
 
 const UserStats = styled.div`
   display: flex;
-  gap: 24px;
-  margin-top: 24px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  justify-content: space-around;
+  align-items: center;
+  margin: 1rem 0;
 
   div {
-    flex: 1;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     cursor: pointer;
-    padding: 12px;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
+    position: relative;
+    width: 100%;
 
     &:hover {
       background-color: #f5f5f5;
+      border-radius: 0.3rem;
     }
 
     strong {
-      display: block;
-      font-size: 24px;
-      color: #333;
-      margin-bottom: 4px;
+      font-size: 32px;
+      font-weight: 700;
+      color: #000;
+      margin-bottom: 8px;
     }
 
     div {
       font-size: 14px;
       color: #666;
-      margin: 0;
       padding: 0;
-      background: none;
     }
   }
 `;
