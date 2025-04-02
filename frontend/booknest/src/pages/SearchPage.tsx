@@ -154,58 +154,144 @@ const BookAuthor = styled.p`
   font-size: 14px;
 `;
 
+interface User {
+  id: number;
+  nickname: string;
+  profileURL: string;
+  isFollowing: boolean;
+}
+
+const TabContainer = styled.div`
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+`;
+
+const Tab = styled.button<{ active: boolean }>`
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  font-size: 16px;
+  color: ${(props) => (props.active ? "#7bc47f" : "#666")};
+  border-bottom: 2px solid ${(props) => (props.active ? "#7bc47f" : "transparent")};
+  cursor: pointer;
+`;
+
+const UserList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+`;
+
+const UserCard = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+`;
+
+const UserAvatar = styled.img`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+`;
+
+const UserInfo = styled.div`
+  flex: 1;
+`;
+
+const UserName = styled.h3`
+  margin: 0;
+  font-size: 16px;
+`;
+
+const FollowButton = styled.button`
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: #f1f1f1;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e1e1e1;
+  }
+`;
+
 const SearchPage = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"books" | "users">("books");
   const [searchTerm, setSearchTerm] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
-
-  const handleSearch = async () => {
-    try {
-      const response = await api.get("/api/search/book", {
-        params: {
-          title: searchTerm,
-          page: 1,
-          size: 10,
-        },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.data.success) {
-        setBooks(response.data.data.content);
-      }
-    } catch (error) {
-      console.error("Failed to search books:", error);
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+  const [users, setUsers] = useState<User[]>([]);
 
   const handleClear = () => {
     setSearchTerm("");
     setBooks([]);
+    setUsers([]);
+  };
+
+  const handleSearchResult = (data: any) => {
+    if (activeTab === "books") {
+      setBooks(data);
+      setUsers([]);
+    } else {
+      setUsers(data);
+      setBooks([]);
+    }
   };
 
   return (
     <SearchContainer>
-      <SearchBar searchTerm={searchTerm} onSearch={handleSearch} onSearchChange={setSearchTerm} onClear={handleClear} />
+      <SearchBar
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onClear={handleClear}
+        searchType={activeTab}
+        onSearchResult={handleSearchResult}
+        placeholder={activeTab === "books" ? "도서 검색" : "유저 검색"}
+      />
 
-      <BookList>
-        {books.map((book) => (
-          <BookCard key={book.bookId} onClick={() => navigate(`/book-detail/${book.bookId}`)}>
-            <BookCover src={book.imageURL} alt={book.title} />
-            <BookInfo>
-              <BookTitle>{book.title}</BookTitle>
-              <BookAuthor>{book.authors}</BookAuthor>
-            </BookInfo>
-          </BookCard>
-        ))}
-      </BookList>
+      <TabContainer>
+        <Tab active={activeTab === "books"} onClick={() => setActiveTab("books")}>
+          도서
+        </Tab>
+        <Tab active={activeTab === "users"} onClick={() => setActiveTab("users")}>
+          유저
+        </Tab>
+      </TabContainer>
+
+      {activeTab === "books" ? (
+        <BookList>
+          {books.map((book) => (
+            <BookCard key={book.bookId} onClick={() => navigate(`/book-detail/${book.bookId}`)}>
+              <BookCover src={book.imageURL} alt={book.title} />
+              <BookInfo>
+                <BookTitle>{book.title}</BookTitle>
+                <BookAuthor>{book.authors}</BookAuthor>
+              </BookInfo>
+            </BookCard>
+          ))}
+        </BookList>
+      ) : (
+        <UserList>
+          {users.map((user) => (
+            <UserCard key={user.id} onClick={() => navigate(`/profile/${user.id}`)}>
+              <UserAvatar src={user.profileURL} alt={user.nickname} />
+              <UserInfo>
+                <UserName>{user.nickname}</UserName>
+              </UserInfo>
+              <FollowButton>{user.isFollowing ? "팔로잉" : "팔로우"}</FollowButton>
+            </UserCard>
+          ))}
+        </UserList>
+      )}
     </SearchContainer>
   );
 };
