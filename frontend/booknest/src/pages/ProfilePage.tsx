@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import LogoutModal from "../components/LogoutModal";
 import DeleteAccountModal from "../components/DeleteAccountModal";
+import EditInfoModal from "../components/EditInfoModal";
 
 // Import theme for breakpoints
 import { theme } from "../styles/theme";
@@ -230,10 +231,10 @@ const ProfilePage = () => {
   const navigate = useNavigate();
   const { userId } = useParams();
   const [profileData, setProfileData] = useState(null);
-  // 여기로 상태 관리 코드 이동
   const [showSettings, setShowSettings] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // 페이지 진입 시 현재 사용자 정보 가져오기
   useEffect(() => {
@@ -295,6 +296,19 @@ const ProfilePage = () => {
   // profileData를 사용하도록 JSX 수정
   const displayData = profileData || userDetail;
 
+  useEffect(() => {
+    if (showEditModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // 컴포넌트 언마운트 시 스크롤 복구
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [showEditModal]);
+
   return (
     <BlankBox>
       <ProfileContainer>
@@ -336,11 +350,24 @@ const ProfilePage = () => {
                     팔로잉 <strong>{displayData?.followings || 0}</strong>
                   </span>
                 </UserLevel>
-                <EditButton style={{ display: isOwnProfile ? "block" : "none" }}>프로필 수정</EditButton>
+                <EditButton style={{ display: isOwnProfile ? "block" : "none" }} onClick={() => setShowEditModal(true)}>
+                  프로필 수정
+                </EditButton>
               </UserNameSection>
             </UserBasicInfo>
           </UserInfo>
         </UserProfile>
+
+        {showEditModal && (
+          <EditInfoModal
+            onClose={() => setShowEditModal(false)}
+            userInfo={{
+              nickname: displayData?.nickname || "",
+              gender: displayData?.gender || "설정안함",
+              birthdate: displayData?.birthdate || "",
+            }}
+          />
+        )}
 
         <hr />
 
