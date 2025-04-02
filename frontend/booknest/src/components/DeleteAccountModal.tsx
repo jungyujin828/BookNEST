@@ -13,6 +13,7 @@ const ModalWrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 1000;
 `;
 
 const ModalContent = styled.div`
@@ -62,7 +63,7 @@ const DeleteAccountModal = ({ onClose }: { onClose: () => void }) => {
     <ModalWrapper>
       <ModalContent>
         <h3>회원탈퇴</h3>
-        <p>정말 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+        <p>정말 탈퇴하시겠습니까?</p>
         <ButtonGroup>
           <Button onClick={onClose}>취소</Button>
           <Button onClick={handleDeleteAccount}>탈퇴하기</Button>
