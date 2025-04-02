@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { ASSETS, OAUTH } from "../constants/paths";
+import { ROUTES, ASSETS, OAUTH } from "../constants/paths";
 import config from "../config";
 // import InputInfoPage from "./InputInfoPage";
 import { useNavigate } from "react-router-dom";
@@ -181,6 +181,15 @@ const LoginPage = () => {
     navigate("/input-info");
   };
 
+  const handleEnterClick = () => {
+    const token = localStorage.getItem("token");
+    if (token && token !== "test") {
+      navigate(ROUTES.HOME);
+    } else {
+      setShowSocialButtons(true);
+    }
+  };
+
   return (
     <LoginContainer>
       <LogoSection>
@@ -196,9 +205,7 @@ const LoginPage = () => {
 
       <ButtonSection>
         {!showSocialButtons ? (
-          <EnterButton onClick={() => setShowSocialButtons(true)}>
-            입장하기
-          </EnterButton>
+          <EnterButton onClick={handleEnterClick}>입장하기</EnterButton>
         ) : (
           <>
             <KakaoButton onClick={handleKakaoLogin}>
