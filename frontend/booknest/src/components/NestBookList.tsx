@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import styled from '@emotion/styled';
-import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { FaStar, FaStarHalfAlt } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import styled from "@emotion/styled";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { FaStar, FaStarHalfAlt } from "react-icons/fa";
 
 interface NestBook {
   bookId: number;
@@ -155,8 +155,8 @@ const PaginationContainer = styled.div`
 `;
 
 const PageButton = styled.button<{ isActive?: boolean }>`
-  background-color: ${props => props.isActive ? '#4CAF50' : 'white'};
-  color: ${props => props.isActive ? 'white' : '#333'};
+  background-color: ${(props) => (props.isActive ? "#4CAF50" : "white")};
+  color: ${(props) => (props.isActive ? "white" : "#333")};
   border: 1px solid #ddd;
   padding: 8px 12px;
   margin: 0 4px;
@@ -165,7 +165,7 @@ const PageButton = styled.button<{ isActive?: boolean }>`
   transition: background-color 0.2s, color 0.2s;
 
   &:hover {
-    background-color: ${props => props.isActive ? '#45a049' : '#f5f5f5'};
+    background-color: ${(props) => (props.isActive ? "#45a049" : "#f5f5f5")};
   }
 
   &:disabled {
@@ -207,7 +207,7 @@ const LoginRequiredState = styled.div`
 `;
 
 const LoginButton = styled.button`
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -246,24 +246,24 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
     totalElements: 0,
     pageSize: 10,
     first: true,
-    last: true
+    last: true,
   });
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  
+
   const navigate = useNavigate();
 
   // 사용자 정보 조회
   const fetchUserInfo = async () => {
     try {
       console.log("사용자 정보 조회 시작");
-      const response = await api.get('/api/user/info');
+      const response = await api.get("/api/user/info");
       console.log("사용자 정보 응답:", response.data);
-      
+
       if (response.data.success && response.data.data) {
         setUserInfo(response.data.data);
         return response.data.data;
@@ -286,26 +286,26 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
       const effectiveNestId = propNestId || currentNestId;
 
       // API 스펙에 맞게 Query Parameter 수정
-      const params: Record<string, any> = { 
-        page: page, 
-        size: 10 
+      const params: Record<string, any> = {
+        page: page,
+        size: 10,
       };
-      
+
       // userId와 nestId 값이 있는 경우만 파라미터에 추가
       if (effectiveUserId !== undefined && effectiveUserId !== null) {
         params.userId = effectiveUserId;
       }
-      
+
       if (effectiveNestId !== undefined && effectiveNestId !== null) {
         params.nestId = effectiveNestId;
       }
 
       // 디버깅 정보 출력
       console.log("API 요청 파라미터:", params);
-      console.log("토큰:", localStorage.getItem('token'));
-      
+      console.log("토큰:", localStorage.getItem("token"));
+
       // axios 인터셉터가 토큰을 자동으로 추가하므로 명시적 헤더 설정 제거
-      const response = await api.get('/api/nest', { params });
+      const response = await api.get("/api/nest", { params });
 
       console.log("API 응답:", response.data);
 
@@ -318,7 +318,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
             totalElements: response.data.data.totalElements,
             pageSize: response.data.data.pageSize,
             first: response.data.data.first,
-            last: response.data.data.last
+            last: response.data.data.last,
           });
         } else if (response.data.data && Array.isArray(response.data.data)) {
           // 다른 형태의 응답인 경우 처리 (배열로 직접 오는 경우)
@@ -329,7 +329,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
             totalElements: response.data.data.length,
             pageSize: response.data.data.length,
             first: true,
-            last: true
+            last: true,
           });
         } else {
           // 데이터가 없는 경우
@@ -340,25 +340,25 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
             totalElements: 0,
             pageSize: 10,
             first: true,
-            last: true
+            last: true,
           });
         }
       } else {
-        throw new Error(response.data.error?.message || '데이터를 불러오는데 실패했습니다.');
+        throw new Error(response.data.error?.message || "데이터를 불러오는데 실패했습니다.");
       }
     } catch (err: any) {
-      console.error('Failed to fetch nest books:', err);
-      console.error('Error details:', err.response?.data || err.message);
-      console.error('Error status:', err.response?.status);
-      
+      console.error("Failed to fetch nest books:", err);
+      console.error("Error details:", err.response?.data || err.message);
+      console.error("Error status:", err.response?.status);
+
       // 403 에러 (인증 관련) 처리
       if (err.response && (err.response.status === 403 || err.response.status === 401)) {
         setIsAuthError(true);
-        setError('로그인이 필요한 서비스입니다.');
+        setError("로그인이 필요한 서비스입니다.");
       } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('둥지 도서 목록을 불러오는데 실패했습니다.');
+        setError("둥지 도서 목록을 불러오는데 실패했습니다.");
       }
     } finally {
       setLoading(false);
@@ -393,18 +393,18 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
 
   const handleLoginClick = () => {
     // 현재 URL을 저장하고 로그인 페이지로 리다이렉트
-    localStorage.setItem('redirectAfterLogin', window.location.pathname);
-    navigate('/login');
+    localStorage.setItem("redirectAfterLogin", window.location.pathname);
+    navigate("/login");
   };
 
   // 페이지네이션 버튼 생성
   const renderPagination = () => {
     const pageButtons = [];
     const maxVisibleButtons = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxVisibleButtons / 2));
     let endPage = Math.min(pagination.totalPages, startPage + maxVisibleButtons - 1);
-    
+
     // 표시되는 페이지 버튼 수 조정
     if (endPage - startPage + 1 < maxVisibleButtons && startPage > 1) {
       startPage = Math.max(1, endPage - maxVisibleButtons + 1);
@@ -412,11 +412,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
 
     // 이전 페이지 버튼
     pageButtons.push(
-      <PageButton 
-        key="prev" 
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={pagination.first}
-      >
+      <PageButton key="prev" onClick={() => handlePageChange(currentPage - 1)} disabled={pagination.first}>
         이전
       </PageButton>
     );
@@ -424,11 +420,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
     // 페이지 번호 버튼
     for (let i = startPage; i <= endPage; i++) {
       pageButtons.push(
-        <PageButton
-          key={i}
-          isActive={i === currentPage}
-          onClick={() => handlePageChange(i)}
-        >
+        <PageButton key={i} isActive={i === currentPage} onClick={() => handlePageChange(i)}>
           {i}
         </PageButton>
       );
@@ -436,11 +428,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
 
     // 다음 페이지 버튼
     pageButtons.push(
-      <PageButton 
-        key="next" 
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={pagination.last}
-      >
+      <PageButton key="next" onClick={() => handlePageChange(currentPage + 1)} disabled={pagination.last}>
         다음
       </PageButton>
     );
@@ -474,7 +462,7 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
       <BookGrid>
         {books.map((book) => (
           <BookCard key={`${book.bookId}-${book.createdAt}`}>
-            <Link to={`/book/${book.bookId}`}>
+            <Link to={`/book-detail/${book.bookId}`}>
               <BookCover>
                 <img src={book.imageUrl} alt={book.title} />
               </BookCover>
@@ -482,25 +470,17 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{book.authors}</BookAuthor>
                 <RatingContainer>
-                  <StarContainer>
-                    {renderRatingStars(book.userRating)}
-                  </StarContainer>
+                  <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
                   <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
                 </RatingContainer>
-                {book.userReview && (
-                  <ReviewText>{book.userReview}</ReviewText>
-                )}
+                {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
               </BookInfo>
             </Link>
           </BookCard>
         ))}
       </BookGrid>
-      
-      {pagination.totalPages > 1 && (
-        <PaginationContainer>
-          {renderPagination()}
-        </PaginationContainer>
-      )}
+
+      {pagination.totalPages > 1 && <PaginationContainer>{renderPagination()}</PaginationContainer>}
     </Container>
   );
 };
