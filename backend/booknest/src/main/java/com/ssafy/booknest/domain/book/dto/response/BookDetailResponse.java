@@ -3,10 +3,12 @@ package com.ssafy.booknest.domain.book.dto.response;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.global.common.CustomPage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,9 +37,9 @@ public class BookDetailResponse {
     private List<String> tags;
     private List<String> categories;
 
-    private List<ReviewResponse> reviews;
+    private CustomPage<ReviewResponse> reviews;
 
-    public static BookDetailResponse of(Book book, Double avgRating, Integer userId) {
+    public static BookDetailResponse of(Book book, Double avgRating, Integer userId, Page<ReviewResponse> reviewPage) {
         boolean isBookMarked = (userId != null) && book.getBookMarks().stream()
                 .anyMatch(bookMark -> bookMark.getNest().getUser().getId().equals(userId));
 
@@ -63,9 +65,7 @@ public class BookDetailResponse {
                 .categories(book.getBookCategories().stream()
                         .map(bookCategory -> bookCategory.getCategory().getName())
                         .collect(Collectors.toList()))
-                .reviews(book.getReviews().stream()
-                        .map(review -> ReviewResponse.of(review, userId))
-                        .collect(Collectors.toList()))
+                .reviews(new CustomPage<>(reviewPage))
                 .build();
     }
 

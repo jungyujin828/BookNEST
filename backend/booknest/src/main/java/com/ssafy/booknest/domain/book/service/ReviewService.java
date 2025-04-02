@@ -11,10 +11,13 @@ import com.ssafy.booknest.domain.book.repository.ReviewLikeRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,31 +42,31 @@ public class ReviewService {
     // 한줄평 등록
     @Transactional
     public void saveReview(Integer userId, Integer bookId, ReviewRequest dto) {
-        // 1. 입력값 검증 (Fail-Fast)
+        // 입력값 검증 (Fail-Fast)
         if (dto.getContent() == null || dto.getContent().isBlank()) {
             throw new CustomException(ErrorCode.EMPTY_REVIEW_CONTENT);
         }
 
-        // 2. 중복 체크
+        // 중복 체크
         if (reviewRepository.existsByUserIdAndBookId(userId, bookId)) {
             throw new CustomException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
-        // 3. 필수 객체 조회
+        // 필수 객체 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
-        // 4. 평점이 있으면 포함해서 빌더에 설정
+        // 평점이 있으면 포함해서 빌더에 설정
         Optional<Rating> ratingOptional = ratingRepository.findByUserIdAndBookId(userId, bookId);
 
         Review review = Review.builder()
                 .user(user)
                 .book(book)
                 .content(dto.getContent())
-                .rating(ratingOptional.map(Rating::getRating).orElse(null)) // 평점이 없으면 null
+                .rating(ratingOptional.map(Rating::getRating).orElse(null))
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -102,6 +105,7 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
+        // 현재 사용자와 작성자가 다르면 접근 금지
         if (!review.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
@@ -112,16 +116,16 @@ public class ReviewService {
 
     // 사용자 한줄평 목록
     @Transactional(readOnly = true)
-    public List<UserReviewResponse> getReviews(Integer userId) {
+    public CustomPage<UserReviewResponse> getReviews(Integer userId, Pageable pageable) {
         if (!userRepository.existsById(userId)) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<Review> reviewList = reviewRepository.findByUserId(userId);
+        Page<Review> reviewPage = reviewRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
 
-        return reviewList.stream()
-                .map(review -> UserReviewResponse.of(review))
-                .toList();
+        Page<UserReviewResponse> responsePage = reviewPage.map(UserReviewResponse::of);
+
+        return new CustomPage<>(responsePage);
     }
 
     // 한줄평 좋아요

@@ -48,6 +48,7 @@ public enum ErrorCode {
     EMPTY_RATING_CONTENT(400, "R001", "점수가 입력되지 않았습니다"),
     RATING_ALREADY_EXISTS(400, "R002", "등록인데 이미 데이터베이스에 점수가 있습니다."),
     RATING_NOT_FOUND(404, "R003", "점수가 등록되어 있지 않습니다."),
+    CANNOT_DELETE_RATING_IN_NEST(400, "R004", "둥지에 담긴 도서는 평점을 삭제할 수 없습니다."),
 
     // NEST
     BOOKNEST_NOT_FOUND(404, "N001", "둥지도서를 찾을 수 없습니다."),

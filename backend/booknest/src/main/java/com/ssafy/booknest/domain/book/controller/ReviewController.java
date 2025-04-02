@@ -6,10 +6,12 @@ import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -65,15 +67,16 @@ public class ReviewController {
 
     // 한줄평 목록 조회
     @GetMapping("/review")
-    public ResponseEntity<ApiResponse<List<UserReviewResponse>>> getReviews(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<ApiResponse<CustomPage<UserReviewResponse>>> getReviews(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            Pageable pageable) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        List<UserReviewResponse> responseList = reviewService.getReviews(userId);
+        CustomPage<UserReviewResponse> responseList = reviewService.getReviews(userId, pageable);
 
         return ApiResponse.success(responseList);
     }
+
 
     // 한줄평 좋아요
     @PostMapping("/review/{reviewId}/like")
@@ -94,6 +97,6 @@ public class ReviewController {
     ) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.unlikeReview(userId, reviewId);
-        return ApiResponse.success(HttpStatus.NO_CONTENT); // 삭제는 보통 204
+        return ApiResponse.success(HttpStatus.OK);
     }
 }
