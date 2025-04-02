@@ -6,15 +6,17 @@ import lombok.Builder;
 
 @Builder
 public record UserSearchResponse(
-        String id,
+        Integer id,
         String nickname,
-        String profileURL
+        String profileURL,
+        boolean isFollowing
 ) {
-    public static UserSearchResponse of(SerachedUser user) {
+    public static UserSearchResponse of(SerachedUser user, boolean isFollowing) {
         return UserSearchResponse.builder()
                 .id(user.id())
                 .nickname(user.nickname())
                 .profileURL(user.profileURL())
+                .isFollowing(isFollowing)
                 .build();
     }
 }

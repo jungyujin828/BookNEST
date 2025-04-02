@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record BookSearchResponse(
-        String bookId,
+        Integer bookId,
         String title,
         String imageURL,
         String authors

@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FollowRepository extends JpaRepository<Follow, Integer> {
 
@@ -27,4 +29,9 @@ public interface FollowRepository extends JpaRepository<Follow, Integer> {
 
     @Query("SELECT f.follower FROM Follow f WHERE f.following.id = :userId")
     Page<User> findFollwerUsers(@Param("userId") Integer userId, Pageable pageable);
+
+    boolean existsByFollowerIdAndFollowingId(Integer followerId, Integer followingId);
+
+    @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId AND f.following.id IN :followingIds")
+    List<Integer> findFollowingIds(@Param("followerId") Integer followerId, @Param("followingIds") List<Integer> followingIds);
 }
