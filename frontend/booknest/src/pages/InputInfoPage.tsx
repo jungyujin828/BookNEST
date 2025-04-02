@@ -190,6 +190,7 @@ const CloseButton = styled.button`
 `;
 
 const InputInfoPage = () => {
+  const [isNicknameValidated, setIsNicknameValidated] = useState(false);
   const navigate = useNavigate(); // 추가: useNavigate 훅 선언
   const [nickname, setNickname] = useState("");
   const [gender, setGender] = useState("설정안함");
@@ -219,9 +220,9 @@ const InputInfoPage = () => {
     setNickname(text);
     setIsNicknameValid(text.length <= 10);
     setErrorMessage("");
+    setIsNicknameValidated(false); // 닉네임이 변경되면 검증 상태 초기화
   };
 
-  // 닉네임 중복 확인 함수 수정
   const checkNicknameDuplicate = async () => {
     // 이모지 및 공백 체크
     const hasEmoji = /[\p{Emoji}]/u.test(nickname);
@@ -247,9 +248,11 @@ const InputInfoPage = () => {
       if (response.data.success) {
         const isDuplicate = response.data.data;
         setIsNicknameValid(!isDuplicate);
+        setIsNicknameValidated(!isDuplicate); // 중복 확인 결과에 따라 검증 상태 설정
         setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
       }
     } catch (error) {
+      setIsNicknameValidated(false);
       setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
     }
   };
@@ -472,7 +475,16 @@ const InputInfoPage = () => {
           />
         </InputGroup>
 
-        <SubmitButton type="submit">정보 입력 완료</SubmitButton>
+        <SubmitButton
+          type="submit"
+          disabled={!isNicknameValidated}
+          style={{
+            backgroundColor: isNicknameValidated ? "#7bc47f" : "#cccccc",
+            cursor: isNicknameValidated ? "pointer" : "not-allowed",
+          }}
+        >
+          {isNicknameValidated ? "정보 입력 완료" : "닉네임: 필수 정보입니다."}
+        </SubmitButton>
       </form>
 
       {isAddressModalOpen && (

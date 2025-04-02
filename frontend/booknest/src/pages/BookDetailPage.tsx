@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import styled from '@emotion/styled';
-import api from '../api/axios';
-import PurchaseModal from '../components/PurchaseModal';
-import CommentForm from '../components/CommentForm';
-import RatingStars from '../components/RatingStars';
-import { useBookStore } from '../store/useBookStore';
-import axios from 'axios';
-import useRatingStore from '../store/useRatingStore';
-import BookmarkButton from '../components/BookmarkButton';
-import AddToNestButton from '../components/AddToNestButton';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import styled from "@emotion/styled";
+import api from "../api/axios";
+import PurchaseModal from "../components/PurchaseModal";
+import CommentForm from "../components/CommentForm";
+import RatingStars from "../components/RatingStars";
+import { useBookStore } from "../store/useBookStore";
+import axios from "axios";
+import useRatingStore from "../store/useRatingStore";
+import BookmarkButton from "../components/BookmarkButton";
+import AddToNestButton from "../components/AddToNestButton";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface Review {
   reviewId: number;
@@ -74,7 +74,7 @@ const TopSection = styled.div`
   display: flex;
   gap: 40px;
   margin-bottom: 40px;
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 24px;
@@ -83,7 +83,7 @@ const TopSection = styled.div`
 
 const ImageSection = styled.div`
   flex: 0 0 300px;
-  
+
   @media (max-width: 768px) {
     flex: none;
     text-align: center;
@@ -182,16 +182,35 @@ const Section = styled.div`
   margin-bottom: 32px;
 `;
 
+const MoreButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 1rem 0;
+  display: block;
+  margin-left: auto;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const SectionTitle = styled.h2`
   font-size: 20px;
   margin-bottom: 16px;
   color: #333;
 `;
 
-const Content = styled.p`
+const Content = styled.p<{ isExpanded?: boolean }>`
   line-height: 1.6;
   color: #495057;
-  white-space: pre-line;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: ${(props) => (props.isExpanded ? "none" : "3")};
+  -webkit-box-orient: vertical;
+  margin-bottom: 8px;
 `;
 
 const ReviewSection = styled.div`
@@ -200,10 +219,10 @@ const ReviewSection = styled.div`
 
 const ReviewCard = styled.div<{ isUserReview?: boolean }>`
   padding: 16px;
-  border: 1px solid ${props => props.isUserReview ? '#4CAF50' : '#dee2e6'};
+  border: 1px solid ${(props) => (props.isUserReview ? "#4CAF50" : "#dee2e6")};
   border-radius: 8px;
   margin-bottom: 16px;
-  background-color: ${props => props.isUserReview ? '#f8fff8' : '#fff'};
+  background-color: ${(props) => (props.isUserReview ? "#f8fff8" : "#fff")};
 `;
 
 const ReviewHeader = styled.div`
@@ -319,7 +338,7 @@ const ButtonContainer = styled.div`
 const PurchaseButton = styled.button`
   flex: 1;
   padding: 12px 24px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   border-radius: 8px;
@@ -356,9 +375,10 @@ const BookDetailPage = () => {
   const [book, setBook] = useState<BookDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [likedReviews, setLikedReviews] = useState<{[key: number]: boolean}>({});
-  const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
-  
+  const [likedReviews, setLikedReviews] = useState<{ [key: number]: boolean }>({});
+  const [likeLoading, setLikeLoading] = useState<{ [key: number]: boolean }>({});
+  const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({});
+
   // Zustand store
   const {
     purchaseUrls,
@@ -366,7 +386,7 @@ const BookDetailPage = () => {
     error: storeError,
     setPurchaseUrls,
     setLoading: setStoreLoading,
-    setError: setStoreError
+    setError: setStoreError,
   } = useBookStore();
 
   // 모달 상태
@@ -381,23 +401,23 @@ const BookDetailPage = () => {
   const loadLikedReviews = () => {
     try {
       if (!currentUserId) return {};
-      
+
       const storedLikes = localStorage.getItem(`likedReviews_${currentUserId}`);
       return storedLikes ? JSON.parse(storedLikes) : {};
     } catch (err) {
-      console.error('Failed to load liked reviews from localStorage:', err);
+      console.error("Failed to load liked reviews from localStorage:", err);
       return {};
     }
   };
 
   // 리뷰 좋아요 상태를 로컬 스토리지에 저장
-  const saveLikedReviews = (likedState: {[key: number]: boolean}) => {
+  const saveLikedReviews = (likedState: { [key: number]: boolean }) => {
     try {
       if (!currentUserId) return;
-      
+
       localStorage.setItem(`likedReviews_${currentUserId}`, JSON.stringify(likedState));
     } catch (err) {
-      console.error('Failed to save liked reviews to localStorage:', err);
+      console.error("Failed to save liked reviews to localStorage:", err);
     }
   };
 
@@ -416,21 +436,21 @@ const BookDetailPage = () => {
         setLoading(true);
         setError(null);
         const response = await api.get(`/api/book/${bookId}`);
-        
+
         if (response.data.success) {
           const bookData = response.data.data;
           setBook(bookData);
-          
+
           // 로컬 스토리지에서 좋아요 상태 불러오기
           if (currentUserId) {
             setLikedReviews(loadLikedReviews());
           }
         } else {
-          setError('도서 정보를 불러오는데 실패했습니다.');
+          setError("도서 정보를 불러오는데 실패했습니다.");
         }
       } catch (err) {
-        console.error('API Error:', err);
-        setError('서버 오류가 발생했습니다.');
+        console.error("API Error:", err);
+        setError("서버 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -445,29 +465,29 @@ const BookDetailPage = () => {
     // 현재 로그인한 사용자 정보 가져오기
     const fetchCurrentUser = async () => {
       try {
-        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>('/api/user/info');
-        console.log('User info response:', response.data);
+        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
+        console.log("User info response:", response.data);
         if (response.data.success && response.data.data) {
-          console.log('User data:', response.data.data);
+          console.log("User data:", response.data.data);
           // nickname으로 사용자 식별
           const nickname = response.data.data.nickname;
-          console.log('User nickname:', nickname);
+          console.log("User nickname:", nickname);
           setCurrentUserId(nickname);
-          console.log('Current user nickname set to:', nickname);
+          console.log("Current user nickname set to:", nickname);
         } else {
-          console.log('No user data in response');
+          console.log("No user data in response");
           setCurrentUserId(null);
         }
       } catch (err) {
         // 403 에러는 로그인하지 않은 상태이므로 무시
         if (axios.isAxiosError(err)) {
-          console.log('Error status:', err.response?.status);
-          console.log('Error data:', err.response?.data);
+          console.log("Error status:", err.response?.status);
+          console.log("Error data:", err.response?.data);
           if (err.response?.status === 403) {
             setCurrentUserId(null);
-            console.log('User not logged in');
+            console.log("User not logged in");
           } else {
-            console.error('Failed to fetch current user:', err);
+            console.error("Failed to fetch current user:", err);
             setCurrentUserId(null);
           }
         }
@@ -478,22 +498,22 @@ const BookDetailPage = () => {
 
   const handlePurchaseClick = async () => {
     try {
-      setStoreLoading('purchaseUrls', true);
-      setStoreError('purchaseUrls', null);
+      setStoreLoading("purchaseUrls", true);
+      setStoreError("purchaseUrls", null);
       setIsPurchaseModalOpen(true);
 
       const response = await api.get(`/api/book/${bookId}/purchase`);
-      
+
       if (response.data.success) {
         setPurchaseUrls(response.data.data);
       } else {
-        setStoreError('purchaseUrls', '구매 링크를 불러오는데 실패했습니다.');
+        setStoreError("purchaseUrls", "구매 링크를 불러오는데 실패했습니다.");
       }
     } catch (err) {
-      console.error('Purchase API Error:', err);
-      setStoreError('purchaseUrls', '서버 오류가 발생했습니다.');
+      console.error("Purchase API Error:", err);
+      setStoreError("purchaseUrls", "서버 오류가 발생했습니다.");
     } finally {
-      setStoreLoading('purchaseUrls', false);
+      setStoreLoading("purchaseUrls", false);
     }
   };
 
@@ -507,17 +527,17 @@ const BookDetailPage = () => {
       setLoading(true);
       setError(null);
       const response = await api.get(`/api/book/${bookId}`);
-      
+
       if (response.data.success) {
         const bookData = response.data.data;
         setBook(bookData);
         setEditingReviewId(null);
       } else {
-        setError('도서 정보를 불러오는데 실패했습니다.');
+        setError("도서 정보를 불러오는데 실패했습니다.");
       }
     } catch (err) {
-      console.error('API Error:', err);
-      setError('서버 오류가 발생했습니다.');
+      console.error("API Error:", err);
+      setError("서버 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -530,11 +550,11 @@ const BookDetailPage = () => {
         // 삭제 성공 후 목록 새로고침
         await handleCommentSubmit();
       } else {
-        setError('리뷰 삭제에 실패했습니다.');
+        setError("리뷰 삭제에 실패했습니다.");
       }
     } catch (err) {
-      console.error('Delete API Error:', err);
-      setError('서버 오류가 발생했습니다.');
+      console.error("Delete API Error:", err);
+      setError("서버 오류가 발생했습니다.");
     }
   };
 
@@ -548,31 +568,31 @@ const BookDetailPage = () => {
 
   const handleRatingChange = async (newRating: number) => {
     try {
-      setBook(prevBook => {
+      setBook((prevBook) => {
         if (!prevBook) return null;
         return {
           ...prevBook,
-          avgRating: newRating
+          avgRating: newRating,
         };
       });
     } catch (err) {
-      console.error('Error updating rating:', err);
-      setError('평점 업데이트에 실패했습니다.');
+      console.error("Error updating rating:", err);
+      setError("평점 업데이트에 실패했습니다.");
     }
   };
 
   const handleLikeToggle = async (reviewId: number) => {
     if (!currentUserId) {
-      alert('로그인이 필요한 기능입니다.');
+      alert("로그인이 필요한 기능입니다.");
       return;
     }
-    
+
     // 좋아요 상태를 위한 로딩 설정
-    setLikeLoading(prev => ({ ...prev, [reviewId]: true }));
-    
+    setLikeLoading((prev) => ({ ...prev, [reviewId]: true }));
+
     try {
       const isCurrentlyLiked = likedReviews[reviewId];
-      
+
       try {
         if (isCurrentlyLiked) {
           // 좋아요 취소 (DELETE 요청)
@@ -581,75 +601,75 @@ const BookDetailPage = () => {
           // 좋아요 추가 (POST 요청)
           await api.post(`/api/book/review/${reviewId}/like`);
         }
-        
+
         // 상태 업데이트
-        const updatedLikes = { 
-          ...likedReviews, 
-          [reviewId]: !isCurrentlyLiked 
+        const updatedLikes = {
+          ...likedReviews,
+          [reviewId]: !isCurrentlyLiked,
         };
-        
+
         setLikedReviews(updatedLikes);
-        
+
         // 로컬 스토리지에 저장
         saveLikedReviews(updatedLikes);
-        
+
         // 좋아요 수 업데이트 (Book 객체 내의 해당 리뷰 업데이트)
-        setBook(prevBook => {
+        setBook((prevBook) => {
           if (!prevBook) return null;
-          
-          const updatedReviews = prevBook.reviews.map(review => {
+
+          const updatedReviews = prevBook.reviews.map((review) => {
             if (review.reviewId === reviewId) {
               return {
                 ...review,
-                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1
+                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1,
               };
             }
             return review;
           });
-          
+
           return {
             ...prevBook,
-            reviews: updatedReviews
+            reviews: updatedReviews,
           };
         });
       } catch (apiError) {
-        console.error('API 요청 실패:', apiError);
-        
+        console.error("API 요청 실패:", apiError);
+
         // API 에러 발생해도 로컬에서는 좋아요 처리
         // (네트워크 문제 등으로 API 실패해도 UX 개선)
-        const updatedLikes = { 
-          ...likedReviews, 
-          [reviewId]: !isCurrentlyLiked 
+        const updatedLikes = {
+          ...likedReviews,
+          [reviewId]: !isCurrentlyLiked,
         };
-        
+
         setLikedReviews(updatedLikes);
         saveLikedReviews(updatedLikes);
-        
+
         // UI 업데이트만 진행
-        setBook(prevBook => {
+        setBook((prevBook) => {
           if (!prevBook) return null;
-          
-          const updatedReviews = prevBook.reviews.map(review => {
+
+          const updatedReviews = prevBook.reviews.map((review) => {
             if (review.reviewId === reviewId) {
               return {
                 ...review,
-                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1
+                likes: isCurrentlyLiked ? Math.max(0, review.likes - 1) : review.likes + 1,
               };
             }
             return review;
           });
-          
+
           return {
             ...prevBook,
-            reviews: updatedReviews
+            reviews: updatedReviews,
           };
         });
       }
     } catch (err) {
-      console.error('Like API Error:', err);
-      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      console.error("Like API Error:", err);
+      alert("좋아요 처리에 실패했습니다. 다시 시도해주세요.");
     } finally {
-      setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
+      setLikeLoading((prev) => ({ ...prev, [reviewId]: false }));
     }
   };
 
@@ -658,7 +678,7 @@ const BookDetailPage = () => {
   }
 
   if (error || !book) {
-    return <ErrorMessage>{error || '도서 정보를 찾을 수 없습니다.'}</ErrorMessage>;
+    return <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>;
   }
 
   return (
@@ -673,13 +693,8 @@ const BookDetailPage = () => {
             <ImageSection>
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
-                <AddToNestButton 
-                  bookId={book.bookId} 
-                  currentRating={userRatings[book.bookId] || 0}
-                />
-                <PurchaseButton onClick={handlePurchaseClick}>
-                  구매하기
-                </PurchaseButton>
+                <AddToNestButton bookId={book.bookId} currentRating={userRatings[book.bookId] || 0} />
+                <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
               </ButtonContainer>
             </ImageSection>
             <InfoSection>
@@ -691,16 +706,11 @@ const BookDetailPage = () => {
                 </RatingRow>
                 <RatingRow>
                   <RatingLabel>내 평점</RatingLabel>
-                  <RatingStars 
-                    bookId={book.bookId}
-                    onRatingChange={handleRatingChange}
-                  />
-                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || '0.0'}</RatingText>
+                  <RatingStars bookId={book.bookId} onRatingChange={handleRatingChange} />
+                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || "0.0"}</RatingText>
                 </RatingRow>
               </RatingContainer>
-              <AuthorInfo>
-                저자: {book.authors.join(', ')}
-              </AuthorInfo>
+              <AuthorInfo>저자: {book.authors.join(", ")}</AuthorInfo>
               <BasicInfo>
                 <InfoItem>
                   <Label>출판사</Label>
@@ -727,25 +737,42 @@ const BookDetailPage = () => {
             </InfoSection>
           </TopSection>
 
-          <Section>
-            <SectionTitle>책 소개</SectionTitle>
-            <Content>{book.intro}</Content>
-          </Section>
+          {/* 책 소개 섹션 */}
+          {book.intro && (
+            <Section>
+              <SectionTitle>책 소개</SectionTitle>
+              <Content isExpanded={expandedSections["intro"]}>{book.intro}</Content>
+              <MoreButton onClick={() => setExpandedSections((prev) => ({ ...prev, intro: !prev.intro }))}>
+                {expandedSections["intro"] ? "접기" : "더보기"}
+              </MoreButton>
+            </Section>
+          )}
 
-          <Section>
-            <SectionTitle>목차</SectionTitle>
-            <Content>{book.index}</Content>
-          </Section>
+          {/* 목차 섹션 */}
+          {book.index && (
+            <Section>
+              <SectionTitle>목차</SectionTitle>
+              <Content isExpanded={expandedSections["index"]}>{book.index}</Content>
+              <MoreButton onClick={() => setExpandedSections((prev) => ({ ...prev, index: !prev.index }))}>
+                {expandedSections["index"] ? "접기" : "더보기"}
+              </MoreButton>
+            </Section>
+          )}
 
-          <Section>
-            <SectionTitle>출판사 서평</SectionTitle>
-            <Content>{book.publisherReview}</Content>
-          </Section>
+          {/* 출판사 서평 섹션 */}
+          {book.publisherReview && (
+            <Section>
+              <SectionTitle>출판사 서평</SectionTitle>
+              <Content isExpanded={expandedSections["publisherReview"]}>{book.publisherReview}</Content>
+              <MoreButton
+                onClick={() => setExpandedSections((prev) => ({ ...prev, publisherReview: !prev.publisherReview }))}
+              >
+                {expandedSections["publisherReview"] ? "접기" : "더보기"}
+              </MoreButton>
+            </Section>
+          )}
 
-          <CommentForm 
-            bookId={Number(bookId)} 
-            onCommentSubmit={handleCommentSubmit}
-          />
+          <CommentForm bookId={Number(bookId)} onCommentSubmit={handleCommentSubmit} />
 
           <ReviewSection>
             <SectionTitle>리뷰</SectionTitle>
@@ -759,22 +786,18 @@ const BookDetailPage = () => {
                   return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
                 })
                 .map((review) => {
-                  const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
+                  const isUserReview =
+                    currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
                   return (
-                    <ReviewCard 
-                      key={review.reviewId}
-                      isUserReview={isUserReview}
-                    >
+                    <ReviewCard key={review.reviewId} isUserReview={isUserReview}>
                       <ReviewHeader>
                         <ReviewInfo>
                           <ReviewerName>{review.reviewerName}</ReviewerName>
-                          <ReviewDate>
-                            {new Date(review.createdAt).toLocaleDateString()}
-                          </ReviewDate>
+                          <ReviewDate>{new Date(review.createdAt).toLocaleDateString()}</ReviewDate>
                         </ReviewInfo>
                       </ReviewHeader>
                       {editingReviewId === review.reviewId ? (
-                        <CommentForm 
+                        <CommentForm
                           bookId={Number(bookId)}
                           reviewId={review.reviewId}
                           initialContent={review.content}
@@ -789,13 +812,11 @@ const BookDetailPage = () => {
                             <ReviewText>{review.content}</ReviewText>
                             {isUserReview && (
                               <ReviewActions>
-                                <ActionButton onClick={() => handleEditClick(review.reviewId)}>
-                                  수정
-                                </ActionButton>
-                                <ActionButton 
+                                <ActionButton onClick={() => handleEditClick(review.reviewId)}>수정</ActionButton>
+                                <ActionButton
                                   className="delete"
                                   onClick={() => {
-                                    if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+                                    if (window.confirm("정말로 이 리뷰를 삭제하시겠습니까?")) {
                                       handleCommentDelete(review.reviewId);
                                     }
                                   }}
@@ -805,9 +826,9 @@ const BookDetailPage = () => {
                               </ReviewActions>
                             )}
                           </ReviewContent>
-                          <LikeButton 
+                          <LikeButton
                             onClick={() => handleLikeToggle(review.reviewId)}
-                            className={likedReviews[review.reviewId] ? 'liked' : ''}
+                            className={likedReviews[review.reviewId] ? "liked" : ""}
                             disabled={likeLoading[review.reviewId]}
                           >
                             {likedReviews[review.reviewId] ? <FaHeart /> : <FaRegHeart />}
@@ -819,9 +840,7 @@ const BookDetailPage = () => {
                   );
                 })
             ) : (
-              <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
-                아직 작성된 리뷰가 없습니다.
-              </div>
+              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>아직 작성된 리뷰가 없습니다.</div>
             )}
           </ReviewSection>
 
