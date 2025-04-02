@@ -1,12 +1,14 @@
 import React from "react";
 import styled from "@emotion/styled";
+import api from "../api/axios";
 
 interface SearchBarProps {
   searchTerm: string;
-  onSearch: () => void;
   onSearchChange: (value: string) => void;
   onClear: () => void;
   placeholder?: string;
+  searchType: "books" | "users";
+  onSearchResult: (data: any) => void;
 }
 
 const SearchBarContainer = styled.div`
@@ -99,14 +101,36 @@ const ClearButton = styled.button`
 
 const SearchBar: React.FC<SearchBarProps> = ({
   searchTerm,
-  onSearch,
   onSearchChange,
   onClear,
   placeholder = "도서, 작가, 유저 검색",
+  searchType,
+  onSearchResult,
 }) => {
+  const handleSearch = async () => {
+    try {
+      const endpoint = searchType === "books" ? "/api/search/book" : "/api/search/user";
+      const params =
+        searchType === "books" ? { title: searchTerm, page: 1, size: 10 } : { name: searchTerm, page: 1, size: 10 };
+
+      const response = await api.get(endpoint, {
+        params,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.data.success) {
+        onSearchResult(response.data.data.content);
+      }
+    } catch (error) {
+      console.error(`Failed to search ${searchType}:`, error);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      onSearch();
+      handleSearch();
     }
   };
 
