@@ -57,7 +57,7 @@ public class FollowService {
 
         return new CustomPage<>(followingUsers.map(followingUser -> {
             Integer totalRatings = ratingRepository.countRatings(followingUser.getId());
-            return FollowResponse.of(followingUser, totalRatings);
+            return FollowResponse.of(followingUser, totalRatings, true);
         }));
     }
 
@@ -67,9 +67,10 @@ public class FollowService {
 
         Page<User> followerUsers = followRepository.findFollwerUsers(targetUserId, pageable);
 
-        return new CustomPage<>(followerUsers.map(followingUser -> {
-            Integer totalRatings = ratingRepository.countRatings(followingUser.getId());
-            return FollowResponse.of(followingUser, totalRatings);
+        return new CustomPage<>(followerUsers.map(followerUser -> {
+            Integer totalRatings = ratingRepository.countRatings(followerUser.getId());
+            Boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(user.getId(), followerUser.getId());
+            return FollowResponse.of(followerUser, totalRatings, isFollowing);
         }));
     }
 }
