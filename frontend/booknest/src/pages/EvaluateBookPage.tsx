@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react"; // useEffect 추가
-import { useNavigate } from "react-router-dom"; // useNavigate 추가
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import styled from "@emotion/styled";
 import WriteCommentModal from "../components/WriteCommentModal";
 import api from "../api/axios";
+import { theme } from "../styles/theme";
 
 // Modify HeartIcon component to accept filled prop
 const HeartIcon = ({ filled = false }) => (
@@ -44,6 +46,28 @@ interface Book {
   imageUrl: string;
   authors: string[];
 }
+
+const NextButton = styled.button`
+  position: fixed;
+  bottom: 2rem;
+  right: 0.3rem;
+  background-color: #000;
+  color: black;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  zoom: 2;
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    bottom: 0.5rem;
+  }
+`;
+
+const NextIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M5 12h14M14 6l6 6-6 6" />
+  </svg>
+);
 
 const EvaluateBookPage = () => {
   const navigate = useNavigate();
@@ -189,37 +213,10 @@ const EvaluateBookPage = () => {
 
   // return문 내부, 최상단 div 안에 버튼 추가
   return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px" }}>
-      <button
-        onClick={() => navigate("/search")}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#4a90e2",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          marginBottom: "20px",
-          fontSize: "16px",
-        }}
-      >
-        도서 검색하기
-      </button>
-      <button
-        onClick={() => navigate("/home")}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#808080",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          marginBottom: "10px",
-          fontSize: "16px",
-        }}
-      >
-        건너뛰기
-      </button>
+    <>
+      <NextButton onClick={() => navigate("/home")}>
+        <NextIcon />
+      </NextButton>
       {books.map((book) => (
         <div
           key={book.bookId}
@@ -259,7 +256,7 @@ const EvaluateBookPage = () => {
       ))}
 
       <WriteCommentModal isOpen={modalOpen} onClose={() => setModalOpen(false)} bookTitle={selectedBook} />
-    </div>
+    </>
   );
 };
 
