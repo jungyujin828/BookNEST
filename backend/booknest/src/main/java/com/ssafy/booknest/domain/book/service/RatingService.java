@@ -112,7 +112,7 @@ public class RatingService {
         }
 
         // 사용자의 둥지에 포함된 도서는 평점 삭제 불가
-        if (bookNestRepository.existByBookId(userId, bookId)) {
+        if (bookNestRepository.existsByNestUserIdAndBookId(userId, bookId)) {
             throw new CustomException(ErrorCode.CANNOT_DELETE_RATING_IN_NEST);
         }
 

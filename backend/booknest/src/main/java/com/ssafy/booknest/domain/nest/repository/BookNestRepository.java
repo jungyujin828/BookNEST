@@ -19,5 +19,5 @@ public interface BookNestRepository extends JpaRepository<BookNest, Integer> {
     Optional<BookNest> findByNestIdAndBookId(Integer id, Integer id1);
 
     // 해당 사용자의 둥지에 해당 책이 있는지 여부
-    boolean existByBookId(Integer userId, Integer bookId);
+    boolean existsByNestUserIdAndBookId(Integer userId, Integer bookId);
 }
