@@ -11,10 +11,13 @@ import com.ssafy.booknest.domain.book.repository.ReviewLikeRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -112,16 +115,16 @@ public class ReviewService {
 
     // 사용자 한줄평 목록
     @Transactional(readOnly = true)
-    public List<UserReviewResponse> getReviews(Integer userId) {
+    public CustomPage<UserReviewResponse> getReviews(Integer userId, Pageable pageable) {
         if (!userRepository.existsById(userId)) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<Review> reviewList = reviewRepository.findByUserId(userId);
+        Page<Review> reviewPage = reviewRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
 
-        return reviewList.stream()
-                .map(review -> UserReviewResponse.of(review))
-                .toList();
+        Page<UserReviewResponse> responsePage = reviewPage.map(UserReviewResponse::of);
+
+        return new CustomPage<>(responsePage);
     }
 
     // 한줄평 좋아요

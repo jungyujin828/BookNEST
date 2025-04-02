@@ -1,9 +1,6 @@
 package com.ssafy.booknest.domain.book.service;
 
-import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
+import com.ssafy.booknest.domain.book.dto.response.*;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
@@ -37,6 +34,7 @@ public class BookService {
     private final ebookRepository ebookRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final ReviewRepository reviewRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -51,23 +49,22 @@ public class BookService {
                 .toList();
     }
 
-
     // 책 상세 페이지 조회
     @Transactional(readOnly = true)
-    public BookDetailResponse getBook(Integer userId, Integer bookId) {
-
-        Book book = bookRepository.findBookDetailById(bookId)
+    public BookDetailResponse getBook(Integer userId, Integer bookId, Pageable pageable) {
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
-        Double averageRating = bookRepository.findAverageRatingByBookId(bookId)
+        Double avgRating = bookRepository.findAverageRatingByBookId(bookId)
                 .orElse(0.0);
 
-        return BookDetailResponse.of(book, averageRating, userId);
+        Page<Review> reviewPage = reviewRepository.findByBookOrderByUserFirst(book, userId, pageable);
+
+        Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
+
+
+        return BookDetailResponse.of(book, avgRating, userId, responsePage);
     }
-
-
-
-
 
     // 구매 사이트 조회
     @Transactional(readOnly = true)

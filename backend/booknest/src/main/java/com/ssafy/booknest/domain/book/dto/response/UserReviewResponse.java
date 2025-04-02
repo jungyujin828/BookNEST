@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class UserReviewResponse {
     private String review;
     private String bookName;
     private List<String> authors;
-
+    private LocalDateTime updatedAt;
 
     public static UserReviewResponse of(Review review) {
         return UserReviewResponse.builder()
@@ -34,6 +35,7 @@ public class UserReviewResponse {
                                 .map(bookAuthor -> bookAuthor.getAuthor().getName())
                                 .collect(Collectors.toList())
                 )
+                .updatedAt(review.getUpdatedAt())
                 .build();
     }
 }

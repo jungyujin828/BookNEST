@@ -11,13 +11,14 @@ import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.IgnoredBookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
-import com.ssafy.booknest.domain.nest.entity.BookMark;
-import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,7 +80,7 @@ public class RatingService {
         }
 
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
+                .orElse(null);
 
         if (!rating.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
@@ -100,7 +101,7 @@ public class RatingService {
     @Transactional
     public void deleteRating(Integer userId, Integer bookId) {
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
+                .orElse(null);
 
         if (!rating.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
@@ -117,22 +118,22 @@ public class RatingService {
 
     // 사용자 평점 목록 조회
     @Transactional(readOnly = true)
-    public List<UserRatingResponse> getRatings(Integer userId) {
+    public CustomPage<UserRatingResponse> getRatingList(Integer userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        List<Rating> ratingList = ratingRepository.findByUser(user);
+        Page<Rating> ratingPage = ratingRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
 
-        return ratingList.stream()
-                .map(rating -> UserRatingResponse.of(rating))
-                .toList();
+        Page<UserRatingResponse> responsePage = ratingPage.map(UserRatingResponse::of);
+
+        return new CustomPage<>(responsePage);
     }
 
-    // 사용자의 해당 책 평점 가져오기
+
+    // 사용자의 해당 책에 대한 평점 가져오기
     public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
-
+                .orElse(null);
         return MyRatingResponse.of(rating);
     }
 
