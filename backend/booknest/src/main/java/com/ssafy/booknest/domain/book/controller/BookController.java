@@ -11,6 +11,8 @@ import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +40,12 @@ public class BookController {
     // 도서 상세
     @GetMapping("/{bookId}")
     public ResponseEntity<ApiResponse<BookDetailResponse>> getBook(@PathVariable("bookId") Integer bookId,
-                                                                   @AuthenticationPrincipal UserPrincipal userPrincipal) {
-
+                                                                   @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                                   Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        return ApiResponse.success(bookService.getBook(userId, bookId));
+        return ApiResponse.success(bookService.getBook(userId, bookId, pageable));
     }
+
 
 
     // 책 구매사이트 연계

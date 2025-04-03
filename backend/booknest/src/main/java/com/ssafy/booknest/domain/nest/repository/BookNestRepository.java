@@ -17,4 +17,7 @@ public interface BookNestRepository extends JpaRepository<BookNest, Integer> {
     Page<BookNest> findByNestIdSorted(@Param("nestId") Integer nestId, Pageable pageable);
 
     Optional<BookNest> findByNestIdAndBookId(Integer id, Integer id1);
+
+    // 해당 사용자의 둥지에 해당 책이 있는지 여부
+    boolean existsByNestUserIdAndBookId(Integer userId, Integer bookId);
 }
