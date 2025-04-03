@@ -3,6 +3,7 @@ package com.ssafy.booknest.domain.user.service;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateImgRequest;
 import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.dto.response.UserMypageResponse;
@@ -148,5 +149,20 @@ public class UserService {
         Integer totalReviews = reviewRepository.countReviews(targetUserId);
 
         return UserMypageResponse.of(targetUser, followers, followings, totalRatings, totalReviews);
+    }
+
+    // 프로필 이미지 등록, 수정, 삭제
+    @Transactional
+    public void saveProfileImage(Integer userId, UserUpdateImgRequest dto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        String defaultImageUrl = "https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png";  // 기본 이미지 URL
+
+        String imgUrl = (dto.getImgurl() == null || dto.getImgurl().isBlank())
+                ? defaultImageUrl
+                : dto.getImgurl();
+
+        user.updatedProfileUrl(imgUrl);
     }
 }
