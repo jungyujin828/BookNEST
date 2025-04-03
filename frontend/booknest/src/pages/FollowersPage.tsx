@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore"; // Add this at the top
 
 interface Follower {
   userId: number;
@@ -20,21 +21,17 @@ const Container = styled.div`
 `;
 
 const FollowButton = styled.button<{ isFollowing: boolean }>`
-  background-color: ${(props) => (props.isFollowing ? "#FFE5EC" : "#7bc47f")};
-  color: ${(props) => (props.isFollowing ? "#FF2E63" : "white")};
-  border: none;
   padding: 8px 16px;
   border-radius: 20px;
+  border: none;
+  background-color: ${(props) => (props.isFollowing ? "#f1f1f1" : "#7bc47f")};
+  color: ${(props) => (props.isFollowing ? "#666" : "white")};
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
+  transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${(props) => (props.isFollowing ? "#FFD1DC" : "#69b578")};
-  }
-
-  &:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    background-color: ${(props) => (props.isFollowing ? "#e1e1e1" : "#6ab36e")};
   }
 `;
 
@@ -44,7 +41,6 @@ const UserCard = styled.div`
   padding: 15px;
   border-bottom: 1px solid #eee;
   gap: 15px;
-  cursor: pointer;
   &:hover {
     background-color: #f5f5f5;
   }
@@ -65,6 +61,7 @@ const FollowersPage = () => {
   const navigate = useNavigate();
   const { userId } = useParams();
   const [followers, setFollowers] = useState<Follower[]>([]);
+  const currentUser = useAuthStore((state) => state.user); // Add this
 
   useEffect(() => {
     const fetchFollowers = async () => {
@@ -83,31 +80,43 @@ const FollowersPage = () => {
           setFollowers(response.data.data.content);
         }
       } catch (error) {
-        console.error("Failed to fetch followers:", error);
+        console.error("팔로워 목록 가져오기 실패:", error);
       }
     };
 
-    fetchFollowers();
+    if (userId) {
+      fetchFollowers();
+    }
   }, [userId]);
 
-  const handleFollow = async (targetUserId: number) => {
+  const handleFollowClick = async (e: React.MouseEvent, targetUserId: number) => {
+    e.stopPropagation();
     try {
-      const response = await api.post(
-        "/api/follow",
-        { targetUserId },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const targetUser = followers.find((u) => u.userId === targetUserId);
+      if (!targetUser) return;
 
-      if (response.data.success) {
-        // Optionally refresh the followers list or show success message
-        console.log("Successfully followed user");
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+
+      if (targetUser.isFollowing) {
+        // 언팔로우 요청
+        const response = await api.delete(`/api/follow?targetUserId=${targetUserId}`, { headers });
+        if (response.data.success) {
+          setFollowers(
+            followers.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: false } : user))
+          );
+        }
+      } else {
+        // 팔로우 요청
+        const response = await api.post(`/api/follow?targetUserId=${targetUserId}`, {}, { headers });
+        if (response.data.success) {
+          setFollowers(followers.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: true } : user)));
+        }
       }
     } catch (error) {
-      console.error("Failed to follow user:", error);
+      console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 
@@ -127,9 +136,11 @@ const FollowersPage = () => {
               <p>평가 {follower.totalRatings}개</p>
             </UserInfo>
           </div>
-          <FollowButton isFollowing={follower.isFollowing} onClick={() => handleFollow(follower.userId)}>
-            {follower.isFollowing ? "팔로우" : "팔로우"}
-          </FollowButton>
+          {currentUser?.id !== follower.userId && (
+            <FollowButton isFollowing={follower.isFollowing} onClick={(e) => handleFollowClick(e, follower.userId)}>
+              {follower.isFollowing ? "팔로잉" : "팔로우"}
+            </FollowButton>
+          )}
         </UserCard>
       ))}
     </Container>

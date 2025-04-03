@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import api from "../api/axios";
-import { useNavigate } from "react-router-dom"; // 추가
+import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store/useAuthStore"; // Add this
 
 interface Following {
   userId: number;
@@ -10,6 +11,7 @@ interface Following {
   profileURL: string;
   archeType: string;
   totalRatings: number;
+  isFollowing: boolean; // Add this
 }
 
 const Container = styled.div`
@@ -42,10 +44,57 @@ const UserInfo = styled.div`
   flex: 1;
 `;
 
+const FollowButton = styled.button<{ isFollowing: boolean }>`
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: ${(props) => (props.isFollowing ? "#f1f1f1" : "#7bc47f")};
+  color: ${(props) => (props.isFollowing ? "#666" : "white")};
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.isFollowing ? "#e1e1e1" : "#6ab36e")};
+  }
+`;
+
 const FollowingPage = () => {
-  const navigate = useNavigate(); // 추가
+  const navigate = useNavigate();
   const { userId } = useParams();
   const [followings, setFollowings] = useState<Following[]>([]);
+  const currentUser = useAuthStore((state) => state.user);
+
+  const handleFollowClick = async (e: React.MouseEvent, targetUserId: number) => {
+    e.stopPropagation();
+    try {
+      const targetUser = followings.find((u) => u.userId === targetUserId);
+      if (!targetUser) return;
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+
+      if (targetUser.isFollowing) {
+        const response = await api.delete(`/api/follow?targetUserId=${targetUserId}`, { headers });
+        if (response.data.success) {
+          setFollowings(
+            followings.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: false } : user))
+          );
+        }
+      } else {
+        const response = await api.post(`/api/follow?targetUserId=${targetUserId}`, {}, { headers });
+        if (response.data.success) {
+          setFollowings(
+            followings.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: true } : user))
+          );
+        }
+      }
+    } catch (error) {
+      console.error("팔로우/언팔로우 작업 실패:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchFollowings = async () => {
@@ -75,16 +124,23 @@ const FollowingPage = () => {
     <Container>
       <h1>팔로잉 목록</h1>
       {followings.map((following) => (
-        <UserCard
-          key={following.userId}
-          onClick={() => navigate(`/profile/${following.userId}`)} // 추가
-        >
-          <ProfileImage src={following.profileURL} alt={following.nickname} />
-          <UserInfo>
-            <h3>{following.nickname}</h3>
-            <p>{following.archeType}</p>
-            <p>평가 {following.totalRatings}개</p>
-          </UserInfo>
+        <UserCard key={following.userId}>
+          <div
+            style={{ display: "flex", alignItems: "center", flex: 1, cursor: "pointer" }}
+            onClick={() => navigate(`/profile/${following.userId}`)}
+          >
+            <ProfileImage src={following.profileURL} alt={following.nickname} />
+            <UserInfo>
+              <h3>{following.nickname}</h3>
+              <p>{following.archeType}</p>
+              <p>평가 {following.totalRatings}개</p>
+            </UserInfo>
+          </div>
+          {currentUser?.id !== following.userId && (
+            <FollowButton isFollowing={following.isFollowing} onClick={(e) => handleFollowClick(e, following.userId)}>
+              {following.isFollowing ? "팔로잉" : "팔로우"}
+            </FollowButton>
+          )}
         </UserCard>
       ))}
     </Container>
