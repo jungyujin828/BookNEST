@@ -17,7 +17,7 @@ import java.util.Optional;
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
     // 베스트 셀러
-    @Query("SELECT bs FROM BestSeller bs")
+    @Query(value = "SELECT * FROM best_seller LIMIT 15", nativeQuery = true)
     List<BestSeller> findBestSellers();
 
 //    // bookId로 책을 조회하는 메서드
