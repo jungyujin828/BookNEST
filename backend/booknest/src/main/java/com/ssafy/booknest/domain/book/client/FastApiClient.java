@@ -1,5 +1,8 @@
 package com.ssafy.booknest.domain.book.client;
 
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -8,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class FastApiClient {
 
@@ -25,12 +29,12 @@ public class FastApiClient {
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
         try {
-            String endpoint = fastApiBaseUrl + "/recommend/today"; // 경로 결합
+            String endpoint = fastApiBaseUrl + "/recommend/today";
             ResponseEntity<Map> response = restTemplate.postForEntity(endpoint, requestEntity, Map.class);
             return response.getBody();
         } catch (Exception e) {
-            System.out.println("FastAPI 호출 에러: " + e.getMessage());
-            return Map.of("db_status", "error", "detail", e.getMessage());
+            log.error("FastAPI 연동 실패: {}", e.getMessage());
+            throw new CustomException(ErrorCode.FASTAPI_REQUEST_FAILED);
         }
     }
 }
