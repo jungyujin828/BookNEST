@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { ROUTES } from '../constants/paths';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { ROUTES } from "../constants/paths";
 
 interface AddToNestButtonProps {
   bookId: number;
@@ -70,13 +70,13 @@ const ModalContent = styled.div`
 
 const ModalTitle = styled.h3`
   margin: 0 0 16px 0;
-  color: ${props => props.color || '#333'};
+  color: ${(props) => props.color || "#333"};
 `;
 
-const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
+const ModalButton = styled.button<{ variant?: "primary" | "secondary" }>`
   padding: 8px 16px;
   margin: 8px;
-  background-color: ${props => props.variant === 'primary' ? '#4a90e2' : '#6c757d'};
+  background-color: ${(props) => (props.variant === "primary" ? "#4a90e2" : "#6c757d")};
   color: white;
   border: none;
   border-radius: 4px;
@@ -84,13 +84,13 @@ const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: ${props => props.variant === 'primary' ? '#357abd' : '#5a6268'};
+    background-color: ${(props) => (props.variant === "primary" ? "#357abd" : "#5a6268")};
   }
 `;
 
 const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating }) => {
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
+  const [modalType, setModalType] = useState<"success" | "error" | null>(null);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -114,13 +114,13 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
 
   const handleAddToNest = async () => {
     if (currentRating === 0) {
-      setModalType('error');
+      setModalType("error");
       setShowModal(true);
       return;
     }
 
     if (!userInfo || !userInfo.nestId) {
-      alert('사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
+      alert("사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.");
       return;
     }
 
@@ -128,48 +128,48 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
 
     try {
       const requestData = {
-        "bookId": bookId.toString(),
-        "nestId": userInfo.nestId.toString(),
-        "rating": currentRating.toString(),
-        "review": "NULL"
+        bookId: bookId,
+        nestId: userInfo.nestId,
+        rating: currentRating.toString(),
+        review: "NULL",
       };
 
-      console.log('Sending request with data:', requestData);
-      const response = await api.post('/api/nest', requestData);
+      console.log("Sending request with data:", requestData);
+      const response = await api.post("/api/nest", requestData);
 
       if (response.data.success) {
-        setModalType('success');
+        setModalType("success");
         setShowModal(true);
       }
     } catch (error: any) {
-      console.error('Full error:', error);
-      console.error('Error details:', {
+      console.error("Full error:", error);
+      console.error("Error details:", {
         status: error.response?.status,
         data: error.response?.data,
         headers: error.response?.headers,
         requestHeaders: error.config?.headers,
-        message: error.message
+        message: error.message,
       });
-      
+
       if (error.response?.status === 409) {
-        alert('이미 서재에 등록된 도서입니다.');
+        alert("이미 서재에 등록된 도서입니다.");
       } else if (error.response?.status === 400) {
-        console.error('Request data that caused 400:', error.config?.data);
-        alert('잘못된 요청입니다. 필수 정보를 확인해주세요.');
+        console.error("Request data that caused 400:", error.config?.data);
+        alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
       } else if (error.response?.status === 401) {
-        alert('로그인이 필요한 서비스입니다.');
+        alert("로그인이 필요한 서비스입니다.");
         navigate(ROUTES.LOGIN);
       } else if (error.response?.status === 403) {
         if (import.meta.env.DEV) {
-          console.log('Development environment detected');
-          console.log('Request URL:', error.config?.url);
-          console.log('Request method:', error.config?.method);
-          console.log('Request data:', error.config?.data);
-          console.log('Complete request headers:', error.config?.headers);
+          console.log("Development environment detected");
+          console.log("Request URL:", error.config?.url);
+          console.log("Request method:", error.config?.method);
+          console.log("Request data:", error.config?.data);
+          console.log("Complete request headers:", error.config?.headers);
         }
-        alert('권한이 없습니다. 인증 토큰을 확인해주세요.');
+        alert("권한이 없습니다. 인증 토큰을 확인해주세요.");
       } else {
-        alert('서재 등록 중 오류가 발생했습니다.');
+        alert("서재 등록 중 오류가 발생했습니다.");
       }
     } finally {
       setLoading(false);
@@ -188,28 +188,24 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
   return (
     <>
       <Button onClick={handleAddToNest} disabled={loading}>
-        {loading ? '처리 중...' : '내 서재에 담기'}
+        {loading ? "처리 중..." : "내 서재에 담기"}
       </Button>
 
       {showModal && (
         <ModalOverlay onClick={handleCloseModal}>
-          <ModalContent onClick={e => e.stopPropagation()}>
-            {modalType === 'success' ? (
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            {modalType === "success" ? (
               <>
                 <ModalTitle>서재에 등록되었습니다</ModalTitle>
                 <ModalButton variant="primary" onClick={handleGoToNest}>
                   서재 바로가기
                 </ModalButton>
-                <ModalButton onClick={handleCloseModal}>
-                  닫기
-                </ModalButton>
+                <ModalButton onClick={handleCloseModal}>닫기</ModalButton>
               </>
             ) : (
               <>
                 <ModalTitle color="#dc3545">평점 등록은 필수입니다</ModalTitle>
-                <ModalButton onClick={handleCloseModal}>
-                  확인
-                </ModalButton>
+                <ModalButton onClick={handleCloseModal}>확인</ModalButton>
               </>
             )}
           </ModalContent>
@@ -219,4 +215,4 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
   );
 };
 
-export default AddToNestButton; 
+export default AddToNestButton;
