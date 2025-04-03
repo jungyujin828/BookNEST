@@ -51,8 +51,10 @@ const DeleteAccountModal = ({ onClose }: { onClose: () => void }) => {
       });
 
       if (response.data.success) {
+        localStorage.clear();
         logout();
         navigate("/login");
+        onClose();
       }
     } catch (error) {
       console.error("회원탈퇴 실패:", error);
