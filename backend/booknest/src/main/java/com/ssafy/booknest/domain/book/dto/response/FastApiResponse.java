@@ -15,6 +15,5 @@ public class FastApiResponse {
     private String db_status;
     private List<FastApiRecommendation> result;
 
-    // Getters, Setters
 }
 
