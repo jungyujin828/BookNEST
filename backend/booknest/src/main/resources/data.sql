@@ -183,7 +183,7 @@ VALUES (
 
 -- 📌 베스트셀러 (1~5번 책을 베스트셀러로 등록)
 INSERT INTO best_seller (book_id) VALUES
-                                      (1), (2), (3), (4), (5);
+                                      (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
 -- 📌 작가 추가 (책에 맞는 유명 작가 5명)
 INSERT INTO author (id, name) VALUES

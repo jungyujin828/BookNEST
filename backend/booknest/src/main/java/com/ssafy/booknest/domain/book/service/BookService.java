@@ -1,8 +1,9 @@
 package com.ssafy.booknest.domain.book.service;
 
-import com.ssafy.booknest.domain.book.dto.response.*;
+import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.entity.*;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
@@ -30,8 +31,7 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final UserRepository userRepository;
-    private final ebookRepository ebookRepository;
+    private final BookMarkRepository bookMarkRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
     private final ReviewRepository reviewRepository;
@@ -61,10 +61,10 @@ public class BookService {
         Page<Review> reviewPage = reviewRepository.findByBookOrderByUserFirst(book, userId, pageable);
 
         Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
+        boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
 
+        return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
 
-        return BookDetailResponse.of(book, avgRating, userId, responsePage);
-    }
 
     // 구매 사이트 조회
     @Transactional(readOnly = true)
@@ -122,38 +122,6 @@ public class BookService {
 //                .map(Ebook::getRedirectUrl)
 //                .collect(Collectors.toList());
 //    }
-
-
-//    // 제목, 저자 기반 검색 (나중에 다시)
-//    public BookSearchResponse searchBooks(String keyword, BookSearchType type, int userPage, int size) {
-//        validateKeyword(keyword);
-//
-//        int internalPage = Math.max(userPage - 1, 0); // 내부 페이지 계산
-//
-//        Pageable pageable = PageRequest.of(internalPage, size);
-//        Page<Book> books;
-//
-//        switch (type) {
-//            case TITLE -> books = bookRepository.findByTitleContaining(keyword, pageable);
-//            case AUTHOR -> books = bookRepository.findByAuthorNameContaining(keyword, pageable);
-//            case ALL -> books = bookRepository.findByTitleOrAuthorContaining(keyword, pageable);
-//            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SEARCH_TYPE);
-//        }
-//
-//        Page<BookResponse> resultPage = books.map(BookResponse::of);
-//
-//        return BookSearchResponse.of(resultPage, userPage, BookSearchType.valueOf(type.name()));
-//    }
-//
-//    // 검색 유효성 검사
-//    private void validateKeyword(String keyword) {
-//        if (keyword == null || keyword.trim().isEmpty()) {
-//            throw new CustomException(ErrorCode.EMPTY_KEYWORD);
-//        }
-//    }
-
-
-
 
 
 

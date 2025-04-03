@@ -1,12 +1,8 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
@@ -29,10 +25,7 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
-    private final ReviewService reviewService;
-    private final RatingService ratingService;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -73,23 +66,6 @@ public class BookController {
 //
 //        return ApiResponse.success((bookService.getOnlineLibrary(userId, bookId)));
 //    }
-
-
-//    // 책 검색 (제목, 저자)
-//    @GetMapping("/search")
-//    public ResponseEntity<ApiResponse<BookSearchResponse>> getResultsByBookSearch(
-//            @RequestParam String keyword,
-//            @RequestParam(defaultValue = "TITLE") BookSearchType type,
-//            @RequestParam(defaultValue = "1") int page,
-//            @RequestParam(defaultValue = "5") int size
-//    ) {
-//        BookSearchResponse response = bookService.searchBooks(keyword, type, page, size);
-//        return ApiResponse.success(response);
-//    }
-
-
-
-
 
 
 //    // 내 지역에서 가장 많이 읽은 책
