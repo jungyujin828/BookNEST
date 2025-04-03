@@ -11,13 +11,15 @@ import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.IgnoredBookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
-import com.ssafy.booknest.domain.nest.entity.BookMark;
-import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,7 @@ public class RatingService {
     private final ReviewRepository reviewRepository;
     private final RatingRepository ratingRepository;
     private final IgnoredBookRepository ignoredBookRepository;
+    private final BookNestRepository bookNestRepository;
 
     // 평점 등록
     @Transactional
@@ -99,40 +102,49 @@ public class RatingService {
     // 평점 삭제
     @Transactional
     public void deleteRating(Integer userId, Integer bookId) {
+        // 평점이 존재하지 않으면 예외 발생
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
 
+        // 평점 작성자와 현재 사용자 불일치 시 접근 금지
         if (!rating.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
-        Optional<Review> review = reviewRepository.findByUserIdAndBookId(userId, bookId);
-
-        if (review.isPresent() && review.get().getRating() != null) {
-            review.get().updateRating(null);  // 평점만 null 처리
+        // 사용자의 둥지에 포함된 도서는 평점 삭제 불가
+        if (bookNestRepository.existsByNestUserIdAndBookId(userId, bookId)) {
+            throw new CustomException(ErrorCode.CANNOT_DELETE_RATING_IN_NEST);
         }
 
+        // 관련 리뷰가 존재하고, 평점이 설정되어 있다면 평점만 제거
+        Optional<Review> review = reviewRepository.findByUserIdAndBookId(userId, bookId);
+        if (review.isPresent() && review.get().getRating() != null) {
+            review.get().updateRating(null);
+        }
+
+        // 평점 삭제
         ratingRepository.delete(rating);
     }
 
+
     // 사용자 평점 목록 조회
     @Transactional(readOnly = true)
-    public List<UserRatingResponse> getRatings(Integer userId) {
+    public CustomPage<UserRatingResponse> getRatingList(Integer userId, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        List<Rating> ratingList = ratingRepository.findByUser(user);
+        Page<Rating> ratingPage = ratingRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
 
-        return ratingList.stream()
-                .map(rating -> UserRatingResponse.of(rating))
-                .toList();
+        Page<UserRatingResponse> responsePage = ratingPage.map(UserRatingResponse::of);
+
+        return new CustomPage<>(responsePage);
     }
 
-    // 사용자의 해당 책 평점 가져오기
+
+    // 사용자의 해당 책에 대한 평점 가져오기
     public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
-                .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
-
+                .orElse(null);
         return MyRatingResponse.of(rating);
     }
 
@@ -157,7 +169,4 @@ public class RatingService {
 
         ignoredBookRepository.save(ignoredBook);
     }
-
-
-
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,15 +14,14 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class   UserRatingResponse {
-
+public class UserRatingResponse {
     private Integer bookId;
     private Integer ratingId;
     private String bookName;
     private String imageUrl;
     private Double rating;
     private List<String> authors;
-
+    private LocalDateTime updatedAt;
 
     public static UserRatingResponse of(Rating rating){
         return UserRatingResponse.builder()
@@ -35,6 +35,7 @@ public class   UserRatingResponse {
                                 .map(bookAuthor -> bookAuthor.getAuthor().getName())
                                 .collect(Collectors.toList())
                 )
+                .updatedAt(rating.getUpdatedAt())
                 .build();
     }
 }
