@@ -10,6 +10,7 @@ interface User {
 
 interface UserDetailInfo {
   userId: number;
+  nestId: number;
   nickname: string;
   gender: string;
   birthDate: string;
