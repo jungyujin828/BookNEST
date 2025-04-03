@@ -34,5 +34,5 @@ oauth:
   naver:
     redirect-uri: http://localhost:5173/oauth/naver/callback
 
-fastapi:
-  url: http://localhost:8000
+#fastapi:
+#  url: http://localhost:8000
