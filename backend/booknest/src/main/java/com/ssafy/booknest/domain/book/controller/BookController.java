@@ -113,16 +113,18 @@ public class BookController {
 //    }
 
 
-//    // 책 검색 (제목, 저자)
-//    @GetMapping("/search")
-//    public ResponseEntity<ApiResponse<BookSearchResponse>> getResultsByBookSearch(
-//            @RequestParam String keyword,
-//            @RequestParam(defaultValue = "TITLE") BookSearchType type,
-//            @RequestParam(defaultValue = "1") int page,
-//            @RequestParam(defaultValue = "5") int size
-//    ) {
-//        BookSearchResponse response = bookService.searchBooks(keyword, type, page, size);
-//        return ApiResponse.success(response);
+//    // 내 지역에서 가장 많이 읽은 책
+//    @GetMapping("/region")
+//    public ResponseEntity<ApiResponse<List<BookResponse>>> getMostReadBooksByRegion(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+//
+//        // 로그인한 사용자만 접근 가능
+//        if (userPrincipal == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
+//        }
+//
+//        List<BookResponse> mostReadBooks = bookService.getMostReadBooksByRegion();
+//
+//        return ApiResponse.success(mostReadBooks);
 //    }
 
 }

@@ -11,7 +11,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 public record SearchedBook(
 
         @Id
-        String bookId,
+        Integer bookId,
 
         @Field(type = FieldType.Keyword)
         String title,

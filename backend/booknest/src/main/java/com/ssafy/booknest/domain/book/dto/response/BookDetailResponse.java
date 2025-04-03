@@ -1,14 +1,11 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,9 +34,7 @@ public class BookDetailResponse {
 
     private List<ReviewResponse> reviews;
 
-    public static BookDetailResponse of(Book book, Double avgRating, Integer userId) {
-        boolean isBookMarked = (userId != null) && book.getBookMarks().stream()
-                .anyMatch(bookMark -> bookMark.getNest().getUser().getId().equals(userId));
+    public static BookDetailResponse of(Book book, Double avgRating, Integer userId, Boolean isBookMarked) {
 
         return BookDetailResponse.builder()
                 .bookId(book.getId())

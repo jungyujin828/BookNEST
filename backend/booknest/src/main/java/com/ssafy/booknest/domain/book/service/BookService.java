@@ -30,8 +30,7 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final UserRepository userRepository;
-    private final ebookRepository ebookRepository;
+    private final BookMarkRepository bookMarkRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
 
@@ -41,6 +40,7 @@ public class BookService {
     public List<BookResponse> getBestSellers() {
 
         List<BestSeller> bestSellers = bookRepository.findBestSellers();
+
 
         return bestSellers.stream()
                 .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
@@ -58,10 +58,10 @@ public class BookService {
         Double averageRating = bookRepository.findAverageRatingByBookId(bookId)
                 .orElse(0.0);
 
-        return BookDetailResponse.of(book, averageRating, userId);
+        boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
+
+        return BookDetailResponse.of(book, averageRating, userId, isBookMarked);
     }
-
-
 
 
 
@@ -129,38 +129,6 @@ public class BookService {
 //                .map(Ebook::getRedirectUrl)
 //                .collect(Collectors.toList());
 //    }
-
-
-//    // 제목, 저자 기반 검색 (나중에 다시)
-//    public BookSearchResponse searchBooks(String keyword, BookSearchType type, int userPage, int size) {
-//        validateKeyword(keyword);
-//
-//        int internalPage = Math.max(userPage - 1, 0); // 내부 페이지 계산
-//
-//        Pageable pageable = PageRequest.of(internalPage, size);
-//        Page<Book> books;
-//
-//        switch (type) {
-//            case TITLE -> books = bookRepository.findByTitleContaining(keyword, pageable);
-//            case AUTHOR -> books = bookRepository.findByAuthorNameContaining(keyword, pageable);
-//            case ALL -> books = bookRepository.findByTitleOrAuthorContaining(keyword, pageable);
-//            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SEARCH_TYPE);
-//        }
-//
-//        Page<BookResponse> resultPage = books.map(BookResponse::of);
-//
-//        return BookSearchResponse.of(resultPage, userPage, BookSearchType.valueOf(type.name()));
-//    }
-//
-//    // 검색 유효성 검사
-//    private void validateKeyword(String keyword) {
-//        if (keyword == null || keyword.trim().isEmpty()) {
-//            throw new CustomException(ErrorCode.EMPTY_KEYWORD);
-//        }
-//    }
-
-
-
 
 
 

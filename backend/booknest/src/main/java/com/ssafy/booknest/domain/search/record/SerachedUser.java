@@ -10,7 +10,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Document(indexName = "users")
 public record SerachedUser(
         @Id
-        String id,
+        Integer id,
 
         @Field(type = FieldType.Keyword)
         String nickname,
