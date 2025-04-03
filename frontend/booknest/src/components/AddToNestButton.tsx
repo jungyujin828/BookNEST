@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -7,6 +7,22 @@ import { ROUTES } from '../constants/paths';
 interface AddToNestButtonProps {
   bookId: number;
   currentRating: number;
+}
+
+interface UserInfo {
+  userId: number;
+  nestId: number;
+  nickname: string;
+  archetype: string;
+  gender: string | null;
+  birthDate: string | null;
+  roadAddress: string;
+  zipcode: string;
+  profileURL: string;
+  followers: number;
+  followings: number;
+  totalRatings: number;
+  totalReviews: number;
 }
 
 const Button = styled.button`
@@ -75,7 +91,26 @@ const ModalButton = styled.button<{ variant?: 'primary' | 'secondary' }>`
 const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating }) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // 사용자 정보 조회
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
+        if (response.data.success && response.data.data) {
+          setUserInfo(response.data.data);
+          console.log("User data fetched for nest:", response.data.data);
+        }
+      } catch (err) {
+        console.error("사용자 정보 조회 실패:", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleAddToNest = async () => {
     if (currentRating === 0) {
@@ -84,10 +119,17 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       return;
     }
 
+    if (!userInfo || !userInfo.nestId) {
+      alert('사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.');
+      return;
+    }
+
+    setLoading(true);
+
     try {
       const requestData = {
         "bookId": bookId.toString(),
-        "nestId": "1",
+        "nestId": userInfo.nestId.toString(),
         "rating": currentRating.toString(),
         "review": "NULL"
       };
@@ -114,6 +156,9 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       } else if (error.response?.status === 400) {
         console.error('Request data that caused 400:', error.config?.data);
         alert('잘못된 요청입니다. 필수 정보를 확인해주세요.');
+      } else if (error.response?.status === 401) {
+        alert('로그인이 필요한 서비스입니다.');
+        navigate(ROUTES.LOGIN);
       } else if (error.response?.status === 403) {
         if (import.meta.env.DEV) {
           console.log('Development environment detected');
@@ -126,6 +171,8 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       } else {
         alert('서재 등록 중 오류가 발생했습니다.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -140,8 +187,8 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
 
   return (
     <>
-      <Button onClick={handleAddToNest}>
-        내 서재에 담기
+      <Button onClick={handleAddToNest} disabled={loading}>
+        {loading ? '처리 중...' : '내 서재에 담기'}
       </Button>
 
       {showModal && (

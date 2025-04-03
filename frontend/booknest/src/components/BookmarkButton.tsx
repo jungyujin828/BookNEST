@@ -15,7 +15,7 @@ interface BookmarkItem {
   createdAt: string;
 }
 
-const Button = styled.button<{ isBookmarked: boolean }>`
+const Button = styled.button<{ $isBookmarked: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
@@ -30,9 +30,9 @@ const Button = styled.button<{ isBookmarked: boolean }>`
   }
 `;
 
-const HeartIcon = styled(FaHeart)<{ isBookmarked: boolean }>`
+const HeartIcon = styled(FaHeart)<{ $isBookmarked: boolean }>`
   font-size: 24px;
-  color: ${(props) => (props.isBookmarked ? "#ff4444" : "#E0E0E0")};
+  color: ${(props) => (props.$isBookmarked ? "#ff4444" : "#E0E0E0")};
   transition: color 0.2s ease;
 `;
 
@@ -98,12 +98,12 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId }) => {
 
   return (
     <Button 
-      isBookmarked={isBookmarked} 
+      $isBookmarked={isBookmarked} 
       onClick={handleBookmarkClick} 
       aria-label={isBookmarked ? "찜 해제" : "찜하기"}
       disabled={loading}
     >
-      <HeartIcon isBookmarked={isBookmarked} />
+      <HeartIcon $isBookmarked={isBookmarked} />
     </Button>
   );
 };
