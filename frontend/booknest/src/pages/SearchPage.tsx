@@ -183,12 +183,26 @@ const UserList = styled.div`
   gap: 16px;
 `;
 
+const FollowButton = styled.button<{ isFollowing: boolean }>`
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: ${(props) => (props.isFollowing ? "#f1f1f1" : "#7bc47f")};
+  color: ${(props) => (props.isFollowing ? "#666" : "white")};
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.isFollowing ? "#e1e1e1" : "#6ab36e")};
+  }
+`;
+
 const UserCard = styled.div`
   display: flex;
   align-items: center;
   padding: 16px;
   gap: 16px;
-  cursor: pointer;
   border-radius: 8px;
 
   &:hover {
@@ -212,18 +226,6 @@ const UserName = styled.h3`
   font-size: 16px;
 `;
 
-const FollowButton = styled.button`
-  padding: 8px 16px;
-  border-radius: 20px;
-  border: none;
-  background-color: #f1f1f1;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #e1e1e1;
-  }
-`;
-
 const SearchPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"books" | "users">("books");
@@ -244,6 +246,35 @@ const SearchPage = () => {
     } else {
       setUsers(data);
       setBooks([]);
+    }
+  };
+
+  const handleFollowClick = async (e: React.MouseEvent, userId: number) => {
+    e.stopPropagation();
+    try {
+      const targetUser = users.find((u) => u.id === userId);
+      if (!targetUser) return;
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      };
+
+      if (targetUser.isFollowing) {
+        // 언팔로우 요청
+        const response = await api.delete(`/api/follow?targetUserId=${userId}`, { headers });
+        if (response.data.success) {
+          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: false } : user)));
+        }
+      } else {
+        // 팔로우 요청
+        const response = await api.post(`/api/follow?targetUserId=${userId}`, {}, { headers });
+        if (response.data.success) {
+          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: true } : user)));
+        }
+      }
+    } catch (error) {
+      console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 
@@ -282,12 +313,21 @@ const SearchPage = () => {
       ) : (
         <UserList>
           {users.map((user) => (
-            <UserCard key={user.id} onClick={() => navigate(`/profile/${user.id}`)}>
-              <UserAvatar src={user.profileURL} alt={user.nickname} />
-              <UserInfo>
-                <UserName>{user.nickname}</UserName>
-              </UserInfo>
-              <FollowButton>{user.isFollowing ? "팔로잉" : "팔로우"}</FollowButton>
+            <UserCard key={user.id}>
+              <div
+                style={{ display: "flex", alignItems: "center", flex: 1, cursor: "pointer" }}
+                onClick={() => navigate(`/profile/${user.id}`)}
+              >
+                <UserAvatar src={user.profileURL} alt={user.nickname} />
+                <UserInfo>
+                  <UserName>{user.nickname}</UserName>
+                </UserInfo>
+              </div>
+              {Number(localStorage.getItem("userId")) !== user.id && (
+                <FollowButton isFollowing={user.isFollowing} onClick={(e) => handleFollowClick(e, user.id)}>
+                  {user.isFollowing ? "팔로잉" : "팔로우"}
+                </FollowButton>
+              )}
             </UserCard>
           ))}
         </UserList>
