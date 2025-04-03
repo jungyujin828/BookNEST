@@ -8,6 +8,7 @@ import api from "../api/axios";
 import LogoutModal from "../components/LogoutModal";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import EditInfoModal from "../components/EditInfoModal";
+import ProfileImageUpload from "../components/ProfileImageUpload";
 
 // Import theme for breakpoints
 import { theme } from "../styles/theme";
@@ -236,6 +237,15 @@ const ProfilePage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // 로컬 스토리지에서 사용자 정보 불러오기
+  useEffect(() => {
+    const savedUserDetail = localStorage.getItem('userDetail');
+    if (savedUserDetail) {
+      const parsedUserDetail = JSON.parse(savedUserDetail);
+      setUserDetail(parsedUserDetail);
+    }
+  }, [setUserDetail]);
+
   // 페이지 진입 시 현재 사용자 정보 가져오기
   useEffect(() => {
     const fetchCurrentUserInfo = async () => {
@@ -315,9 +325,18 @@ const ProfilePage = () => {
         <UserProfile>
           <UserInfo>
             <UserBasicInfo>
-              <ProfileImage>
-                <img src={displayData?.profileURL} alt="profile" />
-              </ProfileImage>
+              {isOwnProfile ? (
+                <ProfileImageUpload 
+                  currentImageUrl={userDetail?.profileURL || '/default-profile.jpg'} 
+                />
+              ) : (
+                <ProfileImage>
+                  <img 
+                    src={displayData?.profileURL || '/default-profile.jpg'} 
+                    alt="profile" 
+                  />
+                </ProfileImage>
+              )}
               <UserNameSection>
                 <IconContainer>
                   <IconButton>
