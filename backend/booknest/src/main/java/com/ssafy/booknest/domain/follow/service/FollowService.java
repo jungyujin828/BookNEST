@@ -57,7 +57,8 @@ public class FollowService {
 
         return new CustomPage<>(followingUsers.map(followingUser -> {
             Integer totalRatings = ratingRepository.countRatings(followingUser.getId());
-            return FollowResponse.of(followingUser, totalRatings, true);
+            Boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(user.getId(), followingUser.getId());
+            return FollowResponse.of(followingUser, totalRatings, isFollowing);
         }));
     }
 
