@@ -3,6 +3,7 @@ package com.ssafy.booknest.domain.book.service;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
@@ -64,11 +65,11 @@ public class BookService {
         boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
 
         return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
-
+    }
 
     // 구매 사이트 조회
     @Transactional(readOnly = true)
-    public BookPurchaseResponse getPurchaseLinks(int bookId) {
+    public BookPurchaseResponse getPurchaseLinks(Integer bookId) {
 
         Book book = bookRepository.findBookDetailById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
