@@ -6,11 +6,14 @@ import CommentForm from './CommentForm';
 
 interface Review {
   reviewId: number;
-  reviewerName: string;
   reviewerId: number;
-  content: string;
-  likes: number;
-  createdAt: string;
+  bookId: number;
+  review: string;     // content 대신 review 필드 사용
+  bookName: string;   // 책 이름
+  authors: string[];  // 저자 목록
+  updatedAt: string;  // 업데이트 날짜
+  reviewerName?: string; // 백엔드에서 제공하지 않는 경우 사용자 표시 용도로 사용
+  likes: number;      // 좋아요 수 (백엔드 응답에 없을 경우 기본값 설정 필요)
 }
 
 interface ReviewListProps {
@@ -135,6 +138,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
   const [likedReviews, setLikedReviews] = useState<{[key: number]: boolean}>({});
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
 
+  // 안전하게 reviews 처리
+  const validReviews = Array.isArray(reviews) ? reviews : [];
+
   // 리뷰 좋아요 상태를 로컬 스토리지에서 불러오기
   const loadLikedReviews = () => {
     try {
@@ -254,12 +260,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
     }
   };
 
-  const sortedReviews = [...reviews].sort((a, b) => {
+  const sortedReviews = [...validReviews].sort((a, b) => {
     // 현재 사용자의 리뷰를 맨 위로
-    if (currentUserId && currentUserId === a.reviewerName) return -1;
-    if (currentUserId && currentUserId === b.reviewerName) return 1;
+    if (currentUserId && a.reviewerName && a.reviewerName === currentUserId) return -1;
+    if (currentUserId && b.reviewerName && b.reviewerName === currentUserId) return 1;
     // 그 다음 최신순으로 정렬
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
   });
 
   return (
@@ -267,14 +273,15 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
       <SectionTitle>리뷰</SectionTitle>
       {sortedReviews.length > 0 ? (
         sortedReviews.map((review) => {
-          const isUserReview = currentUserId !== undefined && currentUserId !== null && currentUserId === review.reviewerName;
+          const isUserReview = currentUserId !== undefined && currentUserId !== null && 
+                               review.reviewerName && currentUserId === review.reviewerName;
           return (
             <ReviewCard key={review.reviewId} isUserReview={isUserReview}>
               <ReviewHeader>
                 <ReviewInfo>
-                  <ReviewerName>{review.reviewerName}</ReviewerName>
+                  <ReviewerName>{review.reviewerName || `사용자 ${review.reviewerId}`}</ReviewerName>
                   <ReviewDate>
-                    {new Date(review.createdAt).toLocaleDateString()}
+                    {new Date(review.updatedAt).toLocaleDateString()}
                   </ReviewDate>
                 </ReviewInfo>
               </ReviewHeader>
@@ -282,7 +289,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
                 <CommentForm 
                   bookId={bookId}
                   reviewId={review.reviewId}
-                  initialContent={review.content}
+                  initialContent={review.review}
                   isEdit={true}
                   onCommentSubmit={handleCommentSubmit}
                   onCommentDelete={handleCommentDelete}
@@ -291,7 +298,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
               ) : (
                 <>
                   <ReviewContent>
-                    <ReviewText>{review.content}</ReviewText>
+                    <ReviewText>{review.review}</ReviewText>
                     {isUserReview && (
                       <ReviewActions>
                         <ActionButton onClick={() => handleEditClick(review.reviewId)}>
@@ -316,7 +323,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
                     disabled={likeLoading[review.reviewId]}
                   >
                     {likedReviews[review.reviewId] ? <FaHeart /> : <FaRegHeart />}
-                    <span>좋아요 {review.likes}개</span>
+                    <span>좋아요 {review.likes || 0}개</span>
                   </LikeButton>
                 </>
               )}
