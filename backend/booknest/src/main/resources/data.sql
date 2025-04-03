@@ -295,3 +295,25 @@ VALUES
     (3, 1, 4, NOW()),
     (4, 1, 5, NOW()),
     (5, 2, 1, NOW());
+
+
+-- 평론가 김문학의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('김문학', 'AI 시대를 살아갈 모든 이들에게 통찰을 주는 책입니다.', 1, 1, NOW()),
+    ('김문학', '고통과 연대, 역사에 대한 깊은 성찰이 담겨 있습니다.', 2, 2, NOW()),
+    ('김문학', '삶에 대한 따뜻한 시선을 느낄 수 있는 산문집입니다.', 3, 3, NOW());
+
+-- 평론가 이평론의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('이평론', '자기계발서의 고전. 실천 중심의 인사이트가 담겨 있습니다.', 1, 4, NOW()),
+    ('이평론', '인생의 아이러니를 깊이 있게 그려낸 수작입니다.', 2, 5, NOW()),
+    ('이평론', '한 소년의 성장기가 감동적으로 펼쳐지는 이야기.', 3, 11, NOW());
+
+-- 평론가 박비평의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('박비평', '화성을 배경으로 한 생존기의 명작. 상상력과 과학이 공존합니다.', 1, 6, NOW()),
+    ('박비평', '소년의 눈으로 본 세계, 그 눈물이 주는 울림이 있습니다.', 2, 7, NOW()),
+    ('박비평', '조용한 소년의 이야기 속 깊은 감정을 담아낸 문학적 수작입니다.', 3, 8, NOW());

@@ -2,6 +2,7 @@ package com.ssafy.booknest.domain.book.repository;
 
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.book.entity.CriticBook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -34,5 +35,6 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     WHERE b.id = :bookId
 """)
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
+
 
 }

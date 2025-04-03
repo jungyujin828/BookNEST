@@ -7,10 +7,7 @@ import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
-import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
-import com.ssafy.booknest.domain.book.repository.ebookRepository;
+import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.user.entity.User;
@@ -27,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +37,7 @@ public class BookService {
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
     private final ReviewRepository reviewRepository;
+    private final CriticBookRepository criticBookRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -104,6 +104,29 @@ public class BookService {
                 .map(FakeResponse::of)
                 .toList();
     }
+
+    // 평론가 추천책
+    public List<CriticBookResponse> getCriticBooks(Integer userId) {
+        List<String> criticNames = criticBookRepository.findAllCriticNames();
+
+        if (criticNames.isEmpty()) {
+            throw new CustomException(ErrorCode.CRITIC_NOT_FOUND);
+        }
+
+        String selectedCritic = criticNames.get(new Random().nextInt(criticNames.size()));
+
+        List<CriticBook> criticBooks =
+                criticBookRepository.findByCriticNameWithBookAndAuthors(selectedCritic);
+
+        if (criticBooks.isEmpty()) {
+            throw new CustomException(ErrorCode.CRITIC_BOOK_NOT_FOUND);
+        }
+
+        return criticBooks.stream()
+                .map(CriticBookResponse::of)
+                .toList();
+    }
+
 
 
 

@@ -35,6 +35,3 @@ oauth:
   naver:
     redirect-uri: https://www.mybooknest.site/oauth/naver/callback # 운영 도메인으로 변경
 
-
-fastapi:
-  url: http://www.mybooknest.site:8000

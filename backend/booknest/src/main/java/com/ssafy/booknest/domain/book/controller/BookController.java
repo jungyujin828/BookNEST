@@ -83,6 +83,16 @@ public class BookController {
         return ApiResponse.success(books);
     }
 
+    // 평론가 추천 책(랜덤으로 한 명 평론가 추천 책 보여짐)
+    @GetMapping("/critic")
+    public ResponseEntity<ApiResponse<List<CriticBookResponse>>> getCriticBooks(
+            @AuthenticationPrincipal UserPrincipal userPrincipal){
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<CriticBookResponse> books = bookService.getCriticBooks(userId);
+        return ApiResponse.success(books);
+    }
+
 
 //    // 내 지역에서 가장 많이 읽은 책
 //    @GetMapping("/region")
