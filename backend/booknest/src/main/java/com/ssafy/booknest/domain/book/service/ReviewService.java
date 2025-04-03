@@ -60,6 +60,7 @@ public class ReviewService {
                 .content(dto.getContent())
                 .rating(ratingOptional.map(Rating::getRating).orElse(null))
                 .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         reviewRepository.save(review);
