@@ -2,12 +2,10 @@ package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
-import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
+import com.ssafy.booknest.domain.book.dto.response.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.service.BookService;
+import com.ssafy.booknest.domain.book.service.FastApiService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
@@ -32,6 +30,7 @@ public class BookController {
     private final AuthenticationUtil authenticationUtil;
     private final ReviewService reviewService;
     private final RatingService ratingService;
+    private final FastApiService fastApiService;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -63,6 +62,46 @@ public class BookController {
         return ApiResponse.success(bookService.getPurchaseLinks(bookId));
     }
 
+    // 오늘의 추천
+    @GetMapping("/today")
+    public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getRecommendations(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<FastApiRecommendation> books = fastApiService.getRecommendations(userId);
+        return ApiResponse.success(books);
+    }
+
+    // 가짜 오추 메서드
+    @GetMapping("/fake")
+    public ResponseEntity<ApiResponse<List<FakeResponse>>> getFakes(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<FakeResponse> books = bookService.getfakes(userId);
+        return ApiResponse.success(books);
+    }
+
+
+//    // 내 지역에서 가장 많이 읽은 책
+//    @GetMapping("/region")
+//    public ResponseEntity<ApiResponse<List<BookResponse>>> getMostReadBooksByRegion(
+//            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+//
+//        // 로그인한 사용자만 접근 가능
+//        if (userPrincipal == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        List<BookResponse> mostReadBooks = bookService.getMostReadBooksByRegion();
+//
+//        return ApiResponse.success(mostReadBooks);
+//    }
+
+
+
+
+
 
     // 전자도서관 연계
 //    @GetMapping("/{bookId}/ebook")
@@ -84,25 +123,6 @@ public class BookController {
 //    ) {
 //        BookSearchResponse response = bookService.searchBooks(keyword, type, page, size);
 //        return ApiResponse.success(response);
-//    }
-
-
-
-
-
-
-//    // 내 지역에서 가장 많이 읽은 책
-//    @GetMapping("/region")
-//    public ResponseEntity<ApiResponse<List<BookResponse>>> getMostReadBooksByRegion(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-//
-//        // 로그인한 사용자만 접근 가능
-//        if (userPrincipal == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // 401 Unauthorized
-//        }
-//
-//        List<BookResponse> mostReadBooks = bookService.getMostReadBooksByRegion();
-//
-//        return ApiResponse.success(mostReadBooks);
 //    }
 
 }

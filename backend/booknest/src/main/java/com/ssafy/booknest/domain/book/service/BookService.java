@@ -1,9 +1,6 @@
 package com.ssafy.booknest.domain.book.service;
 
-import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
+import com.ssafy.booknest.domain.book.dto.response.*;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
@@ -44,7 +41,6 @@ public class BookService {
     public List<BookResponse> getBestSellers() {
 
         List<BestSeller> bestSellers = bookRepository.findBestSellers();
-
 
         return bestSellers.stream()
                 .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
@@ -95,6 +91,14 @@ public class BookService {
                 .kyoboUrl(kyoboUrl)
                 .yes24Url(yes24Url)
                 .build();
+    }
+
+    // 가짜 메서드
+    @Transactional(readOnly = true)
+    public List<FakeResponse> getfakes(Integer userId) {
+        return bookRepository.findAll().stream()
+                .map(FakeResponse::of)
+                .toList();
     }
 
 
