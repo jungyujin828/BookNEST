@@ -7,10 +7,12 @@ import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -65,15 +67,14 @@ public class RatingController {
 
     // 사용자 평점 목록 조회
     @GetMapping("/rating")
-    public ResponseEntity<ApiResponse<List<UserRatingResponse>>> getRatings(
-            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public ResponseEntity<ApiResponse<CustomPage<UserRatingResponse>>> getRatingList(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            Pageable pageable) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        List<UserRatingResponse> responseList = ratingService.getRatings(userId);
-
-        return ApiResponse.success(responseList);
+        return ApiResponse.success(ratingService.getRatingList(userId, pageable));
     }
+
 
     // 내가 입력한 점수 불려오기
     @GetMapping("/{bookId}/rating")

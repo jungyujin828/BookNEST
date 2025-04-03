@@ -3,23 +3,16 @@ package com.ssafy.booknest.domain.book.service;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.BookSearchResponse;
+import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
-import com.ssafy.booknest.domain.book.repository.ebookRepository;
-import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
-import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +26,10 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final UserRepository userRepository;
-    private final ebookRepository ebookRepository;
+    private final BookMarkRepository bookMarkRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final ReviewRepository reviewRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -51,27 +44,26 @@ public class BookService {
                 .toList();
     }
 
-
     // 책 상세 페이지 조회
     @Transactional(readOnly = true)
-    public BookDetailResponse getBook(Integer userId, Integer bookId) {
-
-        Book book = bookRepository.findBookDetailById(bookId)
+    public BookDetailResponse getBook(Integer userId, Integer bookId, Pageable pageable) {
+        Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
-        Double averageRating = bookRepository.findAverageRatingByBookId(bookId)
+        Double avgRating = bookRepository.findAverageRatingByBookId(bookId)
                 .orElse(0.0);
 
-        return BookDetailResponse.of(book, averageRating, userId);
+        Page<Review> reviewPage = reviewRepository.findByBookOrderByUserFirst(book, userId, pageable);
+
+        Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
+        boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
+
+        return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
     }
-
-
-
-
 
     // 구매 사이트 조회
     @Transactional(readOnly = true)
-    public BookPurchaseResponse getPurchaseLinks(int bookId) {
+    public BookPurchaseResponse getPurchaseLinks(Integer bookId) {
 
         Book book = bookRepository.findBookDetailById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
@@ -125,38 +117,6 @@ public class BookService {
 //                .map(Ebook::getRedirectUrl)
 //                .collect(Collectors.toList());
 //    }
-
-
-//    // 제목, 저자 기반 검색 (나중에 다시)
-//    public BookSearchResponse searchBooks(String keyword, BookSearchType type, int userPage, int size) {
-//        validateKeyword(keyword);
-//
-//        int internalPage = Math.max(userPage - 1, 0); // 내부 페이지 계산
-//
-//        Pageable pageable = PageRequest.of(internalPage, size);
-//        Page<Book> books;
-//
-//        switch (type) {
-//            case TITLE -> books = bookRepository.findByTitleContaining(keyword, pageable);
-//            case AUTHOR -> books = bookRepository.findByAuthorNameContaining(keyword, pageable);
-//            case ALL -> books = bookRepository.findByTitleOrAuthorContaining(keyword, pageable);
-//            default -> throw new CustomException(ErrorCode.UNSUPPORTED_SEARCH_TYPE);
-//        }
-//
-//        Page<BookResponse> resultPage = books.map(BookResponse::of);
-//
-//        return BookSearchResponse.of(resultPage, userPage, BookSearchType.valueOf(type.name()));
-//    }
-//
-//    // 검색 유효성 검사
-//    private void validateKeyword(String keyword) {
-//        if (keyword == null || keyword.trim().isEmpty()) {
-//            throw new CustomException(ErrorCode.EMPTY_KEYWORD);
-//        }
-//    }
-
-
-
 
 
 
