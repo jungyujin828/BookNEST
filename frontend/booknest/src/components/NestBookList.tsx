@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { FaStar, FaStarHalfAlt } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa";
 
 interface NestBook {
   bookId: number;
@@ -68,9 +68,14 @@ const BookCard = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s ease-in-out;
   background-color: white;
+  position: relative;
 
   &:hover {
     transform: translateY(-5px);
+  }
+  
+  &:hover .delete-button {
+    opacity: 1;
   }
 `;
 
@@ -219,6 +224,29 @@ const LoginButton = styled.button`
 
   &:hover {
     background-color: #45a049;
+  }
+`;
+
+const DeleteButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: rgba(220, 53, 69, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgb(220, 53, 69);
   }
 `;
 
@@ -397,6 +425,58 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
     navigate("/login");
   };
 
+  const handleDeleteBook = async (bookId: number, event: React.MouseEvent) => {
+    // 이벤트 버블링 방지 (Link 컴포넌트의 클릭 이벤트가 발생하지 않도록)
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!window.confirm('정말로 이 책을 둥지에서 삭제하시겠습니까?')) {
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      // 현재 사용자 정보 또는 prop으로 전달된 정보로 요청
+      const effectiveNestId = propNestId || userInfo?.nestId;
+      
+      // API 요청 바디 구성
+      const requestBody = {
+        nestId: effectiveNestId,
+        bookId: bookId
+      };
+      
+      // DELETE 요청 보내기 (데이터를 바디에 포함)
+      const response = await api.delete('/api/nest', { 
+        data: requestBody 
+      });
+      
+      if (response.data.success) {
+        // 삭제 성공 후 도서 목록에서 해당 도서 제거
+        const updatedBooks = books.filter(book => book.bookId !== bookId);
+        setBooks(updatedBooks);
+        
+        // 화면에 표시할 도서가 없어진 경우 목록 다시 불러오기
+        if (updatedBooks.length === 0 && pagination.pageNumber > 1) {
+          setCurrentPage(pagination.pageNumber - 1);
+        } else if (updatedBooks.length === 0) {
+          // 첫 페이지에서 마지막 항목이 삭제된 경우
+          fetchNestBooks(currentPage, propUserId, effectiveNestId);
+        }
+      } else {
+        throw new Error(response.data.error?.message || "도서 삭제에 실패했습니다.");
+      }
+    } catch (err: any) {
+      console.error("Failed to delete book from nest:", err);
+      console.error("Error details:", err.response?.data || err.message);
+      
+      // 오류 메시지 표시
+      alert(err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 페이지네이션 버튼 생성
   const renderPagination = () => {
     const pageButtons = [];
@@ -462,6 +542,13 @@ const NestBookList: React.FC<NestBookListProps> = ({ userId: propUserId, nestId:
       <BookGrid>
         {books.map((book) => (
           <BookCard key={`${book.bookId}-${book.createdAt}`}>
+            <DeleteButton 
+              onClick={(e) => handleDeleteBook(book.bookId, e)}
+              title="둥지에서 삭제"
+              className="delete-button"
+            >
+              <FaTrash size={14} />
+            </DeleteButton>
             <Link to={`/book-detail/${book.bookId}`}>
               <BookCover>
                 <img src={book.imageUrl} alt={book.title} />
