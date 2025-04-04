@@ -127,7 +127,9 @@ public class BookService {
                 .toList();
     }
 
-
+    // 화제의 작가 책
+    public List<BookResponse> getAuthorBooks(Integer userId) {
+    }
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
