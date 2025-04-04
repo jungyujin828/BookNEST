@@ -89,19 +89,40 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
 
   const handleCancelRating = async () => {
     try {
+      // 사용자에게 확인 메시지 표시
+      if (!window.confirm('평점을 취소하시겠습니까?')) {
+        return;
+      }
+      
       // Optimistic update
       setUserRating(bookId, 0);
       onRatingChange(0);
 
+      // 평점 삭제 API 호출
       const response = await api.delete(`/api/book/${bookId}/rating`);
+      
       if (!response.data.success) {
-        throw new Error(response.data.error?.message || 'Failed to delete rating');
+        throw new Error(response.data.error?.message || '평점 삭제에 실패했습니다.');
       }
+      
+      console.log('평점 삭제 성공:', response.data);
+      
+      // UI 즉시 업데이트를 위한 추가 처리
+      // 1. 현재 평점 상태 초기화
+      setUserRating(bookId, 0);
+      // 2. 부모 컴포넌트에 평점 변경 알림
+      onRatingChange(0);
+      // 3. 호버 상태 초기화
+      setHoveredRating(null);
+      
     } catch (error) {
-      console.error('Failed to delete rating:', error);
-      // Revert optimistic update on error
+      console.error('평점 삭제 실패:', error);
+      // 에러 발생 시 원래 상태로 복원
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
+      
+      // 사용자에게 에러 메시지 표시
+      alert('평점 삭제에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

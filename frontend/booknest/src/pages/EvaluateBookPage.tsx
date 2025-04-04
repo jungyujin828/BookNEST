@@ -4,6 +4,7 @@ import styled from "@emotion/styled";
 import WriteCommentModal from "../components/WriteCommentModal";
 import api from "../api/axios";
 import { theme } from "../styles/theme";
+import RatingStars from "../components/RatingStars";
 
 // Modify HeartIcon component to accept filled prop
 const HeartIcon = ({ filled = false }) => (
@@ -31,22 +32,6 @@ const BanIcon = () => (
   </svg>
 );
 
-const StarIcon = ({ filled = false, half = false }) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    {half && <path d="M12 2l0 15.77 -6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor" />}
-  </svg>
-);
-
-// Book 타입 정의 추가
-interface Book {
-  bookId: number;
-  title: string;
-  publishedDate: string;
-  imageUrl: string;
-  authors: string[];
-}
-
 const NextButton = styled.button`
   position: fixed;
   bottom: 2rem;
@@ -69,19 +54,27 @@ const NextIcon = () => (
   </svg>
 );
 
+// Book 타입 정의 추가
+interface Book {
+  bookId: number;
+  title: string;
+  publishedDate: string;
+  imageUrl: string;
+  authors: string[];
+}
+
 const EvaluateBookPage = () => {
   const navigate = useNavigate();
   const [selectedBook, setSelectedBook] = useState<string>("");
   const [modalOpen, setModalOpen] = useState(false);
-  const [ratings, setRatings] = useState<{ [key: number]: number }>({});
   const [likedBooks, setLikedBooks] = useState<{ [key: number]: boolean }>({});
-  const [books, setBooks] = useState<Book[]>([]); // 책 목록 상태 추가
+  const [books, setBooks] = useState<Book[]>([]);
 
-  // 베스트셀러 목록을 불러오는 useEffect 추가
+  // 베스트셀러 목록을 불러오는 useEffect
   useEffect(() => {
     const fetchBestSellers = async () => {
       try {
-        const response = await api.get("/api/book/best"); // 실제 API 엔드포인트로 수정 필요
+        const response = await api.get("/api/book/best");
         if (response.data.success) {
           setBooks(response.data.data);
         }
@@ -101,117 +94,10 @@ const EvaluateBookPage = () => {
     }));
   };
 
-  // 기존 별점 데이터를 가져오는 함수 추가
-  const fetchUserRatings = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await api.get("/api/book/{bookId}/rating", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response.data.success) {
-        const userRatings = response.data.data.ratedBooks.reduce((acc: any, book: any) => {
-          acc[book.bookId] = book.rating;
-          return acc;
-        }, {});
-        setRatings(userRatings);
-      }
-    } catch (error) {
-      console.error("기존 별점 데이터를 불러오는데 실패했습니다:", error);
-    }
+  const handleRatingChange = (bookId: number, rating: number) => {
+    console.log(`Book ${bookId} rated: ${rating}`);
   };
 
-  // useEffect에 fetchUserRatings 추가
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchUserRatings();
-    };
-    fetchData();
-  }, []);
-
-  const handleRating = async (bookId: number, rating: number) => {
-    try {
-      // 로컬 상태 업데이트
-      setRatings((prev) => ({
-        ...prev,
-        [bookId]: rating,
-      }));
-
-      // API 호출
-      const token = localStorage.getItem("token");
-      const response = await api.post(
-        `/api/book/${bookId}/rating`,
-        {
-          rating: rating,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        console.log(response.data.message);
-      }
-    } catch (error) {
-      console.error("별점 등록 실패:", error);
-      // 에러 발생 시 로컬 상태 롤백
-      setRatings((prev) => ({
-        ...prev,
-        [bookId]: prev[bookId] || 0,
-      }));
-    }
-  };
-
-  const renderStars = (bookId: number) => {
-    const rating = ratings[bookId] || 0;
-    const stars = [];
-    const maxStars = 5;
-
-    for (let i = 1; i <= maxStars; i++) {
-      const isHalf = rating === i - 0.5;
-      const isFilled = rating >= i;
-
-      stars.push(
-        <span key={i} style={{ position: "relative", cursor: "pointer" }}>
-          <StarIcon filled={isFilled} half={isHalf} />
-          <span
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              width: "50%",
-              height: "100%",
-              cursor: "pointer",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRating(bookId, i - 0.5);
-            }}
-          />
-          <span
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: 0,
-              width: "50%",
-              height: "100%",
-              cursor: "pointer",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRating(bookId, i);
-            }}
-          />
-        </span>
-      );
-    }
-    return stars;
-  };
-
-  // return문 내부, 최상단 div 안에 버튼 추가
   return (
     <>
       <NextButton onClick={() => navigate("/home")}>
@@ -234,7 +120,12 @@ const EvaluateBookPage = () => {
           <div style={{ flex: 1 }}>
             <h2 style={{ margin: "0 0 8px 0" }}>{book.title}</h2>
             <p style={{ color: "#666", margin: "0 0 16px 0" }}>{book.authors.join(", ")}</p>
-            <div style={{ display: "flex", gap: "5px", color: "#ffd700" }}>{renderStars(book.bookId)}</div>
+            <div style={{ display: "flex", gap: "5px", color: "#ffd700" }}>
+              <RatingStars 
+                bookId={book.bookId} 
+                onRatingChange={(rating) => handleRatingChange(book.bookId, rating)} 
+              />
+            </div>
             <div style={{ display: "flex", gap: "20px", marginTop: "20px", color: "#666", cursor: "pointer" }}>
               <span onClick={() => handleLike(book.bookId)}>
                 <HeartIcon filled={likedBooks[book.bookId]} />
