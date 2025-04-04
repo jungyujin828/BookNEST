@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -25,4 +26,7 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.user.id = :userId")
     Integer countRatings(@Param("userId") Integer userId);
+
+    @Query("SELECT r.book.id FROM Rating r WHERE r.user.id = :userId")
+    List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
 }

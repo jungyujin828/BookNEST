@@ -4,7 +4,6 @@ import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -34,5 +33,20 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     WHERE b.id = :bookId
 """)
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
+
+    @Query("""
+    SELECT b 
+    FROM Book b 
+    WHERE b.id NOT IN :excludedIds AND
+          (SELECT COUNT(r) FROM Rating r WHERE r.book = b) > 0
+    ORDER BY (SELECT COUNT(r) FROM Rating r WHERE r.book = b) DESC
+    """)
+    Page<Book> findMostRatedBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
+
+    @Query("SELECT b FROM Book b WHERE b.id NOT IN :excludedIds ORDER BY b.publishedDate DESC")
+    Page<Book> findRecentBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
+
+    @Query("SELECT b FROM Book b WHERE b.id NOT IN :excludedIds ORDER BY function('RAND')")
+    Page<Book> findRandomBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
 
 }
