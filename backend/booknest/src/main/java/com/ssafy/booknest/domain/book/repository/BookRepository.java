@@ -37,4 +37,13 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
 
 
+    // 화제의 작가 최상위 3명의 책 가져오기
+    @Query("""
+    SELECT b FROM Book b
+    JOIN b.bookAuthors ba
+    JOIN ba.author a
+    WHERE a.name LIKE %:author%
+    ORDER BY b.createdAt DESC
+""")
+    List<Book> findTop3ByAuthorNameLike(@Param("author") String author);
 }

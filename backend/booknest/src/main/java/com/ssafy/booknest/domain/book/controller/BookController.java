@@ -3,7 +3,9 @@ package com.ssafy.booknest.domain.book.controller;
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.*;
+import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
+import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.FastApiService;
 import com.ssafy.booknest.domain.book.service.RatingService;
@@ -17,9 +19,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class BookController {
     private final ReviewService reviewService;
     private final RatingService ratingService;
     private final FastApiService fastApiService;
+    private final PopularAuthorBookRepository popularAuthorBookRepository;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -51,8 +56,6 @@ public class BookController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         return ApiResponse.success(bookService.getBook(userId, bookId, pageable));
     }
-
-
 
     // 책 구매사이트 연계
     @GetMapping("/{bookId}/purchase")
@@ -93,16 +96,16 @@ public class BookController {
         return ApiResponse.success(books);
     }
 
-    // 화제의 작가 추천 책
+    // 화제의 작가 책 추천
     @GetMapping("/author")
     public ResponseEntity<ApiResponse<List<BookResponse>>> getAuthorBooks(
-            @AuthenticationPrincipal UserPrincipal userPrincipal){
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         List<BookResponse> books = bookService.getAuthorBooks(userId);
         return ApiResponse.success(books);
-
     }
+
 
 
 //    // 내 지역에서 가장 많이 읽은 책

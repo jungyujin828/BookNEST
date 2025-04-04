@@ -9,25 +9,31 @@ import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.entity.BookNest;
+import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
+import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
+import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -38,6 +44,9 @@ public class BookService {
     private final Yes24Service yes24Service;
     private final ReviewRepository reviewRepository;
     private final CriticBookRepository criticBookRepository;
+    private final PopularAuthorBookRepository popularAuthorBookRepository;
+    private final BookNestRepository bookNestRepository;
+    private final NestRepository nestRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -127,8 +136,55 @@ public class BookService {
                 .toList();
     }
 
-    // 화제의 작가 책
+
+    // 화제의 작가 책 배치 (스프링 내 스케쥴링 배치작업 이용)
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 일단 2시간마다 실행(추후 수정 가능)
+    @Transactional
+    public void updatePopularAuthors() {
+
+        List<Nest> allNests = nestRepository.findAllWithBookAndAuthor();
+
+        Map<String, Long> authorCount = new HashMap<>();
+
+        for (Nest nest : allNests) {
+            for (BookNest bookNest : nest.getBookNests()) {
+                String authors = bookNest.getBook().getAuthors();
+                for (String author : authors.split(",")) {
+                    authorCount.put(author.trim(), authorCount.getOrDefault(author.trim(), 0L) + 1);
+                }
+            }
+        }
+
+        String topAuthor = authorCount.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+
+        if (topAuthor != null) {
+            List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(topAuthor);
+
+            // 기존 삭제 후 저장
+            popularAuthorBookRepository.deleteAllInBatch();
+
+            List<PopularAuthorBook> popularList = topBooks.stream()
+                    .map(book -> new PopularAuthorBook(topAuthor, book))
+                    .collect(Collectors.toList());
+
+            popularAuthorBookRepository.saveAll(popularList);
+            log.info("화제의 작가 [{}] 등록 완료. 책 {}권 저장됨", topAuthor, popularList.size());
+        } else {
+            log.warn("서재에서 작가를 찾지 못했습니다.");
+        }
+    }
+
+    // 화제의 작가 추천 책
+    @Transactional(readOnly = true)
     public List<BookResponse> getAuthorBooks(Integer userId) {
+        List<PopularAuthorBook> popularBooks = popularAuthorBookRepository.findAllWithBookAndAuthor();
+
+        return popularBooks.stream()
+                .map(popular -> BookResponse.of(popular.getBook()))
+                .collect(Collectors.toList());
     }
 
 
