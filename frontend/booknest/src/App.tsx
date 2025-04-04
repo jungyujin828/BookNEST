@@ -65,18 +65,11 @@ const AppContent = () => {
             {/* 공개 라우트 */}
             <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
             <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
             <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
             {/* 보호된 라우트 */}
-            <Route
-              path={ROUTES.INPUT_INFO}
-              element={
-                <ProtectedRoute>
-                  <InputInfoPage />
-                </ProtectedRoute>
-              }
-            />
             <Route
               path={ROUTES.EVALUATE_BOOK}
               element={
