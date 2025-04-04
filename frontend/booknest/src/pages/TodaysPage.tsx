@@ -98,6 +98,11 @@ const BookDescription = styled.p`
   font-size: 0.9rem;
   color: white;
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const TagContainer = styled.div`
@@ -214,7 +219,7 @@ const TodaysPage = () => {
           <SlideImageContainer>
             <SlideImage src={currentBook.imageUrl} alt={currentBook.title} />
           </SlideImageContainer>
-          <SlideInfo>
+          <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.bookId}`)}>
             <BasicInfo>
               <DetailInfo isVisible={showDetail}>
                 <BookDescription>
