@@ -116,6 +116,11 @@ public class NestService {
         }
 
         // 찜 여부 조회
+        BookMark bookMark = bookMarkRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElse(null);
+        if(bookMark != null){
+            bookMarkRepository.delete(bookMark);
+        }
+
         BookNest bookNest = bookNestRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElse(null);
         if (bookNest == null) {
             bookNest = BookNest.builder()
