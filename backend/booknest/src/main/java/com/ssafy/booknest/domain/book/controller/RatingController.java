@@ -3,10 +3,7 @@ package com.ssafy.booknest.domain.book.controller;
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
-import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
-import com.ssafy.booknest.domain.book.service.ReviewService;
-import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -18,17 +15,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/book")
 public class RatingController {
 
-    private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
-    private final ReviewService reviewService;
     private final RatingService ratingService;
 
     // 도서 평점 등록
