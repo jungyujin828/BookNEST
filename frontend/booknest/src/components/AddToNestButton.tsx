@@ -131,7 +131,6 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         bookId: bookId,
         nestId: userInfo.nestId,
         rating: currentRating.toString(),
-        review: "NULL",
       };
 
       console.log("Sending request with data:", requestData);
