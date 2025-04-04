@@ -5,14 +5,12 @@
     <property name="APP_NAME" value="booknest" />
     <property name="DATE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS}" />
 
-    <!-- 콘솔 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>[%-5level] %date{HH:mm:ss.SSS} [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- 전체 로그 파일 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -24,7 +22,6 @@
         </encoder>
     </appender>
 
-    <!-- 에러 전용 로그 파일 -->
     <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${APP_NAME}-error.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -39,7 +36,6 @@
         </encoder>
     </appender>
 
-    <!-- 로그 레벨 설정 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE" />

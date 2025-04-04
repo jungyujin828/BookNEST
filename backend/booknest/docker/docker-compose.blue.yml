@@ -9,7 +9,7 @@ services:
     # 컨테이너의 이름
     container_name: spring-booknest-blue
     volumes:
-      - ./app-logs-blue:/app/logs
+      - /home/ubuntu/app-logs-blue:/app/logs
     environment:
       - TZ=Asia/Seoul
     networks:

@@ -6,7 +6,7 @@ services:
       - "8112:80"
     container_name: spring-booknest-green
     volumes:
-      - ./app-logs-green:/app/logs
+      - /home/ubuntu/app-logs-green:/app/logs
     environment:
       - TZ=Asia/Seoul
     networks:
