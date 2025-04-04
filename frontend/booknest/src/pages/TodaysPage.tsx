@@ -204,9 +204,7 @@ const TodaysPage = () => {
                 </BookDescription>
               </DetailInfo>
               <TagContainer>
-                {currentBook.tags.split(",").map((tag, index) => (
-                  <Tag key={index}>{tag.trim()}</Tag>
-                ))}
+                {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
               </TagContainer>
               <BookTitle>{currentBook.title}</BookTitle>
               <AuthorButtonWrapper>
