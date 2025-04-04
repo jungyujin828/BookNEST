@@ -10,8 +10,10 @@ import { useBookStore } from "../store/useBookStore";
 import useRatingStore from "../store/useRatingStore";
 import BookmarkButton from "../components/BookmarkButton";
 import AddToNestButton from "../components/AddToNestButton";
+import DeleteToNestButton from "../components/DeleteToNestButton";
 import ReviewList from "../components/ReviewList";
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import useNestStore from "../store/useNestStore";
 
 interface Review {
   reviewId: number;
@@ -37,6 +39,7 @@ interface ReviewsPage {
 interface BookDetail {
   bookId: number;
   isBookMarked: boolean;
+  isInNest: boolean;
   avgRating: number;
   title: string;
   publishedDate: string;
@@ -51,6 +54,7 @@ interface BookDetail {
   tags: string[];
   categories: string[];
   reviews: ReviewsPage;
+  nestId?: number;
 }
 
 interface PurchaseUrls {
@@ -76,6 +80,7 @@ interface UserInfo {
   followings: number;
   totalRatings: number;
   totalReviews: number;
+  nestId: number;
 }
 
 const Container = styled.div`
@@ -434,6 +439,7 @@ const BookDetailPage = () => {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [likeLoading, setLikeLoading] = useState<{ [key: number]: boolean }>({});
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   // Zustand store
   const {
@@ -450,17 +456,40 @@ const BookDetailPage = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const { userRatings } = useRatingStore();
+  const { setNestStatus, getNestStatus } = useNestStore();
 
   useEffect(() => {
-    const fetchBookDetail = async (page = 1) => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
+        if (response.data.success && response.data.data) {
+          setUserInfo(response.data.data);
+        }
+      } catch (err) {
+        console.error("사용자 정보 조회 실패:", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  useEffect(() => {
+    const fetchBookDetail = async () => {
+      if (!bookId) return;
+      
       try {
         setLoading(true);
         setError(null);
-        const response = await api.get(`/api/book/${bookId}?page=${page}&size=5`);
+        const response = await api.get(`/api/book/${bookId}`);
 
         if (response.data.success) {
           const bookData = response.data.data;
           setBook(bookData);
+          
+          // 서재 등록 상태를 store에 저장 (API 응답 값이 있을 때만)
+          if (typeof bookData.isInNest === 'boolean') {
+            setNestStatus(Number(bookId), bookData.isInNest);
+          }
         } else {
           setError("도서 정보를 불러오는데 실패했습니다.");
         }
@@ -472,10 +501,8 @@ const BookDetailPage = () => {
       }
     };
 
-    if (bookId) {
-      fetchBookDetail();
-    }
-  }, [bookId]);
+    fetchBookDetail();
+  }, [bookId, setNestStatus]);
 
   // 다음 페이지 리뷰 불러오기
   const loadMoreReviews = async () => {
@@ -510,33 +537,6 @@ const BookDetailPage = () => {
       setReviewsLoading(false);
     }
   };
-
-  useEffect(() => {
-    // 현재 로그인한 사용자 정보 가져오기
-    const fetchCurrentUser = async () => {
-      try {
-        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
-        if (response.data.success && response.data.data) {
-          // nickname으로 사용자 식별
-          const nickname = response.data.data.nickname;
-          setCurrentUserId(nickname);
-        } else {
-          setCurrentUserId(null);
-        }
-      } catch (err) {
-        // 403 에러는 로그인하지 않은 상태이므로 무시
-        if (axios.isAxiosError(err)) {
-          if (err.response?.status === 403) {
-            setCurrentUserId(null);
-          } else {
-            console.error("Failed to fetch current user:", err);
-            setCurrentUserId(null);
-          }
-        }
-      }
-    };
-    fetchCurrentUser();
-  }, []);
 
   const handlePurchaseClick = async () => {
     try {
@@ -580,13 +580,14 @@ const BookDetailPage = () => {
 
   const handleRatingChange = async (newRating: number) => {
     try {
-      setBook((prevBook) => {
-        if (!prevBook) return null;
-        return {
-          ...prevBook,
-          avgRating: newRating,
-        };
-      });
+      // 책 정보를 다시 불러와서 평균 평점 업데이트
+      const response = await api.get(`/api/book/${bookId}`);
+      
+      if (response.data.success) {
+        setBook(response.data.data);
+      } else {
+        throw new Error("Failed to fetch updated book data");
+      }
     } catch (err) {
       console.error("Error updating rating:", err);
       setError("평점 업데이트에 실패했습니다.");
@@ -712,6 +713,27 @@ const BookDetailPage = () => {
     }
   };
 
+  const handleNestUpdate = () => {
+    if (book) {
+      const newStatus = !getNestStatus(book.bookId);
+      setNestStatus(book.bookId, newStatus);
+      
+      // 상태 변경 후 책 정보 다시 불러오기
+      const fetchUpdatedBookDetail = async () => {
+        try {
+          const response = await api.get(`/api/book/${bookId}`);
+          if (response.data.success) {
+            setBook(response.data.data);
+          }
+        } catch (err) {
+          console.error("Failed to fetch updated book details:", err);
+        }
+      };
+      
+      fetchUpdatedBookDetail();
+    }
+  };
+
   if (loading) {
     return <LoadingMessage>도서 정보를 불러오는 중...</LoadingMessage>;
   }
@@ -732,7 +754,19 @@ const BookDetailPage = () => {
             <ImageSection>
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
-                <AddToNestButton bookId={book.bookId} currentRating={userRatings[book.bookId] || 0} />
+                {getNestStatus(book.bookId) ? (
+                  <DeleteToNestButton 
+                    bookId={book.bookId} 
+                    nestId={userInfo?.nestId || 0}
+                    onDelete={handleNestUpdate}
+                  />
+                ) : (
+                  <AddToNestButton 
+                    bookId={book.bookId} 
+                    currentRating={userRatings[book.bookId] || 0}
+                    onAdd={handleNestUpdate}
+                  />
+                )}
                 <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
               </ButtonContainer>
             </ImageSection>
