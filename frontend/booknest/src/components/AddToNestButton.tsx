@@ -7,6 +7,7 @@ import { ROUTES } from "../constants/paths";
 interface AddToNestButtonProps {
   bookId: number;
   currentRating: number;
+  onAdd?: () => void;
 }
 
 interface UserInfo {
@@ -73,10 +74,10 @@ const ModalTitle = styled.h3`
   color: ${(props) => props.color || "#333"};
 `;
 
-const ModalButton = styled.button<{ variant?: "primary" | "secondary" }>`
+const ModalButton = styled.button<{ $variant?: "primary" | "secondary" }>`
   padding: 8px 16px;
   margin: 8px;
-  background-color: ${(props) => (props.variant === "primary" ? "#4a90e2" : "#6c757d")};
+  background-color: ${(props) => (props.$variant === "primary" ? "#4a90e2" : "#6c757d")};
   color: white;
   border: none;
   border-radius: 4px;
@@ -84,13 +85,13 @@ const ModalButton = styled.button<{ variant?: "primary" | "secondary" }>`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: ${(props) => (props.variant === "primary" ? "#357abd" : "#5a6268")};
+    background-color: ${(props) => (props.$variant === "primary" ? "#357abd" : "#5a6268")};
   }
 `;
 
-const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating }) => {
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<"success" | "error" | null>(null);
+const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating, onAdd }) => {
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -114,8 +115,7 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
 
   const handleAddToNest = async () => {
     if (currentRating === 0) {
-      setModalType("error");
-      setShowModal(true);
+      alert("평점 등록은 필수입니다");
       return;
     }
 
@@ -124,12 +124,17 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       return;
     }
 
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmAdd = async () => {
     setLoading(true);
+    setShowConfirmModal(false);
 
     try {
       const requestData = {
         bookId: bookId,
-        nestId: userInfo.nestId,
+        nestId: userInfo!.nestId,
         rating: currentRating.toString(),
       };
 
@@ -137,8 +142,10 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       const response = await api.post("/api/nest", requestData);
 
       if (response.data.success) {
-        setModalType("success");
-        setShowModal(true);
+        if (onAdd) {
+          onAdd();
+        }
+        setShowSuccessModal(true);
       }
     } catch (error: any) {
       console.error("Full error:", error);
@@ -175,11 +182,6 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
     }
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setModalType(null);
-  };
-
   const handleGoToNest = () => {
     navigate(ROUTES.NEST);
   };
@@ -190,23 +192,30 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         {loading ? "처리 중..." : "내 서재에 담기"}
       </Button>
 
-      {showModal && (
-        <ModalOverlay onClick={handleCloseModal}>
+      {showConfirmModal && (
+        <ModalOverlay onClick={() => setShowConfirmModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            {modalType === "success" ? (
-              <>
-                <ModalTitle>서재에 등록되었습니다</ModalTitle>
-                <ModalButton variant="primary" onClick={handleGoToNest}>
-                  서재 바로가기
-                </ModalButton>
-                <ModalButton onClick={handleCloseModal}>닫기</ModalButton>
-              </>
-            ) : (
-              <>
-                <ModalTitle color="#dc3545">평점 등록은 필수입니다</ModalTitle>
-                <ModalButton onClick={handleCloseModal}>확인</ModalButton>
-              </>
-            )}
+            <ModalTitle>서재에 등록하시겠습니까?</ModalTitle>
+            <ModalButton $variant="primary" onClick={handleConfirmAdd}>
+              등록하기
+            </ModalButton>
+            <ModalButton onClick={() => setShowConfirmModal(false)}>
+              취소
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {showSuccessModal && (
+        <ModalOverlay onClick={() => setShowSuccessModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>서재에 등록되었습니다</ModalTitle>
+            <ModalButton $variant="primary" onClick={handleGoToNest}>
+              서재 바로가기
+            </ModalButton>
+            <ModalButton onClick={() => setShowSuccessModal(false)}>
+              계속 둘러보기
+            </ModalButton>
           </ModalContent>
         </ModalOverlay>
       )}
