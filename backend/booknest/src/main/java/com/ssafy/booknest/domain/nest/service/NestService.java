@@ -147,7 +147,7 @@ public class NestService {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
         }
 
-        BookNest bookNest = bookNestRepository.findByNestIdAndBookId(book.getId(), nest.getId()).orElseThrow(() ->
+        BookNest bookNest = bookNestRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElseThrow(() ->
                 new CustomException(ErrorCode.BOOKNEST_NOT_FOUND));
 
         bookNestRepository.delete(bookNest);
