@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import api from "../api/axios";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../constants/paths";
 
 interface Book {
   bookId: number;
@@ -150,6 +152,21 @@ const DetailButton = styled.span`
   color: #fff;
 `;
 
+const EvaluateButton = styled.button`
+  position: absolute;
+  bottom: 10rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 32px;
+  backdrop-filter: blur(8px);
+  transition: background-color 0.2s;
+`;
+
 const DetailInfo = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? "block" : "none")};
   margin-top: 20px;
@@ -157,6 +174,7 @@ const DetailInfo = styled.div<{ isVisible: boolean }>`
 
 // TodaysPage 컴포넌트 내부에 상태 추가
 const TodaysPage = () => {
+  const navigate = useNavigate();
   const [books, setBooks] = useState<Book[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
@@ -223,6 +241,7 @@ const TodaysPage = () => {
           <FaChevronRight />
         </NavigationButton>
       </SlideContainer>
+      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
     </MainContainer>
   );
 };
