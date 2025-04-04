@@ -221,7 +221,9 @@ interface EditInfoModalProps {
 const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
   const { userDetail } = useAuthStore();
   const [isNicknameValidated, setIsNicknameValidated] = useState(true);
-  const [nickname, setNickname] = useState(userDetail?.nickname || userInfo.nickname);
+  const [nickname, setNickname] = useState(
+    userDetail?.nickname || userInfo.nickname
+  );
   const [gender, setGender] = useState(() => {
     // 성별 코드를 표시 텍스트로 변환
     switch (userDetail?.gender || userInfo.gender) {
@@ -235,7 +237,9 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         return "설정안함";
     }
   });
-  const [birthdate, setBirthdate] = useState((userDetail?.birthDate || userInfo.birthdate)?.replace(/-/g, "") || "");
+  const [birthdate, setBirthdate] = useState(
+    (userDetail?.birthDate || userInfo.birthdate)?.replace(/-/g, "") || ""
+  );
 
   // 주소 정보 초기화
   // Remove these duplicate state declarations
@@ -280,7 +284,11 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         const isDuplicate = response.data.data;
         setIsNicknameValid(!isDuplicate);
         setIsNicknameValidated(!isDuplicate);
-        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
+        setErrorMessage(
+          isDuplicate
+            ? "이미 사용 중인 닉네임입니다."
+            : "사용 가능한 닉네임입니다."
+        );
       }
     } catch (error) {
       setIsNicknameValidated(false);
@@ -320,20 +328,26 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
-    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
+      6,
+      8
+    )}`;
   };
 
   // 주소 관련 state 추가
   const [address, setAddress] = useState(userInfo.address?.roadAddress || "");
   const [detailAddress, setDetailAddress] = useState("");
-  const [oldAddress, setOldAddress] = useState(userInfo.address?.oldAddress || "");
+  const [oldAddress, setOldAddress] = useState(
+    userInfo.address?.oldAddress || ""
+  );
   const [zipcode, setZipcode] = useState(userInfo.address?.zipcode || "");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   // 다음 주소 API 스크립트 로드
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src =
+      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.body.appendChild(script);
 
@@ -363,7 +377,10 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
             extraAddress += data.bname;
           }
           if (data.buildingName !== "" && data.apartment === "Y") {
-            extraAddress += extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
+            extraAddress +=
+              extraAddress !== ""
+                ? ", " + data.buildingName
+                : data.buildingName;
           }
           if (extraAddress !== "") {
             fullAddress += ` (${extraAddress})`;
@@ -428,7 +445,9 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         window.location.reload();
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || "회원 정보 업데이트에 실패했습니다.";
+      const errorMessage =
+        error.response?.data?.error?.message ||
+        "회원 정보 업데이트에 실패했습니다.";
       setErrorMessage(errorMessage);
     }
   };
@@ -455,14 +474,21 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
                 중복 확인
               </ConfirmButton>
             </InputRow>
-            {!isNicknameValid && errorMessage && <ErrorText>{errorMessage}</ErrorText>}
-            {isNicknameValid && errorMessage && <SuccessText>{errorMessage}</SuccessText>}
+            {!isNicknameValid && errorMessage && (
+              <ErrorText>{errorMessage}</ErrorText>
+            )}
+            {isNicknameValid && errorMessage && (
+              <SuccessText>{errorMessage}</SuccessText>
+            )}
           </InputGroup>
 
           <InputGroup>
             <Label>성별</Label>
             <SelectContainer>
-              <Select value={gender} onChange={(e) => setGender(e.target.value)}>
+              <Select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
                 <option value="설정안함">설정안함</option>
                 <option value="남성">남성</option>
                 <option value="여성">여성</option>
@@ -486,7 +512,12 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
           <InputGroup>
             <Label>주소</Label>
             <AddressRow>
-              <AddressInput type="text" placeholder="주소를 검색해주세요" value={address} readOnly />
+              <AddressInput
+                type="text"
+                placeholder="주소를 검색해주세요"
+                value={address}
+                readOnly
+              />
               <AddressButton type="button" onClick={handleFindAddress}>
                 주소 검색
               </AddressButton>
@@ -518,7 +549,10 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
           <AddressModal>
             <AddressModalContent>
               <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
-              <div id="addressLayer" style={{ width: "100%", height: "400px" }}></div>
+              <div
+                id="addressLayer"
+                style={{ width: "100%", height: "400px" }}
+              ></div>
             </AddressModalContent>
           </AddressModal>
         )}

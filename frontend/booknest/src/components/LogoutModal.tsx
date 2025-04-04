@@ -51,10 +51,11 @@ const LogoutModal = ({ onClose }: { onClose: () => void }) => {
       });
 
       if (response.data.success) {
+        await logout();
+        localStorage.removeItem("token");
         localStorage.clear();
-        logout();
-        navigate("/login");
         onClose();
+        navigate("/login");
       }
     } catch (error) {
       console.error("로그아웃 실패:", error);
