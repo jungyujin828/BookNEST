@@ -1,46 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import WriteCommentModal from "../components/WriteCommentModal";
 import api from "../api/axios";
 import { theme } from "../styles/theme";
 import RatingStars from "../components/RatingStars";
-
-// Modify HeartIcon component to accept filled prop
-const HeartIcon = ({ filled = false }) => (
-  <svg
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill={filled ? "#ff69b4" : "none"}
-    stroke={filled ? "#ff69b4" : "currentColor"}
-  >
-    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-  </svg>
-);
-
-const PencilIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-  </svg>
-);
-
-const BanIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-    <circle cx="12" cy="12" r="10" />
-    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-  </svg>
-);
+import BookmarkButton from "../components/BookmarkButton";
+import IgnoreButton from "../components/IgnoreButton";
 
 const NextButton = styled.button`
   position: fixed;
   bottom: 2rem;
   right: 0.3rem;
-  background-color: #000;
+  background-color: transparent;
   color: black;
   border: none;
   cursor: pointer;
-  background-color: transparent;
   zoom: 2;
 
   @media (min-width: ${theme.breakpoints.desktop}) {
@@ -54,7 +28,6 @@ const NextIcon = () => (
   </svg>
 );
 
-// Book 타입 정의 추가
 interface Book {
   bookId: number;
   title: string;
@@ -65,38 +38,64 @@ interface Book {
 
 const EvaluateBookPage = () => {
   const navigate = useNavigate();
-  const [selectedBook, setSelectedBook] = useState<string>("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [likedBooks, setLikedBooks] = useState<{ [key: number]: boolean }>({});
   const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // 베스트셀러 목록을 불러오는 useEffect
   useEffect(() => {
-    const fetchBestSellers = async () => {
+    const fetchBooks = async () => {
       try {
-        const response = await api.get("/api/book/best");
-        if (response.data.success) {
-          setBooks(response.data.data);
+        setLoading(true);
+        setError(null);
+        
+        const booksResponse = await api.get("/api/book/best");
+        
+        if (!booksResponse.data.success) {
+          throw new Error("책 목록을 불러오는데 실패했습니다.");
         }
+
+        setBooks(booksResponse.data.data);
       } catch (error) {
-        console.error("베스트셀러 목록을 불러오는데 실패했습니다:", error);
+        console.error("데이터를 불러오는데 실패했습니다:", error);
+        setError("데이터를 불러오는데 실패했습니다. 다시 시도해주세요.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchBestSellers();
+    fetchBooks();
   }, []);
-
-  // Add handleLike function
-  const handleLike = (bookId: number) => {
-    setLikedBooks((prev) => ({
-      ...prev,
-      [bookId]: !prev[bookId],
-    }));
-  };
 
   const handleRatingChange = (bookId: number, rating: number) => {
     console.log(`Book ${bookId} rated: ${rating}`);
   };
+
+  if (loading) {
+    return <div style={{ padding: "20px", textAlign: "center" }}>로딩 중...</div>;
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center", color: "red" }}>
+        {error}
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{ 
+            display: "block", 
+            margin: "20px auto", 
+            padding: "10px 20px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          다시 시도
+        </button>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -126,27 +125,13 @@ const EvaluateBookPage = () => {
                 onRatingChange={(rating) => handleRatingChange(book.bookId, rating)} 
               />
             </div>
-            <div style={{ display: "flex", gap: "20px", marginTop: "20px", color: "#666", cursor: "pointer" }}>
-              <span onClick={() => handleLike(book.bookId)}>
-                <HeartIcon filled={likedBooks[book.bookId]} />
-              </span>
-              <span
-                onClick={() => {
-                  setSelectedBook(book.title);
-                  setModalOpen(true);
-                }}
-              >
-                <PencilIcon />
-              </span>
-              <span onClick={() => {}}>
-                <BanIcon />
-              </span>
+            <div style={{ display: "flex", gap: "20px", marginTop: "20px", color: "#666" }}>
+              <BookmarkButton bookId={book.bookId} />
+              <IgnoreButton bookId={book.bookId} />
             </div>
           </div>
         </div>
       ))}
-
-      <WriteCommentModal isOpen={modalOpen} onClose={() => setModalOpen(false)} bookTitle={selectedBook} />
     </>
   );
 };
