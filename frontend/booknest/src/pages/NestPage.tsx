@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import NestBookList from "../components/NestBookList";
 import BookmarkList from "../components/BookmarkList";
+import BookSearchModal from "../components/BookSearchModal";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -40,25 +41,47 @@ const Tab = styled.button<{ $active: boolean }>`
   }
 `;
 
+const AddButton = styled.button`
+  padding: 8px 16px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: auto;
+
+  &:hover {
+    background-color: #357abd;
+  }
+`;
+
+const HeaderSection = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
 const NestPage = () => {
   const [activeTab, setActiveTab] = useState<"둥지" | "찜">("둥지");
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   return (
     <Container>
-      <TabContainer>
-        <Tab $active={activeTab === "둥지"} onClick={() => setActiveTab("둥지")}>
-          둥지
-        </Tab>
-        <Tab $active={activeTab === "찜"} onClick={() => setActiveTab("찜")}>
-          찜
-        </Tab>
-      </TabContainer>
+      <HeaderSection>
+        <TabContainer>
+          <Tab $active={activeTab === "둥지"} onClick={() => setActiveTab("둥지")}>
+            둥지
+          </Tab>
+          <Tab $active={activeTab === "찜"} onClick={() => setActiveTab("찜")}>
+            찜
+          </Tab>
+        </TabContainer>
+        {activeTab === "둥지" && <AddButton onClick={() => setShowSearchModal(true)}>도서 추가</AddButton>}
+      </HeaderSection>
 
-      {activeTab === "둥지" ? (
-        <NestBookList />
-      ) : (
-        <BookmarkList />
-      )}
+      {showSearchModal && <BookSearchModal onClose={() => setShowSearchModal(false)} />}
+
+      {activeTab === "둥지" ? <NestBookList /> : <BookmarkList />}
     </Container>
   );
 };

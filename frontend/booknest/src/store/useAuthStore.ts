@@ -17,17 +17,18 @@ interface User {
  * 사용자의 추가 정보 구조 (프로필 상세 정보)
  */
 interface UserDetailInfo {
-  userId: number;          // 사용자 고유 ID
-  nickname: string;        // 사용자 닉네임
-  gender: string;          // 성별
-  birthDate: string;       // 생년월일
-  roadAddress: string;     // 도로명 주소
-  zipcode: string;         // 우편번호
-  profileURL: string;      // 프로필 이미지 URL
-  followers: number;       // 팔로워 수
-  followings: number;      // 팔로잉 수
-  totalRatings: number;    // 총 평점 수
-  totalReviews: number;    // 총 리뷰 수
+  userId: number;
+  nestId: number;
+  nickname: string;
+  gender: string;
+  birthDate: string;
+  roadAddress: string;
+  zipcode: string;
+  profileURL: string;
+  followers: number;
+  followings: number;
+  totalRatings: number;
+  totalReviews: number;
 }
 
 /**
