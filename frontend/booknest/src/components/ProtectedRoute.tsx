@@ -7,16 +7,25 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const token = localStorage.getItem("token");
+  const userInfo = localStorage.getItem("user");
 
-  console.log("보호된 라우트 - 토큰:", token); // 디버깅 로그 한글화
+  console.log("보호된 라우트 - 토큰:", token);
 
-  // 토큰이 없으면 로그인 페이지로 리다이렉트
   if (!token) {
-    console.log("보호된 라우트 - 토큰이 없음, 로그인 페이지로 이동"); // 디버깅 로그 한글화
+    console.log("보호된 라우트 - 토큰이 없음, 로그인 페이지로 이동");
     return <Navigate to={ROUTES.LOGIN} replace />;
   }
 
-  console.log("보호된 라우트 - 토큰 확인됨, 컴포넌트 렌더링"); // 디버깅 로그 한글화
+  // 사용자 정보 확인 및 닉네임 검증
+  if (userInfo) {
+    const user = JSON.parse(userInfo);
+    if (!user.nickname) {
+      console.log("보호된 라우트 - 닉네임이 없음, 정보입력 페이지로 이동");
+      return <Navigate to={ROUTES.INPUT_INFO} replace />;
+    }
+  }
+
+  console.log("보호된 라우트 - 토큰 확인됨, 컴포넌트 렌더링");
   return <>{children}</>;
 };
 

@@ -176,7 +176,6 @@ const AppContent = () => {
             <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
             {/* 잘못된 경로는 에러 페이지로 연결 */}
             <Route path="*" element={<ErrorPage />} />
-            <Route path="/input-info" element={<InputInfoPage />} />
             {/* 🗑️ */}
           </Routes>
         </div>
