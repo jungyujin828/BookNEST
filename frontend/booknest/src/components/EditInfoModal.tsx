@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
+import { useAuthStore } from "../store/useAuthStore";
 
 declare global {
   interface Window {
@@ -218,10 +219,29 @@ interface EditInfoModalProps {
 }
 
 const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
+  const { userDetail } = useAuthStore();
   const [isNicknameValidated, setIsNicknameValidated] = useState(true);
-  const [nickname, setNickname] = useState(userInfo.nickname);
-  const [gender, setGender] = useState(userInfo.gender);
-  const [birthdate, setBirthdate] = useState(userInfo.birthdate?.replace(/-/g, "") || "");
+  const [nickname, setNickname] = useState(userDetail?.nickname || userInfo.nickname);
+  const [gender, setGender] = useState(() => {
+    // 성별 코드를 표시 텍스트로 변환
+    switch (userDetail?.gender || userInfo.gender) {
+      case "M":
+        return "남성";
+      case "F":
+        return "여성";
+      case "O":
+        return "기타";
+      default:
+        return "설정안함";
+    }
+  });
+  const [birthdate, setBirthdate] = useState((userDetail?.birthDate || userInfo.birthdate)?.replace(/-/g, "") || "");
+
+  // 주소 정보 초기화
+  // Remove these duplicate state declarations
+  // const [address, setAddress] = useState(userDetail?.roadAddress || userInfo.address?.roadAddress || "");
+  // const [zipcode, setZipcode] = useState(userDetail?.zipcode || userInfo.address?.zipcode || "");
+
   const [isNicknameValid, setIsNicknameValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [birthdateError, setBirthdateError] = useState("");
@@ -393,7 +413,17 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
     try {
       const response = await api.put("/api/user/update", payload);
       if (response.data.success) {
-        console.log("회원 정보가 성공적으로 업데이트되었습니다.");
+        // store의 userDetail 정보도 업데이트
+        const updatedUserDetail = {
+          ...userDetail!,
+          nickname,
+          gender: genderCode,
+          birthDate: formatBirthdate(birthdate),
+          roadAddress: detailAddress ? `${address} ${detailAddress}` : address,
+          zipcode,
+        };
+        useAuthStore.getState().setUserDetail(updatedUserDetail);
+
         onClose();
         window.location.reload();
       }
