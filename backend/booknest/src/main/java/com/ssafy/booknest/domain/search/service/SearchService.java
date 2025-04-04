@@ -30,15 +30,17 @@ public class SearchService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
-    public CustomPage<BookSearchResponse> searchBooks(Integer userId, String title, Pageable pageable) {
+    public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (title == null || title.isEmpty()) {
-            return new CustomPage<>(Page.empty());  // 빈 목록 반환
+        if (keyword == null || keyword.isEmpty()) {
+            return new CustomPage<>(Page.empty());
         }
 
-        Page<SearchedBook> books = bookSearchRepository.findByTitleContaining(title, pageable);
+        Page<SearchedBook> books = bookSearchRepository
+                .findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
+
         return new CustomPage<>(books.map(BookSearchResponse::of));
     }
 
