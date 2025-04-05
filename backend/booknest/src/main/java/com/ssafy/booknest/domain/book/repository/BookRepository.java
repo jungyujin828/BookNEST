@@ -2,6 +2,7 @@ package com.ssafy.booknest.domain.book.repository;
 
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
+import com.ssafy.booknest.domain.book.entity.CriticBook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +34,19 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     WHERE b.id = :bookId
 """)
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
+
+
+    // 화제의 작가 최상위 3명의 책 가져오기
+    @Query("""
+    SELECT b FROM Book b
+    JOIN b.bookAuthors ba
+    JOIN ba.author a
+    WHERE a.name LIKE %:author%
+    ORDER BY b.createdAt DESC
+    LIMIT 20
+""")
+    List<Book> findTop3ByAuthorNameLike(@Param("author") String author);
+
 
     @Query("""
     SELECT b 

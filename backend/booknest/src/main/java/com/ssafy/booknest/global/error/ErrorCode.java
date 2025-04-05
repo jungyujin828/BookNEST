@@ -57,7 +57,11 @@ public enum ErrorCode {
     BOOKMARK_NOT_FOUND(404, "N004", "찜이 등록되어 있지 않습니다."),
 
     //Fast API
-    FASTAPI_REQUEST_FAILED(500, "F001", "FastAPI 서버 호출에 실패했습니다.");
+    FASTAPI_REQUEST_FAILED(500, "F001", "FastAPI 서버 호출에 실패했습니다."),
+
+    // CRITIC
+    CRITIC_NOT_FOUND(404, "C101", "해당 평론가 정보를 찾을 수 없습니다."),
+    CRITIC_BOOK_NOT_FOUND(404, "C102", "해당 평론가의 추천 도서를 찾을 수 없습니다.");
 
 
     private final int status;
