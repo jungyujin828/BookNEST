@@ -3,6 +3,7 @@ import axios from 'axios';
 import styled from '@emotion/styled';
 import api from '../api/axios';
 import { useBookStore } from '../store/useBookStore';
+import { useNavigate } from 'react-router-dom';
 
 interface Book {
   bookId: number;
@@ -81,6 +82,13 @@ const BookCard = styled.div`
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
   
   @media (min-width: 768px) {
     flex: 0 0 200px;
@@ -235,6 +243,7 @@ const LoadingMessage = styled.div`
 `;
 
 const AuthorBook = () => {
+  const navigate = useNavigate();
   const { 
     authorBooks, 
     loading, 
@@ -260,6 +269,10 @@ const AuthorBook = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
+  };
+
+  const handleBookClick = (bookId: number) => {
+    navigate(`/book-detail/${bookId}`);
   };
 
   useEffect(() => {
@@ -304,8 +317,8 @@ const AuthorBook = () => {
   return (
     <AuthorBookContainer>
       <Title>
-        <AuthorIcon>✍️</AuthorIcon>
-        화제의 작가 도서
+        <AuthorIcon>📚</AuthorIcon>
+        작가의 다른 책
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -317,7 +330,7 @@ const AuthorBook = () => {
         <BookList ref={bookListRef}>
           {authorBooks && authorBooks.length > 0 ? (
             authorBooks.map((book) => (
-              <BookCard key={book.bookId}>
+              <BookCard key={book.bookId} onClick={() => handleBookClick(book.bookId)}>
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
                   alt={book.title}
