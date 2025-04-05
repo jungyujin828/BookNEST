@@ -24,7 +24,7 @@ public class BookDetailResponse {
     private String publishedDate;
     private String isbn;
     private String publisher;
-    private int pages;
+    private String pages;
     private String imageUrl;
     private String intro;
     private String index;
