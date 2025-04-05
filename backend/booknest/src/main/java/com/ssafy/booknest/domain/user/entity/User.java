@@ -93,6 +93,8 @@ public class User extends BaseEntity {
 
     public void updateDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
 
+    public void updatedProfileUrl(String profileUrl) { this.profileUrl = profileUrl; }
+
     public void setAddress(Address address) {
         this.address = address;
     }

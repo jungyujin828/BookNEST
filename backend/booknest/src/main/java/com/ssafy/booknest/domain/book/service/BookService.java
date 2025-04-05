@@ -11,11 +11,16 @@ import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.book.enums.BookEvalType;
+import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +47,9 @@ public class BookService {
     private final BookMarkRepository bookMarkRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final RatingRepository ratingRepository;
     private final CriticBookRepository criticBookRepository;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
     private final BookNestRepository bookNestRepository;
@@ -140,17 +147,20 @@ public class BookService {
     // 화제의 작가 책 DB에 배치 (스프링 내 스케쥴링 배치작업 이용)
     @Transactional
     public void updatePopularAuthors() {
-
         List<Nest> allNests = nestRepository.findAllWithBooksOnly();
         Map<String, Long> authorCount = new HashMap<>();
 
         for (Nest nest : allNests) {
             for (BookNest bookNest : nest.getBookNests()) {
                 String authors = bookNest.getBook().getAuthors();
-                if (authors != null) {
+
+                // null 또는 빈 문자열인 경우 skip
+                if (authors != null && !authors.trim().isEmpty()) {
                     for (String author : authors.split(",")) {
                         author = author.trim();
-                        authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                        if (!author.isEmpty()) {
+                            authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                        }
                     }
                 }
             }
@@ -170,10 +180,15 @@ public class BookService {
                 .map(Map.Entry::getKey)
                 .toList();
 
+        if (topAuthors.isEmpty()) {
+            log.warn("최다 출현 작가가 없습니다.");
+            return;
+        }
+
         // 랜덤으로 한 명 선택
         String selectedAuthor = topAuthors.get(new Random().nextInt(topAuthors.size()));
 
-        // 책 3권 가져오기 (title like '%작가명%' 포함된 책)
+        // 책 3권 가져오기 (작가 이름이 포함된 책)
         List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(selectedAuthor);
 
         // 기존 추천 작가 책 삭제 후 새로 저장
@@ -198,6 +213,36 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public CustomPage<BookResponse> getEvalBookList(Integer userId, BookEvalType keyword, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Integer> evaluatedBookIds = ratingRepository.findBookIdsByUserId(userId);
+
+        if (evaluatedBookIds == null || evaluatedBookIds.isEmpty()) {
+            evaluatedBookIds = List.of(-1);
+        }
+
+        Page<Book> books;
+
+        switch (keyword) {
+            case POPULAR:
+                books = bookRepository.findMostRatedBooksExcluding(evaluatedBookIds, pageable);
+                break;
+            case RECENT:
+                books = bookRepository.findRecentBooksExcluding(evaluatedBookIds, pageable);
+                break;
+            case RANDOM:
+            default:
+                books = bookRepository.findRandomBooksExcluding(evaluatedBookIds, pageable);
+                break;
+        }
+
+        // Book -> BookResponse 변환 및 CustomPage 래핑
+        Page<BookResponse> bookResponses = books.map(BookResponse::of);
+        return new CustomPage<>(bookResponses);
+    }
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)

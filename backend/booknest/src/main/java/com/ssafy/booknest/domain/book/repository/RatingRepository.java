@@ -2,7 +2,6 @@ package com.ssafy.booknest.domain.book.repository;
 
 import com.ssafy.booknest.domain.book.entity.Rating;
 
-import com.ssafy.booknest.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,4 +26,7 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.user.id = :userId")
     Integer countRatings(@Param("userId") Integer userId);
+
+    @Query("SELECT r.book.id FROM Rating r WHERE r.user.id = :userId")
+    List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
 }
