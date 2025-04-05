@@ -8,6 +8,8 @@ services:
       - "8111:80"
     # 컨테이너의 이름
     container_name: spring-booknest-blue
+    volumes:
+      - /home/ubuntu/app-logs-blue:/app/logs
     environment:
       - TZ=Asia/Seoul
     networks:

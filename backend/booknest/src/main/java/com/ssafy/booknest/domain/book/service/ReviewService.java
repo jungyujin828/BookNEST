@@ -16,6 +16,7 @@ import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -68,6 +69,7 @@ public class ReviewService {
                 .content(dto.getContent())
                 .rating(ratingOptional.map(Rating::getRating).orElse(null))
                 .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .build();
 
         reviewRepository.save(review);

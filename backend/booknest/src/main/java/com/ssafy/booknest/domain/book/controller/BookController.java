@@ -4,6 +4,7 @@ import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.*;
 import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
+import com.ssafy.booknest.domain.book.enums.BookEvalType;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
 import com.ssafy.booknest.domain.book.service.BookService;
@@ -11,12 +12,12 @@ import com.ssafy.booknest.domain.book.service.FastApiService;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.user.service.UserService;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,6 +107,17 @@ public class BookController {
         return ApiResponse.success(books);
     }
 
+
+    @GetMapping("/eval")
+    public ResponseEntity<ApiResponse<CustomPage<BookResponse>>> getEvalBookList(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "RANDOM") BookEvalType keyword,
+            Pageable pageable){
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        return ApiResponse.success(bookService.getEvalBookList(userId, keyword, pageable));
+    }
 
 
 //    // 내 지역에서 가장 많이 읽은 책

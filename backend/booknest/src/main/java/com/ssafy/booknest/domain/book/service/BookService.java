@@ -11,11 +11,16 @@ import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.book.enums.BookEvalType;
+import com.ssafy.booknest.domain.book.repository.BookRepository;
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +47,9 @@ public class BookService {
     private final BookMarkRepository bookMarkRepository;
     private final KyoboService kyoboService;
     private final Yes24Service yes24Service;
+    private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final RatingRepository ratingRepository;
     private final CriticBookRepository criticBookRepository;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
     private final BookNestRepository bookNestRepository;
@@ -198,6 +205,36 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public CustomPage<BookResponse> getEvalBookList(Integer userId, BookEvalType keyword, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        List<Integer> evaluatedBookIds = ratingRepository.findBookIdsByUserId(userId);
+
+        if (evaluatedBookIds == null || evaluatedBookIds.isEmpty()) {
+            evaluatedBookIds = List.of(-1);
+        }
+
+        Page<Book> books;
+
+        switch (keyword) {
+            case POPULAR:
+                books = bookRepository.findMostRatedBooksExcluding(evaluatedBookIds, pageable);
+                break;
+            case RECENT:
+                books = bookRepository.findRecentBooksExcluding(evaluatedBookIds, pageable);
+                break;
+            case RANDOM:
+            default:
+                books = bookRepository.findRandomBooksExcluding(evaluatedBookIds, pageable);
+                break;
+        }
+
+        // Book -> BookResponse 변환 및 CustomPage 래핑
+        Page<BookResponse> bookResponses = books.map(BookResponse::of);
+        return new CustomPage<>(bookResponses);
+    }
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)

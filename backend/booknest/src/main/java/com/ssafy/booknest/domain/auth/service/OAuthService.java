@@ -56,7 +56,7 @@ public class OAuthService {
             // 3. 유저 정보로 로그인 처리하기
 
             // 3. 기존 회원인지 확인
-            Optional<User> existingUser = userRepository.findByProviderAndProviderId(
+            Optional<User> existingUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(
                     provider,
                     userInfo.getId() //providerId
             );
@@ -140,7 +140,7 @@ public class OAuthService {
 
 
         // 3. 기존 회원 확인
-        Optional<User> existingUser = userRepository.findByProviderAndProviderId(Provider.NAVER, userInfo.getId());
+        Optional<User> existingUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(Provider.NAVER, userInfo.getId());
         boolean isNew = existingUser.isEmpty();
 
         // 4. 회원 생성 또는 기존 사용자 가져오기

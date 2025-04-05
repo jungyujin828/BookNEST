@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.user.controller;
 
 import com.ssafy.booknest.domain.auth.dto.TokenValidationResult;
+import com.ssafy.booknest.domain.user.dto.request.UserUpdateImgRequest;
 import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.dto.response.UserMypageResponse;
@@ -96,4 +97,18 @@ public class UserController {
 
         return ApiResponse.success(userService.getUserMypage(userId, targetUserId));
     }
+
+    // 프로필 이미지 등록, 수정, 삭제
+    @PutMapping("/profile-image")
+    public ResponseEntity<ApiResponse<Void>> updateUserProfileImage(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestBody UserUpdateImgRequest dto) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        userService.saveProfileImage(userId, dto);
+
+        return ApiResponse.success(HttpStatus.CREATED);
+    }
+
 }
