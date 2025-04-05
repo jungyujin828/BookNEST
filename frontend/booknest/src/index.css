@@ -1,3 +1,6 @@
+/* 전역적인 스타일 정의 */
+/* 폰트 정의 */
+
 @font-face {
   font-family: "MaruBuri";
   src: url("./fonts/MaruBuri-Regular.ttf") format("truetype");
@@ -30,7 +33,4 @@
 
 * {
   font-family: "MaruBuri", sans-serif;
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10+ */
-  user-select: none; /* Standard syntax */
 }

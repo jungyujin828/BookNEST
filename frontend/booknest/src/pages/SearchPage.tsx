@@ -4,11 +4,19 @@ import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 
+interface User {
+  id: number;
+  nickname: string;
+  profileURL: string;
+  isFollowing: boolean;
+}
+
 interface Book {
   bookId: string;
   title: string;
   imageURL: string;
   authors: string;
+  tags?: string[];
 }
 
 interface SearchResponse {
@@ -154,12 +162,20 @@ const BookAuthor = styled.p`
   font-size: 14px;
 `;
 
-interface User {
-  id: number;
-  nickname: string;
-  profileURL: string;
-  isFollowing: boolean;
-}
+const BookTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+`;
+
+const Tag = styled.span`
+  padding: 2px 8px;
+  background-color: #f0f8f1;
+  color: #7bc47f;
+  border-radius: 12px;
+  font-size: 12px;
+`;
 
 const TabContainer = styled.div`
   display: flex;
@@ -241,6 +257,11 @@ const SearchPage = () => {
 
   const handleSearchResult = (data: any) => {
     if (activeTab === "books") {
+      console.log("Received books data:", data);
+      console.log(
+        "Books tags:",
+        data.map((book: Book) => ({ title: book.title, tags: book.tags }))
+      );
       setBooks(data);
       setUsers([]);
     } else {
@@ -306,6 +327,13 @@ const SearchPage = () => {
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{book.authors}</BookAuthor>
+                {book.tags && book.tags.length > 0 && (
+                  <BookTags>
+                    {book.tags.map((tag, index) => (
+                      <Tag key={index}>{tag}</Tag>
+                    ))}
+                  </BookTags>
+                )}
               </BookInfo>
             </BookCard>
           ))}
