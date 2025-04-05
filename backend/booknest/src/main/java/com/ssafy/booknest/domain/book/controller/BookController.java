@@ -107,6 +107,21 @@ public class BookController {
         return ApiResponse.success(books);
     }
 
+    // 나이대와 성별에 따른 추천
+    @GetMapping("/age-gender")
+    public ResponseEntity<ApiResponse<AgeGenderBookResult>> getAgeGenderBooks(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<AgeGenderBookResponse> books = bookService.getAgeGenderBooks(userId);
+
+        AgeGenderBookResult result = AgeGenderBookResult.of(books);
+
+        return ApiResponse.success(result);
+    }
+
+
 
     @GetMapping("/eval")
     public ResponseEntity<ApiResponse<CustomPage<BookResponse>>> getEvalBookList(

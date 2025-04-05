@@ -29,6 +29,7 @@ public enum ErrorCode {
     // USER
     USER_NOT_FOUND(404, "U001", "유저를 찾을 수 없습니다."),
     ADDRESS_NOT_FOUND(404, "U002", "주소를 찾을 수 없습니다."),
+    BIRTHDATE_INVALID(400, "U003", "유효하지 않은 생년월일입니다."),
 
 
     // BOOK
@@ -59,9 +60,16 @@ public enum ErrorCode {
     //Fast API
     FASTAPI_REQUEST_FAILED(500, "F001", "FastAPI 서버 호출에 실패했습니다."),
 
+    // AGEGROUP & GENDER
+    GENDER_NOT_SELECTED(400, "G001", "성별 정보가 설정되지 않아 연령대+성별 추천이 불가능합니다."),
+    AGE_GENDER_BOOK_NOT_FOUND(404, "G002", "해당 연령대와 성별에 맞는 추천 도서를 찾을 수 없습니다."),
+
+
     // CRITIC
     CRITIC_NOT_FOUND(404, "C101", "해당 평론가 정보를 찾을 수 없습니다."),
     CRITIC_BOOK_NOT_FOUND(404, "C102", "해당 평론가의 추천 도서를 찾을 수 없습니다.");
+
+
 
 
     private final int status;

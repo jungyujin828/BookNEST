@@ -6,6 +6,7 @@ import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
+import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
@@ -19,6 +20,7 @@ import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
@@ -35,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -54,6 +57,7 @@ public class BookService {
     private final PopularAuthorBookRepository popularAuthorBookRepository;
     private final BookNestRepository bookNestRepository;
     private final NestRepository nestRepository;
+    private final AgeGenderBookRepository ageGenderBookRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -243,6 +247,58 @@ public class BookService {
         Page<BookResponse> bookResponses = books.map(BookResponse::of);
         return new CustomPage<>(bookResponses);
     }
+
+    // 나이대와 성별에 따른 추천
+    @Transactional(readOnly = true)
+    public List<AgeGenderBookResponse> getAgeGenderBooks(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        AgeGroup ageGroup = null;
+        Gender gender = user.getGender();
+
+        // 생년월일 → 나이대 계산 (이상하면 무시)
+        String birthdateStr = user.getBirthdate();
+        if (birthdateStr != null && birthdateStr.length() >= 4) {
+            try {
+                int birthYear = Integer.parseInt(birthdateStr.substring(0, 4));
+                int age = LocalDate.now().getYear() - birthYear + 1;
+                ageGroup = AgeGroup.fromAge(age);
+            } catch (NumberFormatException ignored) {
+                // 잘못된 생년월일 형식이면 조용히 ageGroup = null 유지
+            }
+        }
+
+
+        List<AgeGenderBook> books = new ArrayList<>();
+
+        // 1. 나이대 + 성별
+        if (ageGroup != null && gender != null && gender != Gender.N && gender != Gender.O) {
+            books = ageGenderBookRepository.findByAgeGroupAndGender(ageGroup, gender);
+        }
+
+        // 2. 나이대만
+        if (books.isEmpty() && ageGroup != null) {
+            books = ageGenderBookRepository.findByAgeGroup(ageGroup);
+        }
+
+        // 3. 성별만
+        if (books.isEmpty() && gender != null && gender != Gender.N && gender != Gender.O) {
+            books = ageGenderBookRepository.findByGender(gender);
+        }
+
+        // 4. 랜덤 fallback
+        if (books.isEmpty()) {
+            books = ageGenderBookRepository.findRandomLimit(15);
+        }
+
+        return books.stream()
+                .limit(15)
+                .map(AgeGenderBookResponse::of)
+                .toList();
+    }
+
+
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
