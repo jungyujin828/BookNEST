@@ -5,7 +5,7 @@ spring:
     properties:
       hibernate:
         format_sql: true  # SQL 로그 포맷을 비활성화하여 성능 향상
-    defer-datasource-initialization: false  # 데이터베이스 연결 초기화 지연
+    defer-datasource-initialization: true  # 데이터베이스 연결 초기화 지연
 
   data:
     redis:
