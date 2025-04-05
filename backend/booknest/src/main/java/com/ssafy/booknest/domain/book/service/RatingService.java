@@ -145,7 +145,7 @@ public class RatingService {
     public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
                 .orElse(null);
-        return MyRatingResponse.of(rating);
+        return MyRatingResponse.of(rating, bookId);
     }
 
     // 도서 관심없음
