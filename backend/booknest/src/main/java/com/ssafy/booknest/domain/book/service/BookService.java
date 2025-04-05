@@ -147,17 +147,20 @@ public class BookService {
     // 화제의 작가 책 DB에 배치 (스프링 내 스케쥴링 배치작업 이용)
     @Transactional
     public void updatePopularAuthors() {
-
         List<Nest> allNests = nestRepository.findAllWithBooksOnly();
         Map<String, Long> authorCount = new HashMap<>();
 
         for (Nest nest : allNests) {
             for (BookNest bookNest : nest.getBookNests()) {
                 String authors = bookNest.getBook().getAuthors();
-                if (authors != null) {
+
+                // null 또는 빈 문자열인 경우 skip
+                if (authors != null && !authors.trim().isEmpty()) {
                     for (String author : authors.split(",")) {
                         author = author.trim();
-                        authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                        if (!author.isEmpty()) {
+                            authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                        }
                     }
                 }
             }
@@ -177,10 +180,15 @@ public class BookService {
                 .map(Map.Entry::getKey)
                 .toList();
 
+        if (topAuthors.isEmpty()) {
+            log.warn("최다 출현 작가가 없습니다.");
+            return;
+        }
+
         // 랜덤으로 한 명 선택
         String selectedAuthor = topAuthors.get(new Random().nextInt(topAuthors.size()));
 
-        // 책 3권 가져오기 (title like '%작가명%' 포함된 책)
+        // 책 3권 가져오기 (작가 이름이 포함된 책)
         List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(selectedAuthor);
 
         // 기존 추천 작가 책 삭제 후 새로 저장
