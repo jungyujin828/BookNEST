@@ -44,6 +44,8 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     JOIN ba.author a
     WHERE a.name LIKE %:author%
     ORDER BY b.createdAt DESC
+    LIMIT 20
 """)
     List<Book> findTop3ByAuthorNameLike(@Param("author") String author);
+
 }

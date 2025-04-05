@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.entity;
 
 import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -73,6 +74,7 @@ public class Book extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookMark> BookMarks = new ArrayList<>();
+
 
     public String getAuthors() {
         return bookAuthors.stream()

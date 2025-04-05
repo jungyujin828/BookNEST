@@ -23,11 +23,10 @@ public interface NestRepository extends JpaRepository<Nest, Integer> {
     Optional<Nest> findByUser(User user);
 
     @Query("""
-    SELECT n FROM Nest n
+    SELECT DISTINCT n FROM Nest n
     JOIN FETCH n.bookNests bn
     JOIN FETCH bn.book b
-    JOIN FETCH b.bookAuthors ba
-    JOIN FETCH ba.author
-""")
-    List<Nest> findAllWithBookAndAuthor();
+    """)
+    List<Nest> findAllWithBooksOnly();
+
 }

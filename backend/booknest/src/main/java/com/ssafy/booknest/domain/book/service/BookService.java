@@ -137,45 +137,56 @@ public class BookService {
     }
 
 
-    // 화제의 작가 책 배치 (스프링 내 스케쥴링 배치작업 이용)
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 일단 2시간마다 실행(추후 수정 가능)
+    // 화제의 작가 책 DB에 배치 (스프링 내 스케쥴링 배치작업 이용)
     @Transactional
     public void updatePopularAuthors() {
 
-        List<Nest> allNests = nestRepository.findAllWithBookAndAuthor();
-
+        List<Nest> allNests = nestRepository.findAllWithBooksOnly();
         Map<String, Long> authorCount = new HashMap<>();
 
         for (Nest nest : allNests) {
             for (BookNest bookNest : nest.getBookNests()) {
                 String authors = bookNest.getBook().getAuthors();
-                for (String author : authors.split(",")) {
-                    authorCount.put(author.trim(), authorCount.getOrDefault(author.trim(), 0L) + 1);
+                if (authors != null) {
+                    for (String author : authors.split(",")) {
+                        author = author.trim();
+                        authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                    }
                 }
             }
         }
 
-        String topAuthor = authorCount.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse(null);
-
-        if (topAuthor != null) {
-            List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(topAuthor);
-
-            // 기존 삭제 후 저장
-            popularAuthorBookRepository.deleteAllInBatch();
-
-            List<PopularAuthorBook> popularList = topBooks.stream()
-                    .map(book -> new PopularAuthorBook(topAuthor, book))
-                    .collect(Collectors.toList());
-
-            popularAuthorBookRepository.saveAll(popularList);
-            log.info("화제의 작가 [{}] 등록 완료. 책 {}권 저장됨", topAuthor, popularList.size());
-        } else {
+        if (authorCount.isEmpty()) {
             log.warn("서재에서 작가를 찾지 못했습니다.");
+            return;
         }
+
+        // 최대 출현 횟수
+        long maxCount = authorCount.values().stream().max(Long::compare).orElse(0L);
+
+        // maxCount와 같은 작가 리스트 수집
+        List<String> topAuthors = authorCount.entrySet().stream()
+                .filter(entry -> entry.getValue() == maxCount)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        // 랜덤으로 한 명 선택
+        String selectedAuthor = topAuthors.get(new Random().nextInt(topAuthors.size()));
+
+        // 책 3권 가져오기 (title like '%작가명%' 포함된 책)
+        List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(selectedAuthor);
+
+        // 기존 추천 작가 책 삭제 후 새로 저장
+        popularAuthorBookRepository.deleteAllInBatch();
+
+        List<PopularAuthorBook> popularList = topBooks.stream()
+                .map(book -> new PopularAuthorBook(selectedAuthor, book))
+                .collect(Collectors.toList());
+
+        popularAuthorBookRepository.saveAll(popularList);
+        log.info("화제의 작가 [{}] 등록 완료. 책 {}권 저장됨", selectedAuthor, popularList.size());
     }
+
 
     // 화제의 작가 추천 책
     @Transactional(readOnly = true)
@@ -186,6 +197,7 @@ public class BookService {
                 .map(popular -> BookResponse.of(popular.getBook()))
                 .collect(Collectors.toList());
     }
+
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)

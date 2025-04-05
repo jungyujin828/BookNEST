@@ -11,7 +11,7 @@ public class PopularAuthorScheduler {
 
     private final BookService bookService;
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 2시간마다
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 서버 실행 후 2시간 마다 PopularAuthorBook 테이블 갱신
     public void runBatch() {
         bookService.updatePopularAuthors();
     }
