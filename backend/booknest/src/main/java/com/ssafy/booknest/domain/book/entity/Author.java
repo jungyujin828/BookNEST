@@ -16,7 +16,7 @@ public class Author {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name="name" , nullable = false)
+    @Column(name="name" , columnDefinition = "TEXT")
     private String name;
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
