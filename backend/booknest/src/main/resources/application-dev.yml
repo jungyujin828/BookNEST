@@ -15,6 +15,9 @@ spring:
     init:
       mode: always
 
+  main:
+    allow-bean-definition-overriding: true
+
   elasticsearch:
     uris: "localhost:9200"
 
@@ -33,6 +36,3 @@ oauth:
     redirect-uri: http://localhost:5173/oauth/google/callback  # 운영 도메인으로 변경
   naver:
     redirect-uri: http://localhost:5173/oauth/naver/callback
-
-#fastapi:
-#  url: http://localhost:8000

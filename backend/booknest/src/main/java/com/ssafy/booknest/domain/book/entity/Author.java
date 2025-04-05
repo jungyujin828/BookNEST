@@ -19,6 +19,6 @@ public class Author {
     @Column(name="name" , nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<BookAuthor> bookAuthors;
 }

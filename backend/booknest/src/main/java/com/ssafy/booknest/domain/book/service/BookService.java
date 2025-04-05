@@ -6,11 +6,18 @@ import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
+import com.ssafy.booknest.domain.book.enums.BookSearchType;
+import com.ssafy.booknest.domain.book.repository.*;
+import com.ssafy.booknest.domain.nest.entity.BookMark;
+import com.ssafy.booknest.domain.nest.entity.BookNest;
+import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
+import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
+import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
@@ -18,15 +25,20 @@ import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookService {
@@ -38,6 +50,10 @@ public class BookService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final RatingRepository ratingRepository;
+    private final CriticBookRepository criticBookRepository;
+    private final PopularAuthorBookRepository popularAuthorBookRepository;
+    private final BookNestRepository bookNestRepository;
+    private final NestRepository nestRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -103,6 +119,90 @@ public class BookService {
         return bookRepository.findAll().stream()
                 .map(FakeResponse::of)
                 .toList();
+    }
+
+    // 평론가 추천책
+    public List<CriticBookResponse> getCriticBooks(Integer userId) {
+        List<String> criticNames = criticBookRepository.findAllCriticNames();
+
+        if (criticNames.isEmpty()) {
+            throw new CustomException(ErrorCode.CRITIC_NOT_FOUND);
+        }
+
+        String selectedCritic = criticNames.get(new Random().nextInt(criticNames.size()));
+
+        List<CriticBook> criticBooks =
+                criticBookRepository.findByCriticNameWithBookAndAuthors(selectedCritic);
+
+        if (criticBooks.isEmpty()) {
+            throw new CustomException(ErrorCode.CRITIC_BOOK_NOT_FOUND);
+        }
+
+        return criticBooks.stream()
+                .map(CriticBookResponse::of)
+                .toList();
+    }
+
+
+    // 화제의 작가 책 DB에 배치 (스프링 내 스케쥴링 배치작업 이용)
+    @Transactional
+    public void updatePopularAuthors() {
+
+        List<Nest> allNests = nestRepository.findAllWithBooksOnly();
+        Map<String, Long> authorCount = new HashMap<>();
+
+        for (Nest nest : allNests) {
+            for (BookNest bookNest : nest.getBookNests()) {
+                String authors = bookNest.getBook().getAuthors();
+                if (authors != null) {
+                    for (String author : authors.split(",")) {
+                        author = author.trim();
+                        authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
+                    }
+                }
+            }
+        }
+
+        if (authorCount.isEmpty()) {
+            log.warn("서재에서 작가를 찾지 못했습니다.");
+            return;
+        }
+
+        // 최대 출현 횟수
+        long maxCount = authorCount.values().stream().max(Long::compare).orElse(0L);
+
+        // maxCount와 같은 작가 리스트 수집
+        List<String> topAuthors = authorCount.entrySet().stream()
+                .filter(entry -> entry.getValue() == maxCount)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        // 랜덤으로 한 명 선택
+        String selectedAuthor = topAuthors.get(new Random().nextInt(topAuthors.size()));
+
+        // 책 3권 가져오기 (title like '%작가명%' 포함된 책)
+        List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(selectedAuthor);
+
+        // 기존 추천 작가 책 삭제 후 새로 저장
+        popularAuthorBookRepository.deleteAllInBatch();
+
+        List<PopularAuthorBook> popularList = topBooks.stream()
+                .map(book -> new PopularAuthorBook(selectedAuthor, book))
+                .collect(Collectors.toList());
+
+        popularAuthorBookRepository.saveAll(popularList);
+        log.info("화제의 작가 [{}] 등록 완료. 책 {}권 저장됨", selectedAuthor, popularList.size());
+    }
+
+
+    // 화제의 작가 추천 책
+    @Transactional(readOnly = true)
+    public List<BookResponse> getAuthorBooks(Integer userId) {
+        List<PopularAuthorBook> popularBooks = popularAuthorBookRepository.findAllWithBookAndAuthor();
+
+        return popularBooks.stream()
+                .map(popular -> BookResponse.of(popular.getBook()))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
