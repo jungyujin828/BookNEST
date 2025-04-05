@@ -1,12 +1,26 @@
 
--- ✅ 1️⃣ User 테이블 (명시적으로 ID 추가)
-INSERT INTO user (id, nickname, archetype, provider, provider_id, created_at, updated_at, profile_url)
+INSERT INTO user (nickname, archetype, provider, provider_id, created_at, updated_at, profile_url, gender, birthdate)
 VALUES
-    (1, '테스트맨1', '갓 태어난 참새', 'KAKAO', 112312312, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (2, '테스트맨2', '예민한 앵무새', 'NAVER', 1231440, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (3, '테스트맨3', '갓 태어난 참새', 'GOOGLE', 987654321, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (4, '테스트맨4', '갓 태어난 참새', 'KAKAO', 554433221, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (5, '테스트맨5', '갓 태어난 참새', 'NAVER', 667788990, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png');
+-- M
+('열정청년', '도전하는 까치', 'GOOGLE', 1111111, NOW(), NOW(), 'https://img.example.com/profile6.png', 'M', '2005-01-01'), -- 10대
+('직장인A', '현실주의 올빼미', 'NAVER', 1111112, NOW(), NOW(), 'https://img.example.com/profile7.png', 'M', '1994-08-15'), -- 30대
+('중년남', '느긋한 앵무새', 'KAKAO', 1111113, NOW(), NOW(), 'https://img.example.com/profile8.png', 'M', '1975-05-10'), -- 50대
+
+-- F
+('대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png', 'F', '2001-07-20'), -- 20대
+('워킹맘', '다정한 제비', 'NAVER', 1111115, NOW(), NOW(), 'https://img.example.com/profile10.png', 'F', '1983-11-30'), -- 40대
+( '할머니F', '지혜로운 부엉이', 'GOOGLE', 1111116, NOW(), NOW(), 'https://img.example.com/profile11.png', 'F', '1950-03-25'), -- 60대 이상
+
+-- O (기타)
+('열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png', 'O', '1999-06-06'), -- 20대
+
+-- N (성별 선택 안함)
+('미정성별', '신비한 두루미', 'NAVER', 1111118, NOW(), NOW(), 'https://img.example.com/profile13.png', 'N', '1990-09-09'), -- 30대
+
+-- NULL 성별
+('빈성별1', '조용한 까마귀', 'GOOGLE', 1111119, NOW(), NOW(), 'https://img.example.com/profile14.png', NULL, '1988-12-12'), -- 30대
+('빈성별2', '미소 짓는 참새', 'KAKAO', 1111120, NOW(), NOW(), 'https://img.example.com/profile15.png', NULL, '1960-02-28'); -- 60대
+
 -- ✅ Nest 테이블 (명시적으로 ID 추가)
 INSERT INTO nest (id, user_id, created_at, updated_at)
 VALUES
@@ -320,3 +334,59 @@ VALUES
     ('박비평', '화성을 배경으로 한 생존기의 명작. 상상력과 과학이 공존합니다.', 1, 6, NOW()),
     ('박비평', '소년의 눈으로 본 세계, 그 눈물이 주는 울림이 있습니다.', 2, 7, NOW()),
     ('박비평', '조용한 소년의 이야기 속 깊은 감정을 담아낸 문학적 수작입니다.', 3, 8, NOW());
+
+-- AgeGroup: 20대, Gender: M (남자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('TWENTIES', 'M', 1, 1, NOW()),
+    ('TWENTIES', 'M', 2, 2, NOW()),
+    ('TWENTIES', 'M', 3, 3, NOW());
+
+-- AgeGroup: 20대, Gender: F (여자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('TWENTIES', 'F', 1, 2, NOW()),
+    ('TWENTIES', 'F', 2, 4, NOW()),
+    ('TWENTIES', 'F', 3, 5, NOW());
+
+-- AgeGroup: 30대, Gender: M (남자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('THIRTIES', 'M', 1, 6, NOW()),
+    ('THIRTIES', 'M', 2, 3, NOW()),
+    ('THIRTIES', 'M', 3, 5, NOW());
+
+-- AgeGroup: 30대, Gender: F (여자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('THIRTIES', 'F', 1, 7, NOW()),
+    ('THIRTIES', 'F', 2, 8, NOW()),
+    ('THIRTIES', 'F', 3, 9, NOW());
+
+-- AgeGroup: 40대, Gender: M (남자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('FORTIES', 'M', 1, 10, NOW()),
+    ('FORTIES', 'M', 2, 11, NOW()),
+    ('FORTIES', 'M', 3, 4, NOW());
+
+-- AgeGroup: 40대, Gender: F (여자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('FORTIES', 'F', 1, 5, NOW()),
+    ('FORTIES', 'F', 2, 6, NOW()),
+    ('FORTIES', 'F', 3, 7, NOW());
+
+-- AgeGroup: 10대 이하, Gender: F (여자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('UNDER_10', 'F', 1, 15, NOW()),
+    ('UNDER_10', 'F', 2, 14, NOW()),
+    ('UNDER_10', 'F', 3, 13, NOW());
+
+-- AgeGroup: 60대 이상, Gender: M (남자)
+INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
+VALUES
+    ('OVER_60', 'M', 1, 12, NOW()),
+    ('OVER_60', 'M', 2, 11, NOW()),
+    ('OVER_60', 'M', 3, 10, NOW());
