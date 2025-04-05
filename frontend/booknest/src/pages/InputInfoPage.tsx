@@ -206,7 +206,8 @@ const InputInfoPage = () => {
   // Daum Postcode 스크립트 로드
   useEffect(() => {
     const script = document.createElement("script");
-    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src =
+      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.body.appendChild(script);
 
@@ -224,8 +225,15 @@ const InputInfoPage = () => {
   };
 
   const checkNicknameDuplicate = async () => {
-    // 이모지 및 공백 체크
-    const hasEmoji = /[\p{Emoji}]/u.test(nickname);
+    // 빈 닉네임 체크 추가
+    if (!nickname.trim()) {
+      setIsNicknameValid(false);
+      setErrorMessage("닉네임을 입력해주세요.");
+      return;
+    }
+
+    // 이모지만 체크하고 특수문자와 숫자는 허용
+    const hasEmoji = /\p{Extended_Pictographic}/u.test(nickname);
     const isOnlyWhitespace = /^\s*$/.test(nickname);
 
     if (hasEmoji) {
@@ -241,17 +249,28 @@ const InputInfoPage = () => {
     }
 
     try {
+      const token = localStorage.getItem("token");
       const response = await api.get(`/api/user/nickname-check`, {
         params: { nickname },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
+      console.log("닉네임 중복 확인 응답:", response.data); // 디버깅용
+
       if (response.data.success) {
-        const isDuplicate = response.data.data;
-        setIsNicknameValid(!isDuplicate);
-        setIsNicknameValidated(!isDuplicate); // 중복 확인 결과에 따라 검증 상태 설정
-        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
+        const isDuplicate = response.data.data; // true면 중복
+        setIsNicknameValid(!isDuplicate); // 중복이면 false, 아니면 true
+        setIsNicknameValidated(!isDuplicate); // 중복이면 false, 아니면 true
+        setErrorMessage(
+          isDuplicate
+            ? "이미 사용 중인 닉네임입니다."
+            : "사용 가능한 닉네임입니다."
+        );
       }
     } catch (error) {
+      console.error("닉네임 중복 확인 오류:", error);
       setIsNicknameValidated(false);
       setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
     }
@@ -282,7 +301,10 @@ const InputInfoPage = () => {
           }
           // 건물명이 있고, 공동주택일 경우 추가
           if (data.buildingName !== "" && data.apartment === "Y") {
-            extraAddress += extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
+            extraAddress +=
+              extraAddress !== ""
+                ? ", " + data.buildingName
+                : data.buildingName;
           }
           // 표시할 참고항목이 있을 경우 괄호까지 추가한 최종 문자열 생성
           if (extraAddress !== "") {
@@ -369,7 +391,10 @@ const InputInfoPage = () => {
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
-    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
+      6,
+      8
+    )}`;
   };
 
   // handleSubmit 함수 수정
@@ -406,7 +431,9 @@ const InputInfoPage = () => {
         navigate("/eval-book");
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error?.message || "회원 정보 업데이트에 실패했습니다.";
+      const errorMessage =
+        error.response?.data?.error?.message ||
+        "회원 정보 업데이트에 실패했습니다.";
       setErrorMessage(errorMessage);
     }
   };
@@ -431,8 +458,12 @@ const InputInfoPage = () => {
               중복 확인
             </ConfirmButton>
           </InputRow>
-          {!isNicknameValid && errorMessage && <ErrorText>{errorMessage}</ErrorText>}
-          {isNicknameValid && errorMessage && <SuccessText>{errorMessage}</SuccessText>}
+          {!isNicknameValid && errorMessage && (
+            <ErrorText>{errorMessage}</ErrorText>
+          )}
+          {isNicknameValid && errorMessage && (
+            <SuccessText>{errorMessage}</SuccessText>
+          )}
         </InputGroup>
 
         <InputGroup>
@@ -462,7 +493,12 @@ const InputInfoPage = () => {
         <InputGroup>
           <Label>주소</Label>
           <AddressRow>
-            <AddressInput type="text" placeholder="주소를 검색해주세요" value={address} readOnly />
+            <AddressInput
+              type="text"
+              placeholder="주소를 검색해주세요"
+              value={address}
+              readOnly
+            />
             <AddressButton type="button" onClick={handleFindAddress}>
               주소 검색
             </AddressButton>
@@ -491,7 +527,10 @@ const InputInfoPage = () => {
         <AddressModal>
           <AddressModalContent>
             <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
-            <div id="addressLayer" style={{ width: "100%", height: "400px" }}></div>
+            <div
+              id="addressLayer"
+              style={{ width: "100%", height: "400px" }}
+            ></div>
           </AddressModalContent>
         </AddressModal>
       )}

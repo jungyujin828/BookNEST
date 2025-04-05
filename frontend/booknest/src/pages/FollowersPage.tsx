@@ -89,7 +89,10 @@ const FollowersPage = () => {
     }
   }, [userId]);
 
-  const handleFollowClick = async (e: React.MouseEvent, targetUserId: number) => {
+  const handleFollowClick = async (
+    e: React.MouseEvent,
+    targetUserId: number
+  ) => {
     e.stopPropagation();
     try {
       const targetUser = followers.find((u) => u.userId === targetUserId);
@@ -102,17 +105,34 @@ const FollowersPage = () => {
 
       if (targetUser.isFollowing) {
         // 언팔로우 요청
-        const response = await api.delete(`/api/follow?targetUserId=${targetUserId}`, { headers });
+        const response = await api.delete(
+          `/api/follow?targetUserId=${targetUserId}`,
+          { headers }
+        );
         if (response.data.success) {
           setFollowers(
-            followers.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: false } : user))
+            followers.map((user) =>
+              user.userId === targetUserId
+                ? { ...user, isFollowing: false }
+                : user
+            )
           );
         }
       } else {
         // 팔로우 요청
-        const response = await api.post(`/api/follow?targetUserId=${targetUserId}`, {}, { headers });
+        const response = await api.post(
+          `/api/follow?targetUserId=${targetUserId}`,
+          {},
+          { headers }
+        );
         if (response.data.success) {
-          setFollowers(followers.map((user) => (user.userId === targetUserId ? { ...user, isFollowing: true } : user)));
+          setFollowers(
+            followers.map((user) =>
+              user.userId === targetUserId
+                ? { ...user, isFollowing: true }
+                : user
+            )
+          );
         }
       }
     } catch (error) {
@@ -137,7 +157,10 @@ const FollowersPage = () => {
             </UserInfo>
           </div>
           {currentUser?.id !== follower.userId && (
-            <FollowButton isFollowing={follower.isFollowing} onClick={(e) => handleFollowClick(e, follower.userId)}>
+            <FollowButton
+              isFollowing={follower.isFollowing}
+              onClick={(e) => handleFollowClick(e, follower.userId)}
+            >
               {follower.isFollowing ? "팔로잉" : "팔로우"}
             </FollowButton>
           )}
