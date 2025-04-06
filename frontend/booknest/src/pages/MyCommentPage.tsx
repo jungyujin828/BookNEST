@@ -52,6 +52,13 @@ const ReviewCard = styled.div`
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const BookInfo = styled.div`
@@ -211,7 +218,10 @@ const MyCommentPage = () => {
       <PageTitle>{targetId ? '사용자의 코멘트' : '내가 작성한 코멘트'}</PageTitle>
       <ReviewList>
         {reviews.map((review) => (
-          <ReviewCard key={review.reviewId}>
+          <ReviewCard 
+            key={review.reviewId}
+            onClick={() => navigate(`/book-detail/${review.bookId}`)}
+          >
             <BookInfo>
               <BookTitle>{review.bookName}</BookTitle>
               <Authors>{review.authors.join(', ')}</Authors>

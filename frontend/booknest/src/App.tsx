@@ -3,6 +3,7 @@ import { theme } from "./styles/theme";
 import { ROUTES } from "./constants/paths";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AuthRedirect from "./components/AuthRedirect";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
@@ -65,7 +66,14 @@ const AppContent = () => {
             {/* 공개 라우트 */}
             <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-            <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
+            <Route 
+              path={ROUTES.INPUT_INFO} 
+              element={
+                <AuthRedirect>
+                  <InputInfoPage />
+                </AuthRedirect>
+              } 
+            />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
             <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
             <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />

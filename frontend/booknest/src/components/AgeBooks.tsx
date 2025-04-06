@@ -303,7 +303,6 @@ const AgeBooks = () => {
   return (
     <AgeBooksContainer>
       <Title>
-        <AgeIcon>👥</AgeIcon>
         내 연령대 추천 도서
       </Title>
       <BookListContainer>

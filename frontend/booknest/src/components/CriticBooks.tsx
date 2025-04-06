@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
+import { Link } from 'react-router-dom';
 import api from '../api/axios';
 import { useBookStore } from '../store/useBookStore';
 
@@ -58,6 +59,10 @@ const CriticIcon = styled.span`
   }
 `;
 
+const CriticName = styled.span`
+  color: #2196F3;
+`;
+
 const BookListContainer = styled.div`
   position: relative;
   width: 100%;
@@ -82,34 +87,25 @@ const BookList = styled.div`
   }
 `;
 
-const BookCard = styled.div`
+const BookCard = styled(Link)`
   flex: 0 0 140px;
   background: white;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
   
   @media (min-width: 768px) {
     flex: 0 0 200px;
   }
-`;
-
-const RankBadge = styled.div`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: rgba(33, 150, 243, 0.9);
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 14px;
-  z-index: 1;
 `;
 
 const BookImage = styled.img`
@@ -176,17 +172,6 @@ const CriticInfo = styled.div`
   
   @media (min-width: 768px) {
     padding: 10px 15px;
-  }
-`;
-
-const CriticName = styled.p`
-  font-size: 12px;
-  color: #2196F3;
-  font-weight: bold;
-  margin-bottom: 4px;
-  
-  @media (min-width: 768px) {
-    font-size: 14px;
   }
 `;
 
@@ -306,6 +291,7 @@ const CriticBooks = () => {
   } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
+  const [currentCritic, setCurrentCritic] = useState<string>('');
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -349,6 +335,12 @@ const CriticBooks = () => {
     fetchCriticBooks();
   }, [setCriticBooks, setLoading, setError]);
 
+  useEffect(() => {
+    if (criticBooks && criticBooks.length > 0) {
+      setCurrentCritic(criticBooks[0].criticName);
+    }
+  }, [criticBooks]);
+
   if (loading.criticBooks) {
     return <LoadingMessage>평론가 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
@@ -365,7 +357,7 @@ const CriticBooks = () => {
   return (
     <CriticBooksContainer>
       <Title>
-        평론가 추천 도서
+        <CriticName>{currentCritic}</CriticName>평론가의 추천 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -377,8 +369,10 @@ const CriticBooks = () => {
         <BookList ref={bookListRef}>
           {criticBooks && criticBooks.length > 0 ? (
             criticBooks.map((book) => (
-              <BookCard key={book.bookId}>
-                <RankBadge>{book.rank}</RankBadge>
+              <BookCard 
+                key={book.bookId}
+                to={`/book-detail/${book.bookId}`}
+              >
                 <BookImage 
                   src={book.imageUrl || '/images/default-book.png'} 
                   alt={book.title}
@@ -388,10 +382,6 @@ const CriticBooks = () => {
                   <BookAuthor>{book.authors.join(', ')}</BookAuthor>
                   <BookDate>{book.publishedDate}</BookDate>
                 </BookInfo>
-                <CriticInfo>
-                  <CriticName>{book.criticName}</CriticName>
-                  <Endorsement>{book.endorsement}</Endorsement>
-                </CriticInfo>
               </BookCard>
             ))
           ) : (
