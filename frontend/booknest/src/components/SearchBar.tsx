@@ -109,9 +109,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
 }) => {
   const handleSearch = async () => {
     try {
-      const endpoint = searchType === "books" ? "/api/search/book" : "/api/search/user";
+      const endpoint =
+        searchType === "books" ? "/api/search/book" : "/api/search/user";
       const params =
-        searchType === "books" ? { title: searchTerm, page: 1, size: 10 } : { name: searchTerm, page: 1, size: 10 };
+        searchType === "books"
+          ? { title: searchTerm, page: 1, size: 10 }
+          : { name: searchTerm, page: 1, size: 10 };
 
       const response = await api.get(endpoint, {
         params,
@@ -121,8 +124,17 @@ const SearchBar: React.FC<SearchBarProps> = ({
       });
 
       if (response.data.success) {
-        console.log("Search response:", response.data.data); // 응답 데이터 확인
-        onSearchResult(response.data.data.content);
+        // '_tagsparsefailure' 태그 제거
+        const processedData = {
+          ...response.data.data,
+          content: response.data.data.content.map((item: any) => ({
+            ...item,
+            tags:
+              item.tags?.filter((tag: string) => tag !== "_tagsparsefailure") ||
+              [],
+          })),
+        };
+        onSearchResult(processedData.content);
       }
     } catch (error) {
       console.error(`Failed to search ${searchType}:`, error);
