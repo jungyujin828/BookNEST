@@ -57,15 +57,20 @@ public class RatingController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    // 사용자 평점 목록 조회
+    // 사용자 평점 목록 조회 (내 평점 또는 타인의 평점)
     @GetMapping("/rating")
     public ResponseEntity<ApiResponse<CustomPage<UserRatingResponse>>> getRatingList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(value = "targetId", required = false) Integer targetId,
             Pageable pageable) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        return ApiResponse.success(ratingService.getRatingList(userId, pageable));
+
+        Integer targetUserId = (targetId != null) ? targetId : userId;
+
+        return ApiResponse.success(ratingService.getRatingList(targetUserId, pageable));
     }
+
 
 
     // 내가 입력한 점수 불려오기
