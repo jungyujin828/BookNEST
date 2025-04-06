@@ -15,6 +15,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SearchedBook(
 
+        @Id
         @JsonProperty("book_id")
         @Field(type = FieldType.Integer, name = "book_id")
         Integer bookId,
