@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import api from '../api/axios';
 import CommentForm from './CommentForm';
+import { useNavigate } from 'react-router-dom';
 
 export interface Review {
   reviewId: number;
@@ -178,6 +179,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   // 리뷰 정렬 - 내 리뷰를 최상단에, 나머지는 최신순
   const sortedReviews = [...reviews.content].sort((a, b) => {
@@ -262,21 +264,27 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
   };
 
   const loadMoreReviews = async () => {
-    if (reviewsLoading || reviews.last) return;
-    
-    try {
-      setReviewsLoading(true);
-      const nextPage = reviews.pageNumber + 1;
-      const response = await api.get(`/api/book/${bookId}?page=${nextPage}&size=5`);
+    if (reviews.totalElements > 5) {
+      // BookAllCommentPage로 이동
+      navigate(`/book/${bookId}/comments`);
+    } else {
+      // 기존의 더보기 로직 실행
+      if (reviewsLoading || reviews.last) return;
       
-      if (response.data.success) {
-        onReviewChange();
-        setCurrentPage(nextPage);
+      try {
+        setReviewsLoading(true);
+        const nextPage = reviews.pageNumber + 1;
+        const response = await api.get(`/api/book/${bookId}?page=${nextPage}&size=5`);
+        
+        if (response.data.success) {
+          onReviewChange();
+          setCurrentPage(nextPage);
+        }
+      } catch (err) {
+        console.error("Failed to load more reviews:", err);
+      } finally {
+        setReviewsLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to load more reviews:", err);
-    } finally {
-      setReviewsLoading(false);
     }
   };
 
@@ -342,12 +350,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
             );
           })}
           
-          {!reviews.last && (
+          {(!reviews.last || reviews.totalElements > 5) && (
             <LoadMoreButton 
               onClick={loadMoreReviews}
               disabled={reviewsLoading}
             >
-              {reviewsLoading ? '로딩 중...' : '더보기'}
+              {reviewsLoading ? '로딩 중...' : reviews.totalElements > 5 ? '전체 리뷰 보기' : '더보기'}
             </LoadMoreButton>
           )}
           
