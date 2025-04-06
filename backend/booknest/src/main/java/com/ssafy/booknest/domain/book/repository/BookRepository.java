@@ -3,10 +3,12 @@ package com.ssafy.booknest.domain.book.repository;
 import com.ssafy.booknest.domain.book.entity.BestSeller;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.CriticBook;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -62,5 +64,12 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     @Query("SELECT b FROM Book b WHERE b.id NOT IN :excludedIds ORDER BY function('RAND')")
     Page<Book> findRandomBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
+
+
+    // 주어진 태그를 가진 도서들 중 무작위로 선택하여 일정 개수만 조회 (태그별 인기 도서 부족 시 대체용)
+    @Query("SELECT DISTINCT b FROM Book b JOIN b.bookTags bt WHERE bt.tag.name = :tag ORDER BY function('RAND')")
+    List<Book> findRandomBooksByTag(@Param("tag") String tag, Pageable pageable);
+
+
 
 }

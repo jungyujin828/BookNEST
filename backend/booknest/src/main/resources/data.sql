@@ -265,6 +265,23 @@ INSERT INTO book_tag (book_id, tag_id) VALUES
                                            (1, 3),  -- 철학적인
                                            (1, 4);  -- 동화 같은
 
+INSERT INTO book_tag (book_id, tag_id) VALUES
+                                           (12, 1),
+                                           (6, 1),
+                                           (3, 1),
+                                           (13, 1),
+                                           (9, 1),
+                                           (4, 1),
+                                           (7, 1),
+                                           (14, 1),
+                                           (10, 1),
+                                           (5, 1),
+                                           (8, 1),
+                                           (11, 1),
+                                           (15, 1);
+
+
+
 -- 📌 리뷰 추가 (회원 1~5번이 책 1~5번을 리뷰)
 INSERT INTO review (user_id, book_id, rating, content, likes, created_at, updated_at)
 VALUES
@@ -390,3 +407,4 @@ VALUES
     ('OVER_60', 'M', 1, 12, NOW()),
     ('OVER_60', 'M', 2, 11, NOW()),
     ('OVER_60', 'M', 3, 10, NOW());
+
