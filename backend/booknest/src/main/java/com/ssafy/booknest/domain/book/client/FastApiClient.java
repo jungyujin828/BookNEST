@@ -18,9 +18,25 @@ public class FastApiClient {
     @Value("${fastapi.url}")
     private String fastApiBaseUrl;
 
-    public Map<String, Object> requestTodayRecommendation(Integer userId) {
-        RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = new RestTemplate();
 
+    // 오늘의 추천
+    public Map<String, Object> requestTodayRecommendation(Integer userId) {
+        return postWithUserId(userId, "/recommend/today");
+    }
+
+    // 대출 기록 기반 추천
+    public Map<String, Object> requestLoanLogRecommendation(Integer userId) {
+        return postWithUserId(userId, "/recommend/loan_log");
+    }
+
+    // 최근 키워드 기반 추천
+    public Map<String, Object> requestRecentKeywordRecommendation(Integer userId) {
+        return postWithUserId(userId, "/recommend/recent_keyword");
+    }
+
+    // 공통 POST 요청 처리
+    private Map<String, Object> postWithUserId(Integer userId, String path) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("user_id", userId);
 
@@ -29,11 +45,11 @@ public class FastApiClient {
         HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
         try {
-            String endpoint = fastApiBaseUrl + "/recommend/today";
+            String endpoint = fastApiBaseUrl + path;
             ResponseEntity<Map> response = restTemplate.postForEntity(endpoint, requestEntity, Map.class);
             return response.getBody();
         } catch (Exception e) {
-            log.error("FastAPI 연동 실패: {}", e.getMessage());
+            log.error("FastAPI 연동 실패 ({}): {}", path, e.getMessage());
             throw new CustomException(ErrorCode.FASTAPI_REQUEST_FAILED);
         }
     }
