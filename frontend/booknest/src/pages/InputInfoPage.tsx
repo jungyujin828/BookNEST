@@ -193,7 +193,7 @@ const InputInfoPage = () => {
   const [isNicknameValidated, setIsNicknameValidated] = useState(false);
   const navigate = useNavigate(); // 추가: useNavigate 훅 선언
   const [nickname, setNickname] = useState("");
-  const [gender, setGender] = useState("설정안함");
+  const [gender, setGender] = useState("");
   const [birthdate, setBirthdate] = useState(""); // 8자리 생년월일 (YYYYMMDD)
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
@@ -467,7 +467,9 @@ const InputInfoPage = () => {
         </InputGroup>
 
         <InputGroup>
-          <Label>성별</Label>
+          <Label>
+            성별<Required>*</Required>
+          </Label>
           <SelectContainer>
             <Select value={gender} onChange={(e) => setGender(e.target.value)}>
               <option value="설정안함">설정안함</option>
@@ -479,7 +481,9 @@ const InputInfoPage = () => {
         </InputGroup>
 
         <InputGroup>
-          <Label>생년월일</Label>
+          <Label>
+            생년월일<Required>*</Required>
+          </Label>
           <BirthDateInput
             type="text"
             placeholder="생년월일 8자리를 입력해주세요 (예: 19990101)"
@@ -513,13 +517,36 @@ const InputInfoPage = () => {
 
         <SubmitButton
           type="submit"
-          disabled={!isNicknameValidated}
+          disabled={
+            !isNicknameValidated ||
+            gender === "" ||
+            birthdate.length !== 8 ||
+            birthdateError !== ""
+          }
           style={{
-            backgroundColor: isNicknameValidated ? "#7bc47f" : "#cccccc",
-            cursor: isNicknameValidated ? "pointer" : "not-allowed",
+            backgroundColor:
+              isNicknameValidated &&
+              gender !== "" &&
+              birthdate.length === 8 &&
+              birthdateError === ""
+                ? "#7bc47f"
+                : "#cccccc",
+            cursor:
+              isNicknameValidated &&
+              gender !== "" &&
+              birthdate.length === 8 &&
+              birthdateError === ""
+                ? "pointer"
+                : "not-allowed",
           }}
         >
-          {isNicknameValidated ? "정보 입력 완료" : "닉네임: 필수 정보입니다."}
+          {!isNicknameValidated
+            ? "닉네임: 필수 정보입니다."
+            : gender === ""
+            ? "성별: 필수 정보입니다."
+            : birthdate.length !== 8 || birthdateError !== ""
+            ? "생년월일: 필수 정보입니다."
+            : "정보 입력 완료"}
         </SubmitButton>
       </form>
 

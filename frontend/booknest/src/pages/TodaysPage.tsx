@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/paths";
 
 interface Book {
-  bookId: number;
-  imageUrl: string;
-  publishedDate: string;
-  indexContent: string;
-  publisherReview: string;
+  book_id: number;
+  image_url: string;
+  published_date: string;
+  index_content: string;
+  publisher_review: string;
   title: string;
   isbn: string;
   publisher: string;
@@ -56,7 +56,12 @@ const SlideImageContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 30%, rgba(0, 0, 0, 1) 100%);
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.3) 0%,
+      rgba(0, 0, 0, 0.5) 30%,
+      rgba(0, 0, 0, 1) 100%
+    );
     pointer-events: none;
   }
 `;
@@ -217,17 +222,24 @@ const TodaysPage = () => {
       <SlideContainer>
         <SlideCard>
           <SlideImageContainer>
-            <SlideImage src={currentBook.imageUrl} alt={currentBook.title} />
+            <SlideImage src={currentBook.image_url} alt={currentBook.title} />
           </SlideImageContainer>
-          <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.bookId}`)}>
+          <SlideInfo
+            onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}
+          >
             <BasicInfo>
               <DetailInfo isVisible={showDetail}>
                 <BookDescription>
-                  {currentBook.intro || currentBook.publisherReview || "도서 설명이 없습니다."}
+                  {currentBook.intro ||
+                    currentBook.publisher_review ||
+                    "도서 설명이 없습니다."}
                 </BookDescription>
               </DetailInfo>
               <TagContainer>
-                {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
+                {currentBook.tags
+                  ?.split(",")
+                  .map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) ||
+                  []}
               </TagContainer>
               <BookTitle>{currentBook.title}</BookTitle>
               <AuthorButtonWrapper>
@@ -246,7 +258,9 @@ const TodaysPage = () => {
           <FaChevronRight />
         </NavigationButton>
       </SlideContainer>
-      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>
+        도서 평가하기
+      </EvaluateButton>
     </MainContainer>
   );
 };
