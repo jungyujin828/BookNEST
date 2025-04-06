@@ -26,7 +26,7 @@ public class PopularKeywordService {
 
     public List<String> getTodayPopularKeywords() {
         String key = getTodayKey();
-        Set<String> keywords = redisTemplate.opsForZSet().reverseRange(key, 0, 9);
+        Set<String> keywords = redisTemplate.opsForZSet().reverseRange(key, 0, 4);
         return new ArrayList<>(keywords);
     }
 
@@ -34,7 +34,7 @@ public class PopularKeywordService {
         String todayKey = getTodayKey();
         String snapshotKey = getSnapshotKey(LocalDate.now().format(FORMATTER));
 
-        Set<String> topKeywords = redisTemplate.opsForZSet().reverseRange(todayKey, 0, 9);
+        Set<String> topKeywords = redisTemplate.opsForZSet().reverseRange(todayKey, 0, 4);
         if (topKeywords != null) {
             for (String keyword : topKeywords) {
                 redisTemplate.opsForList().rightPush(snapshotKey, keyword);
