@@ -28,8 +28,8 @@ public interface BookSearchRepository extends ElasticsearchRepository<SearchedBo
           {
             "bool": {
               "should": [
-                { "match": { "title": { "query": "?1" } } },
-                { "match": { "authors": { "query": "?1" } } }
+                { "match": { "title": { "query": ?1 } } },
+                { "match": { "authors": { "query": ?1 } } }
               ]
             }
           }
@@ -38,5 +38,6 @@ public interface BookSearchRepository extends ElasticsearchRepository<SearchedBo
     }
     """)
     Page<SearchedBook> findByTagsAndKeyword(List<String> tags, String keyword, Pageable pageable);
+
 
 }
