@@ -15,7 +15,7 @@ public record SearchedBook(
         @Id
         Integer bookId,
 
-        @Field(type = FieldType.Keyword)
+        @Field(type = FieldType.Text)
         String title,
 
         @Field(type = FieldType.Keyword, name = "image_url")
