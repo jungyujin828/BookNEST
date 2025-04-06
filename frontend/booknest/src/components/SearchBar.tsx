@@ -1,6 +1,13 @@
-import React from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
+import React, {
+  useState,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import { useRecentStore } from "../store/useRecentStore";
+import SearchRecent from "./SearchRecent";
 
 interface SearchBarProps {
   searchTerm: string;
@@ -9,6 +16,9 @@ interface SearchBarProps {
   placeholder?: string;
   searchType: "books" | "users";
   onSearchResult: (data: any) => void;
+  selectedTags?: string[];
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 const SearchBarContainer = styled.div`
@@ -99,67 +109,104 @@ const ClearButton = styled.button`
   }
 `;
 
-const SearchBar: React.FC<SearchBarProps> = ({
-  searchTerm,
-  onSearchChange,
-  onClear,
-  placeholder = "도서, 작가, 유저 검색",
-  searchType,
-  onSearchResult,
-}) => {
-  const handleSearch = async () => {
-    try {
-      const endpoint =
-        searchType === "books" ? "/api/search/book" : "/api/search/user";
-      const params =
-        searchType === "books"
-          ? { title: searchTerm, page: 1, size: 10 }
-          : { name: searchTerm, page: 1, size: 10 };
+const SearchBar = forwardRef<any, SearchBarProps>(
+  (
+    {
+      searchTerm,
+      onSearchChange,
+      onClear,
+      placeholder = "도서, 작가, 유저 검색",
+      searchType,
+      onSearchResult,
+      selectedTags,
+      onFocus,
+      onBlur,
+    },
+    ref
+  ) => {
+    const { addRecent } = useRecentStore();
+    const inputRef = useRef<HTMLInputElement>(null);
 
-      const response = await api.get(endpoint, {
-        params,
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      if (response.data.success) {
-        // '_tagsparsefailure' 태그 제거
-        const processedData = {
-          ...response.data.data,
-          content: response.data.data.content.map((item: any) => ({
-            ...item,
-            tags:
-              item.tags?.filter((tag: string) => tag !== "_tagsparsefailure") ||
-              [],
-          })),
-        };
-        onSearchResult(processedData.content);
+    const handleSearch = async () => {
+      if (searchTerm.trim()) {
+        addRecent(searchTerm);
       }
-    } catch (error) {
-      console.error(`Failed to search ${searchType}:`, error);
-    }
-  };
+      try {
+        const endpoint =
+          searchType === "books" ? "/api/search/book" : "/api/search/user";
+        const params =
+          searchType === "books"
+            ? {
+                title: searchTerm,
+                tags: selectedTags?.join(","),
+                page: 1,
+                size: 10,
+              }
+            : { name: searchTerm, page: 1, size: 10 };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+        console.log("SearchBar - Search Parameters:", params);
+        console.log("SearchBar - Selected Tags:", selectedTags);
 
-  return (
-    <SearchBarContainer>
-      <SearchIcon />
-      <SearchInput
-        type="text"
-        placeholder={placeholder}
-        value={searchTerm}
-        onChange={(e) => onSearchChange(e.target.value)}
-        onKeyPress={handleKeyPress}
-      />
-      {searchTerm && <ClearButton onClick={onClear} />}
-    </SearchBarContainer>
-  );
-};
+        const response = await api.get(endpoint, {
+          params,
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          console.log("SearchBar - API Response:", response.data);
+          const processedData = {
+            ...response.data.data,
+            content: response.data.data.content.map((item: any) => ({
+              ...item,
+              tags:
+                item.tags?.filter(
+                  (tag: string) => tag !== "_tagsparsefailure"
+                ) || [],
+            })),
+          };
+          console.log("SearchBar - Processed Data:", processedData);
+          onSearchResult(processedData.content);
+        }
+      } catch (error) {
+        console.error(`Failed to search ${searchType}:`, error);
+      }
+    };
+
+    const handleKeyPress = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      onSearchChange(e.target.value);
+      // Ensure input keeps focus after value change
+      inputRef.current?.focus();
+    };
+
+    useImperativeHandle(ref, () => ({
+      handleSearch,
+    }));
+
+    return (
+      <SearchBarContainer>
+        <SearchIcon />
+        <SearchInput
+          ref={inputRef}
+          type="text"
+          placeholder={placeholder}
+          value={searchTerm}
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          onFocus={onFocus}
+          onBlur={onBlur}
+        />
+        {searchTerm && <ClearButton onClick={onClear} />}
+      </SearchBarContainer>
+    );
+  }
+);
 
 export default SearchBar;

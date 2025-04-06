@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
+import SearchTag from "../components/SearchTag";
+import SearchRecent from "../components/SearchRecent";
+import { useSearchParams } from "react-router-dom";
 
 interface User {
   id: number;
@@ -12,7 +15,7 @@ interface User {
 }
 
 interface Book {
-  bookId: string;
+  bookId: number;
   title: string;
   imageURL: string;
   authors: string;
@@ -91,7 +94,8 @@ const Tab = styled.button<{ active: boolean }>`
   background: none;
   font-size: 16px;
   color: ${(props) => (props.active ? "#7bc47f" : "#666")};
-  border-bottom: 2px solid ${(props) => (props.active ? "#7bc47f" : "transparent")};
+  border-bottom: 2px solid
+    ${(props) => (props.active ? "#7bc47f" : "transparent")};
   cursor: pointer;
 `;
 
@@ -114,6 +118,10 @@ const FollowButton = styled.button<{ isFollowing: boolean }>`
   &:hover {
     background-color: ${(props) => (props.isFollowing ? "#e1e1e1" : "#6ab36e")};
   }
+`;
+
+const SearchBarWrapper = styled.div`
+  position: relative;
 `;
 
 const UserCard = styled.div`
@@ -145,16 +153,73 @@ const UserName = styled.h3`
 `;
 
 const SearchPage = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"books" | "users">("books");
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<"books" | "users">(
+    (searchParams.get("type") as "books" | "users") || "books"
+  );
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("query") || "");
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    searchParams.get("tags")?.split(",").filter(Boolean) || []
+  );
   const [books, setBooks] = useState<Book[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const navigate = useNavigate();
+
+  // 검색 파라미터 업데이트 함수
+  const updateSearchParams = (
+    newSearchTerm?: string,
+    newTags?: string[],
+    newType?: "books" | "users"
+  ) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (newSearchTerm !== undefined) {
+      if (newSearchTerm) params.set("query", newSearchTerm);
+      else params.delete("query");
+    }
+
+    if (newTags !== undefined) {
+      if (newTags.length > 0) params.set("tags", newTags.join(","));
+      else params.delete("tags");
+    }
+
+    if (newType !== undefined) {
+      params.set("type", newType);
+    }
+
+    setSearchParams(params);
+  };
+
+  // 기존 핸들러들 수정
+  const handleTagSelect = (tag: string) => {
+    console.log("SearchPage - Tag Selected:", tag);
+    console.log("SearchPage - Current Tags:", selectedTags);
+
+    const newSelectedTags = selectedTags.includes(tag)
+      ? selectedTags.filter((t) => t !== tag)
+      : [...selectedTags, tag];
+
+    console.log("SearchPage - New Tags Array:", newSelectedTags);
+    setSelectedTags(newSelectedTags);
+    updateSearchParams(undefined, newSelectedTags);
+
+    // setState 완료 후 검색 실행을 위해 setTimeout 사용
+    setTimeout(() => {
+      triggerSearch();
+    }, 0);
+  };
 
   const handleClear = () => {
     setSearchTerm("");
     setBooks([]);
     setUsers([]);
+    updateSearchParams("", []);
+  };
+
+  // 함수 이름을 handleTabChange로 변경
+  const handleTabChange = (tab: "books" | "users") => {
+    setActiveTab(tab);
+    updateSearchParams(undefined, undefined, tab);
   };
 
   const handleSearchResult = (data: any) => {
@@ -185,15 +250,30 @@ const SearchPage = () => {
 
       if (targetUser.isFollowing) {
         // 언팔로우 요청
-        const response = await api.delete(`/api/follow?targetUserId=${userId}`, { headers });
+        const response = await api.delete(
+          `/api/follow?targetUserId=${userId}`,
+          { headers }
+        );
         if (response.data.success) {
-          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: false } : user)));
+          setUsers(
+            users.map((user) =>
+              user.id === userId ? { ...user, isFollowing: false } : user
+            )
+          );
         }
       } else {
         // 팔로우 요청
-        const response = await api.post(`/api/follow?targetUserId=${userId}`, {}, { headers });
+        const response = await api.post(
+          `/api/follow?targetUserId=${userId}`,
+          {},
+          { headers }
+        );
         if (response.data.success) {
-          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: true } : user)));
+          setUsers(
+            users.map((user) =>
+              user.id === userId ? { ...user, isFollowing: true } : user
+            )
+          );
         }
       }
     } catch (error) {
@@ -201,67 +281,132 @@ const SearchPage = () => {
     }
   };
 
+  // SearchTag에서는 onSearch 호출 제거
+
+  const triggerSearch = () => {
+    console.log("SearchPage - Triggering Search with tags:", selectedTags);
+    if (searchBarRef.current) {
+      searchBarRef.current.handleSearch();
+    }
+  };
+
+  const searchBarRef = useRef<any>(null);
+
+  // Add state for search focus
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // SearchBar를 감싸는 새로운 컨테이너 추가
+  const SearchBarWrapper = styled.div`
+    position: relative;
+  `;
+
+  // return 문 안에서
   return (
     <SearchContainer>
-      <SearchBar
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onClear={handleClear}
-        searchType={activeTab}
-        onSearchResult={handleSearchResult}
-        placeholder={activeTab === "books" ? "도서 검색" : "유저 검색"}
-      />
-
       <TabContainer>
-        <Tab active={activeTab === "books"} onClick={() => setActiveTab("books")}>
+        <Tab
+          active={activeTab === "books"}
+          onClick={() => handleTabChange("books")} // 변경된 함수명 사용
+        >
           도서
         </Tab>
-        <Tab active={activeTab === "users"} onClick={() => setActiveTab("users")}>
+        <Tab
+          active={activeTab === "users"}
+          onClick={() => handleTabChange("users")} // 변경된 함수명 사용
+        >
           유저
         </Tab>
       </TabContainer>
 
-      {activeTab === "books" ? (
-        <BookList>
-          {books.map((book) => (
-            <BookCard key={book.bookId} onClick={() => navigate(`/book-detail/${book.bookId}`)}>
-              <BookCover src={book.imageURL} alt={book.title} />
-              <BookInfo>
-                <BookTitle>{book.title}</BookTitle>
-                <BookAuthor>{book.authors}</BookAuthor>
-                {book.tags && book.tags.length > 0 && (
-                  <BookTags>
-                    {book.tags.map((tag, index) => (
-                      <Tag key={index}>{tag}</Tag>
-                    ))}
-                  </BookTags>
-                )}
-              </BookInfo>
-            </BookCard>
-          ))}
-        </BookList>
-      ) : (
-        <UserList>
-          {users.map((user) => (
-            <UserCard key={user.id}>
-              <div
-                style={{ display: "flex", alignItems: "center", flex: 1, cursor: "pointer" }}
-                onClick={() => navigate(`/profile/${user.id}`)}
+      <SearchBarWrapper>
+        <SearchBar
+          ref={searchBarRef}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          onClear={() => {
+            handleClear();
+            setSelectedTags([]);
+          }}
+          searchType={activeTab}
+          onSearchResult={handleSearchResult}
+          placeholder={activeTab === "books" ? "도서 검색" : "유저 검색"}
+          selectedTags={selectedTags}
+          onFocus={() => setIsSearchFocused(true)}
+        />
+
+        {isSearchFocused && (
+          <SearchRecent
+            onSelect={(query) => {
+              setSearchTerm(query);
+              triggerSearch();
+              setIsSearchFocused(false);
+            }}
+            onClose={() => setIsSearchFocused(false)}
+          />
+        )}
+
+        {activeTab === "books" && !isSearchFocused && (
+          <SearchTag
+            selectedTags={selectedTags}
+            onTagSelect={handleTagSelect}
+            onClearTags={() => setSelectedTags([])}
+            onSearch={triggerSearch}
+          />
+        )}
+
+        {activeTab === "books" ? (
+          <BookList>
+            {books.map((book) => (
+              <BookCard
+                key={book.bookId}
+                onClick={() => navigate(`/book-detail/${book.bookId}`)}
               >
-                <UserAvatar src={user.profileURL} alt={user.nickname} />
-                <UserInfo>
-                  <UserName>{user.nickname}</UserName>
-                </UserInfo>
-              </div>
-              {Number(localStorage.getItem("userId")) !== user.id && (
-                <FollowButton isFollowing={user.isFollowing} onClick={(e) => handleFollowClick(e, user.id)}>
-                  {user.isFollowing ? "팔로잉" : "팔로우"}
-                </FollowButton>
-              )}
-            </UserCard>
-          ))}
-        </UserList>
-      )}
+                <BookCover src={book.imageURL} alt={book.title} />
+                <BookInfo>
+                  <BookTitle>{book.title}</BookTitle>
+                  <BookAuthor>{book.authors}</BookAuthor>
+                  {book.tags && book.tags.length > 0 && (
+                    <BookTags>
+                      {book.tags.map((tag, index) => (
+                        <Tag key={index}>{tag}</Tag>
+                      ))}
+                    </BookTags>
+                  )}
+                </BookInfo>
+              </BookCard>
+            ))}
+          </BookList>
+        ) : (
+          <UserList>
+            {users.map((user) => (
+              <UserCard key={user.id}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flex: 1,
+                    cursor: "pointer",
+                  }}
+                  onClick={() => navigate(`/profile/${user.id}`)}
+                >
+                  <UserAvatar src={user.profileURL} alt={user.nickname} />
+                  <UserInfo>
+                    <UserName>{user.nickname}</UserName>
+                  </UserInfo>
+                </div>
+                {Number(localStorage.getItem("userId")) !== user.id && (
+                  <FollowButton
+                    isFollowing={user.isFollowing}
+                    onClick={(e) => handleFollowClick(e, user.id)}
+                  >
+                    {user.isFollowing ? "팔로잉" : "팔로우"}
+                  </FollowButton>
+                )}
+              </UserCard>
+            ))}
+          </UserList>
+        )}
+      </SearchBarWrapper>
     </SearchContainer>
   );
 };
