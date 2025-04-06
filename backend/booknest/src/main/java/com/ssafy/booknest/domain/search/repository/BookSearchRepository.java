@@ -28,8 +28,8 @@ public interface BookSearchRepository extends ElasticsearchRepository<SearchedBo
           {
             "bool": {
               "should": [
-                { "match": { "title": ?1 } },
-                { "match": { "authors": ?1 } }
+                { "match": { "title": { "query": "?1" } } },
+                { "match": { "authors": { "query": "?1" } } }
               ]
             }
           }
