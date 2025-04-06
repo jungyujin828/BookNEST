@@ -13,6 +13,4 @@ public class AddBookNestRequest {
     private Integer nestId;
 
     private Double rating;
-
-    private String review;
 }
