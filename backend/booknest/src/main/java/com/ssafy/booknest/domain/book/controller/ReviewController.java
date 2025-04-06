@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
+import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.RatingService;
@@ -65,18 +66,17 @@ public class ReviewController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    // 한줄평 목록 조회
+    // 한줄평 목록 조회 (내 리뷰 or 타인 리뷰)
     @GetMapping("/review")
     public ResponseEntity<ApiResponse<CustomPage<UserReviewResponse>>> getReviews(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            Pageable pageable) {
+            @RequestParam(value = "targetId") Integer targetId,
+            Pageable pageable
+    ) {
 
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        CustomPage<UserReviewResponse> responseList = reviewService.getReviews(userId, pageable);
-
+        CustomPage<UserReviewResponse> responseList = reviewService.getReviews(targetId, pageable);
         return ApiResponse.success(responseList);
     }
-
 
     // 한줄평 좋아요
     @PostMapping("/review/{reviewId}/like")
@@ -99,4 +99,5 @@ public class ReviewController {
         reviewService.unlikeReview(userId, reviewId);
         return ApiResponse.success(HttpStatus.OK);
     }
+
 }
