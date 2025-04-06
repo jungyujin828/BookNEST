@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FastApiRecommendation {
 
+    @JsonProperty("book_id")
     private Integer bookId;
+
     private String imageUrl;
     private String publishedDate;
     private String indexContent;
