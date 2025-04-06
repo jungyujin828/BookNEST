@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.search.record;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -14,12 +15,14 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record SearchedBook(
 
-        @Id
+        @JsonProperty("book_id")
+        @Field(type = FieldType.Integer, name = "book_id")
         Integer bookId,
 
         @Field(type = FieldType.Text)
         String title,
 
+        @JsonProperty("image_url")
         @Field(type = FieldType.Keyword, name = "image_url")
         String imageURL,
 
