@@ -311,6 +311,8 @@ const ProfilePage = () => {
 
         if (response.data.success) {
           setProfileData(response.data.data);
+          // Update following status from profile data
+          setIsFollowing(response.data.data.isFollowing);
         }
       } catch (error) {
         console.error("Failed to fetch user profile:", error);
@@ -321,6 +323,8 @@ const ProfilePage = () => {
       fetchUserProfile();
     }
   }, [userId, userDetail?.userId, navigate]);
+
+  // Remove the separate checkFollowStatus useEffect
 
   // profileData를 사용하도록 JSX 수정
   const displayData = profileData || userDetail;
