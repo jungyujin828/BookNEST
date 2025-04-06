@@ -3,9 +3,12 @@ import styled from "styled-components";
 import api from "../api/axios";
 import { useAuthStore } from "../store/useAuthStore";
 import RatingStars from "./RatingStars";
+import useNestStore from "../store/useNestStore";
+import { useNavigate } from "react-router-dom";
 
 interface BookSearchModalProps {
   onClose: () => void;
+  onBookAdded?: () => void;
 }
 
 interface Book {
@@ -78,6 +81,10 @@ const BookCard = styled.div`
   p {
     font-size: 12px;
     color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 `;
 
@@ -156,13 +163,15 @@ const CancelButton = styled(Button)`
   }
 `;
 
-const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose }) => {
+const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded }) => {
   const { userDetail } = useAuthStore();
+  const { setNestStatus } = useNestStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [books, setBooks] = useState<Book[]>([]);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [rating, setRating] = useState<number>(0);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const navigate = useNavigate();
 
   const searchBooks = async () => {
     try {
@@ -209,16 +218,28 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose }) => {
         bookId: selectedBook.bookId.toString(),
         nestId: userDetail.nestId.toString(),
         rating: Math.round(rating).toString(),
-        review: "NULL",
+        review: null,
       };
       console.log("Request Data:", requestData);
 
       const response = await api.post("/api/nest", requestData);
 
       if (response.data.success) {
-        alert("서재에 책이 추가되었습니다!");
+        alert("둥지에 책이 추가되었습니다!");
+        // 서재 등록 상태 업데이트
+        if (selectedBook) {
+          setNestStatus(selectedBook.bookId, true);
+        }
         setShowRatingModal(false);
         onClose();
+        
+        // onBookAdded 콜백이 제공된 경우 호출
+        if (onBookAdded) {
+          onBookAdded();
+        } else {
+          // 콜백이 제공되지 않은 경우 기존 방식대로 서재 페이지로 이동
+          navigate("/nest");
+        }
       }
     } catch (error: any) {
       console.error("Full error:", error);
@@ -231,7 +252,7 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose }) => {
       });
 
       if (error.response?.status === 409) {
-        alert("이미 서재에 등록된 도서입니다.");
+        alert("이미 둥지에 등록된 도서입니다.");
       } else if (error.response?.status === 400) {
         console.error("Request data that caused 400:", error.config?.data);
         alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
@@ -240,7 +261,7 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose }) => {
       } else if (error.response?.status === 403) {
         alert("권한이 없습니다. 인증 토큰을 확인해주세요.");
       } else {
-        const errorMessage = error.response?.data?.message || "서재 등록 중 오류가 발생했습니다.";
+        const errorMessage = error.response?.data?.message || "둥지 등록 중 오류가 발생했습니다.";
         alert(errorMessage);
       }
     }

@@ -158,7 +158,7 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       });
 
       if (error.response?.status === 409) {
-        alert("이미 서재에 등록된 도서입니다.");
+        alert("이미 둥지에 등록된 도서입니다.");
       } else if (error.response?.status === 400) {
         console.error("Request data that caused 400:", error.config?.data);
         alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
@@ -175,7 +175,7 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         }
         alert("권한이 없습니다. 인증 토큰을 확인해주세요.");
       } else {
-        alert("서재 등록 중 오류가 발생했습니다.");
+        alert("둥지 등록 중 오류가 발생했습니다.");
       }
     } finally {
       setLoading(false);
@@ -189,13 +189,13 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
   return (
     <>
       <Button onClick={handleAddToNest} disabled={loading}>
-        {loading ? "처리 중..." : "내 서재에 담기"}
+        {loading ? "처리 중..." : "내 둥지에 담기"}
       </Button>
 
       {showConfirmModal && (
         <ModalOverlay onClick={() => setShowConfirmModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalTitle>서재에 등록하시겠습니까?</ModalTitle>
+            <ModalTitle>둥지에 등록하시겠습니까?</ModalTitle>
             <ModalButton $variant="primary" onClick={handleConfirmAdd}>
               등록하기
             </ModalButton>
@@ -209,9 +209,9 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
       {showSuccessModal && (
         <ModalOverlay onClick={() => setShowSuccessModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalTitle>서재에 등록되었습니다</ModalTitle>
+            <ModalTitle>둥지에 등록되었습니다</ModalTitle>
             <ModalButton $variant="primary" onClick={handleGoToNest}>
-              서재 바로가기
+              둥지 바로가기
             </ModalButton>
             <ModalButton onClick={() => setShowSuccessModal(false)}>
               계속 둘러보기

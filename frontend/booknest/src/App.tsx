@@ -60,116 +60,134 @@ const AppContent = () => {
     <AppLayout>
       {!shouldHideNavigation && <Header />}
       <MainContent isLoginPage={shouldHideNavigation}>
-        <Routes>
-          {/* 공개 라우트 */}
-          <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
-          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-          <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
-          <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
-          <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
-          <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
-          {/* 보호된 라우트 */}
-          <Route
-            path={ROUTES.EVALUATE_BOOK}
-            element={
-              <ProtectedRoute>
-                <EvaluateBookPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 검색페이지 */}
-          <Route
-            path={ROUTES.SEARCH}
-            element={
-              <ProtectedRoute>
-                <SearchPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 오늘의 책 */}
-          <Route
-            path={ROUTES.TODAYS}
-            element={
-              <ProtectedRoute>
-                <TodaysPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 메인페이지 */}
-          <Route
-            path={ROUTES.HOME}
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 둥지페이지 */}
-          <Route
-            path={ROUTES.NEST}
-            element={
-              <ProtectedRoute>
-                <NestPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 프로필페이지 */}
-          <Route
-            path={ROUTES.PROFILE}
-            element={
-              <ProtectedRoute>
-                <Navigate to={`/profile/${userDetail?.userId}`} replace />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.PROFILE_DETAIL}
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 팔로잉페이지  */}
-          <Route
-            path={ROUTES.PROFILE_FOLLOWING}
-            element={
-              <ProtectedRoute>
-                <FollowingsPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 팔로워페이지 */}
-          <Route
-            path={ROUTES.PROFILE_FOLLOWERS}
-            element={
-              <ProtectedRoute>
-                <FollowersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.MY_EVALUATED_BOOKS}
-            element={
-              <ProtectedRoute>
-                <MyEvaluatedBookPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path={ROUTES.MY_COMMENTS}
-            element={
-              <ProtectedRoute>
-                <MyCommentPage />
-              </ProtectedRoute>
-            }
-          />
-          {/* 책 상세페이지 */}
-          <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
-          {/* 잘못된 경로는 에러 페이지로 연결 */}
-          <Route path="*" element={<ErrorPage />} />
-          {/* 🗑️ */}
-        </Routes>
+        <div className="container">
+          <Routes>
+            {/* 공개 라우트 */}
+            <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
+            <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
+            <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
+            <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
+            <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
+            {/* 보호된 라우트 */}
+            <Route
+              path={ROUTES.EVALUATE_BOOK}
+              element={
+                <ProtectedRoute>
+                  <EvaluateBookPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 검색페이지 */}
+            <Route
+              path={ROUTES.SEARCH}
+              element={
+                <ProtectedRoute>
+                  <SearchPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 오늘의 책 */}
+            <Route
+              path={ROUTES.TODAYS}
+              element={
+                <ProtectedRoute>
+                  <TodaysPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 메인페이지 */}
+            <Route
+              path={ROUTES.HOME}
+              element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 둥지페이지 */}
+            <Route
+              path={ROUTES.NEST}
+              element={
+                <ProtectedRoute>
+                  <NestPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 프로필페이지 */}
+            <Route
+              path={ROUTES.PROFILE}
+              element={
+                <ProtectedRoute>
+                  <Navigate to={`/profile/${userDetail?.userId}`} replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.PROFILE_DETAIL}
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 팔로잉페이지  */}
+            <Route
+              path={ROUTES.PROFILE_FOLLOWING}
+              element={
+                <ProtectedRoute>
+                  <FollowingsPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 팔로워페이지 */}
+            <Route
+              path={ROUTES.PROFILE_FOLLOWERS}
+              element={
+                <ProtectedRoute>
+                  <FollowersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.MY_EVALUATED_BOOKS}
+              element={
+                <ProtectedRoute>
+                  <MyEvaluatedBookPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={`${ROUTES.MY_EVALUATED_BOOKS}/:targetId`}
+              element={
+                <ProtectedRoute>
+                  <MyEvaluatedBookPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={ROUTES.MY_COMMENTS}
+              element={
+                <ProtectedRoute>
+                  <MyCommentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={`${ROUTES.MY_COMMENTS}/:targetId`}
+              element={
+                <ProtectedRoute>
+                  <MyCommentPage />
+                </ProtectedRoute>
+              }
+            />
+            {/* 책 상세페이지 */}
+            <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
+            {/* 잘못된 경로는 에러 페이지로 연결 */}
+            <Route path="*" element={<ErrorPage />} />
+            {/* 🗑️ */}
+          </Routes>
+        </div>
       </MainContent>
       {!shouldHideNavigation && <Navbar />}
     </AppLayout>

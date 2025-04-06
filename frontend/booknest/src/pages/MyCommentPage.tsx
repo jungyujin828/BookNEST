@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import api from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES } from '../constants/paths';
 
 interface Review {
@@ -115,6 +115,7 @@ const PageButton = styled.button<{ active?: boolean }>`
 `;
 
 const MyCommentPage = () => {
+  const { targetId } = useParams();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,8 +126,17 @@ const MyCommentPage = () => {
   const fetchReviews = async (page: number) => {
     try {
       setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: '10'
+      });
+      
+      if (targetId && targetId !== 'undefined') {
+        params.append('targetId', targetId);
+      }
+
       const response = await api.get<{ success: boolean; data: ApiResponse; error: null }>(
-        `/api/book/review?page=${page}&size=10`
+        `/api/book/review?${params.toString()}`
       );
 
       console.log('API Response:', response.data);
@@ -160,7 +170,7 @@ const MyCommentPage = () => {
 
   useEffect(() => {
     fetchReviews(currentPage);
-  }, [currentPage, navigate]);
+  }, [currentPage, targetId, navigate]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -188,7 +198,7 @@ const MyCommentPage = () => {
   if (!reviews || reviews.length === 0) {
     return (
       <Container>
-        <PageTitle>내가 작성한 코멘트</PageTitle>
+        <PageTitle>{targetId ? '사용자의 코멘트' : '내가 작성한 코멘트'}</PageTitle>
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           아직 작성한 코멘트가 없습니다.
         </div>
@@ -198,7 +208,7 @@ const MyCommentPage = () => {
 
   return (
     <Container>
-      <PageTitle>내가 작성한 코멘트</PageTitle>
+      <PageTitle>{targetId ? '사용자의 코멘트' : '내가 작성한 코멘트'}</PageTitle>
       <ReviewList>
         {reviews.map((review) => (
           <ReviewCard key={review.reviewId}>

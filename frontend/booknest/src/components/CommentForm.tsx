@@ -170,8 +170,7 @@ const CommentForm = ({
         );
 
         if (response.data.success) {
-          setContent('');
-          onCommentSubmit();
+          onCommentSubmit?.();
           onCancel?.(); // 수정 모드 종료
         } else {
           setError(response.data.error?.message || '한줄평 수정에 실패했습니다.');
@@ -189,8 +188,8 @@ const CommentForm = ({
         );
 
         if (response.data.success) {
-          setContent('');
-          onCommentSubmit();
+          setContent('');  // 새 리뷰 작성시에만 내용을 비움
+          onCommentSubmit?.();
         } else {
           setError(response.data.error?.message || '한줄평 등록에 실패했습니다.');
         }
@@ -265,28 +264,32 @@ const CommentForm = ({
         />
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <ButtonContainer>
-          {isEdit && (
-            <DeleteButton 
-              type="button" 
-              onClick={handleDelete}
-              disabled={isSubmitting || isDeleting}
-            >
-              {isDeleting ? '삭제 중...' : '삭제'}
-            </DeleteButton>
+          {isEdit ? (
+            <>
+              {onCancel && (
+                <CancelButton type="button" onClick={onCancel}>
+                  취소
+                </CancelButton>
+              )}
+              <ActionButtons>
+                <SubmitButton 
+                  type="submit" 
+                  disabled={isSubmitting || isDeleting}
+                >
+                  {isSubmitting ? '수정 중...' : '수정'}
+                </SubmitButton>
+              </ActionButtons>
+            </>
+          ) : (
+            <ActionButtons>
+              <SubmitButton 
+                type="submit" 
+                disabled={isSubmitting || isDeleting}
+              >
+                {isSubmitting ? '등록 중...' : '등록'}
+              </SubmitButton>
+            </ActionButtons>
           )}
-          {isEdit && onCancel && (
-            <CancelButton type="button" onClick={onCancel}>
-              취소
-            </CancelButton>
-          )}
-          <ActionButtons>
-            <SubmitButton 
-              type="submit" 
-              disabled={isSubmitting || isDeleting}
-            >
-              {isSubmitting ? (isEdit ? '수정 중...' : '등록 중...') : (isEdit ? '수정' : '등록')}
-            </SubmitButton>
-          </ActionButtons>
         </ButtonContainer>
       </Form>
     </FormContainer>
