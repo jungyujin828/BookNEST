@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import api from '../api/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ROUTES } from '../constants/paths';
 import { FaStar } from 'react-icons/fa';
 
@@ -79,6 +79,10 @@ const Authors = styled.div`
   font-size: 14px;
   color: #666;
   margin-bottom: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 `;
 
 const RatingContainer = styled.div`
@@ -132,6 +136,7 @@ const PageButton = styled.button<{ active?: boolean }>`
 `;
 
 const MyEvaluatedBookPage = () => {
+  const { targetId } = useParams();
   const [books, setBooks] = useState<RatedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -142,8 +147,17 @@ const MyEvaluatedBookPage = () => {
   const fetchRatedBooks = async (page: number) => {
     try {
       setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: '10'
+      });
+      
+      if (targetId && targetId !== 'undefined') {
+        params.append('targetId', targetId);
+      }
+
       const response = await api.get<{ success: boolean; data: ApiResponse; error: null }>(
-        `/api/book/rating?page=${page}&size=10`
+        `/api/book/rating?${params.toString()}`
       );
 
       console.log('API Response:', response.data);
@@ -177,7 +191,7 @@ const MyEvaluatedBookPage = () => {
 
   useEffect(() => {
     fetchRatedBooks(currentPage);
-  }, [currentPage, navigate]);
+  }, [currentPage, targetId, navigate]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -205,7 +219,7 @@ const MyEvaluatedBookPage = () => {
   if (!books || books.length === 0) {
     return (
       <Container>
-        <PageTitle>내가 평가한 책</PageTitle>
+        <PageTitle>{targetId ? '사용자의 평가한 책' : '내가 평가한 책'}</PageTitle>
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           아직 평가한 책이 없습니다.
         </div>
@@ -215,7 +229,7 @@ const MyEvaluatedBookPage = () => {
 
   return (
     <Container>
-      <PageTitle>내가 평가한 책</PageTitle>
+      <PageTitle>{targetId ? '사용자의 평가한 책' : '내가 평가한 책'}</PageTitle>
       <BookList>
         {books.map((book) => (
           <BookCard key={book.ratingId}>
@@ -223,7 +237,11 @@ const MyEvaluatedBookPage = () => {
             <BookInfo>
               <div>
                 <BookTitle>{book.bookName}</BookTitle>
-                <Authors>{book.authors.join(', ')}</Authors>
+                <Authors>
+                  {book.authors.length > 2
+                    ? `${book.authors.slice(0, 2).join(', ')} 외 ${book.authors.length - 2}명`
+                    : book.authors.join(', ')}
+                </Authors>
                 <RatingContainer>
                   <StarIcon />
                   <RatingValue>{book.rating.toFixed(1)}</RatingValue>

@@ -158,7 +158,23 @@ const AppContent = () => {
               }
             />
             <Route
+              path={`${ROUTES.MY_EVALUATED_BOOKS}/:targetId`}
+              element={
+                <ProtectedRoute>
+                  <MyEvaluatedBookPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path={ROUTES.MY_COMMENTS}
+              element={
+                <ProtectedRoute>
+                  <MyCommentPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={`${ROUTES.MY_COMMENTS}/:targetId`}
               element={
                 <ProtectedRoute>
                   <MyCommentPage />
