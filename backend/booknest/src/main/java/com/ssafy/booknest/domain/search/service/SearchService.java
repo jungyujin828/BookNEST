@@ -44,10 +44,10 @@ public class SearchService {
         if (tags != null && !tags.isEmpty()) {
             if (keyword != null && !keyword.isEmpty()) {
                 books = bookSearchRepository
-                        .findByTagsInAndTitleContainingOrAuthorsContaining(tags, keyword, keyword, pageable);
+                        .findByTagsAndKeyword(tags, keyword, pageable);
             } else {
                 books = bookSearchRepository
-                        .findByTagsIn(tags, pageable);
+                        .findByExactTags(tags, pageable);
             }
         } else {
             books = bookSearchRepository
