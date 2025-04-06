@@ -81,6 +81,10 @@ const BookCard = styled.div`
   p {
     font-size: 12px;
     color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 `;
 
