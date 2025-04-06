@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/search")
@@ -27,11 +29,12 @@ public class SearchController {
     public ResponseEntity<ApiResponse<CustomPage<BookSearchResponse>>> searchBook(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestParam(required = false) String title,
+            @RequestParam(required = false) List<String> tags,
             Pageable pageable) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(searchService.searchBooks(userId, title, pageable));
+        return ApiResponse.success(searchService.searchBooks(userId, title, tags, pageable));
     }
 
     @PostMapping("/book")
