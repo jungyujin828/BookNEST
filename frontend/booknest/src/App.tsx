@@ -25,6 +25,7 @@ import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
+import BookAllCommentPage from './pages/BookAllCommentPage';
 
 // 개발 환경에서 테스트용 토큰 설정
 if (import.meta.env.DEV && !localStorage.getItem("token")) {
@@ -191,6 +192,7 @@ const AppContent = () => {
             />
             {/* 책 상세페이지 */}
             <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
+            <Route path="/book/:bookId/comments" element={<BookAllCommentPage />} />
             {/* 잘못된 경로는 에러 페이지로 연결 */}
             <Route path="*" element={<ErrorPage />} />
             {/* 🗑️ */}
