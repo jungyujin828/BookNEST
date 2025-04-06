@@ -59,6 +59,7 @@ public class BookService {
     private final NestRepository nestRepository;
     private final AgeGenderBookRepository ageGenderBookRepository;
     private final TagRandomBookRepository tagRandomBookRepository;
+    private final LibraryBookRepository libraryBookRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -253,6 +254,17 @@ public class BookService {
                 .limit(15)
                 .toList();
     }
+
+    // 년도별 도서관 대여 순위 추천
+    @Transactional(readOnly = true)
+    public List<LibraryBookResponse> getLibraryBooksByYear(Integer targetYear) {
+        List<LibraryBook> books = libraryBookRepository.findTopByYearOrderByRank(targetYear);
+
+        return books.stream()
+                .map(LibraryBookResponse::of)
+                .collect(Collectors.toList());
+    }
+
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)

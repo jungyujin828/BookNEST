@@ -69,11 +69,31 @@ public class BookController {
 
     // 오늘의 추천
     @GetMapping("/today")
-    public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getRecommendations(
+    public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getTodayRecommendations(
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        List<FastApiRecommendation> books = fastApiService.getRecommendations(userId);
+        List<FastApiRecommendation> books = fastApiService.getTodayRecommendations(userId);
+        return ApiResponse.success(books);
+    }
+
+    // 대출 기록 기반 추천
+    @GetMapping("/book-loan")
+    public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getBookLoanRecommendations(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<FastApiRecommendation> books = fastApiService.getBookLoanRecommendations(userId);
+        return ApiResponse.success(books);
+    }
+
+    // 최근 키워드 기반 추천
+    @GetMapping("/recent-keyword")
+    public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getRecentKeywordRecommendations(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<FastApiRecommendation> books = fastApiService.getRecentKeywordRecommendations(userId);
         return ApiResponse.success(books);
     }
 
@@ -125,6 +145,22 @@ public class BookController {
 
         return ApiResponse.success(tagBookResult);
     }
+
+    // 년도별 도서관 대여 순위 추천
+    @GetMapping("/library")
+    public ResponseEntity<ApiResponse<List<LibraryBookResponse>>> getLibraryBooks(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(value = "targetYear") Integer targetYear
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<LibraryBookResponse> responseList = bookService.getLibraryBooksByYear(targetYear);
+        return ApiResponse.success(responseList);
+    }
+
+
+
+
 
 
 
