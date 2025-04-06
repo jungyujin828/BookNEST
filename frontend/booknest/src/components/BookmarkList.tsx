@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
+import { FaSort } from 'react-icons/fa';
 
 interface BookmarkItem {
   bookId: number;
@@ -140,11 +141,66 @@ const LoginButton = styled.button`
   }
 `;
 
+const SortContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  position: relative;
+`;
+
+const SortButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
+const DropdownMenu = styled.div<{ isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: ${props => props.isOpen ? 'block' : 'none'};
+  z-index: 10;
+`;
+
+const DropdownItem = styled.button<{ isActive: boolean }>`
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  text-align: left;
+  border: none;
+  background-color: ${props => props.isActive ? '#f5f5f5' : 'white'};
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+`;
+
 const BookmarkList: React.FC = () => {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -182,9 +238,31 @@ const BookmarkList: React.FC = () => {
     }
   };
 
+  const sortBookmarks = (bookmarksToSort: BookmarkItem[]) => {
+    return [...bookmarksToSort].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+  };
+
   useEffect(() => {
     fetchBookmarks();
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isDropdownOpen && !(event.target as Element).closest('.sort-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isDropdownOpen]);
 
   const handleLoginClick = () => {
     // 현재 URL을 저장하고 로그인 페이지로 리다이렉트
@@ -217,10 +295,38 @@ const BookmarkList: React.FC = () => {
     return <EmptyState>찜한 도서가 없습니다.</EmptyState>;
   }
 
+  const sortedBookmarks = sortBookmarks(bookmarks);
+
   return (
     <Container>
+      <SortContainer className="sort-container">
+        <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+          <FaSort />
+          {sortOrder === 'newest' ? '최신순' : '오래된순'}
+        </SortButton>
+        <DropdownMenu isOpen={isDropdownOpen}>
+          <DropdownItem
+            isActive={sortOrder === 'newest'}
+            onClick={() => {
+              setSortOrder('newest');
+              setIsDropdownOpen(false);
+            }}
+          >
+            최신순
+          </DropdownItem>
+          <DropdownItem
+            isActive={sortOrder === 'oldest'}
+            onClick={() => {
+              setSortOrder('oldest');
+              setIsDropdownOpen(false);
+            }}
+          >
+            오래된순
+          </DropdownItem>
+        </DropdownMenu>
+      </SortContainer>
       <BookGrid>
-        {bookmarks.map((book) => (
+        {sortedBookmarks.map((book) => (
           <BookCard key={`${book.bookId}-${book.createdAt}`}>
             <Link to={`/book-detail/${book.bookId}`}>
               <BookCover>
