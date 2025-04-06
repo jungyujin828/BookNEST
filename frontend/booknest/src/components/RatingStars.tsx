@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { FaStar } from 'react-icons/fa';
 import api from '../api/axios';
 import useRatingStore from '../store/useRatingStore';
+import useNestStore from '../store/useNestStore';
 
 interface RatingStarsProps {
   bookId: number;
@@ -32,6 +33,7 @@ const StarButton = styled.button<{ $active: boolean }>`
 const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const { userRatings, setUserRating } = useRatingStore();
+  const { getNestStatus } = useNestStore();
   const currentRating = userRatings[bookId] || 0;
 
   useEffect(() => {
@@ -89,6 +91,15 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
 
   const handleCancelRating = async () => {
     try {
+      // 서재에 담긴 책인지 확인
+      const isInNest = getNestStatus(bookId);
+      
+      if (isInNest) {
+        // 서재에 담긴 책인 경우 경고 모달 표시
+        alert('둥지에 담긴 책은 평점을 취소할 수 없습니다.\n둥지에서 삭제 후 진행해주세요');
+        return;
+      }
+      
       // 사용자에게 확인 메시지 표시
       if (!window.confirm('평점을 취소하시겠습니까?')) {
         return;

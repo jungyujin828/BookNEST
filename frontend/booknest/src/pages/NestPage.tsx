@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import NestBookList from "../components/NestBookList";
 import BookmarkList from "../components/BookmarkList";
@@ -64,6 +64,13 @@ const HeaderSection = styled.div`
 const NestPage = () => {
   const [activeTab, setActiveTab] = useState<"둥지" | "찜">("둥지");
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const nestBookListRef = useRef<{ fetchNestBooks: () => void } | null>(null);
+
+  const handleBookAdded = () => {
+    if (nestBookListRef.current) {
+      nestBookListRef.current.fetchNestBooks();
+    }
+  };
 
   return (
     <Container>
@@ -79,9 +86,18 @@ const NestPage = () => {
         {activeTab === "둥지" && <AddButton onClick={() => setShowSearchModal(true)}>도서 추가</AddButton>}
       </HeaderSection>
 
-      {showSearchModal && <BookSearchModal onClose={() => setShowSearchModal(false)} />}
+      {showSearchModal && (
+        <BookSearchModal 
+          onClose={() => setShowSearchModal(false)} 
+          onBookAdded={handleBookAdded}
+        />
+      )}
 
-      {activeTab === "둥지" ? <NestBookList /> : <BookmarkList />}
+      {activeTab === "둥지" ? (
+        <NestBookList ref={nestBookListRef} />
+      ) : (
+        <BookmarkList />
+      )}
     </Container>
   );
 };

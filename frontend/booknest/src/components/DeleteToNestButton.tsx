@@ -101,7 +101,7 @@ const DeleteToNestButton: React.FC<DeleteToNestButtonProps> = ({ bookId, nestId,
       if (error.response?.status === 401) {
         alert("로그인이 필요한 서비스입니다.");
       } else {
-        alert("서재에서 도서 삭제 중 오류가 발생했습니다.");
+        alert("둥지에서 도서 삭제 중 오류가 발생했습니다.");
       }
     } finally {
       setLoading(false);
@@ -115,13 +115,13 @@ const DeleteToNestButton: React.FC<DeleteToNestButtonProps> = ({ bookId, nestId,
   return (
     <>
       <Button onClick={() => setShowConfirmModal(true)} disabled={loading}>
-        {loading ? "처리 중..." : "서재에서 삭제"}
+        {loading ? "처리 중..." : "둥지에서 삭제"}
       </Button>
 
       {showConfirmModal && (
         <ModalOverlay onClick={() => setShowConfirmModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalTitle>서재에서 삭제하시겠습니까?</ModalTitle>
+            <ModalTitle>둥지에서 삭제하시겠습니까?</ModalTitle>
             <ModalButton $variant="primary" onClick={handleDeleteFromNest}>
               삭제
             </ModalButton>
@@ -135,9 +135,9 @@ const DeleteToNestButton: React.FC<DeleteToNestButtonProps> = ({ bookId, nestId,
       {showSuccessModal && (
         <ModalOverlay onClick={() => setShowSuccessModal(false)}>
           <ModalContent onClick={(e) => e.stopPropagation()}>
-            <ModalTitle>서재에서 삭제되었습니다</ModalTitle>
+            <ModalTitle>둥지에서 삭제되었습니다</ModalTitle>
             <ModalButton $variant="primary" onClick={handleGoToNest}>
-              서재 바로가기
+              둥지 바로가기
             </ModalButton>
             <ModalButton onClick={() => setShowSuccessModal(false)}>
               계속 둘러보기
