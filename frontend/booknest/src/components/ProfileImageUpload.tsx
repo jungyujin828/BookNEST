@@ -75,6 +75,28 @@ const LoadingOverlay = styled.div`
   color: white;
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+`;
+
+const ResetButton = styled.button`
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #e0e0e0;
+    color: #333;
+  }
+`;
+
 const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
   const { setUserDetail, userDetail } = useAuthStore();
@@ -194,10 +216,58 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
     }
   };
 
+  const handleResetToDefault = async () => {
+    try {
+      setIsUploading(true);
+
+      // 백엔드 API 호출 - 빈 문자열을 전송하여 기본 이미지로 리셋
+      const response = await api.put(
+        '/api/user/profile-image',
+        { imgurl: '' },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.data.success) {
+        throw new Error('프로필 이미지 초기화에 실패했습니다.');
+      }
+
+      // Zustand store 업데이트
+      if (userDetail) {
+        const updatedUserDetail = {
+          ...userDetail,
+          profileURL: '' // 빈 문자열로 설정
+        };
+        
+        setUserDetail(updatedUserDetail);
+        localStorage.setItem('userDetail', JSON.stringify(updatedUserDetail));
+      }
+      
+      // 페이지 새로고침
+      window.location.reload();
+    } catch (error) {
+      console.error('프로필 이미지 초기화 실패:', error);
+      alert('프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div style={{ position: 'relative' }}>
       <ImageContainer onClick={handleClick}>
-        <ProfileImage src={currentImageUrl} alt="프로필 이미지" />
+        <ProfileImage 
+          src={currentImageUrl || '/images/default-profile.png'} 
+          alt="프로필 이미지"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/images/default-profile.png';
+          }}
+        />
         <Overlay className="overlay">
           사진 변경
         </Overlay>
@@ -213,6 +283,11 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
         accept="image/*"
         onChange={handleFileChange}
       />
+      <ButtonContainer>
+        <ResetButton onClick={handleResetToDefault}>
+          기본 이미지로 변경
+        </ResetButton>
+      </ButtonContainer>
     </div>
   );
 };
