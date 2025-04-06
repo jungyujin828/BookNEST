@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
+import com.ssafy.booknest.domain.book.dto.response.BestReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.BookService;
@@ -98,6 +99,16 @@ public class ReviewController {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.unlikeReview(userId, reviewId);
         return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 오늘 베스트 한줄평
+    @GetMapping("/best-reviews")
+    public ResponseEntity<ApiResponse<List<BestReviewResponse>>> getBestReviews(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        List<BestReviewResponse> bestReviews = reviewService.getBestReviews(userId);
+        return ApiResponse.success(bestReviews);
     }
 
 }
