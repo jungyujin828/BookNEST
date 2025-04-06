@@ -1,3 +1,5 @@
+// 경로 관련 상수들 모아두는 곳
+
 export const ROUTES = {
   HOME: "/home",
   LOGIN: "/login",
@@ -16,13 +18,13 @@ export const ROUTES = {
   PROFILE_FOLLOWERS: "/profile/:userId/followers",
   MY_EVALUATED_BOOKS: "/my-evaluated-books",
   MY_COMMENTS: "/my-comments",
+  FOLLOWING: "/follow/following",
 } as const;
 
 export const API_PATHS = {
   KAKAO_LOGIN: "/api/oauth/kakao",
   NAVER_LOGIN: "/api/oauth/naver",
   GOOGLE_LOGIN: "/api/oauth/google",
-  FOLLOWING: "/api/follow/following",
 } as const;
 
 export const ASSETS = {
