@@ -30,16 +30,29 @@ public class SearchService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
 
-    public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, Pageable pageable) {
+    public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, List<String> tags, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        if (keyword == null || keyword.isEmpty()) {
+        // 태그와 키워드 둘 다 없으면 빈 결과 반환
+        if ((keyword == null || keyword.isEmpty()) && (tags == null || tags.isEmpty())) {
             return new CustomPage<>(Page.empty());
         }
 
-        Page<SearchedBook> books = bookSearchRepository
-                .findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
+        Page<SearchedBook> books;
+
+        if (tags != null && !tags.isEmpty()) {
+            if (keyword != null && !keyword.isEmpty()) {
+                books = bookSearchRepository
+                        .findByTagsInAndTitleContainingOrAuthorsContaining(tags, keyword, keyword, pageable);
+            } else {
+                books = bookSearchRepository
+                        .findByTagsIn(tags, pageable);
+            }
+        } else {
+            books = bookSearchRepository
+                    .findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
+        }
 
         return new CustomPage<>(books.map(BookSearchResponse::of));
     }
