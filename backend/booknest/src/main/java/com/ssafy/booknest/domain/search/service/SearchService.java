@@ -36,23 +36,18 @@ public class SearchService {
                 new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 태그와 키워드 둘 다 없으면 빈 결과 반환
-        if ((keyword == null || keyword.isEmpty()) && (tags == null || tags.isEmpty())) {
+        if ((keyword == null || keyword.isBlank()) && (tags == null || tags.isEmpty())) {
             return new CustomPage<>(Page.empty());
         }
 
         Page<SearchedBook> books;
 
         if (tags != null && !tags.isEmpty()) {
-            if (keyword != null && !keyword.isEmpty()) {
-                books = bookSearchRepository
-                        .findByTagsAndKeyword(tags, keyword, pageable);
-            } else {
-                books = bookSearchRepository
-                        .findByExactTags(tags, pageable);
-            }
+            // 태그만 있는 경우에도 이 메서드에서 처리
+            books = bookSearchRepository.searchByTagsAndKeyword(tags, keyword, pageable);
         } else {
-            books = bookSearchRepository
-                    .findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
+            // 키워드만 있는 경우
+            books = bookSearchRepository.findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
         }
 
         if (keyword != null && !keyword.isBlank()) {
@@ -61,6 +56,7 @@ public class SearchService {
 
         return new CustomPage<>(books.map(BookSearchResponse::of));
     }
+
 
     public SearchedBook saveBook(SearchedBook book) {
         return bookSearchRepository.save(book);
