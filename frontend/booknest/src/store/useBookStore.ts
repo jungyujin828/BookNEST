@@ -6,6 +6,9 @@ interface Book {
   publishedDate: string;
   imageUrl: string;
   authors: string[];
+  criticName?: string;
+  endorsement?: string;
+  rank?: number;
 }
 
 interface PurchaseUrls {
