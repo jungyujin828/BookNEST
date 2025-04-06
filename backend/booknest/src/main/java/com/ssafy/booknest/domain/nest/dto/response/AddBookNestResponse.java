@@ -11,7 +11,6 @@ public class AddBookNestResponse {
     private Integer bookId;
     private Integer nestId;
     private Double rating;
-    private String review;
     private LocalDateTime createdAt;
 
     public static AddBookNestResponse of (Integer bookId){

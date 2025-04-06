@@ -100,20 +100,6 @@ public class NestService {
                 ratingService.updateRating(user.getId(), book.getId(), dto);
             }
         }
-        // 사용자의 기존 리뷰 조회
-        Review userReview = reviewRepository.findByUserIdAndBookId(user.getId(), book.getId()).orElse(null);
-        String newReview = request.getReview();
-
-        if (newReview != null) {
-            ReviewRequest dto = ReviewRequest.builder().content(newReview).build();
-            if (userReview == null) {
-                // 새로운 리뷰 추가
-                reviewService.saveReview(user.getId(), book.getId(), dto);
-            } else if (!userReview.getContent().equals(newReview)) { // 다를 경우
-                // 기존 리뷰 업데이트
-                reviewService.updateReview(user.getId(), userReview.getId(), dto);
-            }
-        }
 
         // 찜 여부 조회
         BookMark bookMark = bookMarkRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElse(null);
@@ -134,7 +120,6 @@ public class NestService {
                 .nestId(nest.getId())
                 .bookId(book.getId())
                 .rating(newRating)
-                .review(newReview)
                 .createdAt(bookNest.getCreatedAt())
                 .build();
     }
