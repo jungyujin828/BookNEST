@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import axios from "axios";
@@ -209,6 +209,7 @@ const Content = styled.p<{ isExpanded?: boolean }>`
   -webkit-line-clamp: ${(props) => (props.isExpanded ? "none" : "3")};
   -webkit-box-orient: vertical;
   margin-bottom: 8px;
+  white-space: pre-line;
 `;
 
 const LoadingMessage = styled.div`
@@ -276,10 +277,10 @@ const ReviewSection = styled.div`
 
 const ReviewCard = styled.div<{ isUserReview?: boolean }>`
   padding: 16px;
-  border: 1px solid ${props => props.isUserReview ? '#4CAF50' : '#dee2e6'};
+  border: 1px solid ${(props) => (props.isUserReview ? "#4CAF50" : "#dee2e6")};
   border-radius: 8px;
   margin-bottom: 16px;
-  background-color: ${props => props.isUserReview ? '#f8fff8' : '#fff'};
+  background-color: ${(props) => (props.isUserReview ? "#f8fff8" : "#fff")};
 `;
 
 const ReviewHeader = styled.div`
@@ -415,6 +416,12 @@ const BookDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<{ [key: string]: boolean }>({});
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [contentHeights, setContentHeights] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const introRef = useRef<HTMLParagraphElement>(null);
+  const indexRef = useRef<HTMLParagraphElement>(null);
+  const publisherReviewRef = useRef<HTMLParagraphElement>(null);
 
   // Zustand store
   const {
@@ -434,9 +441,29 @@ const BookDetailPage = () => {
   const { setNestStatus, getNestStatus } = useNestStore();
 
   useEffect(() => {
+    const checkContentHeight = (element: HTMLElement | null, key: string) => {
+      if (!element) return;
+      const lineHeight = parseInt(window.getComputedStyle(element).lineHeight);
+      const height = element.scrollHeight;
+      const lines = height / lineHeight;
+      setContentHeights((prev) => ({ ...prev, [key]: lines > 3 }));
+    };
+    // book 데이터가 있을 때만 높이 체크
+    if (book) {
+      checkContentHeight(introRef.current, "intro");
+      checkContentHeight(indexRef.current, "index");
+      checkContentHeight(publisherReviewRef.current, "publisherReview");
+    }
+  }, [book]); // book 데이터가 변경될 때만 실행
+
+  useEffect(() => {
     const fetchUserInfo = async () => {
       try {
-        const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
+        const response = await api.get<{
+          success: boolean;
+          data: UserInfo;
+          error: null;
+        }>("/api/user/info");
         if (response.data.success && response.data.data) {
           setUserInfo(response.data.data);
         }
@@ -451,7 +478,7 @@ const BookDetailPage = () => {
   useEffect(() => {
     const fetchBookDetail = async () => {
       if (!bookId) return;
-      
+
       try {
         setLoading(true);
         setError(null);
@@ -460,9 +487,9 @@ const BookDetailPage = () => {
         if (response.data.success) {
           const bookData = response.data.data;
           setBook(bookData);
-          
+
           // 서재 등록 상태를 store에 저장 (API 응답 값이 있을 때만)
-          if (typeof bookData.isInNest === 'boolean') {
+          if (typeof bookData.isInNest === "boolean") {
             setNestStatus(Number(bookId), bookData.isInNest);
           }
         } else {
@@ -508,7 +535,7 @@ const BookDetailPage = () => {
   const handleCommentSubmit = async () => {
     try {
       const response = await api.get(`/api/book/${bookId}?page=1&size=5`);
-      
+
       if (response.data.success) {
         setBook(response.data.data);
       }
@@ -521,7 +548,7 @@ const BookDetailPage = () => {
     try {
       // 책 정보를 다시 불러와서 평균 평점 업데이트
       const response = await api.get(`/api/book/${bookId}`);
-      
+
       if (response.data.success) {
         setBook(response.data.data);
       } else {
@@ -554,7 +581,7 @@ const BookDetailPage = () => {
           console.error("Failed to fetch updated book details:", err);
         }
       };
-      
+
       fetchUpdatedBookDetail();
     }
   };
@@ -564,7 +591,9 @@ const BookDetailPage = () => {
   }
 
   if (error || !book) {
-    return <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>;
+    return (
+      <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>
+    );
   }
 
   return (
@@ -580,19 +609,21 @@ const BookDetailPage = () => {
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
                 {getNestStatus(book.bookId) ? (
-                  <DeleteToNestButton 
-                    bookId={book.bookId} 
+                  <DeleteToNestButton
+                    bookId={book.bookId}
                     nestId={userInfo?.nestId || 0}
                     onDelete={handleNestUpdate}
                   />
                 ) : (
-                  <AddToNestButton 
-                    bookId={book.bookId} 
+                  <AddToNestButton
+                    bookId={book.bookId}
                     currentRating={userRatings[book.bookId] || 0}
                     onAdd={handleNestUpdate}
                   />
                 )}
-                <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
+                <PurchaseButton onClick={handlePurchaseClick}>
+                  구매하기
+                </PurchaseButton>
               </ButtonContainer>
             </ImageSection>
             <InfoSection>
@@ -604,8 +635,13 @@ const BookDetailPage = () => {
                 </RatingRow>
                 <RatingRow>
                   <RatingLabel>내 평점</RatingLabel>
-                  <RatingStars bookId={book.bookId} onRatingChange={handleRatingChange} />
-                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || "0.0"}</RatingText>
+                  <RatingStars
+                    bookId={book.bookId}
+                    onRatingChange={handleRatingChange}
+                  />
+                  <RatingText>
+                    {userRatings[book.bookId]?.toFixed(1) || "0.0"}
+                  </RatingText>
                 </RatingRow>
               </RatingContainer>
               <AuthorInfo>저자: {book.authors.join(", ")}</AuthorInfo>
@@ -639,10 +675,21 @@ const BookDetailPage = () => {
           {book.intro && (
             <Section>
               <SectionTitle>책 소개</SectionTitle>
-              <Content isExpanded={expandedSections["intro"]}>{book.intro}</Content>
-              <MoreButton onClick={() => setExpandedSections((prev) => ({ ...prev, intro: !prev.intro }))}>
-                {expandedSections["intro"] ? "접기" : "더보기"}
-              </MoreButton>
+              <Content ref={introRef} isExpanded={expandedSections["intro"]}>
+                {book.intro}
+              </Content>
+              {contentHeights["intro"] && (
+                <MoreButton
+                  onClick={() =>
+                    setExpandedSections((prev) => ({
+                      ...prev,
+                      intro: !prev.intro,
+                    }))
+                  }
+                >
+                  {expandedSections["intro"] ? "접기" : "더보기"}
+                </MoreButton>
+              )}
             </Section>
           )}
 
@@ -650,10 +697,21 @@ const BookDetailPage = () => {
           {book.index && (
             <Section>
               <SectionTitle>목차</SectionTitle>
-              <Content isExpanded={expandedSections["index"]}>{book.index}</Content>
-              <MoreButton onClick={() => setExpandedSections((prev) => ({ ...prev, index: !prev.index }))}>
-                {expandedSections["index"] ? "접기" : "더보기"}
-              </MoreButton>
+              <Content ref={indexRef} isExpanded={expandedSections["index"]}>
+                {book.index}
+              </Content>
+              {contentHeights["index"] && (
+                <MoreButton
+                  onClick={() =>
+                    setExpandedSections((prev) => ({
+                      ...prev,
+                      index: !prev.index,
+                    }))
+                  }
+                >
+                  {expandedSections["index"] ? "접기" : "더보기"}
+                </MoreButton>
+              )}
             </Section>
           )}
 
@@ -661,12 +719,24 @@ const BookDetailPage = () => {
           {book.publisherReview && (
             <Section>
               <SectionTitle>출판사 서평</SectionTitle>
-              <Content isExpanded={expandedSections["publisherReview"]}>{book.publisherReview}</Content>
-              <MoreButton
-                onClick={() => setExpandedSections((prev) => ({ ...prev, publisherReview: !prev.publisherReview }))}
+              <Content
+                ref={publisherReviewRef}
+                isExpanded={expandedSections["publisherReview"]}
               >
-                {expandedSections["publisherReview"] ? "접기" : "더보기"}
-              </MoreButton>
+                {book.publisherReview}
+              </Content>
+              {contentHeights["publisherReview"] && (
+                <MoreButton
+                  onClick={() =>
+                    setExpandedSections((prev) => ({
+                      ...prev,
+                      publisherReview: !prev.publisherReview,
+                    }))
+                  }
+                >
+                  {expandedSections["publisherReview"] ? "접기" : "더보기"}
+                </MoreButton>
+              )}
             </Section>
           )}
 

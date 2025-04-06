@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { theme } from "./styles/theme"; // theme import 추가
+import { theme } from "./styles/theme";
 import { ROUTES } from "./constants/paths";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -53,7 +53,7 @@ const MainContent = styled.main<{ isLoginPage: boolean }>`
 const AppContent = () => {
   const location = useLocation();
   const { userDetail } = useAuthStore();
-  const hideNavigation = ["/login", "/input-info"];
+  const hideNavigation: string[] = [ROUTES.LOGIN, ROUTES.INPUT_INFO];
   const shouldHideNavigation = hideNavigation.includes(location.pathname);
 
   return (

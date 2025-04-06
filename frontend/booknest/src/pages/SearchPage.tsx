@@ -4,113 +4,23 @@ import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 
+interface User {
+  id: number;
+  nickname: string;
+  profileURL: string;
+  isFollowing: boolean;
+}
+
 interface Book {
   bookId: string;
   title: string;
   imageURL: string;
   authors: string;
-}
-
-interface SearchResponse {
-  content: Book[];
-  pageNumber: number;
-  totalPages: number;
-  totalElements: number;
-  pageSize: number;
-  first: boolean;
-  last: boolean;
+  tags?: string[];
 }
 
 const SearchContainer = styled.div`
   padding: 16px;
-`;
-
-const SearchBarContainer = styled.div`
-  position: relative;
-  margin-bottom: 20px;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 12px 45px;
-  border-radius: 10px;
-  border: none;
-  background-color: #f1f1f1;
-  font-size: 16px;
-  outline: none;
-
-  &::placeholder {
-    color: #666;
-  }
-`;
-
-const SearchIcon = styled.span`
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  width: 16px;
-  height: 16px;
-
-  &::before {
-    content: "";
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border: 2px solid #666;
-    border-radius: 50%;
-    top: 0;
-    left: 0;
-  }
-
-  &::after {
-    content: "";
-    position: absolute;
-    width: 2px;
-    height: 6px;
-    background-color: #666;
-    transform: rotate(-45deg);
-    bottom: 0;
-    right: 0;
-  }
-`;
-
-const ClearButton = styled.button`
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    width: 2px;
-    height: 16px;
-    background-color: #666;
-    top: 0;
-    left: 50%;
-  }
-
-  &::before {
-    transform: translateX(-50%) rotate(45deg);
-  }
-
-  &::after {
-    transform: translateX(-50%) rotate(-45deg);
-  }
-
-  &:hover::before,
-  &:hover::after {
-    background-color: #333;
-  }
 `;
 
 const BookList = styled.div`
@@ -154,12 +64,20 @@ const BookAuthor = styled.p`
   font-size: 14px;
 `;
 
-interface User {
-  id: number;
-  nickname: string;
-  profileURL: string;
-  isFollowing: boolean;
-}
+const BookTags = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+`;
+
+const Tag = styled.span`
+  padding: 2px 8px;
+  background-color: #f0f8f1;
+  color: #7bc47f;
+  border-radius: 12px;
+  font-size: 12px;
+`;
 
 const TabContainer = styled.div`
   display: flex;
@@ -241,6 +159,11 @@ const SearchPage = () => {
 
   const handleSearchResult = (data: any) => {
     if (activeTab === "books") {
+      console.log("Received books data:", data);
+      console.log(
+        "Books tags:",
+        data.map((book: Book) => ({ title: book.title, tags: book.tags }))
+      );
       setBooks(data);
       setUsers([]);
     } else {
@@ -306,6 +229,13 @@ const SearchPage = () => {
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{book.authors}</BookAuthor>
+                {book.tags && book.tags.length > 0 && (
+                  <BookTags>
+                    {book.tags.map((tag, index) => (
+                      <Tag key={index}>{tag}</Tag>
+                    ))}
+                  </BookTags>
+                )}
               </BookInfo>
             </BookCard>
           ))}
