@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { FaStar } from 'react-icons/fa';
-import api from '../api/axios';
-import useRatingStore from '../store/useRatingStore';
+import React, { useState, useEffect } from "react";
+import styled from "styled-components";
+import { FaStar } from "react-icons/fa";
+import api from "../api/axios";
+import useRatingStore from "../store/useRatingStore";
 
 interface RatingStarsProps {
   bookId: number;
@@ -20,7 +20,7 @@ const StarButton = styled.button<{ $active: boolean }>`
   border: none;
   padding: 0;
   cursor: pointer;
-  color: ${props => props.$active ? '#f8c41b' : '#ddd'};
+  color: ${(props) => (props.$active ? "#f8c41b" : "#ddd")};
   font-size: 24px;
   transition: color 0.2s ease;
 
@@ -29,7 +29,10 @@ const StarButton = styled.button<{ $active: boolean }>`
   }
 `;
 
-const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => {
+const RatingStars: React.FC<RatingStarsProps> = ({
+  bookId,
+  onRatingChange,
+}) => {
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
   const { userRatings, setUserRating } = useRatingStore();
   const currentRating = userRatings[bookId] || 0;
@@ -41,19 +44,19 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
         if (response.data.success && response.data.data) {
           const { rating } = response.data.data;
           setUserRating(bookId, rating);
-          onRatingChange(rating);
+          // onRatingChange는 초기 로딩시에만 호출하거나 제거
         }
       } catch (error) {
-        console.error('Failed to fetch rating:', error);
+        console.error("Failed to fetch rating:", error);
         // 404 에러는 평점이 없는 경우이므로 무시
         if (error.response?.status !== 404) {
-          console.error('Error fetching rating:', error);
+          console.error("Error fetching rating:", error);
         }
       }
     };
 
     fetchRating();
-  }, [bookId, setUserRating, onRatingChange]);
+  }, [bookId, setUserRating]); // onRatingChange 제거
 
   const handleStarClick = async (score: number) => {
     try {
@@ -61,26 +64,31 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
       setUserRating(bookId, score);
       onRatingChange(score);
 
-      console.log('Submitting rating:', {
+      console.log("Submitting rating:", {
         bookId,
         score,
         currentRating,
-        method: currentRating > 0 ? 'PUT' : 'POST'
+        method: currentRating > 0 ? "PUT" : "POST",
       });
 
       // If there's an existing rating, use PUT, otherwise use POST
-      const method = currentRating > 0 ? 'put' : 'post';
+      const method = currentRating > 0 ? "put" : "post";
       const response = await api[method](`/api/book/${bookId}/rating`, {
-        score: score
+        score: score,
       });
 
-      console.log('Rating response:', response.data);
+      console.log("Rating response:", response.data);
 
       if (!response.data.success) {
-        throw new Error(response.data.error?.message || `Failed to ${method} rating`);
+        throw new Error(
+          response.data.error?.message || `Failed to ${method} rating`
+        );
       }
     } catch (error) {
-      console.error(`Failed to ${currentRating > 0 ? 'update' : 'create'} rating:`, error);
+      console.error(
+        `Failed to ${currentRating > 0 ? "update" : "create"} rating:`,
+        error
+      );
       // Revert optimistic update on error
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
@@ -90,23 +98,25 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
   const handleCancelRating = async () => {
     try {
       // 사용자에게 확인 메시지 표시
-      if (!window.confirm('평점을 취소하시겠습니까?')) {
+      if (!window.confirm("평점을 취소하시겠습니까?")) {
         return;
       }
-      
+
       // Optimistic update
       setUserRating(bookId, 0);
       onRatingChange(0);
 
       // 평점 삭제 API 호출
       const response = await api.delete(`/api/book/${bookId}/rating`);
-      
+
       if (!response.data.success) {
-        throw new Error(response.data.error?.message || '평점 삭제에 실패했습니다.');
+        throw new Error(
+          response.data.error?.message || "평점 삭제에 실패했습니다."
+        );
       }
-      
-      console.log('평점 삭제 성공:', response.data);
-      
+
+      console.log("평점 삭제 성공:", response.data);
+
       // UI 즉시 업데이트를 위한 추가 처리
       // 1. 현재 평점 상태 초기화
       setUserRating(bookId, 0);
@@ -114,15 +124,14 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
       onRatingChange(0);
       // 3. 호버 상태 초기화
       setHoveredRating(null);
-      
     } catch (error) {
-      console.error('평점 삭제 실패:', error);
+      console.error("평점 삭제 실패:", error);
       // 에러 발생 시 원래 상태로 복원
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
-      
+
       // 사용자에게 에러 메시지 표시
-      alert('평점 삭제에 실패했습니다. 다시 시도해주세요.');
+      alert("평점 삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -151,12 +160,12 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
         <button
           onClick={handleCancelRating}
           style={{
-            background: 'none',
-            border: 'none',
-            color: '#666',
-            cursor: 'pointer',
-            marginLeft: '8px',
-            fontSize: '14px'
+            background: "none",
+            border: "none",
+            color: "#666",
+            cursor: "pointer",
+            marginLeft: "8px",
+            fontSize: "14px",
           }}
         >
           취소
@@ -166,4 +175,4 @@ const RatingStars: React.FC<RatingStarsProps> = ({ bookId, onRatingChange }) => 
   );
 };
 
-export default RatingStars; 
+export default RatingStars;
