@@ -267,7 +267,7 @@ const AgeBooks = () => {
         setLoading('ageBooks', true);
         setError('ageBooks', null);
         
-        const response = await api.get<AgeBooksResponse>('/api/book/age');
+        const response = await api.get<AgeBooksResponse>('/api/book/age-gender');
         
         if (response.data.success && response.data.data) {
           setAgeBooks(response.data.data);

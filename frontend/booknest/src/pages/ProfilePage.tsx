@@ -517,12 +517,12 @@ const ProfilePage = () => {
         <hr />
 
         <UserStats>
-          <div onClick={() => navigate(ROUTES.MY_EVALUATED_BOOKS)}>
-            <strong>{userDetail?.totalRatings || 0}</strong>
+          <div onClick={() => navigate(`${ROUTES.MY_EVALUATED_BOOKS}/${userId}`)}>
+            <strong>{displayData?.totalRatings || 0}</strong>
             <div>평가</div>
           </div>
-          <div onClick={() => navigate(ROUTES.MY_COMMENTS)}>
-            <strong>{userDetail?.totalReviews || 0}</strong>
+          <div onClick={() => navigate(`${ROUTES.MY_COMMENTS}/${userId}`)}>
+            <strong>{displayData?.totalReviews || 0}</strong>
             <div>코멘트</div>
           </div>
         </UserStats>
