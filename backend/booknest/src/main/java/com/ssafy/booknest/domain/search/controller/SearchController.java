@@ -39,6 +39,12 @@ public class SearchController {
         return ApiResponse.success(searchService.searchBooks(userId, title, tags, pageable));
     }
 
+    @PostMapping("/book")
+    public ResponseEntity<ApiResponse<SearchedBook>> addBook(@RequestBody SearchedBook book) {
+        SearchedBook savedBook = searchService.saveBook(book);
+        return ApiResponse.success(savedBook);
+    }
+
     @GetMapping("/user")
     public ResponseEntity<ApiResponse<CustomPage<UserSearchResponse>>> searchUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
