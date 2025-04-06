@@ -22,7 +22,7 @@ public record SearchedBook(
         String imageURL,
 
         @Field(type = FieldType.Text)
-        String authors,
+        List<String> authors,
 
         @Field(type = FieldType.Keyword)
         List<String> tags

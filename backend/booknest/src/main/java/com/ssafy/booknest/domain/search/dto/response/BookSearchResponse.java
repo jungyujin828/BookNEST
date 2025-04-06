@@ -10,7 +10,7 @@ public record BookSearchResponse(
         Integer bookId,
         String title,
         String imageURL,
-        String authors,
+        List<String> authors,
         List<String> tags
 ) {
     public static BookSearchResponse of(SearchedBook book) {
