@@ -121,6 +121,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
       });
 
       if (response.data.success) {
+        console.log("Search response:", response.data.data); // 응답 데이터 확인
         onSearchResult(response.data.data.content);
       }
     } catch (error) {
