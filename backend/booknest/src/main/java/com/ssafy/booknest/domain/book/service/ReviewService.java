@@ -1,8 +1,7 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.BestReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
@@ -12,23 +11,22 @@ import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
-import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -166,6 +164,50 @@ public class ReviewService {
 
         reviewLikeRepository.delete(reviewLike);
         review.decrementLikes();
+    }
+
+    // 오늘의 베스트
+    @Transactional(readOnly = true)
+    public List<BestReviewResponse> getBestReviews(Integer userId) {
+        // 유저 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 오늘 날짜 기준 범위 설정
+        LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
+        LocalDateTime endOfToday = startOfToday.plusDays(1);
+
+        // 오늘 좋아요 받은 리뷰들 중 Top 3 조회
+        Pageable topThree = PageRequest.of(0, 3);
+        List<Object[]> reviewIdAndLikeCountList = reviewLikeRepository.findTop3ReviewIdsLikedToday(startOfToday, endOfToday, topThree);
+
+
+        // 리뷰 ID 추출
+        List<Integer> reviewIds = reviewIdAndLikeCountList.stream()
+                .map(row -> (Integer) row[0])
+                .toList();
+
+        // 리뷰 상세 조회
+        List<Review> reviews = reviewRepository.findAllById(reviewIds);
+
+        // 좋아요 수 매핑
+        Map<Integer, Integer> reviewLikeCountMap = reviewIdAndLikeCountList.stream()
+                .collect(Collectors.toMap(
+                        row -> (Integer) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
+
+        // 응답 리스트 생성
+        List<BestReviewResponse> resultList = new ArrayList<>();
+        for (int i = 0; i < reviews.size(); i++) {
+            Review review = reviews.get(i);
+            int todayLikes = reviewLikeCountMap.getOrDefault(review.getId(), 0);
+            BestReviewResponse response = BestReviewResponse.of(review, userId, todayLikes, i + 1);
+            resultList.add(response);
+        }
+
+
+        return resultList;
     }
 
 }
