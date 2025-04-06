@@ -5,6 +5,7 @@ import api from "../api/axios";
 
 interface BookmarkButtonProps {
   bookId: number;
+  isBookMarked?: boolean;
 }
 
 interface BookmarkItem {
@@ -36,7 +37,7 @@ const HeartIcon = styled(FaHeart)<{ $isBookmarked: boolean }>`
   transition: color 0.2s ease;
 `;
 
-const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId }) => {
+const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId, isBookMarked }) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -61,10 +62,15 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId }) => {
     }
   };
 
-  // 컴포넌트 마운트 시 북마크 상태 조회
+  // isBookMarked prop이 제공되면 그 값을 사용하고, 아니면 API로 조회
   useEffect(() => {
-    fetchBookmarks();
-  }, [bookId]);
+    if (typeof isBookMarked !== 'undefined') {
+      setIsBookmarked(isBookMarked);
+      setLoading(false);
+    } else {
+      fetchBookmarks();
+    }
+  }, [bookId, isBookMarked]);
 
   const handleBookmarkClick = async () => {
     try {

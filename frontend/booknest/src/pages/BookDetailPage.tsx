@@ -538,6 +538,11 @@ const BookDetailPage = () => {
       const newStatus = !getNestStatus(book.bookId);
       setNestStatus(book.bookId, newStatus);
       
+      // 서재에 등록되면 북마크는 자동으로 해제됨
+      if (newStatus) {
+        setBook(prev => prev ? { ...prev, isBookMarked: false } : null);
+      }
+      
       // 상태 변경 후 책 정보 다시 불러오기
       const fetchUpdatedBookDetail = async () => {
         try {
@@ -568,7 +573,7 @@ const BookDetailPage = () => {
         <>
           <BookHeader>
             <BookTitle>{book.title}</BookTitle>
-            <BookmarkButton bookId={book.bookId} />
+            <BookmarkButton bookId={book.bookId} isBookMarked={book.isBookMarked} />
           </BookHeader>
           <TopSection>
             <ImageSection>
