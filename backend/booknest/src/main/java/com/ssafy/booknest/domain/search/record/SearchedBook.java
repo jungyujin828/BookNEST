@@ -6,6 +6,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import java.util.List;
+
 @Builder
 @Document(indexName = "book")
 public record SearchedBook(
@@ -20,7 +22,10 @@ public record SearchedBook(
         String imageURL,
 
         @Field(type = FieldType.Text)
-        String authors
+        String authors,
+
+        @Field(type = FieldType.Keyword)
+        List<String> tags
 ) {
 
     public static SearchedBook fromAnotherSource(final SearchedBook book) {
@@ -29,6 +34,7 @@ public record SearchedBook(
                 .title(book.title())
                 .imageURL(book.imageURL())
                 .authors(book.authors())
+                .tags(book.tags())
                 .build();
     }
 }

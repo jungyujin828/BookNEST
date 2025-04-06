@@ -117,7 +117,7 @@ public class UserService {
 
     // 닉네임 중복확인
     public boolean isNicknameDuplicate(String nickname) {
-        return userRepository.existsByNickname(nickname);
+        return userRepository.existsByNicknameAndDeletedAtIsNull(nickname);
     }
 
     // 유저 정보 조회
@@ -148,7 +148,9 @@ public class UserService {
         Integer totalRatings = ratingRepository.countRatings(targetUserId);
         Integer totalReviews = reviewRepository.countReviews(targetUserId);
 
-        return UserMypageResponse.of(targetUser, followers, followings, totalRatings, totalReviews);
+        Boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(user.getId(), targetUserId);
+
+        return UserMypageResponse.of(targetUser, followers, followings, totalRatings, totalReviews, isFollowing);
     }
 
     // 프로필 이미지 등록, 수정, 삭제

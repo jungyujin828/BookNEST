@@ -15,8 +15,9 @@ public class UserMypageResponse {
     private Integer followings;
     private Integer totalRatings;
     private Integer totalReviews;
+    private Boolean isFollowing;
 
-    public static UserMypageResponse of(User user, Integer followers, Integer followings, Integer totalRatings, Integer totalReviews){
+    public static UserMypageResponse of(User user, Integer followers, Integer followings, Integer totalRatings, Integer totalReviews, Boolean isFollowing){
         return UserMypageResponse.builder()
                 .nestId(user.getNest().getId())
                 .nickname(user.getNickname())
@@ -26,6 +27,7 @@ public class UserMypageResponse {
                 .followings(followings)
                 .totalRatings(totalRatings)
                 .totalReviews(totalReviews)
+                .isFollowing(isFollowing)
                 .build();
     }
 }
