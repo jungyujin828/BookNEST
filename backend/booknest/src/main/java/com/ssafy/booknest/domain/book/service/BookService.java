@@ -58,6 +58,7 @@ public class BookService {
     private final BookNestRepository bookNestRepository;
     private final NestRepository nestRepository;
     private final AgeGenderBookRepository ageGenderBookRepository;
+    private final TagRandomBookRepository tagRandomBookRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -117,13 +118,6 @@ public class BookService {
                 .build();
     }
 
-    // 가짜 메서드
-    @Transactional(readOnly = true)
-    public List<FakeResponse> getfakes(Integer userId) {
-        return bookRepository.findAll().stream()
-                .map(FakeResponse::of)
-                .toList();
-    }
 
     // 평론가 추천책
     public List<CriticBookResponse> getCriticBooks(Integer userId) {
@@ -147,64 +141,6 @@ public class BookService {
                 .toList();
     }
 
-
-    // 화제의 작가 책 DB에 배치 (스프링 내 스케쥴링 배치작업 이용)
-    @Transactional
-    public void updatePopularAuthors() {
-        List<Nest> allNests = nestRepository.findAllWithBooksOnly();
-        Map<String, Long> authorCount = new HashMap<>();
-
-        for (Nest nest : allNests) {
-            for (BookNest bookNest : nest.getBookNests()) {
-                String authors = bookNest.getBook().getAuthors();
-
-                // null 또는 빈 문자열인 경우 skip
-                if (authors != null && !authors.trim().isEmpty()) {
-                    for (String author : authors.split(",")) {
-                        author = author.trim();
-                        if (!author.isEmpty()) {
-                            authorCount.put(author, authorCount.getOrDefault(author, 0L) + 1);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (authorCount.isEmpty()) {
-            log.warn("서재에서 작가를 찾지 못했습니다.");
-            return;
-        }
-
-        // 최대 출현 횟수
-        long maxCount = authorCount.values().stream().max(Long::compare).orElse(0L);
-
-        // maxCount와 같은 작가 리스트 수집
-        List<String> topAuthors = authorCount.entrySet().stream()
-                .filter(entry -> entry.getValue() == maxCount)
-                .map(Map.Entry::getKey)
-                .toList();
-
-        if (topAuthors.isEmpty()) {
-            log.warn("최다 출현 작가가 없습니다.");
-            return;
-        }
-
-        // 랜덤으로 한 명 선택
-        String selectedAuthor = topAuthors.get(new Random().nextInt(topAuthors.size()));
-
-        // 책 3권 가져오기 (작가 이름이 포함된 책)
-        List<Book> topBooks = bookRepository.findTop3ByAuthorNameLike(selectedAuthor);
-
-        // 기존 추천 작가 책 삭제 후 새로 저장
-        popularAuthorBookRepository.deleteAllInBatch();
-
-        List<PopularAuthorBook> popularList = topBooks.stream()
-                .map(book -> new PopularAuthorBook(selectedAuthor, book))
-                .collect(Collectors.toList());
-
-        popularAuthorBookRepository.saveAll(popularList);
-        log.info("화제의 작가 [{}] 등록 완료. 책 {}권 저장됨", selectedAuthor, popularList.size());
-    }
 
 
     // 화제의 작가 추천 책
@@ -298,7 +234,25 @@ public class BookService {
                 .toList();
     }
 
+    // 태그별 랜덤 추천
+    @Transactional(readOnly = true)
+    public List<TagBookResponse> getTagRandomBooks(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // 랜덤 태그 하나만 DB에서 가져오기
+        String selectedTag = tagRandomBookRepository.findRandomTag();
+
+        if (selectedTag == null) return List.of(); // 태그가 없을 경우
+
+        // 해당 태그의 책 가져오기
+        List<TagRandomBook> tagBooks = tagRandomBookRepository.findByTag(selectedTag);
+
+        return tagBooks.stream()
+                .map(tagBook -> TagBookResponse.of(tagBook.getBook(), selectedTag))
+                .limit(15)
+                .toList();
+    }
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
