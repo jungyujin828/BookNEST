@@ -29,6 +29,7 @@ public class SearchService {
     private final UserSearchRepository userSearchRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private final PopularKeywordService popularKeywordService;
 
     public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, List<String> tags, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -52,6 +53,10 @@ public class SearchService {
         } else {
             books = bookSearchRepository
                     .findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
+        }
+
+        if (keyword != null && !keyword.isBlank()) {
+            popularKeywordService.increaseKeywordCount(keyword);
         }
 
         return new CustomPage<>(books.map(BookSearchResponse::of));
