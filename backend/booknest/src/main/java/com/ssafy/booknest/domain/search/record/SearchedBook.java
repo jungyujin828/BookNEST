@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.search.record;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -10,6 +11,7 @@ import java.util.List;
 
 @Builder
 @Document(indexName = "book")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record SearchedBook(
 
         @Id
