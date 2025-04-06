@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { FaStar } from 'react-icons/fa';
 import api from '../api/axios';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../constants/paths';
+import { FaStar } from 'react-icons/fa';
 
 interface RatedBook {
   bookId: number;
@@ -10,6 +12,17 @@ interface RatedBook {
   imageUrl: string;
   rating: number;
   authors: string[];
+  updatedAt: string;
+}
+
+interface ApiResponse {
+  content: RatedBook[];
+  pageNumber: number;
+  totalPages: number;
+  totalElements: number;
+  pageSize: number;
+  first: boolean;
+  last: boolean;
 }
 
 const Container = styled.div`
@@ -68,32 +81,53 @@ const Authors = styled.div`
   margin-bottom: 12px;
 `;
 
-const StarRating = styled.div`
+const RatingContainer = styled.div`
   display: flex;
-  gap: 2px;
-`;
-
-const Star = styled(FaStar)<{ filled: boolean }>`
-  color: ${props => props.filled ? '#FFD700' : '#E0E0E0'};
-  font-size: 20px;
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 12px;
   align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
 `;
 
-const IconButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  color: #666;
-  font-size: 18px;
+const RatingValue = styled.span`
+  font-size: 16px;
+  font-weight: 600;
+  color: #f39c12;
+`;
 
-  &:hover {
-    color: #333;
+const StarIcon = styled(FaStar)`
+  color: #f39c12;
+  font-size: 18px;
+`;
+
+const RatingDate = styled.div`
+  font-size: 14px;
+  color: #999;
+`;
+
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+`;
+
+const PageButton = styled.button<{ active?: boolean }>`
+  padding: 8px 12px;
+  border: 1px solid ${props => props.active ? '#007bff' : '#ddd'};
+  background: ${props => props.active ? '#007bff' : 'white'};
+  color: ${props => props.active ? 'white' : '#333'};
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:disabled {
+    background: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: ${props => props.active ? '#0056b3' : '#f8f9fa'};
   }
 `;
 
@@ -101,31 +135,63 @@ const MyEvaluatedBookPage = () => {
   const [books, setBooks] = useState<RatedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const navigate = useNavigate();
+
+  const fetchRatedBooks = async (page: number) => {
+    try {
+      setLoading(true);
+      const response = await api.get<{ success: boolean; data: ApiResponse; error: null }>(
+        `/api/book/rating?page=${page}&size=10`
+      );
+
+      console.log('API Response:', response.data);
+
+      if (response.data.success) {
+        setBooks(response.data.data.content);
+        setTotalPages(response.data.data.totalPages);
+      } else {
+        setError('평가한 책 목록을 불러오는데 실패했습니다.');
+      }
+    } catch (error: any) {
+      console.error('Failed to fetch rated books:', error);
+      
+      if (error.response?.status === 401) {
+        alert('로그인이 필요한 서비스입니다.');
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+      
+      if (error.response?.status === 403) {
+        alert('접근 권한이 없습니다. 다시 로그인해주세요.');
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+
+      setError('평가한 책 목록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRatedBooks = async () => {
-      try {
-        const response = await api.get('/api/book/rating');
-        if (response.data.success) {
-          setBooks(response.data.data);
-        } else {
-          setError('평가한 책 목록을 불러오는데 실패했습니다.');
-        }
-      } catch (error) {
-        console.error('Failed to fetch rated books:', error);
-        setError('평가한 책 목록을 불러오는데 실패했습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    fetchRatedBooks(currentPage);
+  }, [currentPage, navigate]);
 
-    fetchRatedBooks();
-  }, []);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
-  const renderStars = (rating: number) => {
-    return Array.from({ length: 5 }, (_, index) => (
-      <Star key={index} filled={index < Math.floor(rating)} />
-    ));
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   if (loading) {
@@ -134,6 +200,17 @@ const MyEvaluatedBookPage = () => {
 
   if (error) {
     return <Container>{error}</Container>;
+  }
+
+  if (!books || books.length === 0) {
+    return (
+      <Container>
+        <PageTitle>내가 평가한 책</PageTitle>
+        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+          아직 평가한 책이 없습니다.
+        </div>
+      </Container>
+    );
   }
 
   return (
@@ -147,14 +224,39 @@ const MyEvaluatedBookPage = () => {
               <div>
                 <BookTitle>{book.bookName}</BookTitle>
                 <Authors>{book.authors.join(', ')}</Authors>
+                <RatingContainer>
+                  <StarIcon />
+                  <RatingValue>{book.rating.toFixed(1)}</RatingValue>
+                </RatingContainer>
               </div>
-              <StarRating>
-                {renderStars(book.rating)}
-              </StarRating>
+              <RatingDate>{formatDate(book.updatedAt)}</RatingDate>
             </BookInfo>
           </BookCard>
         ))}
       </BookList>
+      <Pagination>
+        <PageButton
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          이전
+        </PageButton>
+        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          <PageButton
+            key={page}
+            active={page === currentPage}
+            onClick={() => handlePageChange(page)}
+          >
+            {page}
+          </PageButton>
+        ))}
+        <PageButton
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          다음
+        </PageButton>
+      </Pagination>
     </Container>
   );
 };
