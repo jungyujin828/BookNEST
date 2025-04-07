@@ -439,25 +439,25 @@ VALUES
 --     ('OVER_60', 'M', 2, 11, NOW()),
 --     ('OVER_60', 'M', 3, 10, NOW());
 
--- 2024년 인기 도서 (rank 1~10)
-INSERT INTO library_book (rank, year, book_id, created_at)
-VALUES
-    (1, 2024, 5, NOW()),
-    (2, 2024, 3, NOW()),
-    (3, 2024, 10, NOW()),
-    (4, 2024, 1, NOW()),
-    (5, 2024, 12, NOW()),
-    (6, 2024, 9, NOW()),
-    (7, 2024, 2, NOW()),
-    (8, 2024, 8, NOW()),
-    (9, 2024, 6, NOW()),
-    (10, 2024, 13, NOW());
-
--- 2023년 인기 도서 (rank 1~5)
-INSERT INTO library_book (rank, year, book_id, created_at)
-VALUES
-    (1, 2023, 7, NOW()),
-    (2, 2023, 14, NOW()),
-    (3, 2023, 4, NOW()),
-    (4, 2023, 11, NOW()),
-    (5, 2023, 15, NOW());
+-- -- 2024년 인기 도서 (rank 1~10)
+-- INSERT INTO library_book (rank, year, book_id, created_at)
+-- VALUES
+--     (1, 2024, 5, NOW()),
+--     (2, 2024, 3, NOW()),
+--     (3, 2024, 10, NOW()),
+--     (4, 2024, 1, NOW()),
+--     (5, 2024, 12, NOW()),
+--     (6, 2024, 9, NOW()),
+--     (7, 2024, 2, NOW()),
+--     (8, 2024, 8, NOW()),
+--     (9, 2024, 6, NOW()),
+--     (10, 2024, 13, NOW());
+--
+-- -- 2023년 인기 도서 (rank 1~5)
+-- INSERT INTO library_book (rank, year, book_id, created_at)
+-- VALUES
+--     (1, 2023, 7, NOW()),
+--     (2, 2023, 14, NOW()),
+--     (3, 2023, 4, NOW()),
+--     (4, 2023, 11, NOW()),
+--     (5, 2023, 15, NOW());
