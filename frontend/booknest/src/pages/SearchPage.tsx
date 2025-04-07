@@ -208,6 +208,7 @@ const SearchPage = () => {
   const [totalPages, setTotalPages] = useState(0);
   const searchBarRef = useRef<any>(null);
   const navigate = useNavigate();
+  const [isSearchActive, setIsSearchActive] = useState(false);
 
   // 검색 파라미터 업데이트 함수
   const updateSearchParams = (
@@ -299,6 +300,9 @@ const SearchPage = () => {
 
   const handleSearchChange = async (value: string) => {
     setSearchTerm(value);
+    if (!value) {
+      setIsSearchActive(false);
+    }
     // 검색어가 변경될 때마다 현재 선택된 태그와 함께 검색
     try {
       const response = await api.get("/api/search/book", {
@@ -331,6 +335,9 @@ const SearchPage = () => {
         setTotalBooks(processedData.totalElements);
         setTotalPages(processedData.totalPages);
         setBooks(processedData.content);
+        if (value) {
+          setIsSearchActive(true);
+        }
       }
     } catch (error) {
       console.error("Failed to search:", error);
@@ -348,12 +355,14 @@ const SearchPage = () => {
     setUsers([]);
     setTotalBooks(0);
     setTotalPages(0);
+    setIsSearchActive(false);
     updateSearchParams("", []);
   };
 
   // 함수 이름을 handleTabChange로 변경
   const handleTabChange = (tab: "books" | "users") => {
     setActiveTab(tab);
+    setIsSearchActive(false);
     updateSearchParams(undefined, undefined, tab);
   };
 
@@ -476,7 +485,7 @@ const SearchPage = () => {
     }, 200);
   };
 
-  const shouldShowTags = activeTab === "books" && !showRecent;
+  const shouldShowTags = activeTab === "books" && !showRecent && !isSearchActive;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
