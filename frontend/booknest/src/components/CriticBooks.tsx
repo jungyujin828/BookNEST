@@ -292,8 +292,19 @@ const CriticBooks = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
   const [currentCritic, setCurrentCritic] = useState<string>('');
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
+
+  const updateScrollButtonsVisibility = () => {
+    if (!bookListRef.current) return;
+    
+    setCanScrollLeft(scrollPosition > 0);
+    setCanScrollRight(
+      scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    );
+  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
@@ -307,7 +318,34 @@ const CriticBooks = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
+    
+    // Update buttons visibility after scrolling
+    setTimeout(updateScrollButtonsVisibility, 300); // Wait for transform animation
   };
+
+  // Update buttons visibility on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (scrollPosition > 0) {
+        // Reset position when window is resized
+        if (bookListRef.current) {
+          setScrollPosition(0);
+          bookListRef.current.style.transform = `translateX(0)`;
+        }
+      }
+      
+      // Update buttons after resize
+      setTimeout(updateScrollButtonsVisibility, 300);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [scrollPosition]);
+
+  // Update scroll buttons visibility when books load or scroll position changes
+  useEffect(() => {
+    updateScrollButtonsVisibility();
+  }, [criticBooks, scrollPosition]);
 
   useEffect(() => {
     const fetchCriticBooks = async () => {
@@ -348,11 +386,6 @@ const CriticBooks = () => {
   if (error.criticBooks) {
     return <ErrorMessage>{error.criticBooks}</ErrorMessage>;
   }
-
-  const canScrollLeft = scrollPosition > 0;
-  const canScrollRight = bookListRef.current 
-    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    : false;
 
   return (
     <CriticBooksContainer>
