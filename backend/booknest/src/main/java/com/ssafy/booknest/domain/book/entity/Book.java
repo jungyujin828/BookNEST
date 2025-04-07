@@ -22,16 +22,16 @@ public class Book extends BaseEntity {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "published_date", nullable = false)
+    @Column(name = "published_date")
     private String publishedDate;
 
     @Column(name="isbn", length = 20)
     private String isbn;
 
-    @Column(name="publisher", nullable= false, length = 100)
+    @Column(name="publisher", length = 100)
     private String publisher;
 
-    @Column(name="pages", nullable = false)
+    @Column(name="pages")
     private String pages;
 
     @Column(name="image_url")
