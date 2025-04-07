@@ -56,12 +56,7 @@ const SlideImageContainer = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.3) 0%,
-      rgba(0, 0, 0, 0.5) 30%,
-      rgba(0, 0, 0, 1) 100%
-    );
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 30%, rgba(0, 0, 0, 1) 100%);
     pointer-events: none;
   }
 `;
@@ -224,27 +219,25 @@ const TodaysPage = () => {
           <SlideImageContainer>
             <SlideImage src={currentBook.image_url} alt={currentBook.title} />
           </SlideImageContainer>
-          <SlideInfo
-            onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}
-          >
+          <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
             <BasicInfo>
               <DetailInfo isVisible={showDetail}>
                 <BookDescription>
-                  {currentBook.intro ||
-                    currentBook.publisher_review ||
-                    "도서 설명이 없습니다."}
+                  {currentBook.intro || currentBook.publisher_review || "도서 설명이 없습니다."}
                 </BookDescription>
               </DetailInfo>
               <TagContainer>
-                {currentBook.tags
-                  ?.split(",")
-                  .map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) ||
-                  []}
+                {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
               </TagContainer>
               <BookTitle>{currentBook.title}</BookTitle>
               <AuthorButtonWrapper>
                 <BookAuthor>{currentBook.authors}</BookAuthor>
-                <DetailButton onClick={() => setShowDetail(!showDetail)}>
+                <DetailButton
+                  onClick={(e) => {
+                    e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
+                    setShowDetail(!showDetail);
+                  }}
+                >
                   {showDetail ? "간단히 보기" : "상세 보기"}
                 </DetailButton>
               </AuthorButtonWrapper>
@@ -258,9 +251,7 @@ const TodaysPage = () => {
           <FaChevronRight />
         </NavigationButton>
       </SlideContainer>
-      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>
-        도서 평가하기
-      </EvaluateButton>
+      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
     </MainContainer>
   );
 };
