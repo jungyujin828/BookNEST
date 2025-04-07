@@ -8,6 +8,7 @@ import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -25,16 +26,20 @@ public class RatingController {
 
     private final AuthenticationUtil authenticationUtil;
     private final RatingService ratingService;
+    private final UserActionLogger userActionLogger;
 
     // 도서 평점 등록
     @PostMapping("/{bookId}/rating")
     public ResponseEntity<ApiResponse<Void>> createBookRating(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody RatingRequest dto
-    ){
+            @RequestBody RatingRequest dto){
+
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         ratingService.createBookRating(userId, bookId, dto);
+
+        userActionLogger.logAction(userId, bookId, "rating_star_" + dto.getScore());
+
         return ApiResponse.success(HttpStatus.CREATED);
     }
 
@@ -43,10 +48,13 @@ public class RatingController {
     public ResponseEntity<ApiResponse<Void>> updateRating(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody RatingRequest dto
-    ){
+            @RequestBody RatingRequest dto){
+
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        ratingService.updateRating(userId, bookId, dto);
+        Double score = ratingService.updateRating(userId, bookId, dto);
+
+        userActionLogger.logAction(userId, bookId, "update_rating_star_" + score + "_" + dto.getScore());
+
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -55,8 +63,12 @@ public class RatingController {
     public ResponseEntity<ApiResponse<Void>> deleteRating(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal){
+
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        ratingService.deleteRating(userId, bookId);
+        Double score = ratingService.deleteRating(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "rating_cancel_" + score);
+
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -88,6 +100,9 @@ public class RatingController {
             @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         ratingService.ignoreBook(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "click_dislike");
+
         return ApiResponse.success(HttpStatus.OK);
     }
 
