@@ -7,5 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BookSearchCustomRepository {
+
+    void save(SearchedBook book);
     Page<SearchedBook> searchByTagsAndKeyword(List<String> tags, String keyword, Pageable pageable);
 }

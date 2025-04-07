@@ -5,7 +5,7 @@ import com.ssafy.booknest.domain.search.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.search.dto.response.UserSearchResponse;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.domain.search.record.SerachedUser;
-import com.ssafy.booknest.domain.search.repository.BookSearchRepository;
+import com.ssafy.booknest.domain.search.repository.BookSearchCustomRepository;
 import com.ssafy.booknest.domain.search.repository.UserSearchRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
@@ -25,31 +25,24 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class SearchService {
-    private final BookSearchRepository bookSearchRepository;
+    private final BookSearchCustomRepository bookSearchRepository;
     private final UserSearchRepository userSearchRepository;
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final PopularKeywordService popularKeywordService;
 
     public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, List<String> tags, Pageable pageable) {
-        User user = userRepository.findById(userId).orElseThrow(() ->
-                new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 태그와 키워드 둘 다 없으면 빈 결과 반환
         if ((keyword == null || keyword.isBlank()) && (tags == null || tags.isEmpty())) {
             return new CustomPage<>(Page.empty());
         }
 
-        Page<SearchedBook> books;
+        Page<SearchedBook> books = bookSearchRepository.searchByTagsAndKeyword(tags, keyword, pageable);
 
-        if (tags != null && !tags.isEmpty()) {
-            // 태그만 있는 경우에도 이 메서드에서 처리
-            books = bookSearchRepository.searchByTagsAndKeyword(tags, keyword, pageable);
-        } else {
-            // 키워드만 있는 경우
-            books = bookSearchRepository.findByTitleContainingOrAuthorsContaining(keyword, keyword, pageable);
-        }
-
+        // 키워드 있을 때만 카운트 증가
         if (keyword != null && !keyword.isBlank()) {
             popularKeywordService.increaseKeywordCount(keyword);
         }
@@ -59,7 +52,8 @@ public class SearchService {
 
 
     public SearchedBook saveBook(SearchedBook book) {
-        return bookSearchRepository.save(book);
+        bookSearchRepository.save(book);
+        return book;
     }
 
     public SerachedUser saveUser(SerachedUser user) { return userSearchRepository.save(user); }
