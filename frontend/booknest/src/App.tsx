@@ -3,6 +3,7 @@ import { theme } from "./styles/theme";
 import { ROUTES } from "./constants/paths";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AuthRedirect from "./components/AuthRedirect";
 import LoginPage from "./pages/LoginPage";
 import InputInfoPage from "./pages/InputInfoPage";
 import KakaoCallback from "./components/KakaoCallback";
@@ -24,6 +25,7 @@ import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
+import BookAllCommentPage from './pages/BookAllCommentPage';
 
 // 개발 환경에서 테스트용 토큰 설정
 if (import.meta.env.DEV && !localStorage.getItem("token")) {
@@ -65,7 +67,14 @@ const AppContent = () => {
             {/* 공개 라우트 */}
             <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-            <Route path={ROUTES.INPUT_INFO} element={<InputInfoPage />} />
+            <Route 
+              path={ROUTES.INPUT_INFO} 
+              element={
+                <AuthRedirect>
+                  <InputInfoPage />
+                </AuthRedirect>
+              } 
+            />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
             <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
             <Route path={ROUTES.GOOGLE_CALLBACK} element={<GoogleCallback />} />
@@ -183,6 +192,7 @@ const AppContent = () => {
             />
             {/* 책 상세페이지 */}
             <Route path="/book-detail/:bookId" element={<BookDetailPage />} />
+            <Route path="/book/:bookId/comments" element={<BookAllCommentPage />} />
             {/* 잘못된 경로는 에러 페이지로 연결 */}
             <Route path="*" element={<ErrorPage />} />
             {/* 🗑️ */}
