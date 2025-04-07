@@ -1,6 +1,9 @@
 package com.ssafy.booknest.domain.search.record;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -8,33 +11,25 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.util.List;
 
-@Builder
 @Document(indexName = "book")
-public record SearchedBook(
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class SearchedBook {
 
-        @Id
-        Integer bookId,
+    @Id
+    private Integer bookId;
 
-        @Field(type = FieldType.Text)
-        String title,
+    @Field(type = FieldType.Text)
+    private String title;
 
-        @Field(type = FieldType.Keyword, name = "image_url")
-        String imageURL,
+    @Field(type = FieldType.Keyword, name = "image_url")
+    private String imageURL;
 
-        @Field(type = FieldType.Text)
-        String authors,
+    @Field(type = FieldType.Text)
+    private List<String> authors;
 
-        @Field(type = FieldType.Keyword)
-        List<String> tags
-) {
-
-    public static SearchedBook fromAnotherSource(final SearchedBook book) {
-        return SearchedBook.builder()
-                .bookId(book.bookId())
-                .title(book.title())
-                .imageURL(book.imageURL())
-                .authors(book.authors())
-                .tags(book.tags())
-                .build();
-    }
+    @Field(type = FieldType.Keyword)
+    private List<String> tags;
 }
