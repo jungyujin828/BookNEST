@@ -163,6 +163,8 @@ const SearchPage = () => {
   );
   const [books, setBooks] = useState<Book[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [showRecent, setShowRecent] = useState(false);
+  const searchBarRef = useRef<any>(null);
   const navigate = useNavigate();
 
   // 검색 파라미터 업데이트 함수
@@ -290,29 +292,40 @@ const SearchPage = () => {
     }
   };
 
-  const searchBarRef = useRef<any>(null);
-
   // Add state for search focus
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-  // SearchBar를 감싸는 새로운 컨테이너 추가
-  const SearchBarWrapper = styled.div`
-    position: relative;
-  `;
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+  };
 
-  // return 문 안에서
+  const handleSearchFocus = () => {
+    if (searchTerm === "") {
+      setShowRecent(true);
+    }
+  };
+
+  const handleSearchBlur = () => {
+    // 약간의 지연을 주어 클릭 이벤트가 처리될 수 있도록 함
+    setTimeout(() => {
+      setShowRecent(false);
+    }, 200);
+  };
+
+  const shouldShowTags = activeTab === "books" && !showRecent && !searchTerm && books.length === 0;
+
   return (
     <SearchContainer>
       <TabContainer>
         <Tab
           active={activeTab === "books"}
-          onClick={() => handleTabChange("books")} // 변경된 함수명 사용
+          onClick={() => handleTabChange("books")}
         >
           도서
         </Tab>
         <Tab
           active={activeTab === "users"}
-          onClick={() => handleTabChange("users")} // 변경된 함수명 사용
+          onClick={() => handleTabChange("users")}
         >
           유저
         </Tab>
@@ -322,7 +335,7 @@ const SearchPage = () => {
         <SearchBar
           ref={searchBarRef}
           searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+          onSearchChange={handleSearchChange}
           onClear={() => {
             handleClear();
             setSelectedTags([]);
@@ -331,21 +344,21 @@ const SearchPage = () => {
           onSearchResult={handleSearchResult}
           placeholder={activeTab === "books" ? "도서 검색" : "유저 검색"}
           selectedTags={selectedTags}
-          onFocus={() => setIsSearchFocused(true)}
+          onFocus={handleSearchFocus}
+          onBlur={handleSearchBlur}
         />
 
-        {isSearchFocused && (
+        {showRecent && searchTerm === "" && (
           <SearchRecent
             onSelect={(query) => {
               setSearchTerm(query);
               triggerSearch();
-              setIsSearchFocused(false);
             }}
-            onClose={() => setIsSearchFocused(false)}
+            onClose={() => setShowRecent(false)}
           />
         )}
 
-        {activeTab === "books" && !isSearchFocused && (
+        {shouldShowTags && (
           <SearchTag
             selectedTags={selectedTags}
             onTagSelect={handleTagSelect}

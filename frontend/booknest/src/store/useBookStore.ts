@@ -23,85 +23,69 @@ interface LibraryBook {
   link: string;
 }
 
-interface BookState {
+interface BookStore {
   bestSellers: Book[];
-  regionalBooks: Book[];
   authorBooks: Book[];
   ageBooks: Book[];
   criticBooks: Book[];
-  authorRatingBooks: Book[];
   purchaseUrls: PurchaseUrls | null;
   libraryBooks: LibraryBook[] | null;
   loading: {
     bestSellers: boolean;
-    regionalBooks: boolean;
     authorBooks: boolean;
     ageBooks: boolean;
     criticBooks: boolean;
-    authorRatingBooks: boolean;
     purchaseUrls: boolean;
     libraryBooks: boolean;
   };
   error: {
     bestSellers: string | null;
-    regionalBooks: string | null;
     authorBooks: string | null;
     ageBooks: string | null;
     criticBooks: string | null;
-    authorRatingBooks: string | null;
     purchaseUrls: string | null;
     libraryBooks: string | null;
   };
   setBestSellers: (books: Book[]) => void;
-  setRegionalBooks: (books: Book[]) => void;
   setAuthorBooks: (books: Book[]) => void;
   setAgeBooks: (books: Book[]) => void;
   setCriticBooks: (books: Book[]) => void;
-  setAuthorRatingBooks: (books: Book[]) => void;
   setPurchaseUrls: (urls: PurchaseUrls | null) => void;
   setLibraryBooks: (books: LibraryBook[] | null) => void;
-  setLoading: (key: keyof BookState['loading'], value: boolean) => void;
-  setError: (key: keyof BookState['error'], value: string | null) => void;
+  setLoading: (key: keyof BookStore['loading'], value: boolean) => void;
+  setError: (key: keyof BookStore['error'], value: string | null) => void;
 }
 
-const useBookStore = create<BookState>((set) => ({
+export const useBookStore = create<BookStore>((set) => ({
   bestSellers: [],
-  regionalBooks: [],
   authorBooks: [],
   ageBooks: [],
   criticBooks: [],
-  authorRatingBooks: [],
   purchaseUrls: null,
   libraryBooks: null,
   loading: {
     bestSellers: false,
-    regionalBooks: false,
     authorBooks: false,
     ageBooks: false,
     criticBooks: false,
-    authorRatingBooks: false,
     purchaseUrls: false,
     libraryBooks: false,
   },
   error: {
     bestSellers: null,
-    regionalBooks: null,
     authorBooks: null,
     ageBooks: null,
     criticBooks: null,
-    authorRatingBooks: null,
     purchaseUrls: null,
     libraryBooks: null,
   },
   setBestSellers: (books) => set({ bestSellers: books }),
-  setRegionalBooks: (books) => set({ regionalBooks: books }),
   setAuthorBooks: (books) => set({ authorBooks: books }),
   setAgeBooks: (books) => set({ ageBooks: books }),
   setCriticBooks: (books) => set({ criticBooks: books }),
-  setAuthorRatingBooks: (books) => set({ authorRatingBooks: books }),
   setPurchaseUrls: (urls) => set({ purchaseUrls: urls }),
   setLibraryBooks: (books) => set({ libraryBooks: books }),
-  setLoading: (key, value) => 
+  setLoading: (key, value) =>
     set((state) => ({
       loading: { ...state.loading, [key]: value }
     })),
@@ -109,6 +93,4 @@ const useBookStore = create<BookState>((set) => ({
     set((state) => ({
       error: { ...state.error, [key]: value }
     })),
-}));
-
-export { useBookStore }; 
+})); 

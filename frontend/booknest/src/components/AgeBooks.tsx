@@ -9,11 +9,16 @@ interface Book {
   publishedDate: string;
   imageUrl: string;
   authors: string[];
+  ageGroup: string;
+  gender: string;
 }
 
 interface AgeBooksResponse {
   success: boolean;
-  data: Book[];
+  data: {
+    description: string;
+    books: Book[];
+  };
   error: null | string;
 }
 
@@ -233,6 +238,32 @@ const LoadingMessage = styled.div`
   }
 `;
 
+const Description = styled.h2`
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  
+  @media (min-width: 768px) {
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+`;
+
+const HighlightAge = styled.span`
+  color: #2196F3;
+  font-weight: 600;
+`;
+
+const HighlightGender = styled.span`
+  color: #2196F3;
+  font-weight: 600;
+`;
+
 const AgeBooks = () => {
   const { 
     ageBooks, 
@@ -242,6 +273,7 @@ const AgeBooks = () => {
     setLoading, 
     setError 
   } = useBookStore();
+  const [description, setDescription] = useState<string>('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
 
@@ -270,7 +302,8 @@ const AgeBooks = () => {
         const response = await api.get<AgeBooksResponse>('/api/book/age-gender');
         
         if (response.data.success && response.data.data) {
-          setAgeBooks(response.data.data);
+          setAgeBooks(response.data.data.books);
+          setDescription(response.data.data.description);
         } else {
           setError('ageBooks', '연령대/성별 추천 도서 정보를 불러오는데 실패했습니다.');
           setAgeBooks([]);
@@ -287,6 +320,24 @@ const AgeBooks = () => {
     fetchAgeBooks();
   }, [setAgeBooks, setLoading, setError]);
 
+  const renderDescription = (desc: string) => {
+    // Split the description into parts, keeping the delimiters
+    const parts = desc.split(/(\d+대|[남여]성)/g);
+    
+    return (
+      <Description>
+        {parts.map((part, index) => {
+          if (/\d+대/.test(part)) {
+            return <HighlightAge key={index}>{part}</HighlightAge>;
+          } else if (/[남여]성/.test(part)) {
+            return <HighlightGender key={index}>{part}</HighlightGender>;
+          }
+          return part;
+        })}
+      </Description>
+    );
+  };
+
   if (loading.ageBooks) {
     return <LoadingMessage>연령대/성별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
@@ -302,9 +353,7 @@ const AgeBooks = () => {
 
   return (
     <AgeBooksContainer>
-      <Title>
-        내 연령대 추천 도서
-      </Title>
+      {description && renderDescription(description)}
       <BookListContainer>
         {canScrollLeft && (
           <NavigationButton 

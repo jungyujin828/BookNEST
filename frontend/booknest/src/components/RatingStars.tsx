@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaStar } from 'react-icons/fa';
+import { FaStar, FaStarHalf } from 'react-icons/fa';
 import api from '../api/axios';
 import useRatingStore from '../store/useRatingStore';
 import useNestStore from '../store/useNestStore';
@@ -16,6 +16,13 @@ const StarContainer = styled.div`
   gap: 4px;
 `;
 
+const StarWrapper = styled.div`
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+`;
+
 const StarButton = styled.button<{ $active: boolean }>`
   background: none;
   border: none;
@@ -24,10 +31,24 @@ const StarButton = styled.button<{ $active: boolean }>`
   color: ${(props) => (props.$active ? "#f8c41b" : "#ddd")};
   font-size: 24px;
   transition: color 0.2s ease;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     color: #f8c41b;
   }
+`;
+
+const HalfStarButton = styled(StarButton)`
+  width: 50%;
+  overflow: hidden;
+  z-index: 2;
 `;
 
 const RatingStars: React.FC<RatingStarsProps> = ({
@@ -73,7 +94,6 @@ const RatingStars: React.FC<RatingStarsProps> = ({
         method: currentRating > 0 ? "PUT" : "POST",
       });
 
-      // If there's an existing rating, use PUT, otherwise use POST
       const method = currentRating > 0 ? "put" : "post";
       const response = await api[method](`/api/book/${bookId}/rating`, {
         score: score,
@@ -91,7 +111,6 @@ const RatingStars: React.FC<RatingStarsProps> = ({
         `Failed to ${currentRating > 0 ? "update" : "create"} rating:`,
         error
       );
-      // Revert optimistic update on error
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
     }
@@ -154,19 +173,38 @@ const RatingStars: React.FC<RatingStarsProps> = ({
     setHoveredRating(null);
   };
 
-  return (
-    <StarContainer>
-      {[1, 2, 3, 4, 5].map((score) => (
+  const renderStar = (index: number) => {
+    const rating = hoveredRating || currentRating;
+    const isFullStar = rating >= index;
+    const isHalfStar = rating === index - 0.5;
+    
+    return (
+      <StarWrapper
+        key={index}
+        onMouseLeave={handleStarLeave}
+      >
         <StarButton
-          key={score}
-          $active={score <= (hoveredRating || currentRating)}
-          onClick={() => handleStarClick(score)}
-          onMouseEnter={() => handleStarHover(score)}
-          onMouseLeave={handleStarLeave}
+          $active={isFullStar || isHalfStar}
+          onClick={() => handleStarClick(index)}
+          onMouseEnter={() => handleStarHover(index)}
+        >
+          {isHalfStar ? <FaStarHalf /> : <FaStar />}
+        </StarButton>
+        <HalfStarButton
+          $active={false}
+          onClick={() => handleStarClick(index - 0.5)}
+          onMouseEnter={() => handleStarHover(index - 0.5)}
+          style={{ opacity: 0 }}  // 반별 클릭 영역만 유지하고 시각적으로는 숨김
         >
           <FaStar />
-        </StarButton>
-      ))}
+        </HalfStarButton>
+      </StarWrapper>
+    );
+  };
+
+  return (
+    <StarContainer>
+      {[1, 2, 3, 4, 5].map((index) => renderStar(index))}
       {currentRating > 0 && (
         <button
           onClick={handleCancelRating}

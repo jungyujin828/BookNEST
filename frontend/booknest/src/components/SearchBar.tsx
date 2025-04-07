@@ -24,6 +24,13 @@ interface SearchBarProps {
 const SearchBarContainer = styled.div`
   position: relative;
   margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
+`;
+
+const SearchInputWrapper = styled.div`
+  position: relative;
+  flex: 1;
 `;
 
 const SearchInput = styled.input`
@@ -109,6 +116,21 @@ const ClearButton = styled.button`
   }
 `;
 
+const SearchButton = styled.button`
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  background-color: #7bc47f;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #6ab36e;
+  }
+`;
+
 const SearchBar = forwardRef<any, SearchBarProps>(
   (
     {
@@ -126,8 +148,12 @@ const SearchBar = forwardRef<any, SearchBarProps>(
   ) => {
     const { addRecent } = useRecentStore();
     const inputRef = useRef<HTMLInputElement>(null);
+    const [isSearching, setIsSearching] = useState(false);
 
     const handleSearch = async () => {
+      if (!searchTerm.trim()) return;
+      
+      setIsSearching(true);
       if (searchTerm.trim()) {
         addRecent(searchTerm);
       }
@@ -144,9 +170,6 @@ const SearchBar = forwardRef<any, SearchBarProps>(
               }
             : { name: searchTerm, page: 1, size: 10 };
 
-        console.log("SearchBar - Search Parameters:", params);
-        console.log("SearchBar - Selected Tags:", selectedTags);
-
         const response = await api.get(endpoint, {
           params,
           headers: {
@@ -155,7 +178,6 @@ const SearchBar = forwardRef<any, SearchBarProps>(
         });
 
         if (response.data.success) {
-          console.log("SearchBar - API Response:", response.data);
           const processedData = {
             ...response.data.data,
             content: response.data.data.content.map((item: any) => ({
@@ -166,11 +188,12 @@ const SearchBar = forwardRef<any, SearchBarProps>(
                 ) || [],
             })),
           };
-          console.log("SearchBar - Processed Data:", processedData);
           onSearchResult(processedData.content);
         }
       } catch (error) {
         console.error(`Failed to search ${searchType}:`, error);
+      } finally {
+        setIsSearching(false);
       }
     };
 
@@ -182,8 +205,18 @@ const SearchBar = forwardRef<any, SearchBarProps>(
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       onSearchChange(e.target.value);
-      // Ensure input keeps focus after value change
-      inputRef.current?.focus();
+    };
+
+    const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      if (onFocus) {
+        onFocus();
+      }
+    };
+
+    const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      if (onBlur) {
+        onBlur();
+      }
     };
 
     useImperativeHandle(ref, () => ({
@@ -192,18 +225,26 @@ const SearchBar = forwardRef<any, SearchBarProps>(
 
     return (
       <SearchBarContainer>
-        <SearchIcon />
-        <SearchInput
-          ref={inputRef}
-          type="text"
-          placeholder={placeholder}
-          value={searchTerm}
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          onFocus={onFocus}
-          onBlur={onBlur}
-        />
-        {searchTerm && <ClearButton onClick={onClear} />}
+        <SearchInputWrapper>
+          <SearchIcon />
+          <SearchInput
+            ref={inputRef}
+            type="text"
+            placeholder={placeholder}
+            value={searchTerm}
+            onChange={handleChange}
+            onKeyPress={handleKeyPress}
+            onFocus={handleInputFocus}
+            onBlur={handleInputBlur}
+          />
+          {searchTerm && <ClearButton onClick={onClear} />}
+        </SearchInputWrapper>
+        <SearchButton 
+          onClick={handleSearch}
+          disabled={isSearching}
+        >
+          {isSearching ? "검색 중..." : "검색"}
+        </SearchButton>
       </SearchBarContainer>
     );
   }
