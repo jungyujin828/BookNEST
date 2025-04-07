@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Map;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserActionLogger {

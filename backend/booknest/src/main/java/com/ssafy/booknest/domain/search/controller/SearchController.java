@@ -3,7 +3,6 @@ package com.ssafy.booknest.domain.search.controller;
 import com.ssafy.booknest.domain.search.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.search.dto.response.UserSearchResponse;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
-import com.ssafy.booknest.domain.search.record.SerachedUser;
 import com.ssafy.booknest.domain.search.service.PopularKeywordService;
 import com.ssafy.booknest.domain.search.service.SearchService;
 import com.ssafy.booknest.global.common.CustomPage;

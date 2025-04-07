@@ -48,9 +48,9 @@ public class RatingController {
             @RequestBody RatingRequest dto){
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        ratingService.updateRating(userId, bookId, dto);
+        Double score = ratingService.updateRating(userId, bookId, dto);
 
-        userActionLogger.logAction(userId, bookId, "rating_star_" + dto.getScore());
+        userActionLogger.logAction(userId, bookId, "update_rating_star_" + score + "_" + dto.getScore());
 
         return ApiResponse.success(HttpStatus.OK);
     }
@@ -60,8 +60,12 @@ public class RatingController {
     public ResponseEntity<ApiResponse<Void>> deleteRating(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal){
+
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        ratingService.deleteRating(userId, bookId);
+        Double score = ratingService.deleteRating(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "rating_cancel_" + score);
+
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -93,6 +97,9 @@ public class RatingController {
             @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         ratingService.ignoreBook(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "click_dislike");
+
         return ApiResponse.success(HttpStatus.OK);
     }
 

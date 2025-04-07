@@ -76,13 +76,17 @@ public class RatingService {
 
     // 평점 수정
     @Transactional
-    public void updateRating(Integer userId, Integer bookId, RatingRequest dto) {
+    public Double updateRating(Integer userId, Integer bookId, RatingRequest dto) {
         if (dto.getScore() == null) {
             throw new CustomException(ErrorCode.EMPTY_RATING_CONTENT);
         }
 
+        Double score = 0.0;
+
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
+
+        score = rating.getRating();
 
         if (!rating.getUser().getId().equals(userId)) {
             throw new CustomException(ErrorCode.FORBIDDEN_ACCESS);
@@ -97,11 +101,15 @@ public class RatingService {
         if (review.isPresent() && review.get().getRating() != null) {
             review.get().updateRating(dto.getScore());
         }
+
+        return score;
     }
 
     // 평점 삭제
     @Transactional
-    public void deleteRating(Integer userId, Integer bookId) {
+    public Double deleteRating(Integer userId, Integer bookId) {
+        Double score = 0.0;
+
         // 평점이 존재하지 않으면 예외 발생
         Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
@@ -116,6 +124,8 @@ public class RatingService {
             throw new CustomException(ErrorCode.CANNOT_DELETE_RATING_IN_NEST);
         }
 
+        score = rating.getRating();
+
         // 관련 리뷰가 존재하고, 평점이 설정되어 있다면 평점만 제거
         Optional<Review> review = reviewRepository.findByUserIdAndBookId(userId, bookId);
         if (review.isPresent() && review.get().getRating() != null) {
@@ -124,6 +134,8 @@ public class RatingService {
 
         // 평점 삭제
         ratingRepository.delete(rating);
+
+        return score;
     }
 
 

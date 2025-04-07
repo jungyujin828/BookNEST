@@ -10,6 +10,7 @@ import com.ssafy.booknest.domain.nest.service.NestService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +28,7 @@ public class NestController {
 
     private final NestService nestService;
     private final AuthenticationUtil authenticationUtil;
+    private final UserActionLogger userActionLogger;
 
     @GetMapping("")
     public ResponseEntity<ApiResponse<CustomPage<NestBookListResponse>>> getNestBookList(
@@ -43,9 +45,13 @@ public class NestController {
     public ResponseEntity<ApiResponse<AddBookNestResponse>> addBookNest(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AddBookNestRequest addBookNestRequest){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(nestService.addBookNest(userId, addBookNestRequest), HttpStatus.CREATED);
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        AddBookNestResponse response = nestService.addBookNest(userId, addBookNestRequest);
+
+        userActionLogger.logAction(userId, addBookNestRequest.getBookId(), "add_to_bookshelf");
+
+        return ApiResponse.success(response, HttpStatus.CREATED);
     }
 
     // 찜하기 등록
@@ -58,6 +64,9 @@ public class NestController {
         Integer bookId = request.getBookId();
 
         nestService.addBookMark(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "add_to_wishlist");
+
         return ApiResponse.success(HttpStatus.CREATED);
     }
 
@@ -71,6 +80,9 @@ public class NestController {
         Integer bookId = request.getBookId();
 
         nestService.removeBookMark(userId, bookId);
+
+        userActionLogger.logAction(userId, bookId, "cancel_wishlist");
+
         return ApiResponse.success(HttpStatus.OK);
     }
 
@@ -92,6 +104,8 @@ public class NestController {
             @RequestBody DeleteBookNestRequest request) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         nestService.deleteBookNest(userId, request);
+
+        userActionLogger.logAction(userId, request.getBookId(), "cancel_bookshelf");
 
         return ApiResponse.success(HttpStatus.OK);
     }
