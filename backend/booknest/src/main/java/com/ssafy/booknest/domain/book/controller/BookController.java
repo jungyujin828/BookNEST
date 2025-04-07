@@ -147,6 +147,37 @@ public class BookController {
         return ApiResponse.success(responseList);
     }
 
+    // 내가 가장 많이 본 카테고리에서 추천
+    @GetMapping("/favorite-category")
+    public ResponseEntity<ApiResponse<List<FavoriteCategoryBookResponse>>> getFavoriteCategoryBooks(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<FavoriteCategoryBookResponse> responseList = bookService.getFavoriteCategoryBooks(userId);
+
+        return ApiResponse.success(responseList);
+    }
+
+
+    // 내가 가장 많이 본 태그에서 추천
+    @GetMapping("/favorite-tag")
+    public ResponseEntity<ApiResponse<List<FavoriteTagBookResponse>>> getFavoriteTagBooks(
+            @AuthenticationPrincipal UserPrincipal userPrincipal
+    ){
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        List<FavoriteTagBookResponse> responseList = bookService.getFavoriteTagBooks(userId);
+
+        return ApiResponse.success(responseList);
+    }
+
+
+
+
+
+
+
     @GetMapping("/eval")
     public ResponseEntity<ApiResponse<CustomPage<BookResponse>>> getEvalBookList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,

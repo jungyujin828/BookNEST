@@ -22,7 +22,7 @@ public class TagBookResult {
         }
 
         String tag = tagBookResponses.get(0).getTag();
-        String description = "‘" + tag + "’ 태그의 추천 도서입니다.";
+        String description = "‘#" + tag + "’ 도서로 떠나는 여행";
 
         return new TagBookResult(description, tagBookResponses);
     }

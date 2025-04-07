@@ -14,12 +14,12 @@ VALUES
     (8, '중년남', '느긋한 앵무새', 'KAKAO', 1111113, NOW(), NOW(), 'https://img.example.com/profile8.png', 'M', '1975-05-10'), -- 50대
 
     -- F
-    (9, '대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png', 'F', '2001-07-20'), -- 20대
-    (10, '워킹맘', '다정한 제비', 'NAVER', 1111115, NOW(), NOW(), 'https://img.example.com/profile10.png', 'F', '1983-11-30'), -- 40대
-    (11, '할머니F', '지혜로운 부엉이', 'GOOGLE', 1111116, NOW(), NOW(), 'https://img.example.com/profile11.png', 'F', '1950-03-25'), -- 60대 이상
+    (9, '대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png'), -- 20대
+    (10, '워킹맘', '다정한 제비', 'NAVER', 1111115, NOW(), NOW(), 'https://img.example.com/profile10.png'), -- 40대
+    (11, '할머니F', '지혜로운 부엉이', 'GOOGLE', 1111116, NOW(), NOW(), 'https://img.example.com/profile11.png'), -- 60대 이상
 
     -- O (기타)
-    (12, '열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png', 'O', '1999-06-06'), -- 20대
+    (12, '열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png'), -- 20대
 
     -- N (성별 선택 안함)
     (13, '미정성별', '신비한 두루미', 'NAVER', 1111118, NOW(), NOW(), 'https://img.example.com/profile13.png', 'N', '1990-09-09'); -- 30대
@@ -187,8 +187,7 @@ VALUES
     (2, 2, 1, NOW()),
     (3, 3, 1, NOW()),
     (4, 4, 1, NOW()),
-    (5, 5, 1, NOW()),
-    (6,3,2, NOW());
+    (5, 5, 1, NOW());
 
 
 
@@ -258,6 +257,18 @@ INSERT INTO book_category (book_id, category_id) VALUES
                                                      (4, 4), -- 어린 왕자 -> 소설
                                                      (5, 5); -- 1984 -> 디스토피아
 
+INSERT INTO book_category (book_id, category_id) VALUES (6, 5);
+INSERT INTO book_category (book_id, category_id) VALUES (7, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (8, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (9, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (10, 2);
+INSERT INTO book_category (book_id, category_id) VALUES (11, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (12, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (13, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (14, 4);
+INSERT INTO book_category (book_id, category_id) VALUES (15, 4);
+
+
 -- 📌 태그 추가
 INSERT INTO tag (id, name) VALUES
                                (1, '감동적인'),
@@ -265,6 +276,13 @@ INSERT INTO tag (id, name) VALUES
                                (3, '철학적인'),
                                (4, '동화 같은'),
                                (5, '디스토피아적인');
+
+INSERT INTO tag (id, name) VALUES
+                               (6, '감성적인'),
+                               (7, '교육적인'),
+                               (8, '스릴 넘치는'),
+                               (9, '힐링되는'),
+                               (10, '가족애');
 
 -- 📌 책 - 태그 매핑
 INSERT INTO book_tag (book_id, tag_id) VALUES
@@ -276,6 +294,37 @@ INSERT INTO book_tag (book_id, tag_id) VALUES
                                            (1, 1),  -- 감동적인
                                            (1, 3),  -- 철학적인
                                            (1, 4);  -- 동화 같은
+
+-- 📌 책 - 태그 매핑 추가
+INSERT INTO book_tag (book_id, tag_id) VALUES
+                                           (6, 8),  -- 마션 -> 스릴 넘치는
+                                           (6, 7),  -- 마션 -> 교육적인
+                                           (6, 3),  -- 마션 -> 철학적인
+
+                                           (7, 1),  -- 소년의 눈물 -> 감동적인
+                                           (7, 9),  -- 소년의 눈물 -> 힐링되는
+
+                                           (8, 2),  -- 소년과 바다 -> 흥미진진한
+                                           (8, 6),  -- 소년과 바다 -> 감성적인
+
+                                           (9, 8),  -- 바람을 가르다 -> 스릴 넘치는
+
+                                           (10, 4), -- 달빛 아래 소년 -> 동화 같은
+                                           (10, 10),-- 달빛 아래 소년 -> 가족애
+
+                                           (11, 1), -- 그림자 소년 -> 감동적인
+                                           (11, 6), -- 그림자 소년 -> 감성적인
+
+                                           (12, 9), -- 달려라, 소년! -> 힐링되는
+
+                                           (13, 6), -- 비 오는 날의 소년 -> 감성적인
+
+                                           (14, 10),-- 소년의 노래 -> 가족애
+                                           (14, 7), -- 소년의 노래 -> 교육적인
+
+                                           (15, 9), -- 소년과 개 -> 힐링되는
+                                           (15, 10);-- 소년과 개 -> 가족애
+
 
 -- 📌 리뷰 추가 (회원 1~5번이 책 1~5번을 리뷰)
 INSERT INTO review (user_id, book_id, rating, content, likes, created_at, updated_at)
