@@ -1,11 +1,9 @@
 import React from "react";
 import styled from "@emotion/styled";
 import BestSeller from "../components/BestSeller";
-import RegionalBooks from "../components/RegionalBooks";
 import AuthorBook from "../components/AuthorBook";
 import AgeBooks from "../components/AgeBooks";
 import CriticBooks from "../components/CriticBooks";
-import AuthorRatingBooks from "../components/AuthorRatingBooks";
 import TodayBestComments from "../components/TodayBestComments";
 import LibraryBooks from '../components/LibraryBooks';
 import { useAuthStore } from "../store/useAuthStore";
@@ -80,7 +78,6 @@ const HomePage = () => {
       }
 
       const response = await api.get("/api/user/info", {
-        // '/api' prefix 추가
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -103,11 +100,9 @@ const HomePage = () => {
       <HomeContainer>
         <TodayBestComments />
         <BestSeller />
-        <RegionalBooks />
         <AuthorBook />
         <AgeBooks />
         <CriticBooks />
-        <AuthorRatingBooks />
         <LibraryBooks />
       </HomeContainer>
     </PageWrapper>
