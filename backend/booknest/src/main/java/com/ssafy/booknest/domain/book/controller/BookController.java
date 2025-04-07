@@ -1,30 +1,21 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.*;
-import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
-import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.FastApiService;
-import com.ssafy.booknest.domain.book.service.RatingService;
-import com.ssafy.booknest.domain.book.service.ReviewService;
-import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,12 +23,9 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
-    private final ReviewService reviewService;
-    private final RatingService ratingService;
     private final FastApiService fastApiService;
-    private final PopularAuthorBookRepository popularAuthorBookRepository;
+    private final UserActionLogger userActionLogger;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -48,13 +36,15 @@ public class BookController {
         return ApiResponse.success(bookService.getBestSellers());
     }
 
-
     // 도서 상세
     @GetMapping("/{bookId}")
     public ResponseEntity<ApiResponse<BookDetailResponse>> getBook(@PathVariable("bookId") Integer bookId,
                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal,
                                                                    Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        userActionLogger.logAction(userId, bookId, "click_book_detail");
+
         return ApiResponse.success(bookService.getBook(userId, bookId, pageable));
     }
 
@@ -96,7 +86,6 @@ public class BookController {
         List<FastApiRecommendation> books = fastApiService.getRecentKeywordRecommendations(userId);
         return ApiResponse.success(books);
     }
-
 
     // 평론가 추천 책(랜덤으로 한 명 평론가 추천 책들이 보여짐)
     @GetMapping("/critic")
