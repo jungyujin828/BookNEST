@@ -61,18 +61,30 @@ const BookCover = styled.img`
 
 const BookInfo = styled.div`
   flex: 1;
+  min-width: 0;
 `;
 
 const BookTitle = styled.h3`
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
 `;
 
 const BookAuthor = styled.p`
   margin: 0;
   color: #666;
   font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  width: 100%;
 `;
 
 const BookTags = styled.div`
@@ -565,7 +577,23 @@ const SearchPage = () => {
                 <BookCover src={book.imageURL} alt={book.title} />
                 <BookInfo>
                   <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors}</BookAuthor>
+                  <BookAuthor>
+                    {(() => {
+                      // authors가 문자열인지 확인
+                      if (!book.authors || typeof book.authors !== 'string') {
+                        return book.authors || '작가 미상';
+                      }
+                      
+                      // 저자 문자열을 쉼표로 분리
+                      const authorsList = book.authors.split(',');
+                      if (authorsList.length <= 1) {
+                        return book.authors;
+                      } else {
+                        // 첫 번째 저자만 표시하고 나머지는 "외 N명"으로 표시
+                        return `${authorsList[0].trim()} 외 ${authorsList.length - 1}명`;
+                      }
+                    })()}
+                  </BookAuthor>
                   {book.tags && book.tags.length > 0 && (
                     <BookTags>
                       {book.tags.map((tag, index) => (
