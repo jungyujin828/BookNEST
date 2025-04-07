@@ -164,7 +164,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           searchType === "books"
             ? {
                 title: searchTerm,
-                tags: selectedTags?.join(","),
+                tags: selectedTags,
                 page: 1,
                 size: 10,
               }
