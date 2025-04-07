@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.search.record;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,12 +20,14 @@ import java.util.List;
 public class SearchedBook {
 
     @Id
+    @JsonProperty("book_id")
     private Integer bookId;
 
     @Field(type = FieldType.Text)
     private String title;
 
     @Field(type = FieldType.Keyword, name = "image_url")
+    @JsonProperty("image_url")
     private String imageURL;
 
     @Field(type = FieldType.Text)
