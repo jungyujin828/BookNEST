@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import SearchTag from "../components/SearchTag";
 import SearchRecent from "../components/SearchRecent";
+import SearchHot from "../components/SearchHot";
 import { useSearchParams } from "react-router-dom";
 
 interface User {
@@ -102,8 +103,7 @@ const Tab = styled.button<{ active: boolean }>`
   background: none;
   font-size: 16px;
   color: ${(props) => (props.active ? "#7bc47f" : "#666")};
-  border-bottom: 2px solid
-    ${(props) => (props.active ? "#7bc47f" : "transparent")};
+  border-bottom: 2px solid ${(props) => (props.active ? "#7bc47f" : "transparent")};
   cursor: pointer;
 `;
 
@@ -171,13 +171,13 @@ const PaginationContainer = styled.div`
 
 const PageButton = styled.button<{ active?: boolean }>`
   padding: 8px 12px;
-  border: 1px solid ${props => props.active ? '#7bc47f' : '#ddd'};
-  background-color: ${props => props.active ? '#7bc47f' : 'white'};
-  color: ${props => props.active ? 'white' : '#666'};
+  border: 1px solid ${(props) => (props.active ? "#7bc47f" : "#ddd")};
+  background-color: ${(props) => (props.active ? "#7bc47f" : "white")};
+  color: ${(props) => (props.active ? "white" : "#666")};
   border-radius: 4px;
   cursor: pointer;
   &:hover {
-    background-color: ${props => props.active ? '#6ab36e' : '#f5f5f5'};
+    background-color: ${(props) => (props.active ? "#6ab36e" : "#f5f5f5")};
   }
   &:disabled {
     cursor: not-allowed;
@@ -211,11 +211,7 @@ const SearchPage = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
 
   // 검색 파라미터 업데이트 함수
-  const updateSearchParams = (
-    newSearchTerm?: string,
-    newTags?: string[],
-    newType?: "books" | "users"
-  ) => {
+  const updateSearchParams = (newSearchTerm?: string, newTags?: string[], newType?: "books" | "users") => {
     const params = new URLSearchParams(searchParams);
 
     if (newSearchTerm !== undefined) {
@@ -241,12 +237,10 @@ const SearchPage = () => {
     console.log("SearchPage - Current Tags:", selectedTags);
 
     // 새로운 태그 배열 생성
-    const newSelectedTags = selectedTags.includes(tag)
-      ? selectedTags.filter((t) => t !== tag)
-      : [...selectedTags, tag];
+    const newSelectedTags = selectedTags.includes(tag) ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
 
     console.log("SearchPage - New Tags Array:", newSelectedTags);
-    
+
     // 상태 업데이트
     setSelectedTags(newSelectedTags);
     updateSearchParams(searchTerm, newSelectedTags);
@@ -259,23 +253,23 @@ const SearchPage = () => {
           page: 1,
           size: 10,
           ...(searchTerm && { title: searchTerm }),
-          ...(newSelectedTags.length > 0 && { tags: newSelectedTags })
+          ...(newSelectedTags.length > 0 && { tags: newSelectedTags }),
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        paramsSerializer: params => {
+        paramsSerializer: (params) => {
           const searchParams = new URLSearchParams();
           Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) {
-              value.forEach(v => searchParams.append(key, v));
+              value.forEach((v) => searchParams.append(key, v));
             } else {
               searchParams.append(key, value as string);
             }
           });
           return searchParams.toString();
-        }
+        },
       });
 
       console.log("Search API Response:", response.data);
@@ -283,7 +277,7 @@ const SearchPage = () => {
       if (response.data.success) {
         const processedData: SearchResult = response.data.data;
         console.log("Processed search results:", processedData);
-        
+
         setCurrentPage(1);
         setTotalBooks(processedData.totalElements);
         setTotalPages(processedData.totalPages);
@@ -310,23 +304,23 @@ const SearchPage = () => {
           page: 1,
           size: 10,
           ...(value && { title: value }),
-          ...(selectedTags.length > 0 && { tags: selectedTags })
+          ...(selectedTags.length > 0 && { tags: selectedTags }),
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        paramsSerializer: params => {
+        paramsSerializer: (params) => {
           const searchParams = new URLSearchParams();
           Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) {
-              value.forEach(v => searchParams.append(key, v));
+              value.forEach((v) => searchParams.append(key, v));
             } else {
               searchParams.append(key, value as string);
             }
           });
           return searchParams.toString();
-        }
+        },
       });
 
       if (response.data.success) {
@@ -394,30 +388,15 @@ const SearchPage = () => {
 
       if (targetUser.isFollowing) {
         // 언팔로우 요청
-        const response = await api.delete(
-          `/api/follow?targetUserId=${userId}`,
-          { headers }
-        );
+        const response = await api.delete(`/api/follow?targetUserId=${userId}`, { headers });
         if (response.data.success) {
-          setUsers(
-            users.map((user) =>
-              user.id === userId ? { ...user, isFollowing: false } : user
-            )
-          );
+          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: false } : user)));
         }
       } else {
         // 팔로우 요청
-        const response = await api.post(
-          `/api/follow?targetUserId=${userId}`,
-          {},
-          { headers }
-        );
+        const response = await api.post(`/api/follow?targetUserId=${userId}`, {}, { headers });
         if (response.data.success) {
-          setUsers(
-            users.map((user) =>
-              user.id === userId ? { ...user, isFollowing: true } : user
-            )
-          );
+          setUsers(users.map((user) => (user.id === userId ? { ...user, isFollowing: true } : user)));
         }
       }
     } catch (error) {
@@ -435,23 +414,23 @@ const SearchPage = () => {
           page,
           size: 10,
           ...(searchTerm && { title: searchTerm }),
-          ...(selectedTags.length > 0 && { tags: selectedTags })
+          ...(selectedTags.length > 0 && { tags: selectedTags }),
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        paramsSerializer: params => {
+        paramsSerializer: (params) => {
           const searchParams = new URLSearchParams();
           Object.entries(params).forEach(([key, value]) => {
             if (Array.isArray(value)) {
-              value.forEach(v => searchParams.append(key, v));
+              value.forEach((v) => searchParams.append(key, v));
             } else {
               searchParams.append(key, value as string);
             }
           });
           return searchParams.toString();
-        }
+        },
       });
 
       if (response.data.success) {
@@ -485,8 +464,8 @@ const SearchPage = () => {
     }, 200);
   };
 
-  const shouldShowTags = activeTab === "books" && !showRecent && 
-    (!isSearchActive || (isSearchActive && selectedTags.length > 0));
+  const shouldShowTags =
+    activeTab === "books" && !showRecent && (!isSearchActive || (isSearchActive && selectedTags.length > 0));
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -496,16 +475,10 @@ const SearchPage = () => {
   return (
     <SearchContainer>
       <TabContainer>
-        <Tab
-          active={activeTab === "books"}
-          onClick={() => handleTabChange("books")}
-        >
+        <Tab active={activeTab === "books"} onClick={() => handleTabChange("books")}>
           도서
         </Tab>
-        <Tab
-          active={activeTab === "users"}
-          onClick={() => handleTabChange("users")}
-        >
+        <Tab active={activeTab === "users"} onClick={() => handleTabChange("users")}>
           유저
         </Tab>
       </TabContainer>
@@ -528,14 +501,23 @@ const SearchPage = () => {
         />
 
         {showRecent && searchTerm === "" && (
-          <SearchRecent
-            onSelect={(query) => {
-              setSearchTerm(query);
-              setIsSearchActive(true);
-              handleSearchChange(query);
-            }}
-            onClose={() => setShowRecent(false)}
-          />
+          <>
+            <SearchRecent
+              onSelect={(query) => {
+                setSearchTerm(query);
+                setIsSearchActive(true);
+                handleSearchChange(query);
+              }}
+              onClose={() => setShowRecent(false)}
+            />
+            <SearchHot
+              onSelect={(query) => {
+                setSearchTerm(query);
+                setIsSearchActive(true);
+                handleSearchChange(query);
+              }}
+            />
+          </>
         )}
       </SearchBarWrapper>
 
@@ -548,20 +530,13 @@ const SearchPage = () => {
         />
       )}
 
-      {activeTab === "books" && books.length > 0 && (
-        <ResultCount>
-          총 {totalBooks}개의 검색결과
-        </ResultCount>
-      )}
+      {activeTab === "books" && books.length > 0 && <ResultCount>총 {totalBooks}개의 검색결과</ResultCount>}
 
       {activeTab === "books" ? (
         <>
           <BookList>
             {books.map((book) => (
-              <BookCard
-                key={book.bookId}
-                onClick={() => navigate(`/book-detail/${book.bookId}`)}
-              >
+              <BookCard key={book.bookId} onClick={() => navigate(`/book-detail/${book.bookId}`)}>
                 <BookCover src={book.imageURL} alt={book.title} />
                 <BookInfo>
                   <BookTitle>{book.title}</BookTitle>
@@ -580,33 +555,22 @@ const SearchPage = () => {
 
           {totalPages > 1 && (
             <PaginationContainer>
-              <PageButton
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
+              <PageButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                 이전
               </PageButton>
               {Array.from({ length: totalPages }, (_, i) => i + 1)
-                .filter(page => 
-                  page === 1 || 
-                  page === totalPages || 
-                  (page >= currentPage - 2 && page <= currentPage + 2)
+                .filter(
+                  (page) => page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)
                 )
                 .map((page, index, array) => (
                   <React.Fragment key={page}>
                     {index > 0 && array[index - 1] !== page - 1 && <span>...</span>}
-                    <PageButton
-                      active={currentPage === page}
-                      onClick={() => handlePageChange(page)}
-                    >
+                    <PageButton active={currentPage === page} onClick={() => handlePageChange(page)}>
                       {page}
                     </PageButton>
                   </React.Fragment>
                 ))}
-              <PageButton
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
+              <PageButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
                 다음
               </PageButton>
             </PaginationContainer>
@@ -631,10 +595,7 @@ const SearchPage = () => {
                 </UserInfo>
               </div>
               {Number(localStorage.getItem("userId")) !== user.id && (
-                <FollowButton
-                  isFollowing={user.isFollowing}
-                  onClick={(e) => handleFollowClick(e, user.id)}
-                >
+                <FollowButton isFollowing={user.isFollowing} onClick={(e) => handleFollowClick(e, user.id)}>
                   {user.isFollowing ? "팔로잉" : "팔로우"}
                 </FollowButton>
               )}

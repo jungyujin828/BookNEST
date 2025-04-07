@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
-import api from '../api/axios';
-import { useNavigate, useParams } from 'react-router-dom';
-import { ROUTES } from '../constants/paths';
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import api from "../api/axios";
+import { useNavigate, useParams } from "react-router-dom";
+import { ROUTES } from "../constants/paths";
 
 interface Review {
   reviewerId: number;
@@ -103,9 +103,9 @@ const Pagination = styled.div`
 
 const PageButton = styled.button<{ active?: boolean }>`
   padding: 8px 12px;
-  border: 1px solid ${props => props.active ? '#007bff' : '#ddd'};
-  background: ${props => props.active ? '#007bff' : 'white'};
-  color: ${props => props.active ? 'white' : '#333'};
+  border: 1px solid ${(props) => (props.active ? "#007bff" : "#ddd")};
+  background: ${(props) => (props.active ? "#007bff" : "white")};
+  color: ${(props) => (props.active ? "white" : "#333")};
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
@@ -117,7 +117,7 @@ const PageButton = styled.button<{ active?: boolean }>`
   }
 
   &:hover:not(:disabled) {
-    background: ${props => props.active ? '#0056b3' : '#f8f9fa'};
+    background: ${(props) => (props.active ? "#0056b3" : "#f8f9fa")};
   }
 `;
 
@@ -135,41 +135,41 @@ const MyCommentPage = () => {
       setLoading(true);
       const params = new URLSearchParams({
         page: page.toString(),
-        size: '10'
+        size: "10",
       });
-      
-      if (targetId && targetId !== 'undefined') {
-        params.append('targetId', targetId);
+
+      if (targetId && targetId !== "undefined") {
+        params.append("targetId", targetId);
       }
 
       const response = await api.get<{ success: boolean; data: ApiResponse; error: null }>(
         `/api/book/review?${params.toString()}`
       );
 
-      console.log('API Response:', response.data);
+      console.log("API Response:", response.data);
 
       if (response.data.success) {
         setReviews(response.data.data.content);
         setTotalPages(response.data.data.totalPages);
       } else {
-        setError('코멘트 목록을 불러오는데 실패했습니다.');
+        setError("코멘트 목록을 불러오는데 실패했습니다.");
       }
     } catch (error: any) {
-      console.error('Failed to fetch reviews:', error);
-      
+      console.error("Failed to fetch reviews:", error);
+
       if (error.response?.status === 401) {
-        alert('로그인이 필요한 서비스입니다.');
-        navigate(ROUTES.LOGIN);
-        return;
-      }
-      
-      if (error.response?.status === 403) {
-        alert('접근 권한이 없습니다. 다시 로그인해주세요.');
+        alert("로그인이 필요한 서비스입니다.");
         navigate(ROUTES.LOGIN);
         return;
       }
 
-      setError('코멘트 목록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
+      if (error.response?.status === 403) {
+        alert("접근 권한이 없습니다. 다시 로그인해주세요.");
+        navigate(ROUTES.LOGIN);
+        return;
+      }
+
+      setError("코멘트 목록을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -185,12 +185,12 @@ const MyCommentPage = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -205,26 +205,21 @@ const MyCommentPage = () => {
   if (!reviews || reviews.length === 0) {
     return (
       <Container>
-        <PageTitle>{targetId ? '사용자의 코멘트' : '내가 작성한 코멘트'}</PageTitle>
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-          아직 작성한 코멘트가 없습니다.
-        </div>
+        <PageTitle>{targetId ? "사용자의 코멘트" : "내가 작성한 코멘트"}</PageTitle>
+        <div style={{ textAlign: "center", marginTop: "2rem" }}>아직 작성한 코멘트가 없습니다.</div>
       </Container>
     );
   }
 
   return (
     <Container>
-      <PageTitle>{targetId ? '사용자의 코멘트' : '내가 작성한 코멘트'}</PageTitle>
+      <PageTitle>{targetId ? "사용자의 코멘트" : "내가 작성한 코멘트"}</PageTitle>
       <ReviewList>
         {reviews.map((review) => (
-          <ReviewCard 
-            key={review.reviewId}
-            onClick={() => navigate(`/book-detail/${review.bookId}`)}
-          >
+          <ReviewCard key={review.reviewId} onClick={() => navigate(`/book-detail/${review.bookId}?fromReviews=true`)}>
             <BookInfo>
               <BookTitle>{review.bookName}</BookTitle>
-              <Authors>{review.authors.join(', ')}</Authors>
+              <Authors>{review.authors.join(", ")}</Authors>
             </BookInfo>
             <ReviewContent>{review.review}</ReviewContent>
             <ReviewDate>{formatDate(review.updatedAt)}</ReviewDate>
@@ -232,25 +227,15 @@ const MyCommentPage = () => {
         ))}
       </ReviewList>
       <Pagination>
-        <PageButton
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
+        <PageButton onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
           이전
         </PageButton>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-          <PageButton
-            key={page}
-            active={page === currentPage}
-            onClick={() => handlePageChange(page)}
-          >
+          <PageButton key={page} active={page === currentPage} onClick={() => handlePageChange(page)}>
             {page}
           </PageButton>
         ))}
-        <PageButton
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
+        <PageButton onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
           다음
         </PageButton>
       </Pagination>
