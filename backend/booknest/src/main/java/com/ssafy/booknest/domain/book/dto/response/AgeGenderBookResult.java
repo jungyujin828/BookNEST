@@ -31,12 +31,13 @@ public class AgeGenderBookResult {
         if (ageGroup != null && gender != null && gender != Gender.N && gender != Gender.O) {
             desc.append(ageGroup.getLabel()).append(" ").append(convertGenderToKorean(gender)).append("이 좋아하는 책");
         } else if (ageGroup != null) {
-            desc.append(ageGroup.getLabel()).append("이 좋아하는 책");
+            desc.append(ageGroup.getLabel()).append(" 연령대가 좋아하는 책");
         } else if (gender != null && gender != Gender.N && gender != Gender.O) {
             desc.append(convertGenderToKorean(gender)).append("이 좋아하는 책");
         } else {
             desc.append("랜덤 추천 도서입니다.");
         }
+
 
         return new AgeGenderBookResult(desc.toString(), responses);
     }
@@ -48,6 +49,5 @@ public class AgeGenderBookResult {
             default -> ""; // N, O 처리 안 함
         };
     }
-
 
 }

@@ -29,4 +29,19 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
     @Query("SELECT r.book.id FROM Rating r WHERE r.user.id = :userId")
     List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
+
+    // 회원 별 각 카테고리별 평균점수 중에 가장 높은 거로 배치 작업
+    @Query("SELECT r FROM Rating r " +
+            "JOIN FETCH r.book b " +
+            "JOIN FETCH b.bookCategories bc " +
+            "JOIN FETCH bc.category " +
+            "JOIN FETCH r.user")
+    List<Rating> findAllWithBookAndCategory();
+
+    // 회원 별 각 태그별 평균점수 중에 가장 높은 거로 배치 작업
+    @Query("SELECT r FROM Rating r " +
+            "JOIN FETCH r.book b " +
+            "JOIN FETCH b.bookTags bt " +
+            "JOIN FETCH bt.tag")
+    List<Rating> findAllWithBookAndTag();
 }
