@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class BestReviewResponse {
 
     private int reviewId;
+    private int bookId;
     private String reviewerName;
     private String content;
     private Boolean myLiked;
@@ -33,6 +34,7 @@ public class BestReviewResponse {
 
         return BestReviewResponse.builder()
                 .reviewId(review.getId())
+                .bookId(review.getBook().getId())
                 .reviewerName(reviewerName)
                 .content(review.getContent())
                 .myLiked(myLiked)

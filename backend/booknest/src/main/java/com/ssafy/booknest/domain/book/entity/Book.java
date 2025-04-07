@@ -1,7 +1,6 @@
 package com.ssafy.booknest.domain.book.entity;
 
 import com.ssafy.booknest.domain.nest.entity.BookMark;
-import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,7 +32,7 @@ public class Book extends BaseEntity {
     private String publisher;
 
     @Column(name="pages", nullable = false)
-    private Integer pages;
+    private String pages;
 
     @Column(name="image_url")
     private String imageUrl;
@@ -41,7 +40,7 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String intro;
 
-    @Column(name="book_index", columnDefinition = "TEXT")
+    @Column(name="book_index", columnDefinition = "MEDIUMTEXT")
     private String bookIndex;
 
     @Column(columnDefinition = "TEXT")

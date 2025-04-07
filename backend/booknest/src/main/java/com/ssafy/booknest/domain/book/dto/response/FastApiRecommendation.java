@@ -15,10 +15,13 @@ public class FastApiRecommendation {
 
     @JsonProperty("book_id")
     private Integer bookId;
-
+    @JsonProperty("image_url")
     private String imageUrl;
+    @JsonProperty("published_date")
     private String publishedDate;
+    @JsonProperty("index_content")
     private String indexContent;
+    @JsonProperty("publisher_review")
     private String publisherReview;
     private String title;
     private String isbn;

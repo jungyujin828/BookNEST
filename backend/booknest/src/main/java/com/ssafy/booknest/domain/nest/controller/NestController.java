@@ -1,6 +1,5 @@
 package com.ssafy.booknest.domain.nest.controller;
 
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.BookMarkRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;

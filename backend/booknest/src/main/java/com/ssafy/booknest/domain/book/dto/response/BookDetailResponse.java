@@ -1,7 +1,6 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.global.common.CustomPage;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +24,7 @@ public class BookDetailResponse {
     private String publishedDate;
     private String isbn;
     private String publisher;
-    private int pages;
+    private String pages;
     private String imageUrl;
     private String intro;
     private String index;

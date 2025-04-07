@@ -111,7 +111,7 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
 
             return new PageImpl<>(content, pageable, total);
         } catch (IOException e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            throw new RuntimeException("비상비상: ", e);
         }
     }
 }

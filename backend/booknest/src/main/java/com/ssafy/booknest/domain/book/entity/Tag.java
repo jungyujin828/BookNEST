@@ -1,9 +1,7 @@
 package com.ssafy.booknest.domain.book.entity;
 
-import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
