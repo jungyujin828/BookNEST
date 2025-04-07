@@ -18,6 +18,14 @@ interface Book {
   authors: string;
 }
 
+interface SearchResponse {
+  content: Book[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
 const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
@@ -51,8 +59,13 @@ const SearchInput = styled.input`
 
 const BookGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  margin-bottom: 20px;
+  
+  @media (max-width: 500px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
 const BookCard = styled.div`
@@ -61,6 +74,9 @@ const BookCard = styled.div`
   border: 1px solid #ddd;
   border-radius: 4px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 
   &:hover {
     background-color: #f5f5f5;
@@ -76,15 +92,25 @@ const BookCard = styled.div`
   h3 {
     font-size: 14px;
     margin: 5px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+    height: 2.6em;
   }
 
   p {
     font-size: 12px;
     color: #666;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+    margin-top: auto;
   }
 `;
 
@@ -163,6 +189,40 @@ const CancelButton = styled(Button)`
   }
 `;
 
+const Pagination = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+`;
+
+const PageButton = styled.button<{ active?: boolean }>`
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: ${props => props.active ? '#4a90e2' : '#f5f5f5'};
+  color: ${props => props.active ? 'white' : '#333'};
+  border: 1px solid ${props => props.active ? '#4a90e2' : '#ddd'};
+  cursor: pointer;
+  font-weight: ${props => props.active ? 'bold' : 'normal'};
+
+  &:hover {
+    background-color: ${props => props.active ? '#357abd' : '#e5e5e5'};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const TotalResults = styled.div`
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+`;
+
 const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded }) => {
   const { userDetail } = useAuthStore();
   const { setNestStatus } = useNestStore();
@@ -171,22 +231,44 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [rating, setRating] = useState<number>(0);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const navigate = useNavigate();
+  
+  const BOOKS_PER_PAGE = 9;
 
-  const searchBooks = async () => {
+  const searchBooks = async (page = 1) => {
     try {
       const response = await api.get("/api/search/book", {
         params: {
           title: searchTerm,
-          page: 1,
-          size: 20,
+          page: page,
+          size: BOOKS_PER_PAGE,
         },
       });
+      
       if (response.data.success) {
-        setBooks(response.data.data.content);
+        const searchData: SearchResponse = response.data.data;
+        setBooks(searchData.content);
+        setTotalPages(searchData.totalPages);
+        setTotalElements(searchData.totalElements);
+        setCurrentPage(page);
       }
     } catch (error) {
       console.error("도서 검색 실패:", error);
+    }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      searchBooks(newPage);
+    }
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      searchBooks(1);
     }
   };
 
@@ -273,6 +355,59 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
     setRating(0);
   };
 
+  // 페이지 버튼 렌더링 함수
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    
+    const pages = [];
+    const maxButtons = 5; // 한 번에 보이는 페이지 버튼 수
+    const halfMaxButtons = Math.floor(maxButtons / 2);
+    
+    let startPage = Math.max(1, currentPage - halfMaxButtons);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    
+    if (endPage - startPage + 1 < maxButtons) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    
+    // 이전 페이지 버튼
+    pages.push(
+      <PageButton 
+        key="prev" 
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        &lt;
+      </PageButton>
+    );
+    
+    // 페이지 번호 버튼
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <PageButton 
+          key={i} 
+          active={i === currentPage}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </PageButton>
+      );
+    }
+    
+    // 다음 페이지 버튼
+    pages.push(
+      <PageButton 
+        key="next" 
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        &gt;
+      </PageButton>
+    );
+    
+    return pages;
+  };
+
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
@@ -282,9 +417,15 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && searchBooks()}
+          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
           placeholder="책 제목을 입력하세요"
         />
+        <Button onClick={handleSearch}>검색</Button>
+        
+        {totalElements > 0 && (
+          <TotalResults>총 {totalElements}개의 검색 결과</TotalResults>
+        )}
+        
         <BookGrid>
           {books.map((book) => (
             <BookCard key={book.bookId} onClick={() => handleBookSelect(book)}>
@@ -294,6 +435,12 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
             </BookCard>
           ))}
         </BookGrid>
+        
+        {totalPages > 0 && (
+          <Pagination>
+            {renderPagination()}
+          </Pagination>
+        )}
       </ModalContent>
 
       {showRatingModal && selectedBook && (

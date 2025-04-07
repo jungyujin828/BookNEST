@@ -254,8 +254,21 @@ const AuthorBook = () => {
   } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
+
+  const updateScrollButtonsVisibility = () => {
+    if (!bookListRef.current) return;
+    
+    const hasHorizontalOverflow = bookListRef.current.scrollWidth > bookListRef.current.clientWidth;
+    
+    setCanScrollLeft(scrollPosition > 0);
+    setCanScrollRight(
+      hasHorizontalOverflow && scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    );
+  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
@@ -269,7 +282,34 @@ const AuthorBook = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
+    
+    // Update buttons visibility after scrolling
+    setTimeout(updateScrollButtonsVisibility, 300); // Wait for transform animation
   };
+
+  // Update buttons visibility on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (scrollPosition > 0) {
+        // Reset position when window is resized
+        if (bookListRef.current) {
+          setScrollPosition(0);
+          bookListRef.current.style.transform = `translateX(0)`;
+        }
+      }
+      
+      // Update buttons after resize
+      setTimeout(updateScrollButtonsVisibility, 300);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [scrollPosition]);
+
+  // Update scroll buttons visibility when books load or scroll position changes
+  useEffect(() => {
+    updateScrollButtonsVisibility();
+  }, [authorBooks, scrollPosition]);
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
@@ -308,11 +348,6 @@ const AuthorBook = () => {
   if (error.authorBooks) {
     return <ErrorMessage>{error.authorBooks}</ErrorMessage>;
   }
-
-  const canScrollLeft = scrollPosition > 0;
-  const canScrollRight = bookListRef.current 
-    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    : false;
 
   return (
     <AuthorBookContainer>

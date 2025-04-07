@@ -73,6 +73,7 @@ const BookInfo = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-width: 0;
 `;
 
 const BookTitle = styled.h2`
@@ -80,6 +81,12 @@ const BookTitle = styled.h2`
   font-weight: 600;
   color: #333;
   margin: 0 0 8px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
 `;
 
 const Authors = styled.div`
@@ -90,6 +97,7 @@ const Authors = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+  width: 100%;
 `;
 
 const RatingContainer = styled.div`
@@ -248,9 +256,12 @@ const MyEvaluatedBookPage = () => {
               <div>
                 <BookTitle>{book.bookName}</BookTitle>
                 <Authors>
-                  {book.authors.length > 2
-                    ? `${book.authors.slice(0, 2).join(', ')} 외 ${book.authors.length - 2}명`
-                    : book.authors.join(', ')}
+                  {book.authors.length <= 1 
+                    ? book.authors.join(', ')
+                    : book.authors.length <= 2
+                      ? book.authors.join(', ')
+                      : `${book.authors[0]} 외 ${book.authors.length - 1}명`
+                  }
                 </Authors>
                 <RatingContainer>
                   <StarIcon />

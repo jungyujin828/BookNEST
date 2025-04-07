@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useBookStore } from '../store/useBookStore';
-import { useNavigate } from 'react-router-dom';
 
 interface Book {
   bookId: number;
@@ -10,20 +10,22 @@ interface Book {
   publishedDate: string;
   imageUrl: string;
   authors: string[];
-  ageGroup: string;
-  gender: string;
+  tag: string;
 }
 
-interface AgeBooksResponse {
+interface TagBooksResponse {
   success: boolean;
   data: {
     description: string;
     books: Book[];
   };
-  error: null | string;
+  error: null | {
+    code: string;
+    message: string;
+  };
 }
 
-const AgeBooksContainer = styled.div`
+const TagBooksContainer = styled.div`
   padding: 16px;
   position: relative;
   
@@ -37,9 +39,6 @@ const Title = styled.h2`
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   
   @media (min-width: 768px) {
     font-size: 20px;
@@ -47,13 +46,9 @@ const Title = styled.h2`
   }
 `;
 
-const AgeIcon = styled.span`
-  font-size: 20px;
-  color: #9C27B0;
-  
-  @media (min-width: 768px) {
-    font-size: 22px;
-  }
+const HighlightTag = styled.span`
+  color: #7bc47f;
+  font-weight: bold;
 `;
 
 const BookListContainer = styled.div`
@@ -125,7 +120,11 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+  height: 2.6em;
   
   @media (min-width: 768px) {
     font-size: 16px;
@@ -136,10 +135,12 @@ const BookTitle = styled.h3`
 const BookAuthor = styled.p`
   font-size: 12px;
   color: #666;
-  margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  margin-bottom: 4px;
   
   @media (min-width: 768px) {
     font-size: 14px;
@@ -150,6 +151,20 @@ const BookAuthor = styled.p`
 const BookDate = styled.p`
   font-size: 11px;
   color: #999;
+  
+  @media (min-width: 768px) {
+    font-size: 12px;
+  }
+`;
+
+const BookTag = styled.span`
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #f0f8f1;
+  color: #7bc47f;
+  border-radius: 12px;
+  font-size: 11px;
+  margin-top: 4px;
   
   @media (min-width: 768px) {
     font-size: 12px;
@@ -246,47 +261,30 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const Description = styled.h2`
-  font-size: 20px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 20px;
-  padding: 0 4px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  
-  @media (min-width: 768px) {
-    font-size: 22px;
-    margin-bottom: 24px;
-  }
-`;
-
-const HighlightAge = styled.span`
-  color: #2196F3;
-  font-weight: 600;
-`;
-
-const HighlightGender = styled.span`
-  color: #2196F3;
-  font-weight: 600;
-`;
-
-const AgeBooks = () => {
-  const { 
-    ageBooks, 
-    loading, 
-    error, 
-    setAgeBooks, 
-    setLoading, 
-    setError 
-  } = useBookStore();
+const TagBooks = () => {
+  const [tagBooks, setTagBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState<string>('');
+  const [tag, setTag] = useState<string>('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
   const navigate = useNavigate();
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
+
+  const updateScrollButtonsVisibility = () => {
+    if (!bookListRef.current) return;
+    
+    const hasHorizontalOverflow = bookListRef.current.scrollWidth > bookListRef.current.clientWidth;
+    
+    setCanScrollLeft(scrollPosition > 0);
+    setCanScrollRight(
+      hasHorizontalOverflow && scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    );
+  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
@@ -300,73 +298,106 @@ const AgeBooks = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
+    
+    // Update buttons visibility after scrolling
+    setTimeout(updateScrollButtonsVisibility, 300);
   };
+
+  // Update buttons visibility on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (scrollPosition > 0) {
+        // Reset position when window is resized
+        if (bookListRef.current) {
+          setScrollPosition(0);
+          bookListRef.current.style.transform = `translateX(0)`;
+        }
+      }
+      
+      // Update buttons after resize
+      setTimeout(updateScrollButtonsVisibility, 300);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [scrollPosition]);
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
   };
 
+  const extractTagFromDescription = (description: string) => {
+    // "'태그명' 태그의 추천 도서입니다." 형식에서 태그명 추출
+    const match = description.match(/'([^']+)'/);
+    return match ? match[1] : '';
+  };
+
+  // 저자 표시 형식 변환
+  const formatAuthors = (authors: string[]) => {
+    if (!authors || !Array.isArray(authors)) return '작가 미상';
+    
+    if (authors.length <= 1) return authors.join(', ');
+    if (authors.length <= 2) return authors.join(', ');
+    return `${authors[0]} 외 ${authors.length - 1}명`;
+  };
+
   useEffect(() => {
-    const fetchAgeBooks = async () => {
+    const fetchTagBooks = async () => {
       try {
-        setLoading('ageBooks', true);
-        setError('ageBooks', null);
+        setLoading(true);
+        setError(null);
         
-        const response = await api.get<AgeBooksResponse>('/api/book/age-gender');
+        const response = await api.get<TagBooksResponse>('/api/book/tag', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          }
+        });
         
         if (response.data.success && response.data.data) {
-          setAgeBooks(response.data.data.books);
+          setTagBooks(response.data.data.books);
           setDescription(response.data.data.description);
+          const extractedTag = extractTagFromDescription(response.data.data.description);
+          setTag(extractedTag);
         } else {
-          setError('ageBooks', '연령대/성별 추천 도서 정보를 불러오는데 실패했습니다.');
-          setAgeBooks([]);
+          setError('태그별 추천 도서 정보를 불러오는데 실패했습니다.');
+          setTagBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('ageBooks', '서버 오류가 발생했습니다.');
-        setAgeBooks([]);
+        setError('서버 오류가 발생했습니다.');
+        setTagBooks([]);
       } finally {
-        setLoading('ageBooks', false);
+        setLoading(false);
       }
     };
 
-    fetchAgeBooks();
-  }, [setAgeBooks, setLoading, setError]);
+    fetchTagBooks();
+  }, []);
 
-  const renderDescription = (desc: string) => {
-    // Split the description into parts, keeping the delimiters
-    const parts = desc.split(/(\d+대|[남여]성)/g);
-    
-    return (
-      <Description>
-        {parts.map((part, index) => {
-          if (/\d+대/.test(part)) {
-            return <HighlightAge key={index}>{part}</HighlightAge>;
-          } else if (/[남여]성/.test(part)) {
-            return <HighlightGender key={index}>{part}</HighlightGender>;
-          }
-          return part;
-        })}
-      </Description>
-    );
-  };
+  // Update scroll buttons visibility when books load
+  useEffect(() => {
+    if (tagBooks.length > 0) {
+      setTimeout(updateScrollButtonsVisibility, 300);
+    }
+  }, [tagBooks]);
 
-  if (loading.ageBooks) {
-    return <LoadingMessage>연령대/성별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
+  if (loading) {
+    return <LoadingMessage>태그별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error.ageBooks) {
-    return <ErrorMessage>{error.ageBooks}</ErrorMessage>;
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
   }
 
-  const canScrollLeft = scrollPosition > 0;
-  const canScrollRight = bookListRef.current 
-    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    : false;
+  if (!tagBooks || tagBooks.length === 0) {
+    return <ErrorMessage>태그별 추천 도서 목록이 없습니다.</ErrorMessage>;
+  }
 
   return (
-    <AgeBooksContainer>
-      {description && renderDescription(description)}
+    <TagBooksContainer>
+      <Title>
+        {description}
+      </Title>
       <BookListContainer>
         {canScrollLeft && (
           <NavigationButton 
@@ -375,26 +406,23 @@ const AgeBooks = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {ageBooks && ageBooks.length > 0 ? (
-            ageBooks.map((book) => (
-              <BookCard 
-                key={book.bookId} 
-                onClick={() => handleBookClick(book.bookId)}
-              >
-                <BookImage 
-                  src={book.imageUrl || '/images/default-book.png'} 
-                  alt={book.title}
-                />
-                <BookInfo>
-                  <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors.join(', ')}</BookAuthor>
-                  <BookDate>{book.publishedDate}</BookDate>
-                </BookInfo>
-              </BookCard>
-            ))
-          ) : (
-            <ErrorMessage>연령대/성별 추천 도서 목록이 없습니다.</ErrorMessage>
-          )}
+          {tagBooks.map((book) => (
+            <BookCard 
+              key={book.bookId}
+              onClick={() => handleBookClick(book.bookId)}
+            >
+              <BookImage 
+                src={book.imageUrl || '/images/default-book.png'} 
+                alt={book.title}
+              />
+              <BookInfo>
+                <BookTitle>{book.title}</BookTitle>
+                <BookAuthor>{formatAuthors(book.authors)}</BookAuthor>
+                <BookDate>{book.publishedDate}</BookDate>
+                <BookTag>#{book.tag}</BookTag>
+              </BookInfo>
+            </BookCard>
+          ))}
         </BookList>
         {canScrollRight && (
           <NavigationButton 
@@ -403,8 +431,8 @@ const AgeBooks = () => {
           />
         )}
       </BookListContainer>
-    </AgeBooksContainer>
+    </TagBooksContainer>
   );
 };
 
-export default AgeBooks; 
+export default TagBooks; 
