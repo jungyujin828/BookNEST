@@ -105,7 +105,10 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState<User[]>([]);
-  const currentUser = useAuthStore((state) => state.user);
+
+  // 로컬 스토리지에서 userDetail 가져오기
+  const authStorage = JSON.parse(localStorage.getItem("auth-storage") || "{}");
+  const userDetail = authStorage.state?.userDetail;
 
   const handleSearchResult = (data: User[]) => {
     setUsers(data);
@@ -167,7 +170,7 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ onClose }) => {
                   <UserName>{user.nickname}</UserName>
                 </UserInfo>
               </div>
-              {currentUser?.id !== user.id && (
+              {userDetail?.userId !== user.id && (
                 <FollowButton isFollowing={user.isFollowing} onClick={(e) => handleFollowClick(e, user.id)}>
                   {user.isFollowing ? "팔로잉" : "팔로우"}
                 </FollowButton>

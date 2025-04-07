@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
+import { theme } from "../styles/theme";
+
 import styled from "@emotion/styled";
 import axios from "axios";
 import api from "../api/axios";
@@ -12,7 +14,7 @@ import BookmarkButton from "../components/BookmarkButton";
 import AddToNestButton from "../components/AddToNestButton";
 import DeleteToNestButton from "../components/DeleteToNestButton";
 import ReviewList, { Review, ReviewsPage } from "../components/ReviewList";
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import useNestStore from "../store/useNestStore";
 
 interface BookDetail {
@@ -422,6 +424,8 @@ const BookDetailPage = () => {
   const introRef = useRef<HTMLParagraphElement>(null);
   const indexRef = useRef<HTMLParagraphElement>(null);
   const publisherReviewRef = useRef<HTMLParagraphElement>(null);
+  const reviewListRef = useRef<HTMLDivElement>(null);
+  const location = useLocation(); // Add this import at the top
 
   // Zustand store
   const {
@@ -439,6 +443,18 @@ const BookDetailPage = () => {
 
   const { userRatings } = useRatingStore();
   const { setNestStatus, getNestStatus } = useNestStore();
+
+  useEffect(() => {
+    // URL에 fromReviews 파라미터가 있으면 리뷰 섹션으로 스크롤
+    if (location.search.includes("fromReviews") && reviewListRef.current) {
+      const headerHeight = 70; // 4rem = 64px (1rem = 16px)
+      const yOffset = -headerHeight;
+      const element = reviewListRef.current;
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }, [location, book]);
 
   useEffect(() => {
     const checkContentHeight = (element: HTMLElement | null, key: string) => {
@@ -564,12 +580,12 @@ const BookDetailPage = () => {
     if (book) {
       const newStatus = !getNestStatus(book.bookId);
       setNestStatus(book.bookId, newStatus);
-      
+
       // 서재에 등록되면 북마크는 자동으로 해제됨
       if (newStatus) {
-        setBook(prev => prev ? { ...prev, isBookMarked: false } : null);
+        setBook((prev) => (prev ? { ...prev, isBookMarked: false } : null));
       }
-      
+
       // 상태 변경 후 책 정보 다시 불러오기
       const fetchUpdatedBookDetail = async () => {
         try {
@@ -591,9 +607,7 @@ const BookDetailPage = () => {
   }
 
   if (error || !book) {
-    return (
-      <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>
-    );
+    return <ErrorMessage>{error || "도서 정보를 찾을 수 없습니다."}</ErrorMessage>;
   }
 
   return (
@@ -609,11 +623,7 @@ const BookDetailPage = () => {
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
                 {getNestStatus(book.bookId) ? (
-                  <DeleteToNestButton
-                    bookId={book.bookId}
-                    nestId={userInfo?.nestId || 0}
-                    onDelete={handleNestUpdate}
-                  />
+                  <DeleteToNestButton bookId={book.bookId} nestId={userInfo?.nestId || 0} onDelete={handleNestUpdate} />
                 ) : (
                   <AddToNestButton
                     bookId={book.bookId}
@@ -621,9 +631,7 @@ const BookDetailPage = () => {
                     onAdd={handleNestUpdate}
                   />
                 )}
-                <PurchaseButton onClick={handlePurchaseClick}>
-                  구매하기
-                </PurchaseButton>
+                <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
               </ButtonContainer>
             </ImageSection>
             <InfoSection>
@@ -635,13 +643,8 @@ const BookDetailPage = () => {
                 </RatingRow>
                 <RatingRow>
                   <RatingLabel>내 평점</RatingLabel>
-                  <RatingStars
-                    bookId={book.bookId}
-                    onRatingChange={handleRatingChange}
-                  />
-                  <RatingText>
-                    {userRatings[book.bookId]?.toFixed(1) || "0.0"}
-                  </RatingText>
+                  <RatingStars bookId={book.bookId} onRatingChange={handleRatingChange} />
+                  <RatingText>{userRatings[book.bookId]?.toFixed(1) || "0.0"}</RatingText>
                 </RatingRow>
               </RatingContainer>
               <AuthorInfo>저자: {book.authors.join(", ")}</AuthorInfo>
@@ -719,10 +722,7 @@ const BookDetailPage = () => {
           {book.publisherReview && (
             <Section>
               <SectionTitle>출판사 서평</SectionTitle>
-              <Content
-                ref={publisherReviewRef}
-                isExpanded={expandedSections["publisherReview"]}
-              >
+              <Content ref={publisherReviewRef} isExpanded={expandedSections["publisherReview"]}>
                 {book.publisherReview}
               </Content>
               {contentHeights["publisherReview"] && (
@@ -741,13 +741,16 @@ const BookDetailPage = () => {
           )}
 
           <CommentForm bookId={Number(bookId)} onCommentSubmit={handleCommentSubmit} />
-          
-          <ReviewList 
-            bookId={Number(bookId)}
-            reviews={book.reviews}
-            onReviewChange={handleCommentSubmit}
-            currentUserId={userInfo?.nickname || null}
-          />
+          <div ref={reviewListRef}>
+            <ReviewList
+              bookId={Number(bookId)}
+              reviews={book.reviews}
+              onReviewChange={handleCommentSubmit}
+              currentUserId={userInfo?.nickname || null}
+            />
+          </div>
+
+          {/* 중복된 ReviewList 컴포넌트 제거 */}
 
           <PurchaseModal
             isOpen={isPurchaseModalOpen}
