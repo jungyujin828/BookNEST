@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
@@ -148,7 +149,7 @@ public class RatingService {
         return MyRatingResponse.of(rating, bookId);
     }
 
-    // 도서 관심없음
+    // 도서 관심없음 등록
     @Transactional
     public void ignoreBook(Integer userId, Integer bookId) {
         User user = userRepository.findById(userId)
@@ -169,4 +170,32 @@ public class RatingService {
 
         ignoredBookRepository.save(ignoredBook);
     }
+
+    // 특정 도서 관심없음 조회
+    @Transactional(readOnly = true)
+    public boolean isBookIgnored(Integer userId, Integer bookId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        return ignoredBookRepository.findByUserAndBook(user, book).isPresent();
+    }
+
+    // 관심없음 취소
+    @Transactional
+    public void cancelIgnoredBook(Integer userId, Integer bookId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+
+        IgnoredBook ignoredBook = ignoredBookRepository.findByUserAndBook(user, book)
+                .orElseThrow(() -> new CustomException(ErrorCode.IGNORED_BOOK_NOT_FOUND));
+
+        ignoredBookRepository.delete(ignoredBook);
+    }
+
 }

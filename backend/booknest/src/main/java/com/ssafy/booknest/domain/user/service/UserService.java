@@ -88,7 +88,7 @@ public class UserService {
                         .user(user)
                         .build();
 
-                addressRepository.save(newAddress); // ⭐ DB 저장 확실하게
+                addressRepository.save(newAddress);
                 user.setAddress(newAddress);
             } else {
                 // 기존 주소 수정
