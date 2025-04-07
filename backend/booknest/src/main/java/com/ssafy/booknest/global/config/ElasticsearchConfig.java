@@ -13,6 +13,12 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     @Value("${spring.elasticsearch.uris}")
     private String[] esHost;
 
+    @Value("${spring.elasticsearch.username}")
+    private String elasticUsername;  // 사용자 이름 추가
+
+    @Value("${spring.elasticsearch.password}")
+    private String elasticPassword;
+
     @Override
     public ClientConfiguration clientConfiguration() {
         return ClientConfiguration.builder()
