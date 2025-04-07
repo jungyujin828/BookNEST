@@ -485,7 +485,8 @@ const SearchPage = () => {
     }, 200);
   };
 
-  const shouldShowTags = activeTab === "books" && !showRecent && !isSearchActive;
+  const shouldShowTags = activeTab === "books" && !showRecent && 
+    (!isSearchActive || (isSearchActive && selectedTags.length > 0));
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -530,7 +531,8 @@ const SearchPage = () => {
           <SearchRecent
             onSelect={(query) => {
               setSearchTerm(query);
-              triggerSearch();
+              setIsSearchActive(true);
+              handleSearchChange(query);
             }}
             onClose={() => setShowRecent(false)}
           />
