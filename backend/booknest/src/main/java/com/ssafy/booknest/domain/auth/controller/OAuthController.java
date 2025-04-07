@@ -40,11 +40,6 @@ public class OAuthController {
     public ResponseEntity<ApiResponse<OAuthLoginResponse>> naverLogin(
             @RequestBody OAuthLoginRequest request) {
 
-        // 🧪 디버깅 로그 추가
-        System.out.println("🧪 [NAVER] 로그인 요청 받음");
-        System.out.println("🧪 [NAVER] code = " + request.getCode());
-        System.out.println("🧪 [NAVER] state = " + request.getState());
-
         LoginResult loginResult = oAuthService.handleNaverOAuthLogin(
                 request.getCode(),
                 request.getState()

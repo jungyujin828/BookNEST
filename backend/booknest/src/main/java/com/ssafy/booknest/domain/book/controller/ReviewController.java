@@ -34,10 +34,9 @@ public class ReviewController {
 
     // 한줄평 등록
     @PostMapping("/{bookId}/review")
-    public ResponseEntity<ApiResponse<Void>> addReview(
-            @PathVariable("bookId") Integer bookId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequest reviewRequest
+    public ResponseEntity<ApiResponse<Void>> addReview(@PathVariable("bookId") Integer bookId,
+                                                       @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                       @RequestBody ReviewRequest reviewRequest
     ) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.saveReview(userId, bookId, reviewRequest);

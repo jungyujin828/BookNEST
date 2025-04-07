@@ -130,16 +130,22 @@ public class RatingService {
 
     // 사용자 평점 목록 조회
     @Transactional(readOnly = true)
-    public CustomPage<UserRatingResponse> getRatingList(Integer userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
+    public CustomPage<UserRatingResponse> getRatingList(Integer userId, Integer targetId, Pageable pageable) {
+        // 호출한 유저와 타겟 유저가 실제 존재하는지 확인
+        userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        userRepository.findById(targetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Page<Rating> ratingPage = ratingRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
+        // 타겟 유저의 평점 정보 조회 (최신순)
+        Page<Rating> ratingPage = ratingRepository.findByUserIdOrderByUpdatedAtDesc(targetId, pageable);
 
+        // DTO 매핑
         Page<UserRatingResponse> responsePage = ratingPage.map(UserRatingResponse::of);
 
         return new CustomPage<>(responsePage);
     }
+
 
 
     // 사용자의 해당 책에 대한 평점 가져오기
