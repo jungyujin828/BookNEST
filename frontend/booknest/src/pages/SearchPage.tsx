@@ -239,49 +239,115 @@ const SearchPage = () => {
     console.log("SearchPage - Tag Selected:", tag);
     console.log("SearchPage - Current Tags:", selectedTags);
 
+    // 새로운 태그 배열 생성
     const newSelectedTags = selectedTags.includes(tag)
       ? selectedTags.filter((t) => t !== tag)
       : [...selectedTags, tag];
 
     console.log("SearchPage - New Tags Array:", newSelectedTags);
+    
+    // 상태 업데이트
     setSelectedTags(newSelectedTags);
-    updateSearchParams(undefined, newSelectedTags);
-    setCurrentPage(1); // Reset to first page when tags change
+    updateSearchParams(searchTerm, newSelectedTags);
 
+    // 검색 실행
     try {
+      console.log("Searching with tags:", newSelectedTags);
       const response = await api.get("/api/search/book", {
         params: {
-          title: searchTerm,
-          tags: newSelectedTags.join(","),
           page: 1,
           size: 10,
+          ...(searchTerm && { title: searchTerm }),
+          ...(newSelectedTags.length > 0 && { tags: newSelectedTags })
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
         },
+        paramsSerializer: params => {
+          const searchParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              value.forEach(v => searchParams.append(key, v));
+            } else {
+              searchParams.append(key, value as string);
+            }
+          });
+          return searchParams.toString();
+        }
       });
 
+      console.log("Search API Response:", response.data);
+
       if (response.data.success) {
-        const processedData: SearchResult = {
-          ...response.data.data,
-          content: response.data.data.content.map((item: any) => ({
-            ...item,
-            tags: item.tags?.filter((tag: string) => tag !== "_tagsparsefailure") || [],
-          })),
-        };
+        const processedData: SearchResult = response.data.data;
+        console.log("Processed search results:", processedData);
+        
+        setCurrentPage(1);
         setTotalBooks(processedData.totalElements);
         setTotalPages(processedData.totalPages);
-        handleSearchResult(processedData.content);
+        setBooks(processedData.content);
       }
     } catch (error) {
       console.error("Failed to search with tags:", error);
+      // 에러 발생 시 상태 초기화
+      setBooks([]);
+      setTotalBooks(0);
+      setTotalPages(0);
+    }
+  };
+
+  const handleSearchChange = async (value: string) => {
+    setSearchTerm(value);
+    // 검색어가 변경될 때마다 현재 선택된 태그와 함께 검색
+    try {
+      const response = await api.get("/api/search/book", {
+        params: {
+          page: 1,
+          size: 10,
+          ...(value && { title: value }),
+          ...(selectedTags.length > 0 && { tags: selectedTags })
+        },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
+        },
+        paramsSerializer: params => {
+          const searchParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              value.forEach(v => searchParams.append(key, v));
+            } else {
+              searchParams.append(key, value as string);
+            }
+          });
+          return searchParams.toString();
+        }
+      });
+
+      if (response.data.success) {
+        const processedData: SearchResult = response.data.data;
+        setCurrentPage(1);
+        setTotalBooks(processedData.totalElements);
+        setTotalPages(processedData.totalPages);
+        setBooks(processedData.content);
+      }
+    } catch (error) {
+      console.error("Failed to search:", error);
+      // 에러 발생 시 상태 초기화
+      setBooks([]);
+      setTotalBooks(0);
+      setTotalPages(0);
     }
   };
 
   const handleClear = () => {
     setSearchTerm("");
+    setSelectedTags([]);
     setBooks([]);
     setUsers([]);
+    setTotalBooks(0);
+    setTotalPages(0);
     updateSearchParams("", []);
   };
 
@@ -357,39 +423,45 @@ const SearchPage = () => {
     try {
       const response = await api.get("/api/search/book", {
         params: {
-          title: searchTerm,
-          tags: selectedTags.join(","),
-          page: page,
+          page,
           size: 10,
+          ...(searchTerm && { title: searchTerm }),
+          ...(selectedTags.length > 0 && { tags: selectedTags })
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json"
         },
+        paramsSerializer: params => {
+          const searchParams = new URLSearchParams();
+          Object.entries(params).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+              value.forEach(v => searchParams.append(key, v));
+            } else {
+              searchParams.append(key, value as string);
+            }
+          });
+          return searchParams.toString();
+        }
       });
 
       if (response.data.success) {
-        const processedData: SearchResult = {
-          ...response.data.data,
-          content: response.data.data.content.map((item: any) => ({
-            ...item,
-            tags: item.tags?.filter((tag: string) => tag !== "_tagsparsefailure") || [],
-          })),
-        };
+        const processedData: SearchResult = response.data.data;
         setTotalBooks(processedData.totalElements);
         setTotalPages(processedData.totalPages);
-        handleSearchResult(processedData.content);
+        setBooks(processedData.content);
       }
     } catch (error) {
       console.error("Failed to search:", error);
+      // 에러 발생 시 상태 초기화
+      setBooks([]);
+      setTotalBooks(0);
+      setTotalPages(0);
     }
   };
 
   // Add state for search focus
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
-  };
 
   const handleSearchFocus = () => {
     if (searchTerm === "") {
