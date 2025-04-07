@@ -29,4 +29,11 @@ public interface NestRepository extends JpaRepository<Nest, Integer> {
     """)
     List<Nest> findAllWithBooksOnly();
 
+    // 회원이 둥지에 등록 한 책 목록
+    @Query("""
+    SELECT bn.book.id
+    FROM BookNest bn
+    WHERE bn.nest.user.id = :userId
+""")
+    List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
 }

@@ -20,8 +20,12 @@ import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
+import com.ssafy.booknest.domain.user.entity.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
+import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
@@ -60,6 +64,8 @@ public class BookService {
     private final AgeGenderBookRepository ageGenderBookRepository;
     private final TagRandomBookRepository tagRandomBookRepository;
     private final LibraryBookRepository libraryBookRepository;
+    private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
+    private final UserTagAnalysisRepository userTagAnalysisRepository;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -265,6 +271,93 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    // 내가 가장 많이 본 태그에서 추천
+    @Transactional(readOnly = true)
+    public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
+        // 1. 사용자 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 2. 해당 유저의 favoriteTag 조회
+        String favoriteTag = userTagAnalysisRepository.findByUser(user)
+                .map(UserTagAnalysis::getFavoriteTag)
+                .orElse(null);
+
+        if (favoriteTag == null || favoriteTag.isBlank()) {
+            return List.of(); // 선호 태그 없음 → 빈 리스트
+        }
+
+        // 3. 평가, 서재, 찜 제외할 도서 ID 목록 수집
+        List<Integer> ratedBookIds = ratingRepository.findBookIdsByUserId(userId);
+        List<Integer> nestedBookIds = nestRepository.findBookIdsByUserId(userId);
+        List<Integer> bookmarkedBookIds = bookMarkRepository.findBookIdsByUserId(userId);
+
+        Set<Integer> excludedIdSet = new HashSet<>();
+        excludedIdSet.addAll(ratedBookIds);
+        excludedIdSet.addAll(nestedBookIds);
+        excludedIdSet.addAll(bookmarkedBookIds);
+
+        if (excludedIdSet.isEmpty()) {
+            excludedIdSet.add(-1); // IN절 에러 방지
+        }
+
+        List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
+
+        // 4. 해당 태그의 도서 중 제외된 도서 제외하고 15권 랜덤으로 추출
+        List<Book> books = bookRepository.findByTagNameExcluding(favoriteTag, excludedIds).stream()
+                .limit(15)
+                .toList();
+
+        // 5. 응답 DTO로 변환
+        return books.stream()
+                .map(book -> FavoriteTagBookResponse.of(book, favoriteTag))
+                .toList();
+    }
+
+
+
+    // 내가 가장 많이 본 카테고리에서 추천
+    @Transactional(readOnly = true)
+    public List<FavoriteCategoryBookResponse> getFavoriteCategoryBooks(Integer userId) {
+        // 1. 사용자 존재 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 2. 해당 유저의 favoriteCategory 조회
+        String favoriteCategory = userCategoryAnalysisRepository.findByUser(user)
+                .map(UserCategoryAnalysis::getFavoriteCategory)
+                .orElse(null);
+
+        if (favoriteCategory == null || favoriteCategory.isBlank()) {
+            return List.of(); // 선호 카테고리 없음 → 빈 리스트
+        }
+
+        // 3. 평가, 서재, 찜 제외할 도서 ID 목록 수집
+        List<Integer> ratedBookIds = ratingRepository.findBookIdsByUserId(userId);
+        List<Integer> nestedBookIds = nestRepository.findBookIdsByUserId(userId);
+        List<Integer> bookmarkedBookIds = bookMarkRepository.findBookIdsByUserId(userId);
+
+        Set<Integer> excludedIdSet = new HashSet<>();
+        excludedIdSet.addAll(ratedBookIds);
+        excludedIdSet.addAll(nestedBookIds);
+        excludedIdSet.addAll(bookmarkedBookIds);
+
+        if (excludedIdSet.isEmpty()) {
+            excludedIdSet.add(-1); // IN절 방지
+        }
+
+        List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
+
+        // 4. 해당 카테고리 도서 중 제외된 도서 제외하고 15권 랜덤 추출
+        List<Book> books = bookRepository.findByCategoryNameExcluding(favoriteCategory, excludedIds).stream()
+                .limit(15)
+                .toList();
+
+        // 5. 응답 DTO 변환
+        return books.stream()
+                .map(book -> FavoriteCategoryBookResponse.of(book, favoriteCategory))
+                .toList();
+    }
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)

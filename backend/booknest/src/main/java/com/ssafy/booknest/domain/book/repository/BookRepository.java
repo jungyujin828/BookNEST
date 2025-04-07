@@ -72,4 +72,39 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
 
 
+    // 특정 태그를 가진 책에서 해당 유저가 평가하지 않은 책
+    @Query("""
+    SELECT DISTINCT b
+    FROM Book b
+    JOIN b.bookTags bt
+    JOIN bt.tag t
+    WHERE t.name = :tagName
+      AND b.id NOT IN :excludedIds
+    ORDER BY function('RAND')
+    """)
+    List<Book> findByTagNameExcluding(
+            @Param("tagName") String tagName,
+            @Param("excludedIds") List<Integer> excludedIds
+    );
+
+    // 특정 카테고리를 가진 책에서 해당 유저가 평가하지 않은 책
+    @Query("""
+    SELECT DISTINCT b
+    FROM Book b
+    JOIN b.bookCategories bc
+    JOIN bc.category c
+    WHERE c.name = :categoryName
+      AND b.id NOT IN :excludedIds
+    ORDER BY function('RAND')
+    """)
+    List<Book> findByCategoryNameExcluding(
+            @Param("categoryName") String categoryName,
+            @Param("excludedIds") List<Integer> excludedIds
+    );
+
+
+
+
+
+
 }

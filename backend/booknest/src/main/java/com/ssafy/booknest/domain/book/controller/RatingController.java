@@ -1,6 +1,7 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
 import com.ssafy.booknest.domain.book.service.RatingService;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -78,13 +81,37 @@ public class RatingController {
         return ApiResponse.success(response);
     }
 
-    // 취향분석에서 책 관심없음
+    // 취향분석에서 책 관심없음 등록
     @PostMapping("/{bookId}/ignore")
     public ResponseEntity<ApiResponse<Void>> ignoreBook(
             @PathVariable("bookId") Integer bookId,
             @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         ratingService.ignoreBook(userId, bookId);
+        return ApiResponse.success(HttpStatus.OK);
+    }
+
+    // 특정 도서에 대해 관심없음 여부 확인
+    @GetMapping("/{bookId}/ignore")
+    public ResponseEntity<ApiResponse<Boolean>> isIgnoredBook(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        boolean isIgnored = ratingService.isBookIgnored(userId, bookId);
+
+        return ApiResponse.success(isIgnored, HttpStatus.OK);
+    }
+
+
+
+    // 관심없음 삭제
+    @DeleteMapping("/{bookId}/ignore")
+    public ResponseEntity<ApiResponse<Void>> cancelIgnoreBook(
+            @PathVariable("bookId") Integer bookId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        ratingService.cancelIgnoredBook(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
     }
 
