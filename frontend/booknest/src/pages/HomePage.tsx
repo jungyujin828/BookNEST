@@ -7,6 +7,7 @@ import CriticBooks from "../components/CriticBooks";
 import TodayBestComments from "../components/TodayBestComments";
 import LibraryBooks from '../components/LibraryBooks';
 import TagBooks from '../components/TagBooks';
+import FavoriteCategoryBooks from '../components/FavoriteCategoryBooks';
 import { useAuthStore } from "../store/useAuthStore";
 import api from "../api/axios";
 
@@ -101,6 +102,7 @@ const HomePage = () => {
       <HomeContainer>
         <TodayBestComments />
         <BestSeller />
+        <FavoriteCategoryBooks />
         <TagBooks />
         <AuthorBook />
         <AgeBooks />
