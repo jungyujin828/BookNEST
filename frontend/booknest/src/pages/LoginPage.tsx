@@ -84,12 +84,15 @@ const ButtonSection = styled.div`
   display: flex;
   flex-direction: column;
   width: 20rem;
+  overflow: hidden;
+`;
 
-  // @media (min-width: ${theme.breakpoints.desktop}) {
-  //   position: static;
-  //   margin-right: 3rem;
-  //   align-self: center;
-  // }
+const SocialButtonsContainer = styled.div<{ show: boolean }>`
+  display: flex;
+  flex-direction: column;
+  transform: translateY(${({ show }) => (show ? "0" : "100%")});
+  opacity: ${({ show }) => (show ? "1" : "0")};
+  transition: all 0.5s ease-in-out;
 `;
 
 const Logo = styled.div`
@@ -175,6 +178,7 @@ const KakaoButton = styled.button`
     position: absolute;
     flex: 1;
     text-align: center;
+    font-family: "Pretendard", sans-serif;
   }
 `;
 
@@ -215,6 +219,7 @@ const NaverButton = styled.button`
     position: absolute;
     flex: 1;
     text-align: center;
+    font-family: "Pretendard", sans-serif;
   }
 `;
 
@@ -255,6 +260,7 @@ const GoogleButton = styled.button`
     position: absolute;
     flex: 1;
     text-align: center;
+    font-family: "Pretendard", sans-serif;
   }
 `;
 
@@ -287,7 +293,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     console.log("interval set");
-    const intervalId = setInterval(handleChangeBackground, 5000);
+    const intervalId = setInterval(handleChangeBackground, 20000);
 
     return () => {
       console.log("interval cleared");

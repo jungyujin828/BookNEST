@@ -48,7 +48,7 @@ const SlideImageContainer = styled.div`
   position: absolute;
   width: 100%;
   height: 70vh;
-  object-fit: cover;
+  background-color: black;
   &::after {
     content: "";
     position: absolute;
@@ -64,7 +64,8 @@ const SlideImageContainer = styled.div`
 const SlideImage = styled.img`
   width: 100%;
   height: 70vh;
-  object-fit: cover;
+  object-fit: contain;
+  background-color: black;
 `;
 
 const SlideInfo = styled.div`
@@ -159,17 +160,13 @@ const DetailButton = styled.span`
 
 const EvaluateButton = styled.button`
   position: absolute;
-  bottom: 10rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.2);
+  width: 100%;
+  height: 30vh;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   border: none;
-  padding: 12px 24px;
-  border-radius: 20px;
   cursor: pointer;
   font-size: 32px;
-  backdrop-filter: blur(8px);
-  transition: background-color 0.2s;
 `;
 
 const DetailInfo = styled.div<{ isVisible: boolean }>`

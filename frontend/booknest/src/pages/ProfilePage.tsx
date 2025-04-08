@@ -342,25 +342,6 @@ const ProfilePage = () => {
     };
   }, [showEditModal]);
 
-  // 팔로우 상태 확인을 위한 useEffect 추가
-  useEffect(() => {
-    const checkFollowStatus = async () => {
-      if (!isOwnProfile && userId) {
-        try {
-          const response = await api.get(`/api/follow/check/${userId}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          setIsFollowing(response.data.data);
-        } catch (error) {
-          console.error("팔로우 상태 확인 실패:", error);
-        }
-      }
-    };
-    checkFollowStatus();
-  }, [userId, isOwnProfile]);
-
   // 팔로우/언팔로우 처리 함수 추가
   const handleFollowToggle = async () => {
     try {

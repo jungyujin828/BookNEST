@@ -5,8 +5,8 @@ import AuthorBook from "../components/AuthorBook";
 import AgeBooks from "../components/AgeBooks";
 import CriticBooks from "../components/CriticBooks";
 import TodayBestComments from "../components/TodayBestComments";
-import LibraryBooks from '../components/LibraryBooks';
-import TagBooks from '../components/TagBooks';
+import LibraryBooks from "../components/LibraryBooks";
+import TagBooks from "../components/TagBooks";
 import { useAuthStore } from "../store/useAuthStore";
 import api from "../api/axios";
 
@@ -52,20 +52,6 @@ const Title = styled.h1`
   color: #4caf50;
 `;
 
-const TestButton = styled.button`
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 10px;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
 const HomePage = () => {
   const { setUserDetail } = useAuthStore();
 
@@ -97,7 +83,6 @@ const HomePage = () => {
 
   return (
     <PageWrapper>
-      <TestButton onClick={fetchUserInfo}>Get User Info</TestButton>
       <HomeContainer>
         <TodayBestComments />
         <BestSeller />
