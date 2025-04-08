@@ -26,7 +26,7 @@ public class FastApiRecommendation {
     private String title;
     private String isbn;
     private String publisher;
-    private Integer pages;
+    private String pages;
     private String intro;
     private String authors;
     private String categories;
