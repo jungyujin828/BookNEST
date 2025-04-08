@@ -14,12 +14,12 @@ VALUES
     (8, '중년남', '느긋한 앵무새', 'KAKAO', 1111113, NOW(), NOW(), 'https://img.example.com/profile8.png', 'M', '1975-05-10'), -- 50대
 
     -- F
-    (9, '대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png'), -- 20대
-    (10, '워킹맘', '다정한 제비', 'NAVER', 1111115, NOW(), NOW(), 'https://img.example.com/profile10.png'), -- 40대
-    (11, '할머니F', '지혜로운 부엉이', 'GOOGLE', 1111116, NOW(), NOW(), 'https://img.example.com/profile11.png'), -- 60대 이상
+    (9, '대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png', 'F', '1998-02-28'), -- 20대
+    (10, '워킹맘', '다정한 제비', 'NAVER', 1111115, NOW(), NOW(), 'https://img.example.com/profile10.png', 'F', '1988-02-28'), -- 40대
+    (11, '할머니F', '지혜로운 부엉이', 'GOOGLE', 1111116, NOW(), NOW(), 'https://img.example.com/profile11.png', 'F', '1968-02-28'), -- 60대 이상
 
     -- O (기타)
-    (12, '열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png'), -- 20대
+    (12, '열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png', 'O', '1998-02-28'), -- 20대
 
     -- N (성별 선택 안함)
     (13, '미정성별', '신비한 두루미', 'NAVER', 1111118, NOW(), NOW(), 'https://img.example.com/profile13.png', 'N', '1990-09-09'); -- 30대
