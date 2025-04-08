@@ -104,7 +104,6 @@ public class RatingController {
     }
 
 
-
     // 관심없음 삭제
     @DeleteMapping("/{bookId}/ignore")
     public ResponseEntity<ApiResponse<Void>> cancelIgnoreBook(
@@ -114,5 +113,4 @@ public class RatingController {
         ratingService.cancelIgnoredBook(userId, bookId);
         return ApiResponse.success(HttpStatus.OK);
     }
-
 }

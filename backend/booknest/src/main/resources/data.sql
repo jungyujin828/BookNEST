@@ -211,15 +211,16 @@ VALUES (
 INSERT INTO best_seller (book_id) VALUES
                                       (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
--- 📌 작가 추가 (책에 맞는 유명 작가 5명)
-INSERT INTO author (id, name) VALUES
-                                  (1, 'J.K. 롤링'),
-                                  (2, '히가시노 게이고'),
-                                  (3, '헤르만 헤세'),
-                                  (4, '생텍쥐페리'),
-                                  (5, '조지 오웰'),
-                                  (6, '이경석'),
-                                  (7, '앤디 위어');
+-- 📌 작가
+INSERT INTO author (id, name, image_url) VALUES
+                                             (1, 'J.K. 롤링', 'https://dummyimage.com/200x300/000/fff&text=J.K.+Rowling'),
+                                             (2, '히가시노 게이고', 'https://dummyimage.com/200x300/000/fff&text=Higashino+Keigo'),
+                                             (3, '헤르만 헤세', 'https://dummyimage.com/200x300/000/fff&text=Hermann+Hesse'),
+                                             (4, '생텍쥐페리', 'https://dummyimage.com/200x300/000/fff&text=Saint-Exupery'),
+                                             (5, '조지 오웰', 'https://dummyimage.com/200x300/000/fff&text=George+Orwell'),
+                                             (6, '이경석', 'https://dummyimage.com/200x300/000/fff&text=Lee+Kyungseok'),
+                                             (7, '앤디 위어', 'https://dummyimage.com/200x300/000/fff&text=Andy+Weir');
+
 
 
 
