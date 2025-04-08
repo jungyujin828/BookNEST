@@ -10,4 +10,6 @@ public interface BookSearchCustomRepository {
 
     void save(SearchedBook book);
     Page<SearchedBook> searchByTagsAndKeyword(List<String> tags, String keyword, Pageable pageable);
+
+    List<String> autocompleteTitle(String keyword);
 }

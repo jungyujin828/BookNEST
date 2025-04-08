@@ -62,4 +62,10 @@ public class SearchController {
         return ApiResponse.success(keywords);
     }
 
+    @GetMapping("/autocomplete")
+    public ResponseEntity<List<String>> autocomplete(@RequestParam String keyword) {
+        List<String> suggestions = searchService.autocompleteTitle(keyword);
+        return ResponseEntity.ok(suggestions);
+    }
+
 }

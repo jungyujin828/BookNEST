@@ -86,4 +86,8 @@ public class SearchService {
 
         return new CustomPage<>(new PageImpl<>(responseList, pageable, users.getTotalElements()));
     }
+
+    public List<String> autocompleteTitle(String keyword) {
+        return bookSearchRepository.autocompleteTitle(keyword);
+    }
 }

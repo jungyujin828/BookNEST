@@ -1,11 +1,11 @@
 package com.ssafy.booknest.domain.search.repository;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.json.JsonData;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
@@ -16,14 +16,62 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
 public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepository {
 
     private final ElasticsearchClient elasticsearchClient;
+
+    @Override
+    public List<String> autocompleteTitle(String keyword) {
+        try {
+            SearchResponse<Void> response = elasticsearchClient.search(s -> s
+                            .index("book")
+                            .size(10)
+                            .query(q -> q
+                                    .bool(b -> b
+                                            .should(s1 -> s1.match(m -> m.field("title.autocomplete").query(keyword)))
+                                            .should(s2 -> s2.match(m -> m.field("authors.autocomplete").query(keyword)))
+                                    )
+                            )
+                            .fields(
+                                    FieldAndFormat.of(f -> f.field("title")),
+                                    FieldAndFormat.of(f -> f.field("authors"))
+                            ),
+                    Void.class
+            );
+
+            Set<String> suggestions = new LinkedHashSet<>();
+            for (Hit<Void> hit : response.hits().hits()) {
+                Map<String, JsonData> fields = hit.fields();
+
+                if (fields.containsKey("title")) {
+                    Object titleObj = fields.get("title").to(Object.class);
+                    if (titleObj instanceof List<?>) {
+                        ((List<?>) titleObj).forEach(t -> suggestions.add(t.toString()));
+                    } else {
+                        suggestions.add(titleObj.toString());
+                    }
+                }
+
+                if (fields.containsKey("authors")) {
+                    Object authorObj = fields.get("authors").to(Object.class);
+                    if (authorObj instanceof List<?>) {
+                        ((List<?>) authorObj).forEach(a -> suggestions.add(a.toString()));
+                    } else {
+                        suggestions.add(authorObj.toString());
+                    }
+                }
+            }
+
+            return new ArrayList<>(suggestions);
+
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.ELASTICSEARCH_ERROR);
+        }
+    }
 
     @Override
     public void save(SearchedBook book) {
