@@ -7,11 +7,11 @@ import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,48 +26,58 @@ public class UserTagAnalysisScheduler {
     private final UserTagAnalysisRepository userTagAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+    @Scheduled(fixedRate = 1000 * 60 * 5) // 5분마다 실행
     public void runUserTagAnalysisBatch() {
         log.info("[태그 배치 시작] 유저 선호 분석");
 
+        // 1. 모든 평점 데이터를 가져옴
         List<Rating> allRatings = ratingRepository.findAllWithBookAndTag();
-        Map<Integer, Map<String, List<Double>>> userTagRatings = new HashMap<>();
+
+        // 2. 유저별 태그 → 평점 리스트 맵핑
+        Map<User, Map<String, List<Double>>> userTagRatings = new HashMap<>();
 
         for (Rating rating : allRatings) {
-            Integer userId = rating.getUser().getId();
-            userTagRatings.putIfAbsent(userId, new HashMap<>());
-
+            User user = rating.getUser();
             List<BookTag> bookTags = rating.getBook().getBookTags();
+
+            userTagRatings.putIfAbsent(user, new HashMap<>());
+
             if (bookTags != null) {
-                Map<String, List<Double>> tagMap = userTagRatings.get(userId);
                 for (BookTag bookTag : bookTags) {
                     String tagName = bookTag.getTag().getName();
-                    tagMap.putIfAbsent(tagName, new ArrayList<>());
-                    tagMap.get(tagName).add(rating.getRating());
+                    userTagRatings.get(user)
+                            .computeIfAbsent(tagName, k -> new ArrayList<>())
+                            .add(rating.getRating());
                 }
             }
         }
 
-        for (Integer userId : userTagRatings.keySet()) {
-            Map<String, List<Double>> tagMap = userTagRatings.get(userId);
-            Optional<User> userOpt = userRepository.findById(userId);
-            if (userOpt.isEmpty()) continue;
+        // 3. 유저별 상위 5개 태그 분석
+        for (Map.Entry<User, Map<String, List<Double>>> entry : userTagRatings.entrySet()) {
+            User user = entry.getKey();
+            Map<String, List<Double>> tagMap = entry.getValue();
 
-            String favoriteTag = tagMap.entrySet().stream()
+            List<String> topTags = tagMap.entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
                             e -> e.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0)
                     ))
                     .entrySet().stream()
-                    .max(Map.Entry.comparingByValue())
+                    .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                    .limit(5)
                     .map(Map.Entry::getKey)
-                    .orElse(null);
+                    .toList();
 
-            UserTagAnalysis analysis = userTagAnalysisRepository.findByUser(userOpt.get())
-                    .orElse(UserTagAnalysis.builder().user(userOpt.get()).build());
+            // 4. 기존 기록 삭제 후 재삽입
+            userTagAnalysisRepository.deleteByUser(user);
 
-            analysis.update(favoriteTag);
-            userTagAnalysisRepository.save(analysis);
+            for (String tag : topTags) {
+                UserTagAnalysis analysis = UserTagAnalysis.builder()
+                        .user(user)
+                        .favoriteTag(tag)
+                        .build();
+                userTagAnalysisRepository.save(analysis);
+            }
         }
 
         log.info("[태그 배치 완료] 유저 분석 테이블 갱신 완료");

@@ -1,17 +1,20 @@
 package com.ssafy.booknest.domain.user.service;
 
+import com.ssafy.booknest.domain.book.entity.Author;
+import com.ssafy.booknest.domain.book.repository.AuthorRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateImgRequest;
+import com.ssafy.booknest.domain.user.dto.response.FavoriteAuthorDto;
 import com.ssafy.booknest.domain.user.dto.response.UserInfoResponse;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateRequest;
 import com.ssafy.booknest.domain.user.dto.response.UserMypageResponse;
 import com.ssafy.booknest.domain.user.entity.Address;
 import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.entity.UserAuthorAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
-import com.ssafy.booknest.domain.user.repository.AddressRepository;
-import com.ssafy.booknest.domain.user.repository.UserRepository;
+import com.ssafy.booknest.domain.user.repository.*;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +37,10 @@ public class UserService {
     private final FollowRepository followRepository;
     private final RatingRepository ratingRepository;
     private final ReviewRepository reviewRepository;
+    private final UserTagAnalysisRepository userTagAnalysisRepository;
+    private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
+    private final UserAuthorAnalysisRepository userAuthorAnalysisRepository;
+    private final AuthorRepository authorRepository;
 
     @Transactional
     public void deleteUser(Integer userId) {
@@ -136,6 +145,8 @@ public class UserService {
         return UserInfoResponse.of(user, address, followers, followings, totalRatings, totalReviews);
     }
 
+
+    // 유저 정보 조회
     public UserMypageResponse getUserMypage(Integer userId, Integer targetUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -143,15 +154,49 @@ public class UserService {
         User targetUser = userRepository.findById(targetUserId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Integer followers = followRepository.countFollowers(targetUserId); // 팔로워 수 조회
-        Integer followings = followRepository.countFollowings(targetUserId); // 팔로잉 수 조회
+        Integer followers = followRepository.countFollowers(targetUserId);
+        Integer followings = followRepository.countFollowings(targetUserId);
         Integer totalRatings = ratingRepository.countRatings(targetUserId);
         Integer totalReviews = reviewRepository.countReviews(targetUserId);
+        Boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(user.getId(), targetUserId); // 팔로우 여부
 
-        Boolean isFollowing = followRepository.existsByFollowerIdAndFollowingId(user.getId(), targetUserId);
+        List<String> favoriteTags = userTagAnalysisRepository.findTopTagsByUserId(targetUserId);
+        List<String> favoriteCategories = userCategoryAnalysisRepository.findTopCategoryNamesByUserId(targetUserId); // 예시
 
-        return UserMypageResponse.of(targetUser, followers, followings, totalRatings, totalReviews, isFollowing);
+        List<String> authorNames = userAuthorAnalysisRepository.findByUserId(targetUserId).stream()
+                .map(UserAuthorAnalysis::getFavoriteAuthor)
+                .collect(Collectors.toList());
+
+        List<FavoriteAuthorDto> favoriteAuthors = authorNames.stream()
+                .map(name -> {
+                    // 이름 기준으로 Author 엔티티에서 검색
+                    Author author = authorRepository.findByName(name)
+                            .orElse(Author.builder()
+                                    .name(name)
+                                    .imageUrl(null) // 이미지 없으면 null 또는 기본 이미지
+                                    .build());
+
+                    return FavoriteAuthorDto.builder()
+                            .name(author.getName())
+                            .imageUrl(author.getImageUrl())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+
+        return UserMypageResponse.of(
+                targetUser,
+                followers,
+                followings,
+                totalRatings,
+                totalReviews,
+                isFollowing,
+                favoriteTags,
+                favoriteCategories,
+                favoriteAuthors
+        );
     }
+
 
     // 프로필 이미지 등록, 수정, 삭제
     @Transactional

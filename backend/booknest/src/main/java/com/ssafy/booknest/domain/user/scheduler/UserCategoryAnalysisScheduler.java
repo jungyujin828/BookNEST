@@ -3,18 +3,14 @@ package com.ssafy.booknest.domain.user.scheduler;
 import com.ssafy.booknest.domain.book.entity.BookCategory;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.nest.entity.BookNest;
-import com.ssafy.booknest.domain.nest.entity.Nest;
-import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
 import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
-import com.ssafy.booknest.domain.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,21 +24,19 @@ public class UserCategoryAnalysisScheduler {
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 4)
+    @Scheduled(fixedRate = 1000 * 60 * 4) // 4분마다 실행
     public void runUserCategoryAnalysisBatch() {
         log.info("[카테고리 배치 시작] 유저 선호 분석");
 
         List<Rating> allRatings = ratingRepository.findAllWithBookAndCategory();
-
         Map<User, Map<String, List<Double>>> userCategoryRatings = new HashMap<>();
 
+        // 1. 유저별 카테고리별 평점 수집
         for (Rating rating : allRatings) {
             User user = rating.getUser();
-            List<BookCategory> categories = rating.getBook().getBookCategories();
-
             userCategoryRatings.putIfAbsent(user, new HashMap<>());
 
-            for (BookCategory bookCategory : categories) {
+            for (BookCategory bookCategory : rating.getBook().getBookCategories()) {
                 String categoryName = bookCategory.getCategory().getName();
                 userCategoryRatings.get(user)
                         .computeIfAbsent(categoryName, k -> new ArrayList<>())
@@ -50,28 +44,37 @@ public class UserCategoryAnalysisScheduler {
             }
         }
 
-        for (User user : userCategoryRatings.keySet()) {
-            Map<String, List<Double>> categoryRatings = userCategoryRatings.get(user);
+        // 2. 유저별 평균 점수 기준 상위 5개 카테고리 저장
+        for (Map.Entry<User, Map<String, List<Double>>> entry : userCategoryRatings.entrySet()) {
+            User user = entry.getKey();
+            Map<String, List<Double>> categoryRatings = entry.getValue();
 
-            String favoriteCategory = categoryRatings.entrySet().stream()
+            // 평균 계산 후 상위 5개 추출
+            List<String> topCategories = categoryRatings.entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            e -> e.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0)
+                            e -> e.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0)
                     ))
                     .entrySet().stream()
-                    .max(Map.Entry.comparingByValue())
+                    .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                    .limit(5)
                     .map(Map.Entry::getKey)
-                    .orElse(null);
+                    .toList();
 
-            UserCategoryAnalysis analysis = userCategoryAnalysisRepository.findByUser(user)
-                    .orElse(UserCategoryAnalysis.builder().user(user).build());
+            // 기존 분석 데이터 삭제
+            userCategoryAnalysisRepository.deleteByUser(user);
 
-            analysis.update(favoriteCategory);
-            userCategoryAnalysisRepository.save(analysis);
+            // 새로운 분석 데이터 저장
+            for (String category : topCategories) {
+                UserCategoryAnalysis analysis = UserCategoryAnalysis.builder()
+                        .user(user)
+                        .favoriteCategory(category)
+                        .build();
+                userCategoryAnalysisRepository.save(analysis);
+            }
         }
 
-
         log.info("[카테고리 배치 완료] 유저 분석 테이블 갱신 완료");
-        log.info("***************************************************************************************************");
+        log.info("********************************************");
     }
 }
