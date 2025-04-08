@@ -26,6 +26,4 @@ public interface AgeGenderBookRepository extends JpaRepository<AgeGenderBook, In
 
     List<AgeGenderBook> findByGender(Gender gender);
 
-    @Query("SELECT agb FROM AgeGenderBook agb ORDER BY function('RAND')")
-    List<AgeGenderBook> findRandomLimit(Pageable pageable);
 }
