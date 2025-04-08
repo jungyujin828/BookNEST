@@ -15,9 +15,6 @@ public interface IgnoredBookRepository extends JpaRepository<IgnoredBook, Intege
     // 이미 유저가 해당 책을 관심없음을 표시했는지
     boolean existsByUserAndBook(User user, Book book);
 
-    List<IgnoredBook> findByUser(User user);
-
     Optional<IgnoredBook> findByUserAndBook(User user, Book book);
 
-    void deleteByUserAndBook(User user, Book book);
 }

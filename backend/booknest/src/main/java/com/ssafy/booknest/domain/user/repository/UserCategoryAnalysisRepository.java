@@ -13,10 +13,6 @@ import java.util.Optional;
 @Repository
 public interface UserCategoryAnalysisRepository extends JpaRepository<UserCategoryAnalysis, Integer> {
 
-    Optional<UserCategoryAnalysis> findByUser(User user);
-
-    Optional<UserCategoryAnalysis> findByUserId(Integer userId);
-
     void deleteByUser(User user);
 
     @Query("SELECT u.favoriteCategory FROM UserCategoryAnalysis u WHERE u.user.id = :userId")
