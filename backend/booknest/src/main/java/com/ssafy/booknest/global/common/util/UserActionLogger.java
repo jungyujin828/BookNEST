@@ -1,9 +1,7 @@
 package com.ssafy.booknest.global.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -13,8 +11,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
@@ -26,10 +26,14 @@ public class UserActionLogger {
 
     @Async
     public void logAction(Integer userId, Integer bookId, String actionType) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String formattedTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul")).format(formatter);
+
         Map<String, Object> log = Map.of(
                 "user_id", userId,
                 "book_id", bookId,
-                "timestamp", Instant.now().toString(),
+                "timestamp", formattedTime,
                 "action_type", actionType
         );
 
