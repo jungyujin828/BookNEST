@@ -4,6 +4,7 @@ import api from "../api/axios";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/paths";
+import { theme } from "../styles/theme";
 
 interface Book {
   book_id: number;
@@ -21,8 +22,9 @@ interface Book {
   tags: string;
 }
 const MainContainer = styled.div`
+  top: ${theme.layout.headerHeight};
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - ${theme.layout.headerHeight});
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +34,7 @@ const MainContainer = styled.div`
 
 const SlideContainer = styled.div`
   width: 100%;
-  height: 100%;
+  height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,6 +51,7 @@ const SlideImageContainer = styled.div`
   width: 100%;
   height: 70vh;
   background-color: black;
+  overflow: hidden;
   &::after {
     content: "";
     position: absolute;
@@ -61,11 +64,22 @@ const SlideImageContainer = styled.div`
   }
 `;
 
-const SlideImage = styled.img`
+const SlideImageBg = styled.img`
+  position: absolute;
   width: 100%;
   height: 70vh;
-  object-fit: contain;
+  object-fit: cover;
+  filter: blur(10px);
+  transform: scale(1.1);
+`;
+
+const SlideImage = styled.img`
+  position: absolute;
+  width: auto;
+  height: 70vh;
   background-color: black;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const SlideInfo = styled.div`
@@ -74,9 +88,9 @@ const SlideInfo = styled.div`
   height: 70vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   justify-content: flex-end;
-  padding: 1rem;
+  padding: 3.5%;
 `;
 
 const BookTitle = styled.h2`
@@ -96,11 +110,11 @@ const BookAuthor = styled.p`
 `;
 
 const BookDescription = styled.p`
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: white;
-  line-height: 1.4;
+  line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 10;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -109,8 +123,7 @@ const BookDescription = styled.p`
 const TagContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 0.5rem;
 `;
 
 const Tag = styled.span`
@@ -156,17 +169,27 @@ const DetailButton = styled.span`
   border-radius: 16px;
   font-size: 14px;
   color: #fff;
+  cursor: pointer;
 `;
 
 const EvaluateButton = styled.button`
-  position: absolute;
-  width: 100%;
-  height: 30vh;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  position:relative;
+  background-color: #00c473;
+  top: 2rem;
+  padding: 1rem 2rem;
+  color: white;
   border: none;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 32px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background-color: "#1a1a1a"};
+  }
+
 `;
 
 const DetailInfo = styled.div<{ isVisible: boolean }>`
@@ -214,6 +237,7 @@ const TodaysPage = () => {
       <SlideContainer>
         <SlideCard>
           <SlideImageContainer>
+            <SlideImageBg src={currentBook.image_url} alt={currentBook.title} />
             <SlideImage src={currentBook.image_url} alt={currentBook.title} />
           </SlideImageContainer>
           <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
