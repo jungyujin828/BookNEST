@@ -327,8 +327,8 @@ const TagBooks = () => {
   };
 
   const extractTagFromDescription = (description: string) => {
-    // "'태그명' 태그의 추천 도서입니다." 형식에서 태그명 추출
-    const match = description.match(/'([^']+)'/);
+    // "태그명 태그의 추천 도서입니다." 형식에서 태그명 추출
+    const match = description.match(/(.+?)\s*태그의/);
     return match ? match[1] : '';
   };
 

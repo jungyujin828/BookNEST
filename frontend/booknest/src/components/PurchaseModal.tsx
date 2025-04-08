@@ -124,38 +124,38 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
         
         {!isLoading && !error && purchaseUrls && (
           <LinkList>
-            {purchaseUrls.aladinUrl && (
-              <PurchaseLink 
-                href={purchaseUrls.aladinUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <StoreLogo src="/images/aladin-logo.png" alt="알라딘" />
-                알라딘에서 구매하기
-              </PurchaseLink>
-            )}
+            <PurchaseLink 
+              href={purchaseUrls.aladinUrl || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => !purchaseUrls.aladinUrl && e.preventDefault()}
+              style={{ opacity: purchaseUrls.aladinUrl ? 1 : 0.5 }}
+            >
+              <StoreLogo src="/images/aladin-logo.png" alt="알라딘" />
+              {purchaseUrls.aladinUrl ? '알라딘에서 구매하기' : '알라딘 구매링크 없음'}
+            </PurchaseLink>
             
-            {purchaseUrls.kyoboUrl && (
-              <PurchaseLink 
-                href={purchaseUrls.kyoboUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <StoreLogo src="/images/kyobo-logo.png" alt="교보문고" />
-                교보문고에서 구매하기
-              </PurchaseLink>
-            )}
+            <PurchaseLink 
+              href={purchaseUrls.kyoboUrl || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => !purchaseUrls.kyoboUrl && e.preventDefault()}
+              style={{ opacity: purchaseUrls.kyoboUrl ? 1 : 0.5 }}
+            >
+              <StoreLogo src="/images/kyobo-logo.png" alt="교보문고" />
+              {purchaseUrls.kyoboUrl ? '교보문고에서 구매하기' : '교보문고 구매링크 없음'}
+            </PurchaseLink>
             
-            {purchaseUrls.yes24Url && (
-              <PurchaseLink 
-                href={purchaseUrls.yes24Url} 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                <StoreLogo src="/images/yes24-logo.png" alt="YES24" />
-                YES24에서 구매하기
-              </PurchaseLink>
-            )}
+            <PurchaseLink 
+              href={purchaseUrls.yes24Url || '#'} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              onClick={(e) => !purchaseUrls.yes24Url && e.preventDefault()}
+              style={{ opacity: purchaseUrls.yes24Url ? 1 : 0.5 }}
+            >
+              <StoreLogo src="/images/yes24-logo.png" alt="YES24" />
+              {purchaseUrls.yes24Url ? 'YES24에서 구매하기' : 'YES24 구매링크 없음'}
+            </PurchaseLink>
           </LinkList>
         )}
       </ModalContent>
