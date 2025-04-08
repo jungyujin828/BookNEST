@@ -26,11 +26,8 @@ import java.util.List;
 @RequestMapping("/api/book")
 public class ReviewController {
 
-    private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
     private final ReviewService reviewService;
-    private final RatingService ratingService;
 
     // 한줄평 등록
     @PostMapping("/{bookId}/review")
@@ -45,11 +42,9 @@ public class ReviewController {
 
     // 한줄평 수정
     @PutMapping("/review/{reviewId}")
-    public ResponseEntity<ApiResponse<Void>> updateReview(
-            @PathVariable("reviewId") Integer reviewId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestBody ReviewRequest reviewRequest
-    ){
+    public ResponseEntity<ApiResponse<Void>> updateReview(@PathVariable("reviewId") Integer reviewId,
+                                                          @AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                          @RequestBody ReviewRequest reviewRequest){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.updateReview(userId, reviewId, reviewRequest);
         return ApiResponse.success(HttpStatus.OK);
@@ -57,10 +52,8 @@ public class ReviewController {
 
     // 한줄평 삭제
     @DeleteMapping("/review/{reviewId}")
-    public ResponseEntity<ApiResponse<Void>> deleteReview(
-            @PathVariable("reviewId") Integer reviewId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ){
+    public ResponseEntity<ApiResponse<Void>> deleteReview(@PathVariable("reviewId") Integer reviewId,
+                                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.deleteReview(userId, reviewId);
         return ApiResponse.success(HttpStatus.OK);
@@ -68,22 +61,18 @@ public class ReviewController {
 
     // 한줄평 목록 조회 (내 리뷰 or 타인 리뷰)
     @GetMapping("/review")
-    public ResponseEntity<ApiResponse<CustomPage<UserReviewResponse>>> getReviews(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
-            @RequestParam(value = "targetId") Integer targetId,
-            Pageable pageable
-    ) {
-
-        CustomPage<UserReviewResponse> responseList = reviewService.getReviews(targetId, pageable);
+    public ResponseEntity<ApiResponse<CustomPage<UserReviewResponse>>> getReviews(@AuthenticationPrincipal UserPrincipal userPrincipal,
+                                                                                  @RequestParam(value = "targetId") Integer targetId,
+                                                                                  Pageable pageable) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        CustomPage<UserReviewResponse> responseList = reviewService.getReviews(userId, targetId, pageable);
         return ApiResponse.success(responseList);
     }
 
     // 한줄평 좋아요
     @PostMapping("/review/{reviewId}/like")
-    public ResponseEntity<ApiResponse<Void>> likeReview(
-            @PathVariable("reviewId") Integer reviewId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal)
-    {
+    public ResponseEntity<ApiResponse<Void>> likeReview(@PathVariable("reviewId") Integer reviewId,
+                                                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Integer likerId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.likeReview(likerId, reviewId);
         return ApiResponse.success(HttpStatus.CREATED);
@@ -91,10 +80,8 @@ public class ReviewController {
 
     // 한줄평 좋아요 취소
     @DeleteMapping("/review/{reviewId}/like")
-    public ResponseEntity<ApiResponse<Void>> unlikeReview(
-            @PathVariable("reviewId") Integer reviewId,
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ) {
+    public ResponseEntity<ApiResponse<Void>> unlikeReview(@PathVariable("reviewId") Integer reviewId,
+                                                          @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         reviewService.unlikeReview(userId, reviewId);
         return ApiResponse.success(HttpStatus.OK);
@@ -102,9 +89,8 @@ public class ReviewController {
 
     // 오늘 베스트 한줄평
     @GetMapping("/best-reviews")
-    public ResponseEntity<ApiResponse<List<BestReviewResponse>>> getBestReviews(
-            @AuthenticationPrincipal UserPrincipal userPrincipal
-    ) {
+    public ResponseEntity<ApiResponse<List<BestReviewResponse>>> getBestReviews(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
         List<BestReviewResponse> bestReviews = reviewService.getBestReviews(userId);
         return ApiResponse.success(bestReviews);

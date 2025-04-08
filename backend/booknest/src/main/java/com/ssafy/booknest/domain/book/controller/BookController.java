@@ -1,9 +1,17 @@
 package com.ssafy.booknest.domain.book.controller;
 
+import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
+import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.*;
+import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
+import com.ssafy.booknest.domain.book.enums.BookSearchType;
+import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.FastApiService;
+import com.ssafy.booknest.domain.book.service.RatingService;
+import com.ssafy.booknest.domain.book.service.ReviewService;
+import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -12,9 +20,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +32,12 @@ import java.util.List;
 public class BookController {
 
     private final BookService bookService;
+    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
+    private final ReviewService reviewService;
+    private final RatingService ratingService;
     private final FastApiService fastApiService;
+    private final PopularAuthorBookRepository popularAuthorBookRepository;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")
@@ -41,7 +55,6 @@ public class BookController {
                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal,
                                                                    Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
         return ApiResponse.success(bookService.getBook(userId, bookId, pageable));
     }
 
@@ -103,11 +116,12 @@ public class BookController {
     // 나이대와 성별에 따른 추천
     @GetMapping("/age-gender")
     public ResponseEntity<ApiResponse<AgeGenderBookResult>> getAgeGenderBooks(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
 
-        return ApiResponse.success(AgeGenderBookResult.of(bookService.getAgeGenderBooks(userId)));
+        // bookService에서 이미 AgeGenderBookResult 리턴하도록 수정한 상태니까, 그대로 받기만 하면 됨
+        return ApiResponse.success(bookService.getAgeGenderBooks(userId));
     }
+
 
     // 태그별 랜덤 추천
     @GetMapping("/tag")

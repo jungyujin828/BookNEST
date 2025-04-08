@@ -113,15 +113,16 @@ public class ReviewService {
 
     // 사용자 한줄평 목록
     @Transactional(readOnly = true)
-    public CustomPage<UserReviewResponse> getReviews(Integer userId, Pageable pageable) {
-        if (!userRepository.existsById(userId)) {
+    public CustomPage<UserReviewResponse> getReviews(Integer userId, Integer targetId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!userRepository.existsById(targetId)) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
-        Page<Review> reviewPage = reviewRepository.findByUserIdOrderByUpdatedAtDesc(userId, pageable);
-
+        Page<Review> reviewPage = reviewRepository.findByUserIdOrderByUpdatedAtDesc(targetId, pageable);
         Page<UserReviewResponse> responsePage = reviewPage.map(UserReviewResponse::of);
-
         return new CustomPage<>(responsePage);
     }
 

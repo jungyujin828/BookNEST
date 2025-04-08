@@ -19,8 +19,8 @@ public class CriticBook extends BaseEntity {
     @Column(name = "critic_name", length = 20, nullable = false)
     private String criticName;
 
-    @Column(name = "Endorsement", columnDefinition = "TEXT")
-    private String Endorsement;
+    @Column(name = "endorsement", columnDefinition = "TEXT")
+    private String endorsement;
 
     @Column(name = "rank")
     private Integer rank;

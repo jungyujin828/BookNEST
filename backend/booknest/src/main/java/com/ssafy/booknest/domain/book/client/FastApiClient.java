@@ -31,8 +31,8 @@ public class FastApiClient {
     }
 
     // 최근 키워드 기반 추천
-    public Map<String, Object> requestRecentKeywordRecommendation(Integer userId) {
-        return postWithUserId(userId, "/recommend/recent_keyword");
+    public Map<String, Object> requestRecentTagRecommendation(Integer userId) {
+        return postWithUserId(userId, "/recommend/recent_tag");
     }
 
     // 공통 POST 요청 처리

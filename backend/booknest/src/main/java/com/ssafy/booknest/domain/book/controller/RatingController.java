@@ -61,13 +61,13 @@ public class RatingController {
         return ApiResponse.success(ratingService.getRatingList(userId, targetId, pageable));
     }
 
-    // 내가 입력한 점수 조회
+    // 내가 입력한 평점 조회
     @GetMapping("/{bookId}/rating")
     public ResponseEntity<ApiResponse<MyRatingResponse>> getMyRating(@PathVariable Integer bookId,
                                                                      @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        MyRatingResponse response = ratingService.getUserRating(userId, bookId);
-        return ApiResponse.success(response);
+
+        return ApiResponse.success(ratingService.getUserRating(userId, bookId));
     }
 
     // 도서 관심없음 등록
@@ -79,14 +79,14 @@ public class RatingController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    // 특정 도서 관심없음 등록
+    // 특정 도서 관심없음 조회
     @GetMapping("/{bookId}/ignore")
     public ResponseEntity<ApiResponse<Boolean>> isIgnoredBook(@PathVariable("bookId") Integer bookId,
                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-        boolean isIgnored = ratingService.isBookIgnored(userId, bookId);
-        return ApiResponse.success(isIgnored, HttpStatus.OK);
+
+        return ApiResponse.success(ratingService.isBookIgnored(userId, bookId), HttpStatus.OK);
     }
 
 

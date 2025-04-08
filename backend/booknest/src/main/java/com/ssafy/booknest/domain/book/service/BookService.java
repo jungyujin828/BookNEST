@@ -200,16 +200,16 @@ public class BookService {
 
     // 나이대와 성별에 따른 추천
     @Transactional(readOnly = true)
-    public List<AgeGenderBookResponse> getAgeGenderBooks(Integer userId) {
+    public AgeGenderBookResult getAgeGenderBooks(Integer userId) {
 
-        // 사용자 검증
+        // 사용자 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         AgeGroup ageGroup = null;
         Gender gender = user.getGender();
 
-        // 생년월일 → 나이대 계산 (이상하면 무시)
+        // 생년월일 → 나이대 추출
         String birthdateStr = user.getBirthdate();
         if (birthdateStr != null && birthdateStr.length() >= 4) {
             try {
@@ -217,15 +217,14 @@ public class BookService {
                 int age = LocalDate.now().getYear() - birthYear + 1;
                 ageGroup = AgeGroup.fromAge(age);
             } catch (NumberFormatException ignored) {
-                // 잘못된 생년월일 형식이면 조용히 ageGroup = null 유지
             }
         }
 
-
         List<AgeGenderBook> books = new ArrayList<>();
+        boolean isValidGender = (gender == Gender.M || gender == Gender.F);
 
         // 1. 나이대 + 성별
-        if (ageGroup != null && gender != null && gender != Gender.N && gender != Gender.O) {
+        if (ageGroup != null && isValidGender) {
             books = ageGenderBookRepository.findByAgeGroupAndGender(ageGroup, gender);
         }
 
@@ -235,7 +234,7 @@ public class BookService {
         }
 
         // 3. 성별만
-        if (books.isEmpty() && gender != null && gender != Gender.N && gender != Gender.O) {
+        if (books.isEmpty() && isValidGender) {
             books = ageGenderBookRepository.findByGender(gender);
         }
 
@@ -244,11 +243,17 @@ public class BookService {
             books = ageGenderBookRepository.findRandomLimit(15);
         }
 
-        return books.stream()
+        // 변환
+        List<AgeGenderBookResponse> responses = books.stream()
                 .limit(15)
                 .map(AgeGenderBookResponse::of)
                 .toList();
+
+        // 설명 생성 + 결과 반환
+        return AgeGenderBookResult.of(userId, responses, userRepository);
     }
+
+
 
     // 태그별 랜덤 추천
     @Transactional(readOnly = true)
