@@ -221,6 +221,7 @@ const SearchPage = () => {
   const searchBarRef = useRef<any>(null);
   const navigate = useNavigate();
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // 검색 파라미터 업데이트 함수
   const updateSearchParams = (newSearchTerm?: string, newTags?: string[], newType?: "books" | "users") => {
@@ -256,6 +257,7 @@ const SearchPage = () => {
     // 상태 업데이트
     setSelectedTags(newSelectedTags);
     updateSearchParams(searchTerm, newSelectedTags);
+    setIsSearchActive(true);
 
     // 검색 실행
     try {
@@ -304,53 +306,26 @@ const SearchPage = () => {
     }
   };
 
-  const handleSearchChange = async (value: string) => {
+  const handleSearchChange = (value: string) => {
     setSearchTerm(value);
     if (!value) {
-      setIsSearchActive(false);
-    }
-    // 검색어가 변경될 때마다 현재 선택된 태그와 함께 검색
-    try {
-      const response = await api.get("/api/search/book", {
-        params: {
-          page: 1,
-          size: 10,
-          ...(value && { title: value }),
-          ...(selectedTags.length > 0 && { tags: selectedTags }),
-        },
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "application/json",
-        },
-        paramsSerializer: (params) => {
-          const searchParams = new URLSearchParams();
-          Object.entries(params).forEach(([key, value]) => {
-            if (Array.isArray(value)) {
-              value.forEach((v) => searchParams.append(key, v));
-            } else {
-              searchParams.append(key, value as string);
-            }
-          });
-          return searchParams.toString();
-        },
-      });
-
-      if (response.data.success) {
-        const processedData: SearchResult = response.data.data;
-        setCurrentPage(1);
-        setTotalBooks(processedData.totalElements);
-        setTotalPages(processedData.totalPages);
-        setBooks(processedData.content);
-        if (value) {
-          setIsSearchActive(true);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to search:", error);
-      // 에러 발생 시 상태 초기화
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
+    }
+    updateSearchParams(value, selectedTags);
+  };
+
+  const handleSearchResult = (data: any) => {
+    if (activeTab === "books") {
+      setCurrentPage(1);
+      setTotalBooks(data.totalElements);
+      setTotalPages(data.totalPages);
+      setBooks(data.content);
+      setIsSearchActive(true);
+    } else {
+      setUsers(data);
+      setBooks([]);
     }
   };
 
@@ -370,21 +345,6 @@ const SearchPage = () => {
     setActiveTab(tab);
     setIsSearchActive(false);
     updateSearchParams(undefined, undefined, tab);
-  };
-
-  const handleSearchResult = (data: any) => {
-    if (activeTab === "books") {
-      console.log("Received books data:", data);
-      console.log(
-        "Books tags:",
-        data.map((book: Book) => ({ title: book.title, tags: book.tags }))
-      );
-      setBooks(data);
-      setUsers([]);
-    } else {
-      setUsers(data);
-      setBooks([]);
-    }
   };
 
   const handleFollowClick = async (e: React.MouseEvent, userId: number) => {
@@ -460,24 +420,25 @@ const SearchPage = () => {
     }
   };
 
-  // Add state for search focus
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-
   const handleSearchFocus = () => {
+    setIsSearchFocused(true);
     if (searchTerm === "") {
       setShowRecent(true);
     }
   };
 
   const handleSearchBlur = () => {
-    // 약간의 지연을 주어 클릭 이벤트가 처리될 수 있도록 함
+    setIsSearchFocused(false);
     setTimeout(() => {
       setShowRecent(false);
     }, 200);
   };
 
   const shouldShowTags =
-    activeTab === "books" && !showRecent && (!isSearchActive || (isSearchActive && selectedTags.length > 0));
+    activeTab === "books" && !showRecent && (
+      selectedTags.length > 0 || // 태그가 선택된 경우는 항상 보여주기
+      (!isSearchFocused && !books.length) // 검색바에 포커스가 없고, 검색 결과가 없는 경우에만 보여주기
+    );
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -518,7 +479,7 @@ const SearchPage = () => {
               onSelect={(query) => {
                 setSearchTerm(query);
                 setIsSearchActive(true);
-                handleSearchChange(query);
+                searchBarRef.current?.handleSearch();
               }}
               onClose={() => setShowRecent(false)}
             />
@@ -526,7 +487,7 @@ const SearchPage = () => {
               onSelect={(query) => {
                 setSearchTerm(query);
                 setIsSearchActive(true);
-                handleSearchChange(query);
+                searchBarRef.current?.handleSearch();
               }}
             />
           </>
