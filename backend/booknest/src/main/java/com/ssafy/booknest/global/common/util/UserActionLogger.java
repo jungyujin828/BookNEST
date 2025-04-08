@@ -21,15 +21,7 @@ import java.util.Map;
 public class UserActionLogger {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Path logPath = Paths.get("logs", "user_logs_" + LocalDate.now() + ".jsonl");
-
-    @PostConstruct
-    public void init() throws IOException {
-        Files.createDirectories(logPath.getParent());
-        if (!Files.exists(logPath)) {
-            Files.createFile(logPath);
-        }
-    }
+    private final String baseLogDir = "/app/logs";
 
     @Async
     public void logAction(Integer userId, Integer bookId, String actionType) {
@@ -41,11 +33,20 @@ public class UserActionLogger {
         );
 
         try {
+            // 매번 현재 날짜 기준으로 파일 경로 설정
+            Path logPath = Paths.get(baseLogDir, "user_logs_" + LocalDate.now() + ".jsonl");
+
+            // 파일 없으면 생성
+            if (!Files.exists(logPath)) {
+                Files.createFile(logPath);
+            }
+
+            // JSONL 로그 작성
             String jsonLine = objectMapper.writeValueAsString(log) + "\n";
             Files.write(logPath, jsonLine.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+
         } catch (IOException e) {
-            // 실패 시 로깅만 하고 무시
-            System.err.println("Failed to write log: " + e.getMessage());
+            System.err.println("Failed to write user log: " + e.getMessage());
         }
     }
 }
