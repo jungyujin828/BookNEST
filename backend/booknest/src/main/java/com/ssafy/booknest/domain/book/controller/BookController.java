@@ -15,6 +15,7 @@ import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,7 @@ public class BookController {
     private final ReviewService reviewService;
     private final RatingService ratingService;
     private final FastApiService fastApiService;
+    private final UserActionLogger userActionLogger;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
 
     // 베스트 셀러 목록 조회
@@ -55,6 +57,9 @@ public class BookController {
                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal,
                                                                    Pageable pageable) {
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+
+        userActionLogger.logAction(userId, bookId, "click_book_detail");
+
         return ApiResponse.success(bookService.getBook(userId, bookId, pageable));
     }
 
