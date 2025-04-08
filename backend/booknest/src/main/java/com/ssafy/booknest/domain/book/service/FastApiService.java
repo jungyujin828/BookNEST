@@ -60,7 +60,7 @@ public class FastApiService {
     }
 
     public List<FastApiRecommendation> getRecentKeywordRecommendations(Integer userId) {
-        Map<String, Object> response = fastApiClient.requestRecentKeywordRecommendation(userId);
+        Map<String, Object> response = fastApiClient.requestRecentTagRecommendation(userId);
 
         // 예외 처리
         if (!"ok".equals(response.get("db_status"))) {

@@ -17,6 +17,7 @@ public class BestReviewResponse {
 
     private int reviewId;
     private int bookId;
+    private String bookName;
     private String reviewerName;
     private String content;
     private Boolean myLiked;
@@ -35,6 +36,7 @@ public class BestReviewResponse {
         return BestReviewResponse.builder()
                 .reviewId(review.getId())
                 .bookId(review.getBook().getId())
+                .bookName(review.getBook().getTitle())
                 .reviewerName(reviewerName)
                 .content(review.getContent())
                 .myLiked(myLiked)
@@ -45,6 +47,4 @@ public class BestReviewResponse {
                 .updatedAt(review.getUpdatedAt())
                 .build();
     }
-
-
 }

@@ -1,12 +1,15 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
+import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
+import com.ssafy.booknest.domain.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -18,35 +21,54 @@ public class AgeGenderBookResult {
     private String description;
     private List<AgeGenderBookResponse> books;
 
-    public static AgeGenderBookResult of(List<AgeGenderBookResponse> responses) {
+    public static AgeGenderBookResult of(Integer userId, List<AgeGenderBookResponse> responses, UserRepository userRepository) {
         if (responses == null || responses.isEmpty()) {
-            return new AgeGenderBookResult("랜덤 추천 도서입니다.", List.of());
+            return new AgeGenderBookResult("책 목록 리스트를 가져오지 못했습니다.", List.of());
         }
 
-        AgeGroup ageGroup = responses.get(0).getAgeGroup();
-        Gender gender = responses.get(0).getGender();
+        User user = userRepository.findById(userId).orElse(null);
 
-        StringBuilder desc = new StringBuilder();
+        AgeGroup ageGroup = null;
+        Gender gender = null;
 
-        if (ageGroup != null && gender != null && gender != Gender.N && gender != Gender.O) {
-            desc.append(ageGroup.getLabel()).append(" ").append(convertGenderToKorean(gender)).append("이 좋아하는 책");
+        if (user != null) {
+            gender = user.getGender();
+
+            String birthdateStr = user.getBirthdate();
+            if (birthdateStr != null && birthdateStr.length() >= 4) {
+                try {
+                    int birthYear = Integer.parseInt(birthdateStr.substring(0, 4));
+                    int age = LocalDate.now().getYear() - birthYear + 1;
+                    ageGroup = AgeGroup.fromAge(age);
+                } catch (NumberFormatException ignored) {
+                    // 생일 오류 무시
+                }
+            }
+        }
+
+        String description = generateDescription(ageGroup, gender);
+        return new AgeGenderBookResult(description, responses);
+    }
+
+    private static String generateDescription(AgeGroup ageGroup, Gender gender) {
+        boolean isValidGender = gender == Gender.M || gender == Gender.F;
+
+        if (ageGroup != null && isValidGender) {
+            return ageGroup.getLabel() + " " + convertGenderToKorean(gender) + "이 좋아하는 도서";
         } else if (ageGroup != null) {
-            desc.append(ageGroup.getLabel()).append(" 연령대가 좋아하는 책");
-        } else if (gender != null && gender != Gender.N && gender != Gender.O) {
-            desc.append(convertGenderToKorean(gender)).append("이 좋아하는 책");
+            return ageGroup.getLabel() + " 연령대가 좋아하는 도서";
+        } else if (isValidGender) {
+            return convertGenderToKorean(gender) + "이 좋아하는 도서";
         } else {
-            desc.append("랜덤 추천 도서입니다.");
+            return "전 세대와 성별을 아우르는 인기 도서";
         }
-
-
-        return new AgeGenderBookResult(desc.toString(), responses);
     }
 
     private static String convertGenderToKorean(Gender gender) {
         return switch (gender) {
             case M -> "남성";
             case F -> "여성";
-            default -> ""; // N, O 처리 안 함
+            case O, N -> ""; // N, O 일 때는 성별 생략
         };
     }
 

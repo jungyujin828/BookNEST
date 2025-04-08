@@ -7,11 +7,7 @@ import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
 import com.ssafy.booknest.domain.book.repository.*;
-import com.ssafy.booknest.domain.nest.entity.BookMark;
-import com.ssafy.booknest.domain.nest.entity.BookNest;
-import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
@@ -33,9 +29,7 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +53,6 @@ public class BookService {
     private final RatingRepository ratingRepository;
     private final CriticBookRepository criticBookRepository;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
-    private final BookNestRepository bookNestRepository;
     private final NestRepository nestRepository;
     private final AgeGenderBookRepository ageGenderBookRepository;
     private final TagRandomBookRepository tagRandomBookRepository;
@@ -69,11 +62,14 @@ public class BookService {
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
-    @Transactional(readOnly = true) // LazyInitializationException 방지
-    public List<BookResponse> getBestSellers() {
+    @Transactional(readOnly = true)
+    public List<BookResponse> getBestSellers(Integer userId) {
+
+        // 사용자 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         List<BestSeller> bestSellers = bookRepository.findBestSellers();
-
 
         return bestSellers.stream()
                 .map(bestSeller -> BookResponse.of(bestSeller.getBook()))
@@ -83,6 +79,10 @@ public class BookService {
     // 책 상세 페이지 조회
     @Transactional(readOnly = true)
     public BookDetailResponse getBook(Integer userId, Integer bookId, Pageable pageable) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
@@ -99,7 +99,10 @@ public class BookService {
 
     // 구매 사이트 조회
     @Transactional(readOnly = true)
-    public BookPurchaseResponse getPurchaseLinks(Integer bookId) {
+    public BookPurchaseResponse getPurchaseLinks(Integer userId, Integer bookId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Book book = bookRepository.findBookDetailById(bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
@@ -128,6 +131,11 @@ public class BookService {
 
     // 평론가 추천책
     public List<CriticBookResponse> getCriticBooks(Integer userId) {
+
+        // 사용자 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         List<String> criticNames = criticBookRepository.findAllCriticNames();
 
         if (criticNames.isEmpty()) {
@@ -148,8 +156,6 @@ public class BookService {
                 .toList();
     }
 
-
-
     // 화제의 작가 추천 책
     @Transactional(readOnly = true)
     public List<BookResponse> getAuthorBooks(Integer userId) {
@@ -160,6 +166,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
+    // 평가 목록 조회
     @Transactional(readOnly = true)
     public CustomPage<BookResponse> getEvalBookList(Integer userId, BookEvalType keyword, Pageable pageable) {
         User user = userRepository.findById(userId)
@@ -193,14 +200,16 @@ public class BookService {
 
     // 나이대와 성별에 따른 추천
     @Transactional(readOnly = true)
-    public List<AgeGenderBookResponse> getAgeGenderBooks(Integer userId) {
+    public AgeGenderBookResult getAgeGenderBooks(Integer userId) {
+
+        // 사용자 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         AgeGroup ageGroup = null;
         Gender gender = user.getGender();
 
-        // 생년월일 → 나이대 계산 (이상하면 무시)
+        // 생년월일 → 나이대 추출
         String birthdateStr = user.getBirthdate();
         if (birthdateStr != null && birthdateStr.length() >= 4) {
             try {
@@ -208,15 +217,14 @@ public class BookService {
                 int age = LocalDate.now().getYear() - birthYear + 1;
                 ageGroup = AgeGroup.fromAge(age);
             } catch (NumberFormatException ignored) {
-                // 잘못된 생년월일 형식이면 조용히 ageGroup = null 유지
             }
         }
 
-
         List<AgeGenderBook> books = new ArrayList<>();
+        boolean isValidGender = (gender == Gender.M || gender == Gender.F);
 
         // 1. 나이대 + 성별
-        if (ageGroup != null && gender != null && gender != Gender.N && gender != Gender.O) {
+        if (ageGroup != null && isValidGender) {
             books = ageGenderBookRepository.findByAgeGroupAndGender(ageGroup, gender);
         }
 
@@ -226,7 +234,7 @@ public class BookService {
         }
 
         // 3. 성별만
-        if (books.isEmpty() && gender != null && gender != Gender.N && gender != Gender.O) {
+        if (books.isEmpty() && isValidGender) {
             books = ageGenderBookRepository.findByGender(gender);
         }
 
@@ -235,15 +243,23 @@ public class BookService {
             books = ageGenderBookRepository.findRandomLimit(15);
         }
 
-        return books.stream()
+        // 변환
+        List<AgeGenderBookResponse> responses = books.stream()
                 .limit(15)
                 .map(AgeGenderBookResponse::of)
                 .toList();
+
+        // 설명 생성 + 결과 반환
+        return AgeGenderBookResult.of(userId, responses, userRepository);
     }
+
+
 
     // 태그별 랜덤 추천
     @Transactional(readOnly = true)
     public List<TagBookResponse> getTagRandomBooks(Integer userId) {
+
+        // 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -263,7 +279,12 @@ public class BookService {
 
     // 년도별 도서관 대여 순위 추천
     @Transactional(readOnly = true)
-    public List<LibraryBookResponse> getLibraryBooksByYear(Integer targetYear) {
+    public List<LibraryBookResponse> getLibraryBooksByYear(Integer userId, Integer targetYear) {
+
+        // 사용자 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
         List<LibraryBook> books = libraryBookRepository.findTopByYearOrderByRank(targetYear);
 
         return books.stream()
@@ -274,6 +295,7 @@ public class BookService {
     // 내가 가장 많이 본 태그에서 추천
     @Transactional(readOnly = true)
     public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
+
         // 1. 사용자 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
