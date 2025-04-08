@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import styled from "@emotion/styled";
 import { ROUTES, OAUTH } from "../constants/paths";
 import config from "../config";
@@ -10,33 +10,54 @@ import KakaoIcon from "../icons/kakao.png";
 import NaverIcon from "../icons/naver.png";
 import GoogleIcon from "../icons/google.png";
 
-const LoginContainer = styled.div`
+// Add this interface near the top of the file, after imports
+interface LoginContainerProps {
+  isChanging: boolean;
+}
+
+const LoginContainer = styled.div<LoginContainerProps>`
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0  , 0.3)), url("bg.png") no-repeat center center;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg.png") no-repeat center center;
   background-size: auto;
   text-align: center;
   position: relative;
+  transition: all 0.7s ease-in-out;
 
-  // @media (min-width: ${theme.breakpoints.desktop}) {
-  //   flex-direction: row;
-  //   justify-content: space-between;
-  //   padding: 0 5rem;
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(${({ isChanging }) => (isChanging ? "30px" : "0px")});
+    transition: backdrop-filter 0.7s ease-in-out;
+    pointer-events: none;
+  }
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+    align-items: flex-start;
+    padding-left: 3rem;
   }
 `;
 
 const LoginContent = styled.div`
   position: fixed;
-  left: 0.6rem;
+  left: 0;
   top: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
   align-items: center;
-  width: 25rem;
+  width: 100%;
+  background-color: rgb(142, 175, 131, 0);
+
+  @media (min-width: ${theme.breakpoints.desktop}) {
+  }
 `;
 
 const LogoSection = styled.div`
@@ -240,11 +261,39 @@ const GoogleButton = styled.button`
 const LoginPage = () => {
   const [showSocialButtons, setShowSocialButtons] = useState(false);
   const [currentBg, setCurrentBg] = useState(1);
+  const [isChanging, setIsChanging] = useState(false);
   const navigate = useNavigate();
 
-  const handleChangeBackground = () => {
-    setCurrentBg((prev) => (prev % 4) + 1);
-  };
+  const handleChangeBackground = useCallback(() => {
+    console.log("change");
+    setIsChanging(true);
+    setTimeout(() => {
+      setCurrentBg((prev) => (prev % 5) + 1);
+      setIsChanging(false);
+    }, 500);
+  }, []); // 의존성 없음
+
+  useEffect(() => {
+    const preloadImages = () => {
+      const imageUrls = ["bg.png", "bg2.png", "bg3.png", "bg4.png", "bg5.png"];
+      imageUrls.forEach((url) => {
+        const img = new Image();
+        img.src = url;
+      });
+    };
+
+    preloadImages();
+  }, []);
+
+  useEffect(() => {
+    console.log("interval set");
+    const intervalId = setInterval(handleChangeBackground, 5000);
+
+    return () => {
+      console.log("interval cleared");
+      clearInterval(intervalId);
+    };
+  }, [handleChangeBackground]); // Add handleChangeBackground to dependencies
 
   const handleKakaoLogin = () => {
     const params = new URLSearchParams({
@@ -300,10 +349,14 @@ const LoginPage = () => {
 
   return (
     <LoginContainer
+      isChanging={isChanging}
       style={{
-        background: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg${
-          currentBg === 1 ? "" : currentBg
-        }.png") no-repeat center center`,
+        background:
+          currentBg === 5
+            ? `linear-gradient(rgba(109, 190, 100, 1), rgba(109, 190, 100, 1))`
+            : `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg${
+                currentBg === 1 ? "" : currentBg
+              }.png") no-repeat center center`,
       }}
     >
       <LoginContent>
