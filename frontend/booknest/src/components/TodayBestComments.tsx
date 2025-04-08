@@ -7,6 +7,7 @@ import api from '../api/axios';
 interface BestReview {
   reviewId: number;
   bookId: number;
+  bookName: string;
   reviewerName: string;
   content: string;
   myLiked: boolean;
@@ -15,7 +16,6 @@ interface BestReview {
   rank: number;
   createdAt: string;
   updatedAt: string;
-  bookTitle?: string;
 }
 
 const Container = styled.div`
@@ -145,24 +145,7 @@ const TodayBestComments: React.FC = () => {
     try {
       const response = await api.get('/api/book/best-reviews');
       if (response.data.success) {
-        const reviewsWithBookTitles = await Promise.all(
-          response.data.data.map(async (review: BestReview) => {
-            try {
-              const bookResponse = await api.get(`/api/book/${review.bookId}`);
-              if (bookResponse.data.success) {
-                return {
-                  ...review,
-                  bookTitle: bookResponse.data.data.title
-                };
-              }
-              return review;
-            } catch (error) {
-              console.error(`책 정보 로딩 실패 (ID: ${review.bookId}):`, error);
-              return review;
-            }
-          })
-        );
-        setBestReviews(reviewsWithBookTitles);
+        setBestReviews(response.data.data);
       }
     } catch (error) {
       console.error('베스트 리뷰 로딩 실패:', error);
@@ -225,7 +208,7 @@ const TodayBestComments: React.FC = () => {
             <ReviewerInfo>
               <ReviewerName>{review.reviewerName}</ReviewerName>
               <RankBadge rank={review.rank}>{review.rank}위</RankBadge>
-              {review.bookTitle && <BookTitle>『{review.bookTitle}』</BookTitle>}
+              <BookTitle>『{review.bookName}』</BookTitle>
             </ReviewerInfo>
           </ReviewHeader>
           <ReviewContent>{review.content}</ReviewContent>
