@@ -65,10 +65,12 @@ public enum ErrorCode {
     GENDER_NOT_SELECTED(400, "G001", "성별 정보가 설정되지 않아 연령대+성별 추천이 불가능합니다."),
     AGE_GENDER_BOOK_NOT_FOUND(404, "G002", "해당 연령대와 성별에 맞는 추천 도서를 찾을 수 없습니다."),
 
-
     // CRITIC
     CRITIC_NOT_FOUND(404, "C101", "해당 평론가 정보를 찾을 수 없습니다."),
-    CRITIC_BOOK_NOT_FOUND(404, "C102", "해당 평론가의 추천 도서를 찾을 수 없습니다.");
+    CRITIC_BOOK_NOT_FOUND(404, "C102", "해당 평론가의 추천 도서를 찾을 수 없습니다."),
+
+    // ELASTICSEARCH
+    ELASTICSEARCH_ERROR(500, "E001", "엘라스틱서치 오류 발생");
 
 
 
