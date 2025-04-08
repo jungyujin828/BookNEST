@@ -1,26 +1,42 @@
 import { useState } from "react";
 import styled from "@emotion/styled";
-import { ROUTES, ASSETS, OAUTH } from "../constants/paths";
+import { ROUTES, OAUTH } from "../constants/paths";
 import config from "../config";
 // import InputInfoPage from "./InputInfoPage";
 import { useNavigate } from "react-router-dom";
 import { theme } from "../styles/theme";
+
+import KakaoIcon from "../icons/kakao.png";
+import NaverIcon from "../icons/naver.png";
+import GoogleIcon from "../icons/google.png";
 
 const LoginContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: #6dbe64;
-  padding: 1.25rem;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0  , 0.3)), url("bg.png") no-repeat center center;
+  background-size: auto;
   text-align: center;
   position: relative;
 
-  @media (min-width: ${theme.breakpoints.desktop}) {
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 0 5rem;
+  // @media (min-width: ${theme.breakpoints.desktop}) {
+  //   flex-direction: row;
+  //   justify-content: space-between;
+  //   padding: 0 5rem;
   }
+`;
+
+const LoginContent = styled.div`
+  position: fixed;
+  left: 0.6rem;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 25rem;
 `;
 
 const LogoSection = styled.div`
@@ -31,27 +47,28 @@ const LogoSection = styled.div`
   color: white;
   text-align: center;
 
-  @media (min-width: ${theme.breakpoints.desktop}) {
-    position: static;
-    transform: none;
-    text-align: left;
-    margin-left: 3rem;
-  }
+  // @media (min-width: ${theme.breakpoints.desktop}) {
+  //   position: static;
+  //   transform: none;
+  //   text-align: left;
+  //   margin-left: 3rem;
+  // }
 `;
 
 const ButtonSection = styled.div`
   position: absolute;
   bottom: 15vh;
-  width: 100%;
-  max-width: 20rem;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
+  width: 20rem;
 
-  @media (min-width: ${theme.breakpoints.desktop}) {
-    position: static;
-    margin-right: 3rem;
-    align-self: center;
-  }
+  // @media (min-width: ${theme.breakpoints.desktop}) {
+  //   position: static;
+  //   margin-right: 3rem;
+  //   align-self: center;
+  // }
 `;
 
 const Logo = styled.div`
@@ -102,41 +119,132 @@ const EnterButton = styled.button`
 `;
 
 const KakaoButton = styled.button`
-  padding: 0.9375rem 1.25rem; // 15px 20px
-  border-radius: 0.75rem; // 12px
-  gap: 0.5rem; // 8px
+  width: 100%;
+  height: 3rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background-color: #fee500;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #fee500;
+    filter: brightness(0.95);
+  }
 
   img {
-    width: 1.5rem; // 24px
-    height: 1.5rem; // 24px
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: auto;
+  }
+
+  span {
+    position: absolute;
+    flex: 1;
+    text-align: center;
   }
 `;
 
 const NaverButton = styled.button`
-  padding: 0.9375rem 1.25rem; // 15px 20px
-  border-radius: 0.75rem; // 12px
-  gap: 0.5rem; // 8px
+  width: 100%;
+  height: 3rem;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background-color: #03c75a;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #03c75a;
+    filter: brightness(0.95);
+  }
 
   img {
-    width: 1.5rem; // 24px
-    height: 1.5rem; // 24px
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    margin-right: auto;
+    left: -0.35rem;
+  }
+
+  span {
+    position: absolute;
+    flex: 1;
+    text-align: center;
   }
 `;
 
 const GoogleButton = styled.button`
-  padding: 0.9375rem 1.25rem; // 15px 20px
-  border-radius: 0.75rem; // 12px
-  gap: 0.5rem; // 8px
+  width: 100%;
+  height: 3rem;
+  padding: 0 1rem;
+  border: 1px solid #dadce0;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  color: #3c4043;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #f8f9fa;
+    border-color: #dadce0;
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+  }
 
   img {
-    width: 1.5rem; // 24px
-    height: 1.5rem; // 24px
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: auto;
+  }
+
+  span {
+    position: absolute;
+    flex: 1;
+    text-align: center;
   }
 `;
 
 const LoginPage = () => {
   const [showSocialButtons, setShowSocialButtons] = useState(false);
+  const [currentBg, setCurrentBg] = useState(1);
   const navigate = useNavigate();
+
+  const handleChangeBackground = () => {
+    setCurrentBg((prev) => (prev % 4) + 1);
+  };
 
   const handleKakaoLogin = () => {
     const params = new URLSearchParams({
@@ -191,40 +299,66 @@ const LoginPage = () => {
   };
 
   return (
-    <LoginContainer>
-      <LogoSection>
-        <Logo>
-          <span>Book</span>
-          <span>NEST</span>
-        </Logo>
-        <Subtitle>
-          나의 취향이 가득한
-          <br />책 둥지를 틀다
-        </Subtitle>
-      </LogoSection>
+    <LoginContainer
+      style={{
+        background: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg${
+          currentBg === 1 ? "" : currentBg
+        }.png") no-repeat center center`,
+      }}
+    >
+      <LoginContent>
+        <LogoSection>
+          <Logo>
+            <span>Book</span>
+            <span>NEST</span>
+          </Logo>
+          <Subtitle>
+            나의 취향이 가득한
+            <br />책 둥지를 틀다
+          </Subtitle>
+        </LogoSection>
 
-      <ButtonSection>
-        {!showSocialButtons ? (
-          <EnterButton onClick={handleEnterClick}>입장하기</EnterButton>
-        ) : (
-          <>
-            <KakaoButton onClick={handleKakaoLogin}>
-              <img src={ASSETS.ICONS.KAKAO} alt="카카오 로고" />
-              카카오 로그인
-            </KakaoButton>
-            <NaverButton onClick={handleNaverLogin}>
-              <img src={ASSETS.ICONS.NAVER} alt="네이버 로고" />
-              네이버 로그인
-            </NaverButton>
-            <GoogleButton onClick={handleGoogleLogin}>
-              <img src={ASSETS.ICONS.GOOGLE} alt="구글 로고" />
-              Google로 계속하기
-            </GoogleButton>
-          </>
-        )}
-      </ButtonSection>
+        <ButtonSection>
+          <ChangeImageButton onClick={handleChangeBackground}>배경 변경</ChangeImageButton>
+          {!showSocialButtons ? (
+            <EnterButton onClick={handleEnterClick}>입장하기</EnterButton>
+          ) : (
+            <>
+              <KakaoButton onClick={handleKakaoLogin}>
+                <img src={KakaoIcon} alt="카카오 로고" />
+                <span>카카오로 시작하기</span>
+              </KakaoButton>
+              <NaverButton onClick={handleNaverLogin}>
+                <img src={NaverIcon} alt="네이버 로고" />
+                <span>네이버로 시작하기</span>
+              </NaverButton>
+              <GoogleButton onClick={handleGoogleLogin}>
+                <img src={GoogleIcon} alt="구글 로고" />
+                <span>구글로 시작하기</span>
+              </GoogleButton>
+            </>
+          )}
+        </ButtonSection>
+      </LoginContent>
     </LoginContainer>
   );
 };
+
+// Add this new styled component near other styled components
+const ChangeImageButton = styled.button`
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid white;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+`;
 
 export default LoginPage;

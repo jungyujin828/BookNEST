@@ -27,14 +27,6 @@ export const API_PATHS = {
   GOOGLE_LOGIN: "/api/oauth/google",
 } as const;
 
-export const ASSETS = {
-  ICONS: {
-    KAKAO: "/icons/kakao.png",
-    NAVER: "/icons/naver.png",
-    GOOGLE: "/icons/google.png",
-  },
-} as const;
-
 export const OAUTH = {
   KAKAO: {
     AUTH_URL: "https://kauth.kakao.com/oauth/authorize",
