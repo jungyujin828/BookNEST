@@ -19,6 +19,9 @@ public class Author {
     @Column(name="name" , columnDefinition = "TEXT")
     private String name;
 
+    @Column(name="image_url" , columnDefinition = "TEXT")
+    private String imageUrl;
+
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<BookAuthor> bookAuthors;
 }

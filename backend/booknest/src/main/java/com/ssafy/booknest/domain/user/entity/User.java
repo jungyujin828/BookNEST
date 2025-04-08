@@ -79,6 +79,18 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<IgnoredBook> ignoredBooks = new ArrayList<>(); // 내가 관심없어 하는 도서 목록
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserCategoryAnalysis> UserCategoryAnalysises = new ArrayList<>(); // 내가 좋아하는 카테고리들
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTagAnalysis> UserTagAnalysises = new ArrayList<>(); // 내가 좋아하는 태그들
+
+    @Builder.Default
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserAuthorAnalysis> UserAuthorAnalysises = new ArrayList<>(); // 내가 좋아하는 작가들
+
     public void updateNickname(String nickname) {
         this.nickname = nickname;
     }
