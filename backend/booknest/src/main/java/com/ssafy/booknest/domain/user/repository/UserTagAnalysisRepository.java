@@ -18,7 +18,9 @@ public interface UserTagAnalysisRepository extends JpaRepository<UserTagAnalysis
 
     void deleteByUser(User user);
 
+    // 유저 가장 좋아하는 태그 조회
     @Query("SELECT u.favoriteTag FROM UserTagAnalysis u WHERE u.user.id = :userId")
     List<String> findTopTagsByUserId(@Param("userId") Integer userId);
+
 
 }
