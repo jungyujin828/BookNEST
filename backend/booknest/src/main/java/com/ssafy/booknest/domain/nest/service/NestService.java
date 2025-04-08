@@ -1,14 +1,12 @@
 package com.ssafy.booknest.domain.nest.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.entity.Review;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.book.service.RatingService;
-import com.ssafy.booknest.domain.book.service.ReviewService;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.response.AddBookNestResponse;
@@ -24,6 +22,7 @@ import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
+import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +45,7 @@ public class NestService {
     private final NestRepository nestRepository;
     private final BookMarkRepository bookMarkRepository;
     private final RatingService ratingService;
-    private final ReviewService reviewService;
-
+    private final UserActionLogger userActionLogger;
 
 
     @Transactional
@@ -95,9 +93,11 @@ public class NestService {
             if (userRating == null) {
                 // 새로운 평점 추가
                 ratingService.createBookRating(user.getId(), book.getId(), dto);
+                userActionLogger.logAction(userId, book.getId(), "rating_star_" + dto.getScore());
             } else if (!userRating.getRating().equals(newRating)) { // 다를 경우
                 // 기존 평점 업데이트
                 ratingService.updateRating(user.getId(), book.getId(), dto);
+                userActionLogger.logAction(userId, book.getId(), "update_rating_star_" + userRating.getRating() + "_" + dto.getScore());
             }
         }
 

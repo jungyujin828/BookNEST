@@ -12,15 +12,15 @@ import org.springframework.data.annotation.LastModifiedDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_category_analysis")
+@Table(name = "user_author_analysis")
 @Getter
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserCategoryAnalysis extends BaseEntity {
+public class UserAuthorAnalysis extends BaseEntity {
 
-    @Column(name = "favorite_category")
-    private String favoriteCategory;
+    @Column(name = "favorite_author")
+    private String favoriteAuthor;
 
     @LastModifiedDate
     @Column(name = "updated_at")
@@ -30,7 +30,7 @@ public class UserCategoryAnalysis extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public void update(String favoriteCategory) {
-        this.favoriteCategory = favoriteCategory;
+    public void update(String favoriteAuthor) {
+        this.favoriteAuthor = favoriteAuthor;
     }
- }
+}

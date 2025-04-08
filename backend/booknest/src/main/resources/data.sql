@@ -6,10 +6,12 @@ VALUES
     (2, '테스트맨2', '예민한 앵무새', 'NAVER', 1231440, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
     (3, '테스트맨3', '갓 태어난 참새', 'GOOGLE', 987654321, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
     (4, '테스트맨4', '갓 태어난 참새', 'KAKAO', 554433221, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (5, '테스트맨5', '갓 태어난 참새', 'NAVER', 667788990, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (6, '열정청년', '도전하는 까치', 'GOOGLE', 1111111, NOW(), NOW(), 'https://img.example.com/profile6.png'), -- 10대
-    (7, '직장인A', '현실주의 올빼미', 'NAVER', 1111112, NOW(), NOW(), 'https://img.example.com/profile7.png'), -- 30대
-    (8, '중년남', '느긋한 앵무새', 'KAKAO', 1111113, NOW(), NOW(), 'https://img.example.com/profile8.png'), -- 50대
+    (5, '테스트맨5', '갓 태어난 참새', 'NAVER', 667788990, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png');
+INSERT INTO user (id, nickname, archetype, provider, provider_id, created_at, updated_at, profile_url, gender, birthdate)
+VALUES
+    (6, '열정청년', '도전하는 까치', 'GOOGLE', 1111111, NOW(), NOW(), 'https://img.example.com/profile6.png', 'M', '2005-01-01'), -- 10대
+    (7, '직장인A', '현실주의 올빼미', 'NAVER', 1111112, NOW(), NOW(), 'https://img.example.com/profile7.png', 'M', '1994-08-15'), -- 30대
+    (8, '중년남', '느긋한 앵무새', 'KAKAO', 1111113, NOW(), NOW(), 'https://img.example.com/profile8.png', 'M', '1975-05-10'), -- 50대
 
     -- F
     (9, '대학생F', '활발한 참새', 'KAKAO', 1111114, NOW(), NOW(), 'https://img.example.com/profile9.png'), -- 20대
@@ -20,7 +22,7 @@ VALUES
     (12, '열린사람', '자유로운 비둘기', 'KAKAO', 1111117, NOW(), NOW(), 'https://img.example.com/profile12.png'), -- 20대
 
     -- N (성별 선택 안함)
-    (13, '미정성별', '신비한 두루미', 'NAVER', 1111118, NOW(), NOW(), 'https://img.example.com/profile13.png'); -- 30대
+    (13, '미정성별', '신비한 두루미', 'NAVER', 1111118, NOW(), NOW(), 'https://img.example.com/profile13.png', 'N', '1990-09-09'); -- 30대
 
 -- ✅ Nest 테이블 (명시적으로 ID 추가)
 INSERT INTO nest (id, user_id, created_at, updated_at)
@@ -211,15 +213,16 @@ VALUES (
 INSERT INTO best_seller (book_id) VALUES
                                       (1), (2), (3), (4), (5), (6), (7), (8), (9), (10);
 
--- 📌 작가 추가 (책에 맞는 유명 작가 5명)
-INSERT INTO author (id, name) VALUES
-                                  (1, 'J.K. 롤링'),
-                                  (2, '히가시노 게이고'),
-                                  (3, '헤르만 헤세'),
-                                  (4, '생텍쥐페리'),
-                                  (5, '조지 오웰'),
-                                  (6, '이경석'),
-                                  (7, '앤디 위어');
+-- 📌 작가
+INSERT INTO author (id, name, image_url) VALUES
+                                             (1, 'J.K. 롤링', 'https://dummyimage.com/200x300/000/fff&text=J.K.+Rowling'),
+                                             (2, '히가시노 게이고', 'https://dummyimage.com/200x300/000/fff&text=Higashino+Keigo'),
+                                             (3, '헤르만 헤세', 'https://dummyimage.com/200x300/000/fff&text=Hermann+Hesse'),
+                                             (4, '생텍쥐페리', 'https://dummyimage.com/200x300/000/fff&text=Saint-Exupery'),
+                                             (5, '조지 오웰', 'https://dummyimage.com/200x300/000/fff&text=George+Orwell'),
+                                             (6, '이경석', 'https://dummyimage.com/200x300/000/fff&text=Lee+Kyungseok'),
+                                             (7, '앤디 위어', 'https://dummyimage.com/200x300/000/fff&text=Andy+Weir');
+
 
 
 
@@ -373,26 +376,26 @@ VALUES
     (5, 2, 1, NOW());
 
 
--- -- 평론가 김문학의 추천 도서 3권
--- INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
--- VALUES
---     ('김문학', 'AI 시대를 살아갈 모든 이들에게 통찰을 주는 책입니다.', 1, 1, NOW()),
---     ('김문학', '고통과 연대, 역사에 대한 깊은 성찰이 담겨 있습니다.', 2, 2, NOW()),
---     ('김문학', '삶에 대한 따뜻한 시선을 느낄 수 있는 산문집입니다.', 3, 3, NOW());
---
--- -- 평론가 이평론의 추천 도서 3권
--- INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
--- VALUES
---     ('이평론', '자기계발서의 고전. 실천 중심의 인사이트가 담겨 있습니다.', 1, 4, NOW()),
---     ('이평론', '인생의 아이러니를 깊이 있게 그려낸 수작입니다.', 2, 5, NOW()),
---     ('이평론', '한 소년의 성장기가 감동적으로 펼쳐지는 이야기.', 3, 11, NOW());
---
--- -- 평론가 박비평의 추천 도서 3권
--- INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
--- VALUES
---     ('박비평', '화성을 배경으로 한 생존기의 명작. 상상력과 과학이 공존합니다.', 1, 6, NOW()),
---     ('박비평', '소년의 눈으로 본 세계, 그 눈물이 주는 울림이 있습니다.', 2, 7, NOW()),
---     ('박비평', '조용한 소년의 이야기 속 깊은 감정을 담아낸 문학적 수작입니다.', 3, 8, NOW());
+-- 평론가 김문학의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('김문학', 'AI 시대를 살아갈 모든 이들에게 통찰을 주는 책입니다.', 1, 1, NOW()),
+    ('김문학', '고통과 연대, 역사에 대한 깊은 성찰이 담겨 있습니다.', 2, 2, NOW()),
+    ('김문학', '삶에 대한 따뜻한 시선을 느낄 수 있는 산문집입니다.', 3, 3, NOW());
+
+-- 평론가 이평론의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('이평론', '자기계발서의 고전. 실천 중심의 인사이트가 담겨 있습니다.', 1, 4, NOW()),
+    ('이평론', '인생의 아이러니를 깊이 있게 그려낸 수작입니다.', 2, 5, NOW()),
+    ('이평론', '한 소년의 성장기가 감동적으로 펼쳐지는 이야기.', 3, 11, NOW());
+
+-- 평론가 박비평의 추천 도서 3권
+INSERT INTO critic_book (critic_name, endorsement, rank, book_id, created_at)
+VALUES
+    ('박비평', '화성을 배경으로 한 생존기의 명작. 상상력과 과학이 공존합니다.', 1, 6, NOW()),
+    ('박비평', '소년의 눈으로 본 세계, 그 눈물이 주는 울림이 있습니다.', 2, 7, NOW()),
+    ('박비평', '조용한 소년의 이야기 속 깊은 감정을 담아낸 문학적 수작입니다.', 3, 8, NOW());
 
 -- AgeGroup: 20대, Gender: M (남자)
 INSERT INTO age_gender_book (age_group, gender, rank, book_id, created_at)
