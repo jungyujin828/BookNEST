@@ -23,6 +23,9 @@ public class PopularAuthorBook extends BaseEntity {
     @Column(name="author_name")
     private String authorName;
 
+    @Column(name = "rank")
+    private Integer rank;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -36,5 +39,4 @@ public class PopularAuthorBook extends BaseEntity {
         this.book = book;
         this.updatedAt = LocalDateTime.now();
     }
-
 }

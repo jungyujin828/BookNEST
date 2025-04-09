@@ -31,7 +31,7 @@ public class UserTagAnalysisScheduler {
         log.info("[태그 배치 시작] 유저 선호 분석");
 
         // 1. 모든 평점 데이터를 가져옴
-        List<Rating> allRatings = ratingRepository.findAllWithBookAndTag();
+        List<Rating> allRatings = ratingRepository.findAllWithBookAndTags();
 
         // 2. 유저별 태그 → 평점 리스트 맵핑
         Map<User, Map<String, List<Double>>> userTagRatings = new HashMap<>();
