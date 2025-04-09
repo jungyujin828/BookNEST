@@ -25,4 +25,18 @@ public class TagVectorService {
         redisTemplate.opsForZSet().incrementScore(key, tag, score);
     }
 
+    public double getScoreWeight(double score) {
+        if (score == 5.0) return 0.50;
+        if (score == 4.5) return 0.45;
+        if (score == 4.0) return 0.30;
+        if (score == 3.5) return 0.20;
+        if (score == 3.0) return 0.10;
+        if (score == 2.5) return 0.0;
+        if (score == 2.0) return -0.15;
+        if (score == 1.5) return -0.20;
+        if (score == 1.0) return -0.25;
+        if (score == 0.5) return -0.45;
+        return 0.0; // 혹시 모를 예외 처리
+    }
+
 }

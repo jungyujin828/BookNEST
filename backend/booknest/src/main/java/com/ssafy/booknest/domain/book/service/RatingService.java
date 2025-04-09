@@ -76,7 +76,7 @@ public class RatingService {
             review.get().updateRating(dto.getScore());
         }
 
-        double weight = getScoreWeight(dto.getScore());
+        double weight = tagVectorService.getScoreWeight(dto.getScore());
         List<String> tags = book.getTagNames();
 
         for (String tag : tags) {
@@ -117,12 +117,12 @@ public class RatingService {
         List<String> tags = book.getTagNames();
 
         // 이전 원복
-        double weight = getScoreWeight(score);
+        double weight = tagVectorService.getScoreWeight(score);
         for (String tag : tags) {
             tagVectorService.increaseTagScore(userId, tag, -weight);
         }
         // 업데이트
-        weight = getScoreWeight(dto.getScore());
+        weight = tagVectorService.getScoreWeight(dto.getScore());
         for (String tag : tags) {
             tagVectorService.increaseTagScore(userId, tag, weight);
         }
@@ -159,6 +159,16 @@ public class RatingService {
 
         // 평점 삭제
         ratingRepository.delete(rating);
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+        List<String> tags = book.getTagNames();
+
+        // 이전 원복
+        double weight = tagVectorService.getScoreWeight(score);
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, -weight);
+        }
 
         return score;
     }
@@ -208,6 +218,11 @@ public class RatingService {
                 .build();
 
         ignoredBookRepository.save(ignoredBook);
+
+        List<String> tags = book.getTagNames();
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, -0.50); // 관심없음 가중치
+        }
     }
 
     // 특정 도서 관심없음 조회
@@ -235,20 +250,6 @@ public class RatingService {
                 .orElseThrow(() -> new CustomException(ErrorCode.IGNORED_BOOK_NOT_FOUND));
 
         ignoredBookRepository.delete(ignoredBook);
-    }
-
-    private double getScoreWeight(double score) {
-        if (score == 5.0) return 0.50;
-        if (score == 4.5) return 0.45;
-        if (score == 4.0) return 0.30;
-        if (score == 3.5) return 0.20;
-        if (score == 3.0) return 0.10;
-        if (score == 2.5) return 0.0;
-        if (score == 2.0) return -0.15;
-        if (score == 1.5) return -0.20;
-        if (score == 1.0) return -0.25;
-        if (score == 0.5) return -0.45;
-        return 0.0; // 혹시 모를 예외 처리
     }
 
 }
