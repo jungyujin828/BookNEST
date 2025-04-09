@@ -73,11 +73,11 @@ const AppContent = () => {
             <Route
               path={ROUTES.INPUT_INFO}
               element={
-                <AuthRedirect>
-                  <ProtectedRoute>
-                    <InputInfoPage />
-                  </ProtectedRoute>
-                </AuthRedirect>
+                // <AuthRedirect>
+                <ProtectedRoute>
+                  <InputInfoPage />
+                </ProtectedRoute>
+                //</AuthRedirect>
               }
             />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />

@@ -61,6 +61,7 @@ const NicknameInput = styled.input`
 
 const FullInput = styled.input`
   flex: 1;
+  width: 100%;
   height: 50px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -178,21 +179,30 @@ const AddressModal = styled.div`
 
 const AddressModalContent = styled.div`
   background-color: white;
-  padding: 1.25rem; // 20px
-  height: 70%;
-  border-radius: 0.3125rem; // 5px
+  padding: 3.5%;
+  width: 100%;
+  max-width: 500px;
+  height: 70vh;
+  border-radius: 0.3125rem;
   overflow: visible;
   position: relative;
 `;
 
 const CloseButton = styled.button`
-  position: relative;
-  rigjt: 0;
+  position: absolute;
+  right: 10px;
+  top: 10px;
   border: none;
-  background-color: #ffffff;
-  font-size: 20px;
+  background-color: transparent;
+  font-size: 24px;
   cursor: pointer;
-  color: #000000;
+  color: #666;
+  padding: 5px;
+  line-height: 1;
+
+  &:hover {
+    color: #000;
+  }
 `;
 
 const InputInfoPage = () => {
@@ -289,6 +299,10 @@ const InputInfoPage = () => {
   const execDaumPostcode = () => {
     if (window.daum && window.daum.Postcode) {
       new window.daum.Postcode({
+        width: "100%",
+        height: "100%",
+        animation: true,
+        autoClose: false,
         oncomplete: function (data: any) {
           // 우편번호와 주소 정보 가져오기
           const zonecode = data.zonecode;
