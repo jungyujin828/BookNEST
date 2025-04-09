@@ -1,11 +1,17 @@
-import React, { useState } from 'react';
-import styled from '@emotion/styled';
-import { useAuthStore } from '../store/useAuthStore';
-import api from '../api/axios';
+import React, { useState } from "react";
+import styled from "@emotion/styled";
+import { useAuthStore } from "../store/useAuthStore";
+import api from "../api/axios";
 
 interface ProfileImageUploadProps {
   currentImageUrl: string;
 }
+
+const EditImageContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 100%;
+`;
 
 const ImageContainer = styled.div`
   position: relative;
@@ -25,20 +31,12 @@ const ImageContainer = styled.div`
   }
 `;
 
-const ClickableArea = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  cursor: pointer;
-  z-index: 2;
-`;
-
 const ProfileImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border: 1px solid #555555;
+  border-radius: 50%;
 `;
 
 const Overlay = styled.div`
@@ -76,24 +74,34 @@ const LoadingOverlay = styled.div`
 `;
 
 const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-top: 8px;
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 3;
 `;
 
 const ResetButton = styled.button`
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
-  color: #666;
+  background-color: #555555;
+  border: none;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  padding: 0;
+  position: relative;
 
   &:hover {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: #333333;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+    fill: white;
   }
 `;
 
@@ -103,66 +111,66 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    console.log('이미지 클릭됨');
+    console.log("이미지 클릭됨");
     fileInputRef.current?.click();
   };
 
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-    formData.append('resource_type', 'image');
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+    formData.append("resource_type", "image");
 
     try {
-      console.log('Cloudinary 업로드 시작...');
+      console.log("Cloudinary 업로드 시작...");
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
-          method: 'POST',
+          method: "POST",
           body: formData,
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Cloudinary 응답 에러:', errorData);
-        throw new Error('이미지 업로드에 실패했습니다.');
+        console.error("Cloudinary 응답 에러:", errorData);
+        throw new Error("이미지 업로드에 실패했습니다.");
       }
 
       const data = await response.json();
-      console.log('Cloudinary 업로드 성공:', data);
+      console.log("Cloudinary 업로드 성공:", data);
       return data.secure_url;
     } catch (error) {
-      console.error('Cloudinary 업로드 실패:', error);
-      throw new Error('이미지 업로드에 실패했습니다.');
+      console.error("Cloudinary 업로드 실패:", error);
+      throw new Error("이미지 업로드에 실패했습니다.");
     }
   };
 
   const updateProfileImageInBackend = async (imageUrl: string) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('로그인이 필요합니다.');
+        throw new Error("로그인이 필요합니다.");
       }
 
       const response = await api.put(
-        '/api/user/profile-image',
+        "/api/user/profile-image",
         { imgurl: imageUrl },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (!response.data.success) {
-        throw new Error('프로필 이미지 업데이트에 실패했습니다.');
+        throw new Error("프로필 이미지 업데이트에 실패했습니다.");
       }
 
       return response.data;
     } catch (error) {
-      console.error('백엔드 업데이트 실패:', error);
+      console.error("백엔드 업데이트 실패:", error);
       throw error;
     }
   };
@@ -172,14 +180,14 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
     if (!file) return;
 
     // 파일 타입 검증
-    if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.');
+    if (!file.type.startsWith("image/")) {
+      alert("이미지 파일만 업로드 가능합니다.");
       return;
     }
 
     // 파일 크기 검증 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB를 초과할 수 없습니다.');
+      alert("파일 크기는 5MB를 초과할 수 없습니다.");
       return;
     }
 
@@ -188,7 +196,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       // Cloudinary에 이미지 업로드
       const imageUrl = await uploadToCloudinary(file);
-      console.log('받은 이미지 URL:', imageUrl);
+      console.log("받은 이미지 URL:", imageUrl);
 
       // 백엔드 API 호출
       await updateProfileImageInBackend(imageUrl);
@@ -197,20 +205,20 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
       if (userDetail) {
         const updatedUserDetail = {
           ...userDetail,
-          profileURL: imageUrl
+          profileURL: imageUrl,
         };
-        
+
         // Zustand store 업데이트
         setUserDetail(updatedUserDetail);
-        
+
         // 로컬 스토리지에 업데이트된 사용자 정보 저장
-        localStorage.setItem('userDetail', JSON.stringify(updatedUserDetail));
+        localStorage.setItem("userDetail", JSON.stringify(updatedUserDetail));
       }
-      
-      alert('프로필 이미지가 성공적으로 업데이트되었습니다.');
+
+      alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
     } catch (error) {
-      console.error('프로필 이미지 업로드 실패:', error);
-      alert('프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+      console.error("프로필 이미지 업로드 실패:", error);
+      alert("프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsUploading(false);
     }
@@ -222,74 +230,67 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       // 백엔드 API 호출 - 빈 문자열을 전송하여 기본 이미지로 리셋
       const response = await api.put(
-        '/api/user/profile-image',
-        { imgurl: '' },
+        "/api/user/profile-image",
+        { imgurl: "" },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         }
       );
 
       if (!response.data.success) {
-        throw new Error('프로필 이미지 초기화에 실패했습니다.');
+        throw new Error("프로필 이미지 초기화에 실패했습니다.");
       }
 
       // Zustand store 업데이트
       if (userDetail) {
         const updatedUserDetail = {
           ...userDetail,
-          profileURL: '' // 빈 문자열로 설정
+          profileURL: "", // 빈 문자열로 설정
         };
-        
+
         setUserDetail(updatedUserDetail);
-        localStorage.setItem('userDetail', JSON.stringify(updatedUserDetail));
+        localStorage.setItem("userDetail", JSON.stringify(updatedUserDetail));
       }
-      
+
       // 페이지 새로고침
       window.location.reload();
     } catch (error) {
-      console.error('프로필 이미지 초기화 실패:', error);
-      alert('프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.');
+      console.error("프로필 이미지 초기화 실패:", error);
+      alert("프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setIsUploading(false);
     }
   };
 
   return (
-    <div style={{ position: 'relative' }}>
-      <ImageContainer onClick={handleClick}>
-        <ProfileImage 
-          src={currentImageUrl || '/images/default-profile.png'} 
-          alt="프로필 이미지"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = '/images/default-profile.png';
-          }}
-        />
-        <Overlay className="overlay">
-          사진 변경
-        </Overlay>
-      </ImageContainer>
-      {isUploading && (
-        <LoadingOverlay>
-          업로드 중...
-        </LoadingOverlay>
-      )}
-      <HiddenInput
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-      />
-      <ButtonContainer>
-        <ResetButton onClick={handleResetToDefault}>
-          기본 이미지로 변경
-        </ResetButton>
-      </ButtonContainer>
+    <div style={{ position: "relative" }}>
+      <EditImageContainer>
+        <ImageContainer onClick={handleClick}>
+          <ProfileImage
+            src={currentImageUrl || "/images/default-profile.png"}
+            alt="프로필 이미지"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/images/default-profile.png";
+            }}
+          />
+          <Overlay className="overlay">사진 변경</Overlay>
+        </ImageContainer>
+        {isUploading && <LoadingOverlay>업로드 중...</LoadingOverlay>}
+        <HiddenInput ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} />
+        <ButtonContainer>
+          <ResetButton onClick={handleResetToDefault} aria-label="Reset profile image">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+            </svg>
+          </ResetButton>
+        </ButtonContainer>
+      </EditImageContainer>
     </div>
   );
 };
 
-export default ProfileImageUpload; 
+export default ProfileImageUpload;

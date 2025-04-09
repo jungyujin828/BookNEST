@@ -7,6 +7,7 @@ import SearchTag from "../components/SearchTag";
 import SearchRecent from "../components/SearchRecent";
 import SearchHot from "../components/SearchHot";
 import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 interface User {
   id: number;

@@ -28,6 +28,11 @@ const LoginContainer = styled.div<LoginContainerProps>`
   text-align: center;
   position: relative;
   transition: all 0.7s ease-in-out;
+  touch-action: pan-y pinch-zoom;
+  user-select: none; // 드래그 방지 추가
+  -webkit-user-select: none; // Safari 지원
+  -moz-user-select: none; // Firefox 지원
+  -ms-user-select: none; // IE/Edge 지원
 
   &::before {
     content: "";
@@ -39,10 +44,6 @@ const LoginContainer = styled.div<LoginContainerProps>`
     backdrop-filter: blur(${({ isChanging }) => (isChanging ? "30px" : "0px")});
     transition: backdrop-filter 0.7s ease-in-out;
     pointer-events: none;
-  }
-
-  @media (min-width: ${theme.breakpoints.desktop}) {
-    align-items: flex-start;
   }
 `;
 
@@ -285,11 +286,127 @@ const GoogleButton = styled.button`
   }
 `;
 
+const DotContainer = styled.div`
+  position: absolute;
+  bottom: 45vh;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+`;
+
+const Dot = styled.button<{ isActive: boolean }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ isActive }) => (isActive ? "#ffffff" : "rgba(255, 255, 255, 0.5)")};
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+`;
+
 const LoginPage = () => {
   const [showSocialButtons, setShowSocialButtons] = useState(false);
   const [currentBg, setCurrentBg] = useState(5);
   const [isChanging, setIsChanging] = useState(false);
   const navigate = useNavigate();
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  // 마우스 이벤트도 추가 (데스크톱 지원)
+  const [mouseStart, setMouseStart] = useState<number | null>(null);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setMouseStart(e.clientX);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (mouseStart !== null) {
+      setTouchEnd(e.clientX);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (mouseStart !== null && touchEnd !== null) {
+      const distance = mouseStart - touchEnd;
+      const minSwipeDistance = 50;
+
+      if (Math.abs(distance) < minSwipeDistance) {
+        setMouseStart(null);
+        setTouchEnd(null);
+        return;
+      }
+
+      setIsChanging(true);
+
+      if (distance > 0) {
+        setTimeout(() => {
+          setCurrentBg((prev) => (prev % 5) + 1);
+          setIsChanging(false);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          setCurrentBg((prev) => (prev === 1 ? 5 : prev - 1));
+          setIsChanging(false);
+        }, 500);
+      }
+    }
+    setMouseStart(null);
+    setTouchEnd(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault(); // 추가
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    e.preventDefault(); // 추가
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const minSwipeDistance = 50; // 최소 스와이프 거리
+
+    if (Math.abs(distance) < minSwipeDistance) return; // 최소 거리 체크
+
+    setIsChanging(true);
+
+    if (distance > 0) {
+      // 왼쪽으로 스와이프
+      setTimeout(() => {
+        setCurrentBg((prev) => (prev % 5) + 1);
+        setIsChanging(false);
+      }, 500);
+    } else {
+      // 오른쪽으로 스와이프
+      setTimeout(() => {
+        setCurrentBg((prev) => (prev === 1 ? 5 : prev - 1));
+        setIsChanging(false);
+      }, 500);
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  // 닷 클릭 핸들러
+  const handleDotClick = (index: number) => {
+    if (index === currentBg) return;
+    setIsChanging(true);
+    setTimeout(() => {
+      setCurrentBg(index);
+      setIsChanging(false);
+    }, 500);
+  };
 
   // 스크롤 막기
   useEffect(() => {
@@ -371,10 +488,6 @@ const LoginPage = () => {
     window.location.href = googleURL;
   };
 
-  const goToInputInfoPage = () => {
-    navigate("/input-info");
-  };
-
   const handleEnterClick = () => {
     const token = localStorage.getItem("token");
     if (token && token !== "test") {
@@ -387,6 +500,13 @@ const LoginPage = () => {
   return (
     <LoginContainer
       isChanging={isChanging}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
       style={{
         background:
           currentBg === 5
@@ -394,12 +514,20 @@ const LoginPage = () => {
             : `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg${
                 currentBg === 1 ? "" : currentBg
               }.png") no-repeat center center`,
+        backgroundSize: "cover",
       }}
     >
+      <DotContainer>
+        {[1, 2, 3, 4, 5].map((num) => (
+          <Dot
+            key={num}
+            isActive={currentBg === num}
+            onClick={() => handleDotClick(num)}
+            aria-label={`배경 이미지 ${num}번으로 이동`}
+          />
+        ))}
+      </DotContainer>
       <LoginContent>
-        <ChangeImageButton onClick={handleChangeBackground}>
-          <FiRefreshCw />
-        </ChangeImageButton>
         <LogoSection>
           <Logo>
             <span>Book</span>

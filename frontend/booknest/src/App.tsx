@@ -73,11 +73,11 @@ const AppContent = () => {
             <Route
               path={ROUTES.INPUT_INFO}
               element={
-                <AuthRedirect>
-                  <ProtectedRoute>
-                    <InputInfoPage />
-                  </ProtectedRoute>
-                </AuthRedirect>
+                // <AuthRedirect>
+                <ProtectedRoute>
+                  <InputInfoPage />
+                </ProtectedRoute>
+                //</AuthRedirect>
               }
             />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
@@ -122,6 +122,14 @@ const AppContent = () => {
             {/* 둥지페이지 */}
             <Route
               path={ROUTES.NEST}
+              element={
+                <ProtectedRoute>
+                  <Navigate to={`/nest/${userDetail?.userId}`} replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={`${ROUTES.NEST}/:userId`}
               element={
                 <ProtectedRoute>
                   <NestPage />

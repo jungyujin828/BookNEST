@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { FaSort } from 'react-icons/fa';
+import { FaSort } from "react-icons/fa";
 
 interface BookmarkItem {
   bookId: number;
@@ -174,7 +174,7 @@ const DropdownMenu = styled.div<{ isOpen: boolean }>`
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: ${props => props.isOpen ? 'block' : 'none'};
+  display: ${(props) => (props.isOpen ? "block" : "none")};
   z-index: 10;
 `;
 
@@ -184,7 +184,7 @@ const DropdownItem = styled.button<{ isActive: boolean }>`
   padding: 8px 16px;
   text-align: left;
   border: none;
-  background-color: ${props => props.isActive ? '#f5f5f5' : 'white'};
+  background-color: ${(props) => (props.isActive ? "#f5f5f5" : "white")};
   cursor: pointer;
   font-size: 14px;
   color: #333;
@@ -194,12 +194,16 @@ const DropdownItem = styled.button<{ isActive: boolean }>`
   }
 `;
 
-const BookmarkList: React.FC = () => {
+interface BookmarkListProps {
+  userId?: number;
+}
+
+const BookmarkList: React.FC<BookmarkListProps> = ({ userId }) => {
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAuthError, setIsAuthError] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const navigate = useNavigate();
@@ -242,7 +246,7 @@ const BookmarkList: React.FC = () => {
     return [...bookmarksToSort].sort((a, b) => {
       const dateA = new Date(a.createdAt).getTime();
       const dateB = new Date(b.createdAt).getTime();
-      return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
     });
   };
 
@@ -253,14 +257,14 @@ const BookmarkList: React.FC = () => {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isDropdownOpen && !(event.target as Element).closest('.sort-container')) {
+      if (isDropdownOpen && !(event.target as Element).closest(".sort-container")) {
         setIsDropdownOpen(false);
       }
     };
 
-    document.addEventListener('click', handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
   }, [isDropdownOpen]);
 
@@ -271,7 +275,7 @@ const BookmarkList: React.FC = () => {
   };
 
   const formatAuthors = (authors: string[]) => {
-    return authors.join(', ');
+    return authors.join(", ");
   };
 
   if (loading) {
@@ -302,22 +306,22 @@ const BookmarkList: React.FC = () => {
       <SortContainer className="sort-container">
         <SortButton onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
           <FaSort />
-          {sortOrder === 'newest' ? '최신순' : '오래된순'}
+          {sortOrder === "newest" ? "최신순" : "오래된순"}
         </SortButton>
         <DropdownMenu isOpen={isDropdownOpen}>
           <DropdownItem
-            isActive={sortOrder === 'newest'}
+            isActive={sortOrder === "newest"}
             onClick={() => {
-              setSortOrder('newest');
+              setSortOrder("newest");
               setIsDropdownOpen(false);
             }}
           >
             최신순
           </DropdownItem>
           <DropdownItem
-            isActive={sortOrder === 'oldest'}
+            isActive={sortOrder === "oldest"}
             onClick={() => {
-              setSortOrder('oldest');
+              setSortOrder("oldest");
               setIsDropdownOpen(false);
             }}
           >
@@ -335,9 +339,7 @@ const BookmarkList: React.FC = () => {
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{formatAuthors(book.authors)}</BookAuthor>
-                <CreatedAt>
-                  찜한 날짜: {new Date(book.createdAt).toLocaleDateString()}
-                </CreatedAt>
+                <CreatedAt>찜한 날짜: {new Date(book.createdAt).toLocaleDateString()}</CreatedAt>
               </BookInfo>
             </Link>
           </BookCard>
@@ -347,4 +349,4 @@ const BookmarkList: React.FC = () => {
   );
 };
 
-export default BookmarkList; 
+export default BookmarkList;
