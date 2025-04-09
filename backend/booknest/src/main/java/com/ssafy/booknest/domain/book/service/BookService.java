@@ -13,16 +13,14 @@ import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
-import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
-import com.ssafy.booknest.domain.user.entity.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.common.CustomPage;
+import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -59,6 +57,7 @@ public class BookService {
     private final LibraryBookRepository libraryBookRepository;
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
     private final UserTagAnalysisRepository userTagAnalysisRepository;
+    private final TagVectorService tagVectorService;
 
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
@@ -94,7 +93,7 @@ public class BookService {
         Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
         boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
 
-        return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
+        return BookDetailResponse.of(book, avgRating, responsePage, isBookMarked);
     }
 
     // 구매 사이트 조회
