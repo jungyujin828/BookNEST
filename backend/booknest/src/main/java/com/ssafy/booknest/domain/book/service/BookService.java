@@ -323,40 +323,29 @@ public class BookService {
     @Transactional(readOnly = true)
     public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
 
-        // 1. 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 선호 태그 리스트 가져오기
         List<String> tags = userTagAnalysisRepository.findTopTagsByUserId(userId);
         if (tags == null || tags.isEmpty()) return List.of();
 
-        // 3. 랜덤 태그 선택
         String randomTag = tags.get(new Random().nextInt(tags.size()));
 
-        // 4. 제외할 도서 ID 수집
         Set<Integer> excludedIdSet = new HashSet<>();
         excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
         excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
         excludedIdSet.addAll(bookMarkRepository.findBookIdsByUserId(userId));
         if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
-        List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
 
-        // 5. 해당 태그의 책 ID만 조회
-        List<Integer> candidateIds = bookRepository.findBookIdsByTagNameExcluding(randomTag, excludedIds);
+        List<Integer> selectedIds = bookRepository.findRandomBookIdsByTagNameExcluding(randomTag, new ArrayList<>(excludedIdSet));
 
-        // 6. Java에서 랜덤으로 섞고 15개 뽑기
-        Collections.shuffle(candidateIds);
-        List<Integer> selectedIds = candidateIds.stream().limit(15).toList();
+        List<Book> books = bookRepository.findAllByIdWithAuthors(selectedIds);
 
-        // 7. 최종 도서 조회
-        List<Book> books = bookRepository.findAllById(selectedIds);
-
-        // 8. DTO 변환
         return books.stream()
                 .map(book -> FavoriteTagBookResponse.of(book, randomTag))
                 .toList();
     }
+
 
 
 
