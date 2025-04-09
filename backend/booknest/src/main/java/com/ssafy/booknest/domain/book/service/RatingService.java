@@ -16,6 +16,7 @@ import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
+import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -32,17 +33,18 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RatingService {
 
-    private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final BookRepository bookRepository;
     private final ReviewRepository reviewRepository;
     private final RatingRepository ratingRepository;
     private final IgnoredBookRepository ignoredBookRepository;
     private final BookNestRepository bookNestRepository;
 
+    private final TagVectorService tagVectorService;
+
     // 평점 등록
     @Transactional
     public void createBookRating(Integer userId, Integer bookId, RatingRequest dto) {
-        // 입력값 검증 (Fail-Fast)
         if (dto.getScore() == null) {
             throw new CustomException(ErrorCode.EMPTY_RATING_CONTENT);
         }
@@ -73,6 +75,13 @@ public class RatingService {
         if(reviewRepository.existsByUserIdAndBookId(userId, bookId)) {
             review.get().updateRating(dto.getScore());
         }
+
+        double weight = getScoreWeight(dto.getScore());
+        List<String> tags = book.getTagNames();
+
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, weight);
+        }
     }
 
     // 평점 수정
@@ -101,6 +110,21 @@ public class RatingService {
         // 만약에 이미 Review 테이블에 평점 있으면 이것도 수정
         if (review.isPresent() && review.get().getRating() != null) {
             review.get().updateRating(dto.getScore());
+        }
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+        List<String> tags = book.getTagNames();
+
+        // 이전 원복
+        double weight = getScoreWeight(score);
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, -weight);
+        }
+        // 업데이트
+        weight = getScoreWeight(dto.getScore());
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, weight);
         }
 
         return score;
@@ -139,7 +163,6 @@ public class RatingService {
         return score;
     }
 
-
     // 사용자 평점 목록 조회
     @Transactional(readOnly = true)
     public CustomPage<UserRatingResponse> getRatingList(Integer userId, Integer targetId, Pageable pageable) {
@@ -157,8 +180,6 @@ public class RatingService {
 
         return new CustomPage<>(responsePage);
     }
-
-
 
     // 사용자의 해당 책에 대한 평점 가져오기
     public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
@@ -214,6 +235,20 @@ public class RatingService {
                 .orElseThrow(() -> new CustomException(ErrorCode.IGNORED_BOOK_NOT_FOUND));
 
         ignoredBookRepository.delete(ignoredBook);
+    }
+
+    private double getScoreWeight(double score) {
+        if (score == 5.0) return 0.50;
+        if (score == 4.5) return 0.45;
+        if (score == 4.0) return 0.30;
+        if (score == 3.5) return 0.20;
+        if (score == 3.0) return 0.10;
+        if (score == 2.5) return 0.0;
+        if (score == 2.0) return -0.15;
+        if (score == 1.5) return -0.20;
+        if (score == 1.0) return -0.25;
+        if (score == 0.5) return -0.45;
+        return 0.0; // 혹시 모를 예외 처리
     }
 
 }
