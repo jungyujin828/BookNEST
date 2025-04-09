@@ -32,10 +32,6 @@ public class UserTagAnalysis extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book;
-
     public void update(String favoriteTag) {
         this.favoriteTag = favoriteTag;
     }
