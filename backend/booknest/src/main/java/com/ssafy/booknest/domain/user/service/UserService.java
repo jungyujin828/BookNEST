@@ -15,6 +15,8 @@ import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.UserAuthorAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.*;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
