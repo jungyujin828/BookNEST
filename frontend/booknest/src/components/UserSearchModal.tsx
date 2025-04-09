@@ -110,8 +110,26 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ onClose }) => {
   const authStorage = JSON.parse(localStorage.getItem("auth-storage") || "{}");
   const userDetail = authStorage.state?.userDetail;
 
-  const handleSearchResult = (data: User[]) => {
-    setUsers(data);
+  const handleSearchResult = (data: any) => {
+    console.log("검색 결과 데이터:", data);
+
+    if (!data) {
+      console.warn("데이터가 없습니다");
+      setUsers([]);
+      return;
+    }
+
+    // 페이지네이션 응답 구조 처리
+    if (data.content && Array.isArray(data.content)) {
+      console.log("페이지네이션 데이터 처리:", data.content);
+      setUsers(data.content);
+    } else if (Array.isArray(data)) {
+      console.log("배열 데이터 처리:", data);
+      setUsers(data);
+    } else {
+      console.warn("처리할 수 없는 데이터 형식:", data);
+      setUsers([]);
+    }
   };
 
   const handleUserClick = (userId: number) => {
