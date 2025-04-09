@@ -1,13 +1,18 @@
 package com.ssafy.booknest.domain.search.controller;
 
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.enums.BookEvalType;
 import com.ssafy.booknest.domain.search.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.search.dto.response.UserSearchResponse;
+import com.ssafy.booknest.domain.search.record.BookEval;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.domain.search.service.PopularKeywordService;
 import com.ssafy.booknest.domain.search.service.SearchService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
+import com.ssafy.booknest.global.error.ErrorCode;
+import com.ssafy.booknest.global.error.exception.CustomException;
 import com.ssafy.booknest.global.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -68,4 +74,23 @@ public class SearchController {
         return ApiResponse.success(suggestions);
     }
 
+    // 평가 페이지 조회
+    @GetMapping("/eval")
+    public ResponseEntity<ApiResponse<CustomPage<BookResponse>>> getEvalBookList(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam(defaultValue = "RANDOM") BookEvalType keyword,
+            Pageable pageable) {
+        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
+        try {
+            return ApiResponse.success(searchService.getEvalBookList(userId, keyword, pageable));
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.ELASTICSEARCH_ERROR); // 또는 적절한 예외
+        }
+    }
+
+    @PostMapping("/book-eval")
+    public ResponseEntity<ApiResponse<BookEval>> addBookEval(@RequestBody BookEval bookEval) throws IOException {
+        BookEval savedEval = searchService.saveBookEval(bookEval);
+        return ApiResponse.success(savedEval);
+    }
 }
