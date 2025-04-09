@@ -1,11 +1,11 @@
-package com.ssafy.booknest.domain.user.scheduler;
+package com.ssafy.booknest.domain.user.scheduler.category;
 
 import com.ssafy.booknest.domain.book.entity.BookCategory;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
-import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
+import com.ssafy.booknest.domain.user.entity.category.UserCategoryAnalysis;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
