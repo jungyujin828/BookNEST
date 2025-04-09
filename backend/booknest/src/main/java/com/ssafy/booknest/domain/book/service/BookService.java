@@ -57,6 +57,7 @@ public class BookService {
     private final LibraryBookRepository libraryBookRepository;
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
     private final UserTagAnalysisRepository userTagAnalysisRepository;
+
     private final TagVectorService tagVectorService;
 
 
@@ -92,6 +93,12 @@ public class BookService {
 
         Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
         boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
+
+        List<String> tags = book.getTagNames();
+
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, 0.2);
+        }
 
         return BookDetailResponse.of(book, avgRating, responsePage, isBookMarked);
     }
