@@ -5,10 +5,10 @@ import api from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
 
 interface Book {
-  bookId: number;
+  book_id: number;
   title: string;
-  publishedDate: string;
-  imageUrl: string;
+  published_date: string;
+  image_url: string;
   authors: string;
   categories: string;
   tags: string;
@@ -245,6 +245,10 @@ const RecentTagBooks = () => {
   const bookListRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { userDetail } = useAuthStore();
+  
+  // 터치 스와이프 관련 상태
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -262,8 +266,39 @@ const RecentTagBooks = () => {
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
   };
 
-  const handleBookClick = (bookId: number) => {
-    navigate(`/book-detail/${bookId}`);
+  // 터치 시작 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  // 터치 이동 이벤트 핸들러
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  // 터치 종료 이벤트 핸들러
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) {
+      handleScroll('right');
+    }
+    
+    if (isRightSwipe) {
+      handleScroll('left');
+    }
+    
+    // 터치 상태 초기화
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const handleBookClick = (book_id: number) => {
+    navigate(`/book-detail/${book_id}`);
   };
 
   useEffect(() => {
@@ -315,7 +350,9 @@ const RecentTagBooks = () => {
     : false;
 
   // 태그 추출 (첫 번째 책의 태그 사용)
-  const tags = books[0]?.tags ? books[0].tags.split(',').slice(0, 3) : [];
+  const tags = books.length > 0 && books[0]?.tags 
+    ? books[0].tags.split(',').slice(0, 3) 
+    : [];
 
   return (
     <Container>
@@ -336,20 +373,25 @@ const RecentTagBooks = () => {
             onClick={() => handleScroll('left')}
           />
         )}
-        <BookList ref={bookListRef}>
+        <BookList 
+          ref={bookListRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {books.map((book) => (
             <BookCard 
-              key={book.bookId}
-              onClick={() => handleBookClick(book.bookId)}
+              key={book.book_id}
+              onClick={() => handleBookClick(book.book_id)}
             >
               <BookImage 
-                src={book.imageUrl || '/images/default-book.png'} 
+                src={book.image_url || '/images/default-book.png'} 
                 alt={book.title}
               />
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
                 <BookAuthor>{book.authors}</BookAuthor>
-                <BookDate>{book.publishedDate}</BookDate>
+                <BookDate>{book.published_date}</BookDate>
               </BookInfo>
             </BookCard>
           ))}
