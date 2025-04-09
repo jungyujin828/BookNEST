@@ -288,19 +288,21 @@ public class BookService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 랜덤 태그 하나만 DB에서 가져오기
-        String selectedTag = tagRandomBookRepository.findRandomTag();
+        // 태그 목록 가져오기
+        List<String> tags = tagRandomBookRepository.findAllTags();
+        if (tags.isEmpty()) return List.of();
 
-        if (selectedTag == null) return List.of(); // 태그가 없을 경우
+        // Java에서 랜덤 태그 선택
+        String selectedTag = tags.get(new Random().nextInt(tags.size()));
 
-        // 해당 태그의 책 가져오기
-        List<TagRandomBook> tagBooks = tagRandomBookRepository.findByTag(selectedTag);
+        // 해당 태그에 대해 랜덤 책 15권만 DB에서 가져오기
+        List<TagRandomBook> tagBooks = tagRandomBookRepository.findRandomBooksByTag(selectedTag);
 
         return tagBooks.stream()
                 .map(tagBook -> TagBookResponse.of(tagBook.getBook(), selectedTag))
-                .limit(15)
                 .toList();
     }
+
 
     // 년도별 도서관 대여 순위 추천
     @Transactional(readOnly = true)
