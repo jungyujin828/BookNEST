@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { FaHeart, FaRegHeart, FaCaretUp } from 'react-icons/fa';
 import { RiMedalFill, RiMedalLine } from 'react-icons/ri';
@@ -11,6 +11,7 @@ interface BestReview {
   bookName: string;
   reviewerName: string;
   reviewerProfileUrl: string;
+  reviewerImgUrl: string;
   content: string;
   myLiked: boolean;
   totalLikes: number;
@@ -21,10 +22,22 @@ interface BestReview {
 }
 
 const Container = styled.div`
-  padding: 24px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 16px;
+  justify-content: flex-start;
+  padding: 24px 0;
   background-color: #fff;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  position: relative;
+
+  @media (min-width: 768px) {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: hidden;
+  }
 `;
 
 const Title = styled.h2`
@@ -33,11 +46,20 @@ const Title = styled.h2`
   color: #1a1a1a;
   margin-bottom: 24px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  gap: 8px;
+`;
+
+const HighlightText = styled.span`
+  color: #00c473;
+  font-weight: bold;
 `;
 
 const ReviewCard = styled.div`
+  flex: 0 0 300px;
+  height: 250px;
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 16px;
@@ -50,6 +72,14 @@ const ReviewCard = styled.div`
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  @media (min-width: 768px) {
+    width: calc(50% - 16px);
+  }
+
+  @media (min-width: 1024px) {
+    width: calc(33.33% - 16px);
   }
 `;
 
@@ -95,15 +125,22 @@ const ReviewerName = styled.span`
 `;
 
 const ReviewContent = styled.p`
-  margin: 0 0 16px 0;
+  margin: 0 0 32px 0;
+  margin-top: 16px;
   color: #333;
   font-size: 16px;
   line-height: 1.6;
   letter-spacing: -0.3px;
+  max-height: 48px; /* Fixed height for 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 `;
 
 const BookInfo = styled.div`
-  margin-top: 12px;
+  margin-top: 32px;
   padding-top: 12px;
   border-top: 1px solid #f0f0f0;
 `;
@@ -112,6 +149,11 @@ const BookTitle = styled.span`
   font-size: 14px;
   color: #666;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 100%;
 `;
 
 const InteractionBar = styled.div`
@@ -119,7 +161,6 @@ const InteractionBar = styled.div`
   align-items: center;
   gap: 4px;
   position: absolute;
-  top: 20px;
   right: 20px;
 `;
 
@@ -166,9 +207,24 @@ const TodayBestComments: React.FC = () => {
   const [bestReviews, setBestReviews] = useState<BestReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!containerRef.current) return;
+
+    const scrollAmount = 300;
+    const newPosition = direction === 'left' 
+      ? scrollPosition - scrollAmount
+      : scrollPosition + scrollAmount;
+
+    setScrollPosition(newPosition);
+    containerRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
+  };
 
   const fetchBestReviews = async () => {
     try {
+      setLoading(true);
       const response = await api.get('/api/book/best-reviews');
       if (response.data.success) {
         setBestReviews(response.data.data);
@@ -180,6 +236,7 @@ const TodayBestComments: React.FC = () => {
     }
   };
 
+  // 초기 로딩 시에만 데이터 가져오기
   useEffect(() => {
     fetchBestReviews();
   }, []);
@@ -234,53 +291,57 @@ const TodayBestComments: React.FC = () => {
   }
 
   return (
-    <Container>
-      <Title>오늘의 BEST 한줄평</Title>
-      {bestReviews.map((review) => (
-        <ReviewCard 
-          key={review.reviewId}
-          onClick={(e) => handleReviewClick(review.bookId, e)}
-        >
-          <InteractionBar>
-            <LikeButton 
-              isLiked={review.myLiked}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleLikeToggle(review.reviewId);
-              }}
-              disabled={likeLoading[review.reviewId]}
-            >
-              {review.myLiked ? <FaHeart /> : <FaRegHeart />}
-              {review.totalLikes}
-            </LikeButton>
-            {review.todayLikes > 0 && (
-              <TodayLikes>
-                <FaCaretUp />
-                {review.todayLikes}
-              </TodayLikes>
-            )}
-          </InteractionBar>
-          <ReviewHeader>
-            <RankBadge rank={review.rank}>
-              {getRankIcon(review.rank)}
-            </RankBadge>
+    <div>
+      <Title>
+        <HighlightText>오늘의</HighlightText> BEST <HighlightText>한줄평</HighlightText>
+      </Title>
+      <Container ref={containerRef}>
+        {bestReviews.map((review) => (
+          <ReviewCard 
+            key={review.reviewId}
+            onClick={(e) => handleReviewClick(review.bookId, e)}
+          >
+            <ReviewHeader>
+              <RankBadge rank={review.rank}>
+                {getRankIcon(review.rank)}
+              </RankBadge>
+              <InteractionBar>
+                <LikeButton 
+                  isLiked={review.myLiked}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLikeToggle(review.reviewId);
+                  }}
+                  disabled={likeLoading[review.reviewId]}
+                >
+                  {review.myLiked ? <FaHeart /> : <FaRegHeart />}
+                  {review.totalLikes}
+                </LikeButton>
+                {review.todayLikes > 0 && (
+                  <TodayLikes>
+                    <FaCaretUp />
+                    {review.todayLikes}
+                  </TodayLikes>
+                )}
+              </InteractionBar>
+            </ReviewHeader>
             <UserProfile>
               <ProfileImage 
-                src={review.reviewerProfileUrl || '/default-profile.png'} 
+                src={review.reviewerImgUrl || '/default-profile.png'} 
                 alt={review.reviewerName} 
               />
               <ReviewerName>{review.reviewerName}</ReviewerName>
             </UserProfile>
-          </ReviewHeader>
-          
-          <ReviewContent>{review.content}</ReviewContent>
-          
-          <BookInfo>
-            <BookTitle>『{review.bookName}』</BookTitle>
-          </BookInfo>
-        </ReviewCard>
-      ))}
-    </Container>
+            
+            <ReviewContent>{review.content}</ReviewContent>
+            
+            <BookInfo>
+              <BookTitle>『{review.bookName}』</BookTitle>
+            </BookInfo>
+          </ReviewCard>
+        ))}
+      </Container>
+    </div>
   );
 };
 

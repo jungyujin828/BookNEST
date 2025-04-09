@@ -157,12 +157,12 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   top: 50%;
   ${props => props.direction === 'left' ? 'left: 4px;' : 'right: 4px;'}
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 40px;
+  height: 60px;
+  border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -172,8 +172,8 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 
   @media (min-width: 768px) {
     ${props => props.direction === 'left' ? 'left: -18px;' : 'right: -18px;'}
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 80px;
   }
 
   &:hover {
@@ -194,19 +194,12 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 
   &::before {
     content: '';
-    width: 10px;
-    height: 10px;
-    border-top: 2.5px solid #555;
-    border-right: 2.5px solid #555;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid #555;
+    border-right: 3px solid #555;
     transform: ${props => props.direction === 'left' ? 'rotate(-135deg) translateX(2px)' : 'rotate(45deg) translateX(-2px)'};
     transition: border-color 0.2s ease;
-    
-    @media (min-width: 768px) {
-      width: 12px;
-      height: 12px;
-      border-top: 3px solid #555;
-      border-right: 3px solid #555;
-    }
   }
 
   &:hover::before {
@@ -259,8 +252,6 @@ const AuthorBook = () => {
   } = useBookStore();
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -278,17 +269,6 @@ const AuthorBook = () => {
 
   const commonAuthor = getCommonAuthor(authorBooks);
 
-  const updateScrollButtonsVisibility = () => {
-    if (!bookListRef.current) return;
-    
-    const hasHorizontalOverflow = bookListRef.current.scrollWidth > bookListRef.current.clientWidth;
-    
-    setCanScrollLeft(scrollPosition > 0);
-    setCanScrollRight(
-      hasHorizontalOverflow && scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    );
-  };
-
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
 
@@ -301,34 +281,12 @@ const AuthorBook = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
-    
-    // Update buttons visibility after scrolling
-    setTimeout(updateScrollButtonsVisibility, 300); // Wait for transform animation
   };
 
-  // Update buttons visibility on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (scrollPosition > 0) {
-        // Reset position when window is resized
-        if (bookListRef.current) {
-          setScrollPosition(0);
-          bookListRef.current.style.transform = `translateX(0)`;
-        }
-      }
-      
-      // Update buttons after resize
-      setTimeout(updateScrollButtonsVisibility, 300);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [scrollPosition]);
-
-  // Update scroll buttons visibility when books load or scroll position changes
-  useEffect(() => {
-    updateScrollButtonsVisibility();
-  }, [authorBooks, scrollPosition]);
+  const canScrollLeft = scrollPosition > 0;
+  const canScrollRight = bookListRef.current 
+    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    : false;
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
