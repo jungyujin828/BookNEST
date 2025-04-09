@@ -736,7 +736,7 @@ const SearchPage = () => {
 
       {activeTab === "books" && books.length === 0 && searchTerm && (
         <NoResultsMessage>
-          <NoResultsIcon>🐣🕊️</NoResultsIcon>
+          <NoResultsIcon>검색 결과 없음</NoResultsIcon>
           <NoResultsTitle>
             {selectedTags.length > 0 
               ? "태그와 검색어에 일치하는 도서를 찾지 못했어요"
