@@ -64,9 +64,14 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
 
     // 주어진 태그를 가진 도서들 중 무작위로 선택하여 일정 개수만 조회 (태그별 인기 도서 부족 시 대체용)
-    @Query("SELECT DISTINCT b FROM Book b JOIN b.bookTags bt WHERE bt.tag.name = :tag ORDER BY function('RAND')")
+    @Query("""
+    SELECT b FROM Book b
+    JOIN b.bookTags bt
+    JOIN bt.tag t
+    WHERE t.name = :tag
+    ORDER BY function('RAND')
+""")
     List<Book> findRandomBooksByTag(@Param("tag") String tag, Pageable pageable);
-
 
 
     // 특정 태그를 가진 책에서 해당 유저가 평가하지 않은 책

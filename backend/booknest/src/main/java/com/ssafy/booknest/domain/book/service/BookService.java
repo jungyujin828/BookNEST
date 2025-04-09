@@ -16,14 +16,13 @@ import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
-import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
-import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
-import jakarta.persistence.Cacheable;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -345,9 +344,6 @@ public class BookService {
                 .map(book -> FavoriteTagBookResponse.of(book, randomTag))
                 .toList();
     }
-
-
-
 
     // 사용자가 가장 많이 본 카테고리에서 추천
     @Transactional(readOnly = true)
