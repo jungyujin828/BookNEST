@@ -306,7 +306,7 @@ const FavoriteCategoryBooks = () => {
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 본 <CategoryHighlight>{books[0]?.category}</CategoryHighlight> 추천!
+        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은 <CategoryHighlight>{books[0]?.category}</CategoryHighlight> 카테고리 도서!
       </Title>
       <BookListContainer>
         {canScrollLeft && (

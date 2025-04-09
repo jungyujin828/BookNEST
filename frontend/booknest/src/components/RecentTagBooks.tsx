@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -9,12 +9,12 @@ interface Book {
   title: string;
   publishedDate: string;
   imageUrl: string;
-  authors: string[];
-  tag: string;
-  categories: string[];
+  authors: string;
+  categories: string;
+  tags: string;
 }
 
-interface FavoriteTagResponse {
+interface RecentTagResponse {
   success: boolean;
   data: Book[];
   error: null | string;
@@ -237,7 +237,7 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const FavoriteTagBooks = () => {
+const RecentTagBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -267,12 +267,12 @@ const FavoriteTagBooks = () => {
   };
 
   useEffect(() => {
-    const fetchFavoriteTagBooks = async () => {
+    const fetchRecentTagBooks = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const response = await api.get('/api/book/favorite-tag', {
+        const response = await api.get<RecentTagResponse>('/api/book/recent-keyword', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
@@ -282,7 +282,7 @@ const FavoriteTagBooks = () => {
         if (response.data.success && response.data.data) {
           setBooks(response.data.data);
         } else {
-          setError('추천 도서 정보를 불러오는데 실패했습니다.');
+          setError('최근 키워드 기반 추천 도서 정보를 불러오는데 실패했습니다.');
           setBooks([]);
         }
       } catch (err) {
@@ -294,11 +294,11 @@ const FavoriteTagBooks = () => {
       }
     };
 
-    fetchFavoriteTagBooks();
+    fetchRecentTagBooks();
   }, []);
 
   if (loading) {
-    return <LoadingMessage>추천 도서 목록을 불러오는 중...</LoadingMessage>;
+    return <LoadingMessage>최근 태그 기반 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
   if (error) {
@@ -314,10 +314,20 @@ const FavoriteTagBooks = () => {
     ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
     : false;
 
+  // 태그 추출 (첫 번째 책의 태그 사용)
+  const tags = books[0]?.tags ? books[0].tags.split(',').slice(0, 3) : [];
+
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은 <TagHighlight>#{books[0]?.tag}</TagHighlight> 도서!
+        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한{' '}
+        {tags.map((tag, index) => (
+          <React.Fragment key={index}>
+            <TagHighlight>#{tag.trim()}</TagHighlight>
+            {index < tags.length - 1 ? ', ' : ''}
+          </React.Fragment>
+        ))}
+        {' '}도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -338,7 +348,7 @@ const FavoriteTagBooks = () => {
               />
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
-                <BookAuthor>{book.authors.join(', ')}</BookAuthor>
+                <BookAuthor>{book.authors}</BookAuthor>
                 <BookDate>{book.publishedDate}</BookDate>
               </BookInfo>
             </BookCard>
@@ -355,4 +365,4 @@ const FavoriteTagBooks = () => {
   );
 };
 
-export default FavoriteTagBooks; 
+export default RecentTagBooks; 

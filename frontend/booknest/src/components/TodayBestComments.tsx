@@ -46,8 +46,15 @@ const Title = styled.h2`
   color: #1a1a1a;
   margin-bottom: 24px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  margin-top: 24px;
+  gap: 8px;
+`;
+
+const HighlightText = styled.span`
+  color: #00c473;
+  font-weight: bold;
 `;
 
 const ReviewCard = styled.div`
@@ -124,6 +131,12 @@ const ReviewContent = styled.p`
   font-size: 16px;
   line-height: 1.6;
   letter-spacing: -0.3px;
+  max-height: 48px; /* Fixed height for 3 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 `;
 
 const BookInfo = styled.div`
@@ -136,6 +149,11 @@ const BookTitle = styled.span`
   font-size: 14px;
   color: #666;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+  max-width: 100%;
 `;
 
 const InteractionBar = styled.div`
@@ -204,12 +222,9 @@ const TodayBestComments: React.FC = () => {
     containerRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
   };
 
-  useEffect(() => {
-    fetchBestReviews();
-  }, []);
-
   const fetchBestReviews = async () => {
     try {
+      setLoading(true);
       const response = await api.get('/api/book/best-reviews');
       if (response.data.success) {
         setBestReviews(response.data.data);
@@ -220,6 +235,11 @@ const TodayBestComments: React.FC = () => {
       setLoading(false);
     }
   };
+
+  // 초기 로딩 시에만 데이터 가져오기
+  useEffect(() => {
+    fetchBestReviews();
+  }, []);
 
   const handleLikeToggle = async (reviewId: number) => {
     if (likeLoading[reviewId]) return;
@@ -272,7 +292,9 @@ const TodayBestComments: React.FC = () => {
 
   return (
     <div>
-      <Title>오늘의 BEST 한줄평</Title>
+      <Title>
+        <HighlightText>오늘의</HighlightText> BEST <HighlightText>한줄평</HighlightText>
+      </Title>
       <Container ref={containerRef}>
         {bestReviews.map((review) => (
           <ReviewCard 
