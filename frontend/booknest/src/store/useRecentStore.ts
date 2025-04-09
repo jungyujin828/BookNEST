@@ -19,23 +19,30 @@ export const useRecentStore = create<RecentStore>((set) => ({
     if (!query.trim()) return;
 
     set((state) => {
-      const newRecent = [
+      const currentSearches = state.recentSearches;
+      
+      const updatedFullList = [
         { query, timestamp: Date.now() },
-        ...state.recentSearches.filter((item) => item.query !== query),
-      ].slice(0, 8); // 최대 8개까지만 저장
+        ...currentSearches.filter((item) => item.query !== query),
+      ];
 
-      localStorage.setItem("recentSearches", JSON.stringify(newRecent));
-      return { recentSearches: newRecent };
+      localStorage.setItem("recentSearches", JSON.stringify(updatedFullList));
+      
+      return { recentSearches: updatedFullList };
     });
   },
 
   removeRecent: (query: string) => {
     set((state) => {
-      const newRecent = state.recentSearches.filter(
+      const currentSearches = state.recentSearches;
+
+      const updatedFullList = currentSearches.filter(
         (item) => item.query !== query
       );
-      localStorage.setItem("recentSearches", JSON.stringify(newRecent));
-      return { recentSearches: newRecent };
+
+      localStorage.setItem("recentSearches", JSON.stringify(updatedFullList));
+
+      return { recentSearches: updatedFullList };
     });
   },
 

@@ -407,14 +407,19 @@ const SearchPage = () => {
 
   // SearchTag에서는 onSearch 호출 제거
 
-  const triggerSearch = async (page: number = currentPage) => {
-    console.log("SearchPage - Triggering Search with tags:", selectedTags);
+  const triggerSearch = async (page: number = currentPage, termToSearch?: string) => {
+    const finalSearchTerm = termToSearch !== undefined ? termToSearch : searchTerm;
+    console.log("SearchPage - Triggering Search with term:", finalSearchTerm, "tags:", selectedTags);
+
+    // termToSearch가 비어있고 searchTerm도 비어있으면 검색 중단 (선택적)
+    // if (!finalSearchTerm.trim() && !selectedTags.length) return;
+
     try {
       const response = await api.get("/api/search/book", {
         params: {
           page,
           size: 10,
-          ...(searchTerm && { title: searchTerm }),
+          ...(finalSearchTerm.trim() && { title: finalSearchTerm.trim() }), // finalSearchTerm 사용
           ...(selectedTags.length > 0 && { tags: selectedTags }),
         },
         headers: {
@@ -440,9 +445,8 @@ const SearchPage = () => {
         setTotalPages(processedData.totalPages);
         setBooks(processedData.content);
       }
-    } catch (error) {
+    } catch (error) { 
       console.error("Failed to search:", error);
-      // 에러 발생 시 상태 초기화
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
@@ -471,7 +475,7 @@ const SearchPage = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    triggerSearch(page);
+    triggerSearch(page); // 페이지 변경 시에는 현재 searchTerm 사용 (인자 없음)
   };
 
   return (
@@ -508,16 +512,18 @@ const SearchPage = () => {
             <SearchRecent
               onSelect={(query) => {
                 setSearchTerm(query);
+                updateSearchParams(query, selectedTags, activeTab);
+                triggerSearch(1, query); // 클릭된 query를 인자로 전달
                 setIsSearchActive(true);
-                searchBarRef.current?.handleSearch();
               }}
               onClose={() => setShowRecent(false)}
             />
             <SearchHot
               onSelect={(query) => {
                 setSearchTerm(query);
+                updateSearchParams(query, selectedTags, activeTab);
+                triggerSearch(1, query); // 클릭된 query를 인자로 전달
                 setIsSearchActive(true);
-                searchBarRef.current?.handleSearch();
               }}
             />
           </SuggestionContainer>

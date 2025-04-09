@@ -8,15 +8,12 @@ interface SearchRecentProps {
 }
 
 const SearchRecentContainer = styled.div`
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
   background: white;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 16px;
-  z-index: 1000;
+  margin-bottom: 8px;
+  width: 100%;
 `;
 
 const Title = styled.div`
@@ -92,6 +89,9 @@ const SearchRecent: React.FC<SearchRecentProps> = ({ onSelect, onClose }) => {
     removeRecent(query);
   };
 
+  // Get the last 5 recent searches to display
+  const displayedSearches = recentSearches.slice(0, 5);
+
   return (
     <SearchRecentContainer>
       <Title>
@@ -101,7 +101,7 @@ const SearchRecent: React.FC<SearchRecentProps> = ({ onSelect, onClose }) => {
         )}
       </Title>
 
-      {recentSearches.map((item) => (
+      {displayedSearches.map((item) => (
         <SearchItem
           key={item.timestamp}
           onClick={() => handleSelect(item.query)}
