@@ -54,20 +54,6 @@ const Title = styled.h1`
   color: #4caf50;
 `;
 
-const TestButton = styled.button`
-  padding: 10px 20px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin: 10px;
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
 const HomePage = () => {
   const { setUserDetail } = useAuthStore();
 
@@ -99,7 +85,6 @@ const HomePage = () => {
 
   return (
     <PageWrapper>
-      <TestButton onClick={fetchUserInfo}>Get User Info</TestButton>
       <HomeContainer>
         <TodayBestComments />
         <BestSeller />

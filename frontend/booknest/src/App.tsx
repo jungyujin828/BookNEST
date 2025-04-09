@@ -25,7 +25,7 @@ import Navbar from "./components/Navbar";
 import styled from "@emotion/styled";
 import { useLocation } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore";
-import BookAllCommentPage from './pages/BookAllCommentPage';
+import BookAllCommentPage from "./pages/BookAllCommentPage";
 
 // 개발 환경에서 테스트용 토큰 설정
 if (import.meta.env.DEV && !localStorage.getItem("token")) {
@@ -41,39 +41,42 @@ if (import.meta.env.DEV && !localStorage.getItem("token")) {
 
 const AppLayout = styled.div``;
 
-const MainContent = styled.main<{ isLoginPage: boolean }>`
-  padding-top: ${(props) => (props.isLoginPage ? "0" : theme.layout.headerHeight)};
-  padding-bottom: ${(props) => (props.isLoginPage ? "0" : theme.layout.navbarHeight)};
-  height: ${(props) => (props.isLoginPage ? "100vh" : "auto")};
+const MainContent = styled.main<{ isLoginPage: boolean; isTodayPage: boolean }>`
+  padding: ${(props) => (props.isTodayPage ? "0" : "0 3.5%")};
+  padding-top: ${(props) => (props.isLoginPage || props.isTodayPage ? "0" : theme.layout.headerHeight)};
+  padding-bottom: ${(props) => (props.isLoginPage || props.isTodayPage ? "0" : theme.layout.navbarHeight)};
+  height: ${(props) => (props.isLoginPage || props.isTodayPage ? "100vh" : "auto")};
 
   @media (min-width: ${theme.breakpoints.desktop}) {
-    padding-top: ${(props) => (props.isLoginPage ? "0" : theme.layout.headerHeight)};
+    padding-top: ${(props) => (props.isLoginPage || props.isTodayPage ? "0" : theme.layout.headerHeight)};
     padding-bottom: 0;
   }
 `;
 
+// AppContent 컴포넌트 내에서 isTodayPage 판단 추가
 const AppContent = () => {
   const location = useLocation();
   const { userDetail } = useAuthStore();
   const hideNavigation: string[] = [ROUTES.LOGIN, ROUTES.INPUT_INFO];
   const shouldHideNavigation = hideNavigation.includes(location.pathname);
+  const isTodayPage = location.pathname === ROUTES.TODAYS || location.pathname === ROUTES.LOGIN;
 
   return (
     <AppLayout>
       {!shouldHideNavigation && <Header />}
-      <MainContent isLoginPage={shouldHideNavigation}>
+      <MainContent isLoginPage={shouldHideNavigation} isTodayPage={isTodayPage}>
         <div className="container">
           <Routes>
             {/* 공개 라우트 */}
             <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
             <Route path={ROUTES.LOGIN} element={<LoginPage />} />
-            <Route 
-              path={ROUTES.INPUT_INFO} 
+            <Route
+              path={ROUTES.INPUT_INFO}
               element={
                 <AuthRedirect>
                   <InputInfoPage />
                 </AuthRedirect>
-              } 
+              }
             />
             <Route path={ROUTES.KAKAO_CALLBACK} element={<KakaoCallback />} />
             <Route path={ROUTES.NAVER_CALLBACK} element={<NaverCallback />} />
