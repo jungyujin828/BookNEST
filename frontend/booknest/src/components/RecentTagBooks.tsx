@@ -63,6 +63,8 @@ const BookListContainer = styled.div`
   overflow: hidden;
   margin: 0 -16px;
   padding: 0 16px;
+  -webkit-overflow-scrolling: touch; /* Better iOS scrolling */
+  overscroll-behavior-x: contain; /* Prevent overscroll on Android */
   
   @media (min-width: 768px) {
     margin: 0;
@@ -75,6 +77,8 @@ const BookList = styled.div`
   gap: 12px;
   transition: transform 0.3s ease;
   padding: 10px 0;
+  touch-action: pan-x; /* Optimize for horizontal touch */
+  will-change: transform; /* Optimize performance on Android */
   
   @media (min-width: 768px) {
     gap: 20px;
@@ -249,9 +253,10 @@ const RecentTagBooks = () => {
   const navigate = useNavigate();
   const { userDetail } = useAuthStore();
   
-  // 터치 스와이프 관련 상태
+  // Add touch state for mobile swipe
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -268,24 +273,46 @@ const RecentTagBooks = () => {
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
   };
-
-  // 터치 시작 이벤트 핸들러
+  
+  // Add touch event handlers for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
+    if (window.innerWidth < 768) {
+      setTouchStart(e.targetTouches[0].clientX);
+      setIsScrolling(false);
+    }
   };
 
-  // 터치 이동 이벤트 핸들러
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    if (touchStart !== null && window.innerWidth < 768) {
+      setTouchEnd(e.targetTouches[0].clientX);
+      
+      // Calculate how far we've moved
+      const diff = touchStart - e.targetTouches[0].clientX;
+      
+      // If significant movement, prevent default scrolling in some cases
+      if (Math.abs(diff) > 10) {
+        // Check if we're at the boundaries
+        if (bookListRef.current) {
+          const { scrollWidth, clientWidth } = bookListRef.current;
+          const maxScroll = scrollWidth - clientWidth;
+          
+          // Only prevent default if we're not at the boundaries
+          if ((diff > 0 && scrollPosition < maxScroll) || 
+              (diff < 0 && scrollPosition > 0)) {
+            e.preventDefault();
+            setIsScrolling(true);
+          }
+        }
+      }
+    }
   };
 
-  // 터치 종료 이벤트 핸들러
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     
     const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
+    const isLeftSwipe = distance > 50;  // Swiping left (scrolls content right)
+    const isRightSwipe = distance < -50; // Swiping right (scrolls content left)
     
     if (isLeftSwipe) {
       handleScroll('right');
@@ -295,10 +322,41 @@ const RecentTagBooks = () => {
       handleScroll('left');
     }
     
-    // 터치 상태 초기화
+    // Reset touch states
     setTouchStart(null);
     setTouchEnd(null);
+    setIsScrolling(false);
   };
+
+  // Add passive event listener for better performance on Android
+  useEffect(() => {
+    const bookList = bookListRef.current;
+    if (!bookList) return;
+
+    // Add passive event listeners for better performance
+    const options = { passive: true };
+    
+    const handleTouchStartPassive = (e: TouchEvent) => {
+      if (window.innerWidth < 768) {
+        setTouchStart(e.touches[0].clientX);
+        setIsScrolling(false);
+      }
+    };
+    
+    const handleTouchMovePassive = (e: TouchEvent) => {
+      if (touchStart !== null && window.innerWidth < 768) {
+        setTouchEnd(e.touches[0].clientX);
+      }
+    };
+    
+    bookList.addEventListener('touchstart', handleTouchStartPassive, options);
+    bookList.addEventListener('touchmove', handleTouchMovePassive, options);
+    
+    return () => {
+      bookList.removeEventListener('touchstart', handleTouchStartPassive);
+      bookList.removeEventListener('touchmove', handleTouchMovePassive);
+    };
+  }, [touchStart]);
 
   const handleBookClick = (book_id: number) => {
     navigate(`/book-detail/${book_id}`);

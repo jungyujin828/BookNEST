@@ -1,14 +1,7 @@
 import styled from "@emotion/styled";
 import api from "../api/axios";
-import React, {
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import { useRecentStore } from "../store/useRecentStore";
-import SearchRecent from "./SearchRecent";
 
 interface SearchBarProps {
   searchTerm: string;
@@ -20,6 +13,7 @@ interface SearchBarProps {
   selectedTags?: string[];
   onFocus?: () => void;
   onBlur?: () => void;
+  onUpdateSearchParams: (searchTerm: string) => void;
 }
 
 const SearchBarContainer = styled.div`
@@ -66,7 +60,7 @@ const AutocompleteList = styled.ul`
 const AutocompleteItem = styled.li`
   padding: 8px 16px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: #f5f5f5;
   }
@@ -145,7 +139,7 @@ const SearchButton = styled.button`
   padding: 12px 24px;
   border-radius: 10px;
   border: none;
-  background-color: #7bc47f;
+  background-color: #00c473;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -168,6 +162,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
       selectedTags,
       onFocus,
       onBlur,
+      onUpdateSearchParams,
     },
     ref
   ) => {
@@ -184,7 +179,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
       }
 
       try {
-        const response = await api.get('/api/search/autocomplete', {
+        const response = await api.get("/api/search/autocomplete", {
           params: { keyword },
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -195,7 +190,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           setAutocompleteResults(response.data.data);
         }
       } catch (error) {
-        console.error('Failed to fetch autocomplete:', error);
+        console.error("Failed to fetch autocomplete:", error);
         setAutocompleteResults([]);
       }
     };
@@ -212,28 +207,30 @@ const SearchBar = forwardRef<any, SearchBarProps>(
       return () => clearTimeout(debounceTimer);
     }, [searchTerm]);
 
-    const handleSearch = async () => {
-      if (!searchTerm.trim()) return;
+    const handleSearch = async (keywordToSearch?: string) => {
+      const finalSearchTerm = keywordToSearch !== undefined ? keywordToSearch : searchTerm;
+
+      if (!finalSearchTerm.trim()) return;
       
       setIsSearching(true);
       setShowAutocomplete(false);
-      if (searchTerm.trim()) {
-        addRecent(searchTerm);
+      if (finalSearchTerm.trim()) {
+        addRecent(finalSearchTerm);
       }
 
       try {
         const endpoint = searchType === "books" ? "/api/search/book" : "/api/search/user";
         const params = new URLSearchParams();
-        
+
         if (searchType === "books") {
-          params.append("title", searchTerm);
+          params.append("title", finalSearchTerm);
           params.append("page", "1");
           params.append("size", "10");
           if (selectedTags && selectedTags.length > 0) {
-            selectedTags.forEach(tag => params.append("tags", tag));
+            selectedTags.forEach((tag) => params.append("tags", tag));
           }
         } else {
-          params.append("name", searchTerm);
+          params.append("name", finalSearchTerm);
           params.append("page", "1");
           params.append("size", "10");
         }
@@ -284,7 +281,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
       setTimeout(() => {
         setShowAutocomplete(false);
       }, 200);
-      
+
       if (onBlur) {
         onBlur();
       }
@@ -292,7 +289,8 @@ const SearchBar = forwardRef<any, SearchBarProps>(
 
     const handleAutocompleteClick = (value: string) => {
       onSearchChange(value);
-      handleSearch();
+      onUpdateSearchParams(value);
+      handleSearch(value);
     };
 
     useImperativeHandle(ref, () => ({
@@ -317,10 +315,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           {showAutocomplete && autocompleteResults.length > 0 && (
             <AutocompleteList>
               {autocompleteResults.map((result, index) => (
-                <AutocompleteItem
-                  key={index}
-                  onClick={() => handleAutocompleteClick(result)}
-                >
+                <AutocompleteItem key={index} onClick={() => handleAutocompleteClick(result)}>
                   {result}
                 </AutocompleteItem>
               ))}
@@ -328,7 +323,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           )}
         </SearchInputWrapper>
         <SearchButton 
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           disabled={isSearching}
         >
           {isSearching ? "검색 중..." : "검색"}

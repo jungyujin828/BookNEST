@@ -175,6 +175,7 @@ const UserSearchModal: React.FC<UserSearchModalProps> = ({ onClose }) => {
           searchType="users"
           onSearchResult={handleSearchResult}
           placeholder="유저 검색"
+          onUpdateSearchParams={(term) => setSearchTerm(term)}
         />
         <UserList>
           {users.map((user) => (

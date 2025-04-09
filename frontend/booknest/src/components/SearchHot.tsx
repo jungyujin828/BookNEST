@@ -7,15 +7,8 @@ interface SearchHotProps {
 }
 
 const SearchHotContainer = styled.div`
-  position: absolute;
-  top: 15rem;
-  left: 0;
-  right: 0;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 16px;
-  z-index: 999;
 `;
 
 const Title = styled.div`
@@ -43,7 +36,7 @@ const SearchItem = styled.div`
 `;
 
 const RankIcon = styled.span`
-  color: #7bc47f;
+  color: #00c473;
   margin-right: 12px;
   font-size: 16px;
   font-weight: bold;
