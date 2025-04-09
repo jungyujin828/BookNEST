@@ -22,9 +22,6 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query(value = "SELECT * FROM best_seller LIMIT 15", nativeQuery = true)
     List<BestSeller> findBestSellers();
 
-//    // bookId로 책을 조회하는 메서드
-//    Optional<Book> findBookDetailById(Integer bookId);
-
     // 책 평균 평가 점수 구하기
     @Query("SELECT ROUND(AVG(r.rating), 2) FROM Rating r WHERE r.book.id = :bookId")
     Optional<Double> findAverageRatingByBookId(@Param("bookId") int bookId);
@@ -37,17 +34,16 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 """)
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
 
-
     // 화제의 작가 최상위 3명의 책 가져오기
     @Query("""
-    SELECT b FROM Book b
-    JOIN b.bookAuthors ba
-    JOIN ba.author a
-    WHERE a.name LIKE %:author%
-    ORDER BY b.createdAt DESC
-    LIMIT 20
-""")
-    List<Book> findTop3ByAuthorNameLike(@Param("author") String author);
+        SELECT b FROM Book b
+        JOIN b.bookAuthors ba
+        JOIN ba.author a
+        WHERE a.name LIKE %:author%
+        ORDER BY b.createdAt DESC
+    """)
+    List<Book> findBooksByAuthorNameLike(@Param("author") String author, Pageable pageable);
+
 
 
     @Query("""

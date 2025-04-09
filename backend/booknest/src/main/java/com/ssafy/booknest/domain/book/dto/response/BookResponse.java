@@ -28,6 +28,7 @@ public class BookResponse {
                 .publishedDate(book.getPublishedDate())
                 .authors(book.getBookAuthors().stream()
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())
+                        .distinct()
                         .collect(Collectors.toList()))
                 .build();
     }

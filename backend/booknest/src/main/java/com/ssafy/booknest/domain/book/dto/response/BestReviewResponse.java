@@ -19,6 +19,7 @@ public class BestReviewResponse {
     private int bookId;
     private String bookName;
     private String reviewerName;
+    private String reviewerImgUrl;
     private String content;
     private Boolean myLiked;
     private int totalLikes;
@@ -38,6 +39,7 @@ public class BestReviewResponse {
                 .bookId(review.getBook().getId())
                 .bookName(review.getBook().getTitle())
                 .reviewerName(reviewerName)
+                .reviewerImgUrl(reviewer.getProfileUrl())
                 .content(review.getContent())
                 .myLiked(myLiked)
                 .totalLikes(review.getLikes())
