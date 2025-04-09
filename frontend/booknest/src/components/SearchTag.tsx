@@ -110,6 +110,7 @@ const tagCategories = {
 // 스크롤 관련 로직을 위한 Hook
 const useTagScroll = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
+  const scrollPositionRef = useRef(0); // Add a ref to store the scroll position
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -133,6 +134,7 @@ const useTagScroll = () => {
     }
 
     setScrollPosition(newPosition);
+    scrollPositionRef.current = newPosition; // Update the ref
     if (listRef.current) {
         listRef.current.style.transform = `translateX(-${newPosition}px)`;
     }
@@ -203,6 +205,7 @@ const useTagScroll = () => {
             if (scrollPosition > maxScroll) {
                 const newScrollPosition = Math.max(0, maxScroll);
                 setScrollPosition(newScrollPosition);
+                scrollPositionRef.current = newScrollPosition; // Update the ref
                 if (listRef.current) {
                   listRef.current.style.transform = `translateX(-${newScrollPosition}px)`;
                 }
@@ -243,8 +246,16 @@ const useTagScroll = () => {
     };
   }, [scrollPosition, listRef, containerRef]); 
 
+  // Add a new useEffect to maintain scroll position when component re-renders
+  useEffect(() => {
+    if (listRef.current && scrollPositionRef.current > 0) {
+      listRef.current.style.transform = `translateX(-${scrollPositionRef.current}px)`;
+    }
+  }, []);
+
   return {
     scrollPosition,
+    scrollPositionRef,
     listRef,
     containerRef,
     handleScroll,
@@ -257,8 +268,8 @@ const useTagScroll = () => {
 };
 
 // 각 태그 카테고리별 스크롤을 위한 컴포넌트
-const ScrollableTagList: React.FC<{ tags: string[]; selectedTags: string[]; onTagSelect: (tag: string) => void }> = 
-({ tags, selectedTags, onTagSelect }) => {
+const ScrollableTagList: React.FC<{ tags: string[]; selectedTags: string[]; onTagSelect: (tag: string) => void; isExpanded?: boolean }> = 
+({ tags, selectedTags, onTagSelect, isExpanded = true }) => {
   const { 
     listRef, 
     containerRef, 
@@ -267,8 +278,16 @@ const ScrollableTagList: React.FC<{ tags: string[]; selectedTags: string[]; onTa
     canScrollRight,
     handleTouchStart,
     handleTouchMove,
-    handleTouchEnd
+    handleTouchEnd,
+    scrollPositionRef
   } = useTagScroll();
+
+  // Add useEffect to maintain scroll position when selectedTags changes
+  useEffect(() => {
+    if (listRef.current && scrollPositionRef.current > 0) {
+      listRef.current.style.transform = `translateX(-${scrollPositionRef.current}px)`;
+    }
+  }, [selectedTags]);
 
   return (
     <TagListContainer ref={containerRef}>
@@ -304,6 +323,16 @@ const SearchTag: React.FC<SearchTagProps> = ({
   onClearTags,
   onSearch,
 }) => {
+  // Add state to track whether the tag list should be expanded
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Update isExpanded state when selectedTags changes
+  useEffect(() => {
+    // If there are any selected tags, keep the list expanded
+    if (selectedTags.length > 0) {
+      setIsExpanded(true);
+    }
+  }, [selectedTags]);
 
   const handleClearTags = () => {
     console.log("Clearing all tags");
@@ -344,6 +373,7 @@ const TagSection = styled.div`
 
 const TagCategory = styled.div`
   margin-bottom: 10px;
+  min-height: 80px; /* Add a minimum height to prevent collapsing */
 `;
 
 const CategoryTitle = styled.h3`
@@ -358,6 +388,8 @@ const TagListContainer = styled.div`
   width: 100%;
   overflow: hidden; 
   -webkit-overflow-scrolling: touch; /* Better iOS scrolling */
+  display: flex; /* Always display as flex */
+  min-height: 50px; /* Add a minimum height to prevent collapsing */
 `;
 
 const TagList = styled.div`
@@ -368,6 +400,8 @@ const TagList = styled.div`
   transition: transform 0.3s ease;
   transform: translateX(0);
   touch-action: pan-x; /* Optimize for horizontal touch */
+  width: 100%; /* Ensure full width */
+  min-height: 40px; /* Add a minimum height to prevent collapsing */
 `;
 
 const TagButton = styled.button<{ selected: boolean }>`

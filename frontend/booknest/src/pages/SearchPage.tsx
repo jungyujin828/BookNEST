@@ -330,6 +330,13 @@ const SearchPage = () => {
     }
   }, []);
 
+  // Add an effect to ensure the tag list is always expanded when there are selected tags
+  useEffect(() => {
+    if (selectedTags.length > 0) {
+      setIsTagsExpanded(true);
+    }
+  }, [selectedTags]);
+
   // 검색 파라미터 업데이트 함수
   const updateSearchParams = (newSearchTerm?: string, newTags?: string[], newType?: "books" | "users") => {
     const params = new URLSearchParams(searchParams);
@@ -561,7 +568,15 @@ const SearchPage = () => {
   };
 
   const toggleTags = () => {
-    setIsTagsExpanded(prev => !prev);
+    // 태그창이 항상 펼쳐져 있도록 수정
+    setIsTagsExpanded(true);
+    
+    // 기존 코드 주석 처리
+    // if (selectedTags.length > 0) {
+    //   setIsTagsExpanded(true);
+    // } else {
+    //   setIsTagsExpanded(prev => !prev);
+    // }
   };
 
   // Update the shouldShowTags condition to be more strict
@@ -587,19 +602,24 @@ const SearchPage = () => {
   // Add an event handler to the page body to close tags when clicking outside
   useEffect(() => {
     const handlePageClick = (event: MouseEvent) => {
-      // If the tags are expanded and the click is outside the tag section
-      if (isTagsExpanded && 
-          tagSectionRef.current && 
-          !tagSectionRef.current.contains(event.target as Node)) {
-        // Don't collapse if clicking on the toggle button when tags are hidden
-        const targetElement = event.target as HTMLElement;
-        if (targetElement.closest('.toggle-button')) {
-          return;
-        }
+      // 태그창이 자동으로 닫히지 않도록 이 부분을 주석 처리하거나 제거합니다
+      // if (isTagsExpanded && 
+      //     tagSectionRef.current && 
+      //     !tagSectionRef.current.contains(event.target as Node)) {
+      //   // Don't collapse if clicking on the toggle button when tags are hidden
+      //   const targetElement = event.target as HTMLElement;
+      //   if (targetElement.closest('.toggle-button')) {
+      //     return;
+      //   }
         
-        // Collapse tags
-        setIsTagsExpanded(false);
-      }
+      //   // Don't collapse if there are selected tags
+      //   if (selectedTags.length > 0) {
+      //     return;
+      //   }
+        
+      //   // Collapse tags
+      //   setIsTagsExpanded(false);
+      // }
     };
 
     // Add the event listener to the document
@@ -609,7 +629,7 @@ const SearchPage = () => {
     return () => {
       document.removeEventListener('click', handlePageClick);
     };
-  }, [isTagsExpanded]);
+  }, [isTagsExpanded, selectedTags]);
 
   return (
     <SearchContainer>

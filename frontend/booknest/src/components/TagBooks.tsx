@@ -170,7 +170,7 @@ const BookTag = styled.span`
   display: inline-block;
   padding: 2px 8px;
   background-color: #f0f8f1;
-  color: #7bc47f;
+  color: #00c473;
   border-radius: 12px;
   font-size: 11px;
   margin-top: 4px;
