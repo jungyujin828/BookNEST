@@ -271,6 +271,7 @@ const SearchTag: React.FC<SearchTagProps> = ({
 
 const TagSection = styled.div`
   margin: 20px 0;
+  background-color: white;
 `;
 
 const TagCategory = styled.div`
@@ -380,10 +381,6 @@ const SelectedTag = styled.span`
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-
-  &:hover {
-    background-color: #00a05e;
-  }
 `;
 
 const ClearTagsButton = styled.button`

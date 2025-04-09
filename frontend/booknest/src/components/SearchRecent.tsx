@@ -9,8 +9,6 @@ interface SearchRecentProps {
 
 const SearchRecentContainer = styled.div`
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 16px;
   margin-bottom: 8px;
   width: 100%;
@@ -69,7 +67,10 @@ const DeleteButton = styled.button`
   border: none;
   color: #666;
   cursor: pointer;
-  padding: 4px;
+  font-size: 26px;
+  font-weight: 300;
+  padding-right: 1rem;
+  
 
   &:hover {
     color: #333;

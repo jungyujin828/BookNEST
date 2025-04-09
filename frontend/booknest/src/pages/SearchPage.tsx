@@ -115,7 +115,6 @@ const Tab = styled.button<{ active: boolean }>`
   border: none;
   background: none;
   font-size: 16px;
-  font-weight: 600;
   color: ${(props) => (props.active ? "#00c473" : "#666")};
   border-bottom: 2px solid ${(props) => (props.active ? "#00c473" : "transparent")};
   cursor: pointer;
@@ -205,20 +204,6 @@ const ResultCount = styled.div`
   font-size: 14px;
 `;
 
-// 최근/인기 검색어 컨테이너 추가
-const SuggestionContainer = styled.div`
-  position: absolute;
-  top: calc(100% + 4px); // 검색창 바로 아래에 위치 (약간의 간격 포함)
-  left: 0;
-  right: 0;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 1000; // 다른 요소 위에 오도록 z-index 설정
-  // 내부에 여러 컴포넌트가 올 수 있으므로 padding 추가
-  padding: 8px 0; 
-`;
-
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"books" | "users">(
@@ -265,16 +250,10 @@ const SearchPage = () => {
     console.log("SearchPage - Tag Selected:", tag);
     console.log("SearchPage - Current Tags:", selectedTags);
 
-    let newSelectedTags;
-    if (selectedTags.includes(tag)) {
-      // 태그 해제 시: 배열에서 제거 (순서 유지)
-      newSelectedTags = selectedTags.filter((t) => t !== tag);
-    } else {
-      // 새 태그 선택 시: 배열 맨 뒤에 추가 (선택 순서 유지)
-      newSelectedTags = [...selectedTags, tag];
-    }
+    // 새로운 태그 배열 생성
+    const newSelectedTags = selectedTags.includes(tag) ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
 
-    console.log("SearchPage - New Tags Array (Original Order):", newSelectedTags);
+    console.log("SearchPage - New Tags Array:", newSelectedTags);
 
     // 상태 업데이트
     setSelectedTags(newSelectedTags);
@@ -407,19 +386,14 @@ const SearchPage = () => {
 
   // SearchTag에서는 onSearch 호출 제거
 
-  const triggerSearch = async (page: number = currentPage, termToSearch?: string) => {
-    const finalSearchTerm = termToSearch !== undefined ? termToSearch : searchTerm;
-    console.log("SearchPage - Triggering Search with term:", finalSearchTerm, "tags:", selectedTags);
-
-    // termToSearch가 비어있고 searchTerm도 비어있으면 검색 중단 (선택적)
-    // if (!finalSearchTerm.trim() && !selectedTags.length) return;
-
+  const triggerSearch = async (page: number = currentPage) => {
+    console.log("SearchPage - Triggering Search with tags:", selectedTags);
     try {
       const response = await api.get("/api/search/book", {
         params: {
           page,
           size: 10,
-          ...(finalSearchTerm.trim() && { title: finalSearchTerm.trim() }), // finalSearchTerm 사용
+          ...(searchTerm && { title: searchTerm }),
           ...(selectedTags.length > 0 && { tags: selectedTags }),
         },
         headers: {
@@ -445,8 +419,9 @@ const SearchPage = () => {
         setTotalPages(processedData.totalPages);
         setBooks(processedData.content);
       }
-    } catch (error) { 
+    } catch (error) {
       console.error("Failed to search:", error);
+      // 에러 발생 시 상태 초기화
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
@@ -475,7 +450,7 @@ const SearchPage = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    triggerSearch(page); // 페이지 변경 시에는 현재 searchTerm 사용 (인자 없음)
+    triggerSearch(page);
   };
 
   return (
@@ -504,29 +479,26 @@ const SearchPage = () => {
           selectedTags={selectedTags}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}
-          onUpdateSearchParams={(term) => updateSearchParams(term, selectedTags, activeTab)}
         />
 
         {showRecent && searchTerm === "" && (
-          <SuggestionContainer>
+          <>
             <SearchRecent
               onSelect={(query) => {
                 setSearchTerm(query);
-                updateSearchParams(query, selectedTags, activeTab);
-                triggerSearch(1, query); // 클릭된 query를 인자로 전달
                 setIsSearchActive(true);
+                searchBarRef.current?.handleSearch();
               }}
               onClose={() => setShowRecent(false)}
             />
             <SearchHot
               onSelect={(query) => {
                 setSearchTerm(query);
-                updateSearchParams(query, selectedTags, activeTab);
-                triggerSearch(1, query); // 클릭된 query를 인자로 전달
                 setIsSearchActive(true);
+                searchBarRef.current?.handleSearch();
               }}
             />
-          </SuggestionContainer>
+          </>
         )}
       </SearchBarWrapper>
 
@@ -575,17 +547,9 @@ const SearchPage = () => {
                         .sort((a, b) => {
                           const aIsSelected = selectedTags.includes(a);
                           const bIsSelected = selectedTags.includes(b);
-
-                          if (aIsSelected && bIsSelected) {
-                            // 둘 다 선택된 경우: selectedTags 배열에서의 순서대로 정렬
-                            return selectedTags.indexOf(a) - selectedTags.indexOf(b);
-                          } else if (aIsSelected) {
-                            return -1; // a만 선택된 경우 a를 앞으로
-                          } else if (bIsSelected) {
-                            return 1;  // b만 선택된 경우 b를 앞으로
-                          } else {
-                            return 0; // 둘 다 선택되지 않은 경우 순서 유지
-                          }
+                          if (aIsSelected && !bIsSelected) return -1;
+                          if (!aIsSelected && bIsSelected) return 1;
+                          return 0;
                         })
                         .map((tag, index) => (
                           <Tag 
