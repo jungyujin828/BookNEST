@@ -6,6 +6,7 @@ import com.ssafy.booknest.domain.book.entity.CriticBook;
 import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -70,33 +71,38 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 
     // 특정 태그를 가진 책에서 해당 유저가 평가하지 않은 책
     @Query("""
-    SELECT DISTINCT b
+    SELECT b.id
     FROM Book b
     JOIN b.bookTags bt
     JOIN bt.tag t
     WHERE t.name = :tagName
       AND b.id NOT IN :excludedIds
-    ORDER BY function('RAND')
-    """)
-    List<Book> findByTagNameExcluding(
+""")
+    List<Integer> findBookIdsByTagNameExcluding(
             @Param("tagName") String tagName,
             @Param("excludedIds") List<Integer> excludedIds
     );
 
+
+
     // 특정 카테고리를 가진 책에서 해당 유저가 평가하지 않은 책
     @Query("""
-    SELECT DISTINCT b
-    FROM Book b
-    JOIN b.bookCategories bc
-    JOIN bc.category c
-    WHERE c.name = :categoryName
-      AND b.id NOT IN :excludedIds
-    ORDER BY function('RAND')
-    """)
-    List<Book> findByCategoryNameExcluding(
+        SELECT b.id
+        FROM Book b
+        JOIN b.bookCategories bc
+        JOIN bc.category c
+        WHERE c.name = :categoryName
+        AND b.id NOT IN :excludedIds
+     """)
+    List<Integer> findBookIdsByCategoryNameExcluding(
             @Param("categoryName") String categoryName,
             @Param("excludedIds") List<Integer> excludedIds
     );
+
+
+    @EntityGraph(attributePaths = {"bookAuthors", "bookAuthors.author"})
+    @Query("SELECT b FROM Book b WHERE b.id IN :ids")
+    List<Book> findAllByIdWithAuthors(@Param("ids") List<Integer> ids);
 
 
 

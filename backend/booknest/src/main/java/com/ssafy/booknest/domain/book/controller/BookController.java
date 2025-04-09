@@ -91,7 +91,7 @@ public class BookController {
     }
 
     // 최근 키워드 기반 추천
-    @GetMapping("/recent-keyword")
+    @GetMapping("/recent-tag")
     public ResponseEntity<ApiResponse<List<FastApiRecommendation>>> getRecentKeywordRecommendations(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
