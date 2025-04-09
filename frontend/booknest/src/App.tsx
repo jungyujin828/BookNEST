@@ -124,6 +124,14 @@ const AppContent = () => {
               path={ROUTES.NEST}
               element={
                 <ProtectedRoute>
+                  <Navigate to={`/nest/${userDetail?.userId}`} replace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path={`${ROUTES.NEST}/:userId`}
+              element={
+                <ProtectedRoute>
                   <NestPage />
                 </ProtectedRoute>
               }
