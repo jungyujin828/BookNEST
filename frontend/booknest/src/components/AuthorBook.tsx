@@ -29,7 +29,7 @@ const AuthorBookContainer = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
@@ -38,7 +38,7 @@ const Title = styled.h2`
   gap: 8px;
   
   @media (min-width: 768px) {
-    font-size: 20px;
+    font-size: 22px;
     margin-bottom: 20px;
   }
 `;
@@ -242,6 +242,11 @@ const LoadingMessage = styled.div`
   }
 `;
 
+const AuthorHighlight = styled.span`
+  color: #00c473;
+  font-weight: bold;
+`;
+
 const AuthorBook = () => {
   const navigate = useNavigate();
   const { 
@@ -258,6 +263,20 @@ const AuthorBook = () => {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
+
+  const getCommonAuthor = (books) => {
+    if (!books || books.length === 0) return '';
+    const authorCount = {};
+    books.forEach(book => {
+      book.authors.forEach(author => {
+        authorCount[author] = (authorCount[author] || 0) + 1;
+      });
+    });
+    const commonAuthors = Object.entries(authorCount).filter(([author, count]) => count === books.length);
+    return commonAuthors.length > 0 ? commonAuthors[0][0] : books[0].authors[0];
+  };
+
+  const commonAuthor = getCommonAuthor(authorBooks);
 
   const updateScrollButtonsVisibility = () => {
     if (!bookListRef.current) return;
@@ -352,7 +371,7 @@ const AuthorBook = () => {
   return (
     <AuthorBookContainer>
       <Title>
-        화제의 작가 도서
+        화제의 작가<AuthorHighlight>{commonAuthor}</AuthorHighlight>의 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (

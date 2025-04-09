@@ -35,19 +35,24 @@ const TagBooksContainer = styled.div`
 `;
 
 const Title = styled.h2`
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 16px;
   color: #333;
   
   @media (min-width: 768px) {
-    font-size: 20px;
+    font-size: 22px;
     margin-bottom: 20px;
   }
 `;
 
 const HighlightTag = styled.span`
-  color: #7bc47f;
+  color: #00c473;
+  font-weight: bold;
+`;
+
+const TagHighlight = styled.span`
+  color: #00c473;
   font-weight: bold;
 `;
 
@@ -176,12 +181,12 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   top: 50%;
   ${props => props.direction === 'left' ? 'left: 4px;' : 'right: 4px;'}
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 40px;
+  height: 60px;
+  border-radius: 8px;
   background-color: rgba(255, 255, 255, 0.9);
   border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -191,8 +196,8 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 
   @media (min-width: 768px) {
     ${props => props.direction === 'left' ? 'left: -18px;' : 'right: -18px;'}
-    width: 44px;
-    height: 44px;
+    width: 60px;
+    height: 80px;
   }
 
   &:hover {
@@ -213,19 +218,12 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 
   &::before {
     content: '';
-    width: 10px;
-    height: 10px;
-    border-top: 2.5px solid #555;
-    border-right: 2.5px solid #555;
+    width: 16px;
+    height: 16px;
+    border-top: 3px solid #555;
+    border-right: 3px solid #555;
     transform: ${props => props.direction === 'left' ? 'rotate(-135deg) translateX(2px)' : 'rotate(45deg) translateX(-2px)'};
     transition: border-color 0.2s ease;
-    
-    @media (min-width: 768px) {
-      width: 12px;
-      height: 12px;
-      border-top: 3px solid #555;
-      border-right: 3px solid #555;
-    }
   }
 
   &:hover::before {
@@ -326,10 +324,8 @@ const TagBooks = () => {
     navigate(`/book-detail/${bookId}`);
   };
 
-  const extractTagFromDescription = (description: string) => {
-    // "태그명 태그의 추천 도서입니다." 형식에서 태그명 추출
-    const match = description.match(/(.+?)\s*태그의/);
-    return match ? match[1] : '';
+  const extractTagFromBooks = (books: Book[]) => {
+    return books.length > 0 ? books[0].tag : '';
   };
 
   // 저자 표시 형식 변환
@@ -356,7 +352,7 @@ const TagBooks = () => {
         if (response.data.success && response.data.data) {
           setTagBooks(response.data.data.books);
           setDescription(response.data.data.description);
-          const extractedTag = extractTagFromDescription(response.data.data.description);
+          const extractedTag = extractTagFromBooks(response.data.data.books);
           setTag(extractedTag);
         } else {
           setError('태그별 추천 도서 정보를 불러오는데 실패했습니다.');
@@ -393,10 +389,12 @@ const TagBooks = () => {
     return <ErrorMessage>태그별 추천 도서 목록이 없습니다.</ErrorMessage>;
   }
 
+  const extractedTag = extractTagFromBooks(tagBooks);
+
   return (
     <TagBooksContainer>
       <Title>
-        {description}
+        <TagHighlight>#{extractedTag}</TagHighlight> 도서는 어떠세요?
       </Title>
       <BookListContainer>
         {canScrollLeft && (

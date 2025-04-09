@@ -47,10 +47,10 @@ const Title = styled.h2`
 
 const YearSelect = styled.select`
   padding: 8px 12px;
-  border: 2px solid #2196F3;
-  border-radius: 6px;
+  border: 2px solid #00c473;
+  border-radius: 12px;
   font-size: 16px;
-  color: #2196F3;
+  color: #00c473;
   background-color: white;
   cursor: pointer;
   font-weight: 600;
@@ -62,7 +62,7 @@ const YearSelect = styled.select`
 
   &:focus {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    box-shadow: 0 0 0 2px rgba(0, 196, 115, 0.2);
   }
 `;
 
@@ -114,7 +114,7 @@ const RankBadge = styled.div`
   position: absolute;
   top: 8px;
   left: 8px;
-  background-color: #2196F3;
+  background-color: #00c473;
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
@@ -249,7 +249,7 @@ const LibraryBooks = () => {
   const bookListRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   
-  const years = [2020, 2021, 2022, 2023, 2024];
+  const years = [2023, 2024];
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
   const handleScroll = (direction: 'left' | 'right') => {

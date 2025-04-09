@@ -11,7 +11,6 @@ import KakaoIcon from "../icons/kakao.png";
 import NaverIcon from "../icons/naver.png";
 import GoogleIcon from "../icons/google.png";
 
-// Add this interface near the top of the file, after imports
 interface LoginContainerProps {
   isChanging: boolean;
 }
@@ -21,6 +20,8 @@ const LoginContainer = styled.div<LoginContainerProps>`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: "black";
   background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg.png") no-repeat center center;
   background-size: cover;
@@ -88,14 +89,6 @@ const ButtonSection = styled.div`
   overflow: hidden;
 `;
 
-const SocialButtonsContainer = styled.div<{ show: boolean }>`
-  display: flex;
-  flex-direction: column;
-  transform: translateY(${({ show }) => (show ? "0" : "100%")});
-  opacity: ${({ show }) => (show ? "1" : "0")};
-  transition: all 0.5s ease-in-out;
-`;
-
 const Logo = styled.div`
   font-size: 5.5rem;
   font-weight: 600;
@@ -130,7 +123,7 @@ const Subtitle = styled.p`
 
 const ChangeImageButton = styled.button`
   position: absolute;
-  bottom: 2rem;
+  top: 2rem;
   left: 2rem;
   background-color: rgba(0, 0, 0, 0.5);
   color: white;
@@ -297,6 +290,15 @@ const LoginPage = () => {
   const [currentBg, setCurrentBg] = useState(5);
   const [isChanging, setIsChanging] = useState(false);
   const navigate = useNavigate();
+
+  // 스크롤 막기
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
 
   const handleChangeBackground = useCallback(() => {
     console.log("change");
