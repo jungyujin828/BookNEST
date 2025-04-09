@@ -46,6 +46,9 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
+    @Column(name="total_ratings")
+    private Integer totalRatings;
+
     @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<BookCategory> bookCategories = new ArrayList<>();
