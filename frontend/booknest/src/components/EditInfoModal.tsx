@@ -22,34 +22,23 @@ const ModalOverlay = styled.div`
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  overflow: hidden; // 오버레이 스크롤 방지
+  overflow-y: scroll;
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // IE and Edge
+  &::-webkit-scrollbar {
+    display: none; // Chrome, Safari, Opera
+  }
 `;
 
 const ModalContainer = styled.div`
   background-color: white;
-  padding: 2rem;
+  padding: 3.5%;
   border-radius: 10px;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto; // 모달 내부만 스크롤 가능
   position: relative; // CloseButton을 위한 position 설정
-
-  // 스크롤바 스타일링 (선택사항)
-  &::-webkit-scrollbar {
-    width: 8px;
-  }
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-  }
-  &::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
 `;
 
 const Title = styled.h2`
@@ -80,12 +69,13 @@ const InputRow = styled.div`
   align-items: center;
 `;
 
-const Input = styled.input`
+const NicknameInput = styled.input`
   flex: 1;
-  height: 3.125rem;
-  border: 0.0625rem solid #ddd;
-  border-radius: 0.3125rem;
-  padding: 0 0.9375rem;
+  width: 70%;
+  height: 3.125rem; // 50px
+  border: 0.0625rem solid #ddd; // 1px
+  border-radius: 0.3125rem; // 5px
+  padding: 0 0.9375rem; // 0 15px
   font-size: 16px;
   box-sizing: border-box;
   background-color: #ffffff;
@@ -157,6 +147,7 @@ const AddressRow = styled.div`
 
 const AddressInput = styled.input`
   flex: 1;
+  width: 70%;
   height: 50px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -176,9 +167,15 @@ const AddressButton = styled.button`
   cursor: pointer;
 `;
 
-const FullInput = styled(Input)`
+const FullInput = styled.input`
+  flex: 1;
   width: 100%;
-  margin-top: 10px;
+  height: 50px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0 15px;
+  font-size: 16px;
+  background-color: #ffffff;
 `;
 
 const AddressModal = styled.div`
@@ -221,9 +218,7 @@ interface EditInfoModalProps {
 const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
   const { userDetail } = useAuthStore();
   const [isNicknameValidated, setIsNicknameValidated] = useState(true);
-  const [nickname, setNickname] = useState(
-    userDetail?.nickname || userInfo.nickname
-  );
+  const [nickname, setNickname] = useState(userDetail?.nickname || userInfo.nickname);
   const [gender, setGender] = useState(() => {
     // 성별 코드를 표시 텍스트로 변환
     switch (userDetail?.gender || userInfo.gender) {
@@ -237,9 +232,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         return "설정안함";
     }
   });
-  const [birthdate, setBirthdate] = useState(
-    (userDetail?.birthDate || userInfo.birthdate)?.replace(/-/g, "") || ""
-  );
+  const [birthdate, setBirthdate] = useState((userDetail?.birthDate || userInfo.birthdate)?.replace(/-/g, "") || "");
 
   // 주소 정보 초기화
   // Remove these duplicate state declarations
@@ -284,11 +277,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         const isDuplicate = response.data.data;
         setIsNicknameValid(!isDuplicate);
         setIsNicknameValidated(!isDuplicate);
-        setErrorMessage(
-          isDuplicate
-            ? "이미 사용 중인 닉네임입니다."
-            : "사용 가능한 닉네임입니다."
-        );
+        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
       }
     } catch (error) {
       setIsNicknameValidated(false);
@@ -328,26 +317,20 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
-    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
-      6,
-      8
-    )}`;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   };
 
   // 주소 관련 state 추가
   const [address, setAddress] = useState(userInfo.address?.roadAddress || "");
   const [detailAddress, setDetailAddress] = useState("");
-  const [oldAddress, setOldAddress] = useState(
-    userInfo.address?.oldAddress || ""
-  );
+  const [oldAddress, setOldAddress] = useState(userInfo.address?.oldAddress || "");
   const [zipcode, setZipcode] = useState(userInfo.address?.zipcode || "");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
 
   // 다음 주소 API 스크립트 로드
   useEffect(() => {
     const script = document.createElement("script");
-    script.src =
-      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.body.appendChild(script);
 
@@ -377,10 +360,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
             extraAddress += data.bname;
           }
           if (data.buildingName !== "" && data.apartment === "Y") {
-            extraAddress +=
-              extraAddress !== ""
-                ? ", " + data.buildingName
-                : data.buildingName;
+            extraAddress += extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
           }
           if (extraAddress !== "") {
             fullAddress += ` (${extraAddress})`;
@@ -445,9 +425,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
         window.location.reload();
       }
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.error?.message ||
-        "회원 정보 업데이트에 실패했습니다.";
+      const errorMessage = error.response?.data?.error?.message || "회원 정보 업데이트에 실패했습니다.";
       setErrorMessage(errorMessage);
     }
   };
@@ -464,7 +442,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
               닉네임<Required>*</Required>
             </Label>
             <InputRow>
-              <Input
+              <NicknameInput
                 type="text"
                 placeholder="사용하실 닉네임을 입력해주세요"
                 value={nickname}
@@ -474,21 +452,14 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
                 중복 확인
               </ConfirmButton>
             </InputRow>
-            {!isNicknameValid && errorMessage && (
-              <ErrorText>{errorMessage}</ErrorText>
-            )}
-            {isNicknameValid && errorMessage && (
-              <SuccessText>{errorMessage}</SuccessText>
-            )}
+            {!isNicknameValid && errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+            {isNicknameValid && errorMessage && <SuccessText>{errorMessage}</SuccessText>}
           </InputGroup>
 
           <InputGroup>
             <Label>성별</Label>
             <SelectContainer>
-              <Select
-                value={gender}
-                onChange={(e) => setGender(e.target.value)}
-              >
+              <Select value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="설정안함">설정안함</option>
                 <option value="남성">남성</option>
                 <option value="여성">여성</option>
@@ -512,12 +483,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
           <InputGroup>
             <Label>주소</Label>
             <AddressRow>
-              <AddressInput
-                type="text"
-                placeholder="주소를 검색해주세요"
-                value={address}
-                readOnly
-              />
+              <AddressInput type="text" placeholder="주소를 검색해주세요" value={address} readOnly />
               <AddressButton type="button" onClick={handleFindAddress}>
                 주소 검색
               </AddressButton>
@@ -549,10 +515,7 @@ const EditInfoModal = ({ onClose, userInfo }: EditInfoModalProps) => {
           <AddressModal>
             <AddressModalContent>
               <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
-              <div
-                id="addressLayer"
-                style={{ width: "100%", height: "400px" }}
-              ></div>
+              <div id="addressLayer" style={{ width: "100%", height: "400px" }}></div>
             </AddressModalContent>
           </AddressModal>
         )}
