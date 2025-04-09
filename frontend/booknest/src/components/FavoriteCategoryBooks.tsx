@@ -29,12 +29,15 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  line-height: 1.4;
   
   @media (min-width: 768px) {
     font-size: 22px;
     margin-bottom: 20px;
+    gap: 6px;
   }
 `;
 
@@ -117,7 +120,7 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
   
   @media (min-width: 768px) {
     font-size: 16px;
@@ -306,7 +309,8 @@ const FavoriteCategoryBooks = () => {
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 본 <CategoryHighlight>{books[0]?.category}</CategoryHighlight> 추천!
+        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은</span>
+        <span><CategoryHighlight>{books[0]?.category}</CategoryHighlight> 카테고리 도서!</span>
       </Title>
       <BookListContainer>
         {canScrollLeft && (

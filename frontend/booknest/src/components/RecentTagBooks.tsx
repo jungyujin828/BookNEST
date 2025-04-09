@@ -1,24 +1,26 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useBookStore } from '../store/useBookStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface Book {
-  bookId: number;
+  book_id: number;
   title: string;
-  publishedDate: string;
-  imageUrl: string;
-  authors: string[];
+  published_date: string;
+  image_url: string;
+  authors: string;
+  categories: string;
+  tags: string;
 }
 
-interface BestSellerResponse {
+interface RecentTagResponse {
   success: boolean;
   data: Book[];
   error: null | string;
 }
 
-const BestSellerContainer = styled.div`
+const Container = styled.div`
   padding: 16px;
   position: relative;
   
@@ -33,16 +35,24 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column; 
+  align-items: flex-start; 
+  gap: 4px; 
+  line-height: 1.4;
   
   @media (min-width: 768px) {
     font-size: 22px;
     margin-bottom: 20px;
+    gap: 6px;
   }
 `;
 
-const HighlightText = styled.span`
+const TagHighlight = styled.span`
+  color: #00c473;
+  font-weight: bold;
+`;
+
+const NicknameHighlight = styled.span`
   color: #00c473;
   font-weight: bold;
 `;
@@ -65,7 +75,6 @@ const BookList = styled.div`
   gap: 12px;
   transition: transform 0.3s ease;
   padding: 10px 0;
-  transform: translateX(0);
   
   @media (min-width: 768px) {
     gap: 20px;
@@ -117,18 +126,11 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  height: 36px;
-  line-height: 18px;
+  white-space: nowrap;
   
   @media (min-width: 768px) {
     font-size: 16px;
     margin-bottom: 8px;
-    height: 42px;
-    line-height: 21px;
   }
 `;
 
@@ -238,18 +240,18 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const BestSeller = () => {
-  const { 
-    bestSellers, 
-    loading, 
-    error, 
-    setBestSellers, 
-    setLoading, 
-    setError 
-  } = useBookStore();
+const RecentTagBooks = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { userDetail } = useAuthStore();
+  
+  // 터치 스와이프 관련 상태
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -267,70 +269,107 @@ const BestSeller = () => {
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
   };
 
-  // 화면 크기 변경 시 스크롤 위치 재계산
-  useEffect(() => {
-    const handleResize = () => {
-      if (bookListRef.current) {
-        // 스크롤 위치가 최대 스크롤 범위를 초과하는지 확인
-        const maxScroll = bookListRef.current.scrollWidth - bookListRef.current.clientWidth;
-        if (scrollPosition > maxScroll) {
-          setScrollPosition(maxScroll);
-          bookListRef.current.style.transform = `translateX(-${maxScroll}px)`;
-        }
-      }
-    };
+  // 터치 시작 이벤트 핸들러
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [scrollPosition]);
+  // 터치 이동 이벤트 핸들러
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
 
-  const handleBookClick = (bookId: number) => {
-    navigate(`/book-detail/${bookId}`);
+  // 터치 종료 이벤트 핸들러
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+    
+    if (isLeftSwipe) {
+      handleScroll('right');
+    }
+    
+    if (isRightSwipe) {
+      handleScroll('left');
+    }
+    
+    // 터치 상태 초기화
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  const handleBookClick = (book_id: number) => {
+    navigate(`/book-detail/${book_id}`);
   };
 
   useEffect(() => {
-    const fetchBestSellers = async () => {
+    const fetchRecentTagBooks = async () => {
       try {
-        setLoading('bestSellers', true);
-        setError('bestSellers', null);
+        setLoading(true);
+        setError(null);
         
-        const response = await api.get('/api/book/best');
+        const response = await api.get<RecentTagResponse>('/api/book/recent-keyword', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+        });
         
         if (response.data.success && response.data.data) {
-          setBestSellers(response.data.data);
+          setBooks(response.data.data);
         } else {
-          setError('bestSellers', '베스트셀러 정보를 불러오는데 실패했습니다.');
-          setBestSellers([]);
+          setError('최근 키워드 기반 추천 도서 정보를 불러오는데 실패했습니다.');
+          setBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('bestSellers', '서버 오류가 발생했습니다.');
-        setBestSellers([]);
+        setError('서버 오류가 발생했습니다.');
+        setBooks([]);
       } finally {
-        setLoading('bestSellers', false);
+        setLoading(false);
       }
     };
 
-    fetchBestSellers();
-  }, [setBestSellers, setLoading, setError]);
+    fetchRecentTagBooks();
+  }, []);
 
-  if (loading.bestSellers) {
-    return <LoadingMessage>베스트셀러 목록을 불러오는 중...</LoadingMessage>;
+  if (loading) {
+    return <LoadingMessage>최근 태그 기반 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
-  if (error.bestSellers) {
-    return <ErrorMessage>{error.bestSellers}</ErrorMessage>;
+  if (error) {
+    return <ErrorMessage>{error}</ErrorMessage>;
+  }
+
+  if (!books.length) {
+    return null;
   }
 
   const canScrollLeft = scrollPosition > 0;
   const canScrollRight = bookListRef.current 
-    ? scrollPosition < (bookListRef.current.scrollWidth - bookListRef.current.clientWidth - 10)
+    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
     : false;
 
+  // 태그 추출 (첫 번째 책의 태그 사용)
+  const tags = books.length > 0 && books[0]?.tags 
+    ? books[0].tags.split(',').slice(0, 3) 
+    : [];
+
   return (
-    <BestSellerContainer>
+    <Container>
       <Title>
-        꾸준한 명작! <HighlightText>스테디셀러</HighlightText>
+        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한</span>
+        <span>
+          {tags.map((tag, index) => (
+            <React.Fragment key={index}>
+              <TagHighlight>#{tag.trim()}</TagHighlight>
+              {index < tags.length - 1 ? ', ' : ''}
+            </React.Fragment>
+          ))}
+          {' '}도서
+        </span>
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -339,27 +378,28 @@ const BestSeller = () => {
             onClick={() => handleScroll('left')}
           />
         )}
-        <BookList ref={bookListRef}>
-          {bestSellers && bestSellers.length > 0 ? (
-            bestSellers.map((book) => (
-              <BookCard 
-                key={book.bookId}
-                onClick={() => handleBookClick(book.bookId)}
-              >
-                <BookImage 
-                  src={book.imageUrl || '/images/default-book.png'} 
-                  alt={book.title}
-                />
-                <BookInfo>
-                  <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors.join(', ')}</BookAuthor>
-                  <BookDate>{book.publishedDate}</BookDate>
-                </BookInfo>
-              </BookCard>
-            ))
-          ) : (
-            <ErrorMessage>베스트셀러 목록이 없습니다.</ErrorMessage>
-          )}
+        <BookList 
+          ref={bookListRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {books.map((book) => (
+            <BookCard 
+              key={book.book_id}
+              onClick={() => handleBookClick(book.book_id)}
+            >
+              <BookImage 
+                src={book.image_url || '/images/default-book.png'} 
+                alt={book.title}
+              />
+              <BookInfo>
+                <BookTitle>{book.title}</BookTitle>
+                <BookAuthor>{book.authors}</BookAuthor>
+                <BookDate>{book.published_date}</BookDate>
+              </BookInfo>
+            </BookCard>
+          ))}
         </BookList>
         {canScrollRight && (
           <NavigationButton 
@@ -368,8 +408,8 @@ const BestSeller = () => {
           />
         )}
       </BookListContainer>
-    </BestSellerContainer>
+    </Container>
   );
 };
 
-export default BestSeller;
+export default RecentTagBooks; 
