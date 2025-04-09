@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -306,6 +306,7 @@ const SearchPage = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>(
     searchParams.get("tags")?.split(",").filter(Boolean) || []
   );
+  const [tagSelectionOrder, setTagSelectionOrder] = useState<string[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [showRecent, setShowRecent] = useState(false);
@@ -367,6 +368,15 @@ const SearchPage = () => {
     const newSelectedTags = selectedTags.includes(tag) ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
 
     console.log("SearchPage - New Tags Array:", newSelectedTags);
+
+    // 태그 선택 순서 업데이트
+    if (selectedTags.includes(tag)) {
+      // 태그가 이미 선택되어 있으면 제거
+      setTagSelectionOrder(tagSelectionOrder.filter(t => t !== tag));
+    } else {
+      // 새로운 태그를 선택하면 순서 배열에 추가
+      setTagSelectionOrder([...tagSelectionOrder, tag]);
+    }
 
     // 상태 업데이트
     setSelectedTags(newSelectedTags);
@@ -568,15 +578,8 @@ const SearchPage = () => {
   };
 
   const toggleTags = () => {
-    // 태그창이 항상 펼쳐져 있도록 수정
-    setIsTagsExpanded(true);
-    
-    // 기존 코드 주석 처리
-    // if (selectedTags.length > 0) {
-    //   setIsTagsExpanded(true);
-    // } else {
-    //   setIsTagsExpanded(prev => !prev);
-    // }
+    // 선택한 태그가 있어도 접기 버튼을 누르면 접어지도록 수정
+    setIsTagsExpanded(prev => !prev);
   };
 
   // Update the shouldShowTags condition to be more strict
@@ -790,13 +793,23 @@ const SearchPage = () => {
                   </BookAuthor>
                   {book.tags && book.tags.length > 0 && (
                     <BookTags>
-                      {[...book.tags]
+                      {book.tags
                         .sort((a, b) => {
-                          const aIsSelected = selectedTags.includes(a);
-                          const bIsSelected = selectedTags.includes(b);
-                          if (aIsSelected && !bIsSelected) return -1;
-                          if (!aIsSelected && bIsSelected) return 1;
-                          return 0;
+                          const aSelected = selectedTags.includes(a);
+                          const bSelected = selectedTags.includes(b);
+                          
+                          if (aSelected && !bSelected) return -1;
+                          if (!aSelected && bSelected) return 1;
+                          
+                          // 둘 다 선택된 경우 선택 순서에 따라 정렬
+                          if (aSelected && bSelected) {
+                            const aIndex = tagSelectionOrder.indexOf(a);
+                            const bIndex = tagSelectionOrder.indexOf(b);
+                            return aIndex - bIndex;
+                          }
+                          
+                          // 둘 다 선택되지 않은 경우 알파벳 순으로 정렬
+                          return a.localeCompare(b);
                         })
                         .map((tag, index) => (
                           <Tag 
