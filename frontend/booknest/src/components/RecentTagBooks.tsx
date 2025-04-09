@@ -35,12 +35,15 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column; 
+  align-items: flex-start; 
+  gap: 4px; 
+  line-height: 1.4;
   
   @media (min-width: 768px) {
     font-size: 22px;
     margin-bottom: 20px;
+    gap: 6px;
   }
 `;
 
@@ -169,7 +172,7 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 10;
   transition: all 0.2s ease-in-out;
 
   @media (min-width: 768px) {
@@ -357,14 +360,16 @@ const RecentTagBooks = () => {
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한{' '}
-        {tags.map((tag, index) => (
-          <React.Fragment key={index}>
-            <TagHighlight>#{tag.trim()}</TagHighlight>
-            {index < tags.length - 1 ? ', ' : ''}
-          </React.Fragment>
-        ))}
-        {' '}도서
+        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한</span>
+        <span>
+          {tags.map((tag, index) => (
+            <React.Fragment key={index}>
+              <TagHighlight>#{tag.trim()}</TagHighlight>
+              {index < tags.length - 1 ? ', ' : ''}
+            </React.Fragment>
+          ))}
+          {' '}도서
+        </span>
       </Title>
       <BookListContainer>
         {canScrollLeft && (

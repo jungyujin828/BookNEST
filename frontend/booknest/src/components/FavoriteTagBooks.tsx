@@ -35,12 +35,15 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column; 
+  align-items: flex-start; 
+  gap: 4px; 
+  line-height: 1.4;
   
   @media (min-width: 768px) {
     font-size: 22px;
     margin-bottom: 20px;
+    gap: 6px;
   }
 `;
 
@@ -317,7 +320,8 @@ const FavoriteTagBooks = () => {
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은 <TagHighlight>#{books[0]?.tag}</TagHighlight> 도서!
+        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은</span>
+        <span><TagHighlight>#{books[0]?.tag}</TagHighlight> 도서!</span>
       </Title>
       <BookListContainer>
         {canScrollLeft && (

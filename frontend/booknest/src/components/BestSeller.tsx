@@ -65,6 +65,7 @@ const BookList = styled.div`
   gap: 12px;
   transition: transform 0.3s ease;
   padding: 10px 0;
+  transform: translateX(0);
   
   @media (min-width: 768px) {
     gap: 20px;
@@ -116,11 +117,18 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  height: 36px;
+  line-height: 18px;
   
   @media (min-width: 768px) {
     font-size: 16px;
     margin-bottom: 8px;
+    height: 42px;
+    line-height: 21px;
   }
 `;
 
@@ -162,7 +170,7 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 10;
   transition: all 0.2s ease-in-out;
 
   @media (min-width: 768px) {
@@ -259,6 +267,23 @@ const BestSeller = () => {
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
   };
 
+  // 화면 크기 변경 시 스크롤 위치 재계산
+  useEffect(() => {
+    const handleResize = () => {
+      if (bookListRef.current) {
+        // 스크롤 위치가 최대 스크롤 범위를 초과하는지 확인
+        const maxScroll = bookListRef.current.scrollWidth - bookListRef.current.clientWidth;
+        if (scrollPosition > maxScroll) {
+          setScrollPosition(maxScroll);
+          bookListRef.current.style.transform = `translateX(-${maxScroll}px)`;
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [scrollPosition]);
+
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
   };
@@ -299,7 +324,7 @@ const BestSeller = () => {
 
   const canScrollLeft = scrollPosition > 0;
   const canScrollRight = bookListRef.current 
-    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    ? scrollPosition < (bookListRef.current.scrollWidth - bookListRef.current.clientWidth - 10)
     : false;
 
   return (
