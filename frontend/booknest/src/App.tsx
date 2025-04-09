@@ -59,7 +59,7 @@ const AppContent = () => {
   const { userDetail } = useAuthStore();
   const hideNavigation: string[] = [ROUTES.LOGIN, ROUTES.INPUT_INFO];
   const shouldHideNavigation = hideNavigation.includes(location.pathname);
-  const isTodayPage = location.pathname === ROUTES.TODAYS; // 추가
+  const isTodayPage = location.pathname === ROUTES.TODAYS || location.pathname === ROUTES.LOGIN;
 
   return (
     <AppLayout>

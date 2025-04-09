@@ -203,6 +203,7 @@ const TodaysPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 추가
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -210,9 +211,13 @@ const TodaysPage = () => {
         const response = await api.get("/api/book/today");
         if (response.data.success) {
           setBooks(response.data.data);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 1000); // 1초 딜레이
         }
       } catch (error) {
         console.error("추천 도서 목록을 불러오는데 실패했습니다:", error);
+        setIsLoading(false);
       }
     };
 
@@ -227,52 +232,80 @@ const TodaysPage = () => {
     setCurrentIndex((prev) => (prev < books.length - 1 ? prev + 1 : 0));
   };
 
-  if (!books.length) return <div>로딩중...</div>;
+  const EmptyContainer = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+  `;
+
+  const EmptyImage = styled.img``;
+
+  if (!books.length || isLoading) {
+    return (
+      <MainContainer>
+        <h1>로딩중..</h1>
+      </MainContainer>
+    );
+  }
 
   const currentBook = books[currentIndex];
 
   // 컴포넌트 return 부분 수정
   return (
     <MainContainer>
-      <SlideContainer>
-        <SlideCard>
-          <SlideImageContainer>
-            <SlideImageBg src={currentBook.image_url} alt={currentBook.title} />
-            <SlideImage src={currentBook.image_url} alt={currentBook.title} />
-          </SlideImageContainer>
-          <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
-            <BasicInfo>
-              <DetailInfo isVisible={showDetail}>
-                <BookDescription>
-                  {currentBook.intro || currentBook.publisher_review || "도서 설명이 없습니다."}
-                </BookDescription>
-              </DetailInfo>
-              <TagContainer>
-                {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
-              </TagContainer>
-              <BookTitle>{currentBook.title}</BookTitle>
-              <AuthorButtonWrapper>
-                <BookAuthor>{currentBook.authors}</BookAuthor>
-                <DetailButton
-                  onClick={(e) => {
-                    e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
-                    setShowDetail(!showDetail);
-                  }}
-                >
-                  {showDetail ? "간단히 보기" : "상세 보기"}
-                </DetailButton>
-              </AuthorButtonWrapper>
-            </BasicInfo>
-          </SlideInfo>
-        </SlideCard>
-        <NavigationButton direction="left" onClick={handlePrevious}>
-          <FaChevronLeft />
-        </NavigationButton>
-        <NavigationButton direction="right" onClick={handleNext}>
-          <FaChevronRight />
-        </NavigationButton>
-      </SlideContainer>
-      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+      {!books.length ? (
+        <EmptyContainer>
+          <EmptyImage src="/todays_empty.png" alt="오늘의 책 준비중" />
+        </EmptyContainer>
+      ) : (
+        <>
+          <SlideContainer>
+            <SlideCard>
+              <SlideImageContainer>
+                <SlideImageBg src={currentBook.image_url} alt={currentBook.title} />
+                <SlideImage src={currentBook.image_url} alt={currentBook.title} />
+              </SlideImageContainer>
+              <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
+                <BasicInfo>
+                  <DetailInfo isVisible={showDetail}>
+                    <BookDescription>
+                      {currentBook.intro || currentBook.publisher_review || "도서 설명이 없습니다."}
+                    </BookDescription>
+                  </DetailInfo>
+                  <TagContainer>
+                    {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
+                  </TagContainer>
+                  <BookTitle>{currentBook.title}</BookTitle>
+                  <AuthorButtonWrapper>
+                    <BookAuthor>{currentBook.authors}</BookAuthor>
+                    <DetailButton
+                      onClick={(e) => {
+                        e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
+                        setShowDetail(!showDetail);
+                      }}
+                    >
+                      {showDetail ? "간단히 보기" : "상세 보기"}
+                    </DetailButton>
+                  </AuthorButtonWrapper>
+                </BasicInfo>
+              </SlideInfo>
+            </SlideCard>
+            <NavigationButton direction="left" onClick={handlePrevious}>
+              <FaChevronLeft />
+            </NavigationButton>
+            <NavigationButton direction="right" onClick={handleNext}>
+              <FaChevronRight />
+            </NavigationButton>
+          </SlideContainer>
+          <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+        </>
+      )}
     </MainContainer>
   );
 };

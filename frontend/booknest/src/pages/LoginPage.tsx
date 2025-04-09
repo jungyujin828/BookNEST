@@ -5,6 +5,7 @@ import config from "../config";
 // import InputInfoPage from "./InputInfoPage";
 import { useNavigate } from "react-router-dom";
 import { theme } from "../styles/theme";
+import { FiRefreshCw } from "react-icons/fi";
 
 import KakaoIcon from "../icons/kakao.png";
 import NaverIcon from "../icons/naver.png";
@@ -20,8 +21,9 @@ const LoginContainer = styled.div<LoginContainerProps>`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
+  background-color: "black";
   background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url("bg.png") no-repeat center center;
-  background-size: auto;
+  background-size: cover;
   text-align: center;
   position: relative;
   transition: all 0.7s ease-in-out;
@@ -40,7 +42,6 @@ const LoginContainer = styled.div<LoginContainerProps>`
 
   @media (min-width: ${theme.breakpoints.desktop}) {
     align-items: flex-start;
-    padding-left: 3rem;
   }
 `;
 
@@ -122,8 +123,35 @@ const Logo = styled.div`
 const Subtitle = styled.p`
   font-size: 1.25rem;
   font-weight: 600;
-  color: #0d7323;
+  // color: rgb(167, 234, 181);
+  color: "white";
   margin-right: -2.5rem;
+`;
+
+const ChangeImageButton = styled.button`
+  position: absolute;
+  bottom: 2rem;
+  left: 2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+    transform: rotate(180deg);
+  }
+
+  svg {
+    font-size: 1.25rem;
+  }
 `;
 
 const EnterButton = styled.button`
@@ -266,7 +294,7 @@ const GoogleButton = styled.button`
 
 const LoginPage = () => {
   const [showSocialButtons, setShowSocialButtons] = useState(false);
-  const [currentBg, setCurrentBg] = useState(1);
+  const [currentBg, setCurrentBg] = useState(5);
   const [isChanging, setIsChanging] = useState(false);
   const navigate = useNavigate();
 
@@ -293,6 +321,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     console.log("interval set");
+    // 화면 자동 변경 시간 20초로 설정
     const intervalId = setInterval(handleChangeBackground, 20000);
 
     return () => {
@@ -366,6 +395,9 @@ const LoginPage = () => {
       }}
     >
       <LoginContent>
+        <ChangeImageButton onClick={handleChangeBackground}>
+          <FiRefreshCw />
+        </ChangeImageButton>
         <LogoSection>
           <Logo>
             <span>Book</span>
@@ -378,7 +410,6 @@ const LoginPage = () => {
         </LogoSection>
 
         <ButtonSection>
-          <ChangeImageButton onClick={handleChangeBackground}>배경 변경</ChangeImageButton>
           {!showSocialButtons ? (
             <EnterButton onClick={handleEnterClick}>입장하기</EnterButton>
           ) : (
@@ -402,22 +433,5 @@ const LoginPage = () => {
     </LoginContainer>
   );
 };
-
-// Add this new styled component near other styled components
-const ChangeImageButton = styled.button`
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid white;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.3);
-  }
-`;
 
 export default LoginPage;
