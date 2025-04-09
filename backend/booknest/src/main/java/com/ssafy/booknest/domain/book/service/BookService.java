@@ -25,10 +25,12 @@ import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
+import jakarta.persistence.Cacheable;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,36 +162,28 @@ public class BookService {
     @Transactional(readOnly = true)
     public List<BookResponse> getAuthorBooks(Integer userId) {
 
-        // 사용자 검증
+        // 1. 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 모든 인기 작가 책 가져오기
-        List<PopularAuthorBook> all = popularAuthorBookRepository.findAllWithBookAndAuthor();
+        // 2. rank 기준 상위 30개만 조회 (중복 제거 고려)
+        Page<PopularAuthorBook> page = popularAuthorBookRepository
+                .findTopRankedAuthors(PageRequest.of(0, 30));
 
-        // rank 기준 오름차순 정렬
-        List<PopularAuthorBook> sorted = all.stream()
-                .sorted(Comparator.comparingInt(PopularAuthorBook::getRank))
-                .toList();
-
-        // 상위 작가부터 최대 15권 수집
+        // 3. 중복 책 제거하면서 15권 추출
         List<BookResponse> result = new ArrayList<>();
-        Set<Integer> addedBookIds = new HashSet<>(); // 책 중복 방지
+        Set<Integer> addedBookIds = new HashSet<>();
 
-        for (PopularAuthorBook popular : sorted) {
-            Book book = popular.getBook();
-
-            if (book != null && !addedBookIds.contains(book.getId())) {
+        for (PopularAuthorBook popular : page.getContent()) {
+            Book book = popular.getBook(); // LAZY 로딩
+            if (book != null && addedBookIds.add(book.getId())) {
                 result.add(BookResponse.of(book));
-                addedBookIds.add(book.getId());
             }
-
             if (result.size() == 15) break;
         }
 
         return result;
     }
-
 
     // 평가 목록 조회
     @Transactional(readOnly = true)
@@ -319,23 +313,22 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    // 내가 가장 많이 본 태그에서 추천
+    // 사용자가 많이 본 태그에서 추천
     @Transactional(readOnly = true)
     public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
 
-        // 사용자 존재 확인
+        // 1. 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 선호 태그 리스트 중 랜덤 선택
+        // 2. 선호 태그 리스트 가져오기
         List<String> tags = userTagAnalysisRepository.findTopTagsByUserId(userId);
-        if (tags == null || tags.isEmpty()) {
-            return List.of(); // 선호 태그 없음
-        }
+        if (tags == null || tags.isEmpty()) return List.of();
 
+        // 3. 랜덤 태그 선택
         String randomTag = tags.get(new Random().nextInt(tags.size()));
 
-        // 평가, 서재, 찜 제외할 도서 ID 목록 수집
+        // 4. 제외할 도서 ID 수집
         Set<Integer> excludedIdSet = new HashSet<>();
         excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
         excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
@@ -343,13 +336,17 @@ public class BookService {
         if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
         List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
 
-        // 해당 태그의 도서 중 제외 도서 제외하고 15권 랜덤 추출
-        List<Book> books = bookRepository.findByTagNameExcluding(randomTag, excludedIds)
-                .stream()
-                .limit(15)
-                .toList();
+        // 5. 해당 태그의 책 ID만 조회
+        List<Integer> candidateIds = bookRepository.findBookIdsByTagNameExcluding(randomTag, excludedIds);
 
-        // 응답 DTO 변환
+        // 6. Java에서 랜덤으로 섞고 15개 뽑기
+        Collections.shuffle(candidateIds);
+        List<Integer> selectedIds = candidateIds.stream().limit(15).toList();
+
+        // 7. 최종 도서 조회
+        List<Book> books = bookRepository.findAllById(selectedIds);
+
+        // 8. DTO 변환
         return books.stream()
                 .map(book -> FavoriteTagBookResponse.of(book, randomTag))
                 .toList();
@@ -357,46 +354,47 @@ public class BookService {
 
 
 
-    // 내가 가장 많이 본 카테고리에서 추천
+    // 사용자가 가장 많이 본 카테고리에서 추천
     @Transactional(readOnly = true)
     public List<FavoriteCategoryBookResponse> getFavoriteCategoryBooks(Integer userId) {
 
-        //  사용자 존재 확인
+        // 1. 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-
+        // 2. 선호 카테고리 가져오기
         List<String> categories = userCategoryAnalysisRepository.findTopCategoryNamesByUserId(userId);
         if (categories == null || categories.isEmpty()) {
             throw new RuntimeException("유저의 선호 카테고리가 없습니다.");
         }
 
+        // 3. 랜덤 카테고리 선택
         String randomCategory = categories.get(new Random().nextInt(categories.size()));
 
-        List<Integer> ratedBookIds = ratingRepository.findBookIdsByUserId(userId);
-        List<Integer> nestedBookIds = nestRepository.findBookIdsByUserId(userId);
-        List<Integer> bookmarkedBookIds = bookMarkRepository.findBookIdsByUserId(userId);
-
+        // 4. 제외할 도서 ID 수집
         Set<Integer> excludedIdSet = new HashSet<>();
-        excludedIdSet.addAll(ratedBookIds);
-        excludedIdSet.addAll(nestedBookIds);
-        excludedIdSet.addAll(bookmarkedBookIds);
-
-        if (excludedIdSet.isEmpty()) {
-            excludedIdSet.add(-1); // IN절 방지
-        }
-
+        excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
+        excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
+        excludedIdSet.addAll(bookMarkRepository.findBookIdsByUserId(userId));
+        if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
         List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
 
-        List<Book> books = bookRepository.findByCategoryNameExcluding(randomCategory, excludedIds)
-                .stream()
-                .limit(15)
-                .toList();
+        // 5. 해당 카테고리에서 제외 도서 빼고 ID만 조회
+        List<Integer> candidateIds = bookRepository.findBookIdsByCategoryNameExcluding(randomCategory, excludedIds);
 
+        // 6. Java에서 랜덤 추출
+        Collections.shuffle(candidateIds);
+        List<Integer> selectedIds = candidateIds.stream().limit(15).toList();
+
+        // 7. 최종 Book 엔티티 조회
+        List<Book> books = bookRepository.findAllById(selectedIds);
+
+        // 8. DTO 변환
         return books.stream()
                 .map(book -> FavoriteCategoryBookResponse.of(book, randomCategory))
                 .toList();
     }
+
 
 
 //    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
