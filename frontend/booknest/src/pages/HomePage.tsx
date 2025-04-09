@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "@emotion/styled";
 import BestSeller from "../components/BestSeller";
 import AuthorBook from "../components/AuthorBook";
@@ -83,6 +83,10 @@ const HomePage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   return (
     <PageWrapper>
