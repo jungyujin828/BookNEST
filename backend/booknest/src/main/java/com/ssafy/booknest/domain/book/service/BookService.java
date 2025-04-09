@@ -159,12 +159,37 @@ public class BookService {
     // 화제의 작가 추천 책
     @Transactional(readOnly = true)
     public List<BookResponse> getAuthorBooks(Integer userId) {
-        List<PopularAuthorBook> popularBooks = popularAuthorBookRepository.findAllWithBookAndAuthor();
 
-        return popularBooks.stream()
-                .map(popular -> BookResponse.of(popular.getBook()))
-                .collect(Collectors.toList());
+        // 사용자 검증
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 모든 인기 작가 책 가져오기
+        List<PopularAuthorBook> all = popularAuthorBookRepository.findAllWithBookAndAuthor();
+
+        // rank 기준 오름차순 정렬
+        List<PopularAuthorBook> sorted = all.stream()
+                .sorted(Comparator.comparingInt(PopularAuthorBook::getRank))
+                .toList();
+
+        // 상위 작가부터 최대 15권 수집
+        List<BookResponse> result = new ArrayList<>();
+        Set<Integer> addedBookIds = new HashSet<>(); // 책 중복 방지
+
+        for (PopularAuthorBook popular : sorted) {
+            Book book = popular.getBook();
+
+            if (book != null && !addedBookIds.contains(book.getId())) {
+                result.add(BookResponse.of(book));
+                addedBookIds.add(book.getId());
+            }
+
+            if (result.size() == 15) break;
+        }
+
+        return result;
     }
+
 
     // 평가 목록 조회
     @Transactional(readOnly = true)
@@ -263,19 +288,21 @@ public class BookService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 랜덤 태그 하나만 DB에서 가져오기
-        String selectedTag = tagRandomBookRepository.findRandomTag();
+        // 태그 목록 가져오기
+        List<String> tags = tagRandomBookRepository.findAllTags();
+        if (tags.isEmpty()) return List.of();
 
-        if (selectedTag == null) return List.of(); // 태그가 없을 경우
+        // Java에서 랜덤 태그 선택
+        String selectedTag = tags.get(new Random().nextInt(tags.size()));
 
-        // 해당 태그의 책 가져오기
-        List<TagRandomBook> tagBooks = tagRandomBookRepository.findByTag(selectedTag);
+        // 해당 태그에 대해 랜덤 책 15권만 DB에서 가져오기
+        List<TagRandomBook> tagBooks = tagRandomBookRepository.findRandomBooksByTag(selectedTag);
 
         return tagBooks.stream()
                 .map(tagBook -> TagBookResponse.of(tagBook.getBook(), selectedTag))
-                .limit(15)
                 .toList();
     }
+
 
     // 년도별 도서관 대여 순위 추천
     @Transactional(readOnly = true)

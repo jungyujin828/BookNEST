@@ -43,7 +43,7 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
             "JOIN FETCH r.book b " +
             "JOIN FETCH b.bookTags bt " +
             "JOIN FETCH bt.tag")
-    List<Rating> findAllWithBookAndTag();
+    List<Rating> findAllWithBookAndTags();
 
     // 회원 별 각 작가별 평균점수 중에 가장 높은 거로 배치 작업
     @Query("SELECT r FROM Rating r " +
@@ -51,5 +51,7 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
             "JOIN FETCH b.bookAuthors ba " +
             "JOIN FETCH ba.author")
     List<Rating> findAllWithBookAndAuthor();
+
+
 
 }
