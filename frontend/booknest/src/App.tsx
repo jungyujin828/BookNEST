@@ -74,7 +74,9 @@ const AppContent = () => {
               path={ROUTES.INPUT_INFO}
               element={
                 <AuthRedirect>
-                  <InputInfoPage />
+                  <ProtectedRoute>
+                    <InputInfoPage />
+                  </ProtectedRoute>
                 </AuthRedirect>
               }
             />
