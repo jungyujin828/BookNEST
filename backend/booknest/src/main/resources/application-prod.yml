@@ -7,6 +7,14 @@ spring:
         format_sql: false  # SQL 로그 포맷을 비활성화하여 성능 향상
     defer-datasource-initialization: false  # 데이터베이스 연결 초기화 지연
 
+  datasource:
+    hikari:
+      maximum-pool-size: 30         # 최대 커넥션 수
+      minimum-idle: 5               # 최소 커넥션 수
+      idle-timeout: 600000          # 커넥션 유휴 시 제거까지 대기 시간
+      max-lifetime: 1800000         # 커넥션 최대 생존 시간
+      connection-timeout: 30000     # 커넥션 기다리는 최대 시간
+
   data:
     redis:
       host: 43.203.172.46

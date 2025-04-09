@@ -33,13 +33,9 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
-    private final ReviewService reviewService;
-    private final RatingService ratingService;
     private final FastApiService fastApiService;
     private final UserActionLogger userActionLogger;
-    private final PopularAuthorBookRepository popularAuthorBookRepository;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")

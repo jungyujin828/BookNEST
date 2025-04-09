@@ -13,16 +13,14 @@ import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
-import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
-import com.ssafy.booknest.domain.user.entity.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.common.CustomPage;
+import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import jakarta.persistence.Cacheable;
@@ -62,6 +60,8 @@ public class BookService {
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
     private final UserTagAnalysisRepository userTagAnalysisRepository;
 
+    private final TagVectorService tagVectorService;
+
 
     // 베스트셀러 조회 (BestSeller → Book → BookResponse 변환)
     @Transactional(readOnly = true)
@@ -96,7 +96,13 @@ public class BookService {
         Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
         boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
 
-        return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
+        List<String> tags = book.getTagNames();
+
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, 0.2);
+        }
+
+        return BookDetailResponse.of(book, avgRating, responsePage, isBookMarked);
     }
 
     // 구매 사이트 조회
@@ -317,40 +323,29 @@ public class BookService {
     @Transactional(readOnly = true)
     public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
 
-        // 1. 사용자 검증
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 선호 태그 리스트 가져오기
         List<String> tags = userTagAnalysisRepository.findTopTagsByUserId(userId);
         if (tags == null || tags.isEmpty()) return List.of();
 
-        // 3. 랜덤 태그 선택
         String randomTag = tags.get(new Random().nextInt(tags.size()));
 
-        // 4. 제외할 도서 ID 수집
         Set<Integer> excludedIdSet = new HashSet<>();
         excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
         excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
         excludedIdSet.addAll(bookMarkRepository.findBookIdsByUserId(userId));
         if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
-        List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
 
-        // 5. 해당 태그의 책 ID만 조회
-        List<Integer> candidateIds = bookRepository.findBookIdsByTagNameExcluding(randomTag, excludedIds);
+        List<Integer> selectedIds = bookRepository.findRandomBookIdsByTagNameExcluding(randomTag, new ArrayList<>(excludedIdSet));
 
-        // 6. Java에서 랜덤으로 섞고 15개 뽑기
-        Collections.shuffle(candidateIds);
-        List<Integer> selectedIds = candidateIds.stream().limit(15).toList();
-
-        // 7. 최종 도서 조회
         List<Book> books = bookRepository.findAllByIdWithAuthors(selectedIds);
 
-        // 8. DTO 변환
         return books.stream()
                 .map(book -> FavoriteTagBookResponse.of(book, randomTag))
                 .toList();
     }
+
 
 
 
