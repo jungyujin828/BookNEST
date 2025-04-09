@@ -4,6 +4,7 @@ import api from "../api/axios";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../constants/paths";
+import { theme } from "../styles/theme";
 
 interface Book {
   book_id: number;
@@ -21,8 +22,9 @@ interface Book {
   tags: string;
 }
 const MainContainer = styled.div`
+  top: ${theme.layout.headerHeight};
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - ${theme.layout.headerHeight});
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,7 +34,7 @@ const MainContainer = styled.div`
 
 const SlideContainer = styled.div`
   width: 100%;
-  height: 100%;
+  height: 70vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +50,8 @@ const SlideImageContainer = styled.div`
   position: absolute;
   width: 100%;
   height: 70vh;
-  object-fit: cover;
+  background-color: black;
+  overflow: hidden;
   &::after {
     content: "";
     position: absolute;
@@ -61,10 +64,22 @@ const SlideImageContainer = styled.div`
   }
 `;
 
-const SlideImage = styled.img`
+const SlideImageBg = styled.img`
+  position: absolute;
   width: 100%;
   height: 70vh;
   object-fit: cover;
+  filter: blur(10px);
+  transform: scale(1.1);
+`;
+
+const SlideImage = styled.img`
+  position: absolute;
+  width: auto;
+  height: 70vh;
+  background-color: black;
+  left: 50%;
+  transform: translateX(-50%);
 `;
 
 const SlideInfo = styled.div`
@@ -73,9 +88,9 @@ const SlideInfo = styled.div`
   height: 70vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
   justify-content: flex-end;
-  padding: 1rem;
+  padding: 3.5%;
 `;
 
 const BookTitle = styled.h2`
@@ -95,11 +110,11 @@ const BookAuthor = styled.p`
 `;
 
 const BookDescription = styled.p`
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: white;
-  line-height: 1.4;
+  line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 10;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -108,8 +123,7 @@ const BookDescription = styled.p`
 const TagContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 0.5rem;
 `;
 
 const Tag = styled.span`
@@ -155,21 +169,27 @@ const DetailButton = styled.span`
   border-radius: 16px;
   font-size: 14px;
   color: #fff;
+  cursor: pointer;
 `;
 
 const EvaluateButton = styled.button`
-  position: absolute;
-  bottom: 10rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(255, 255, 255, 0.2);
+  position:relative;
+  background-color: #00c473;
+  top: 2rem;
+  padding: 1rem 2rem;
+  color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 20px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 32px;
-  backdrop-filter: blur(8px);
-  transition: background-color 0.2s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    background-color: "#1a1a1a"};
+  }
+
 `;
 
 const DetailInfo = styled.div<{ isVisible: boolean }>`
@@ -183,6 +203,7 @@ const TodaysPage = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // 추가
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -190,9 +211,13 @@ const TodaysPage = () => {
         const response = await api.get("/api/book/today");
         if (response.data.success) {
           setBooks(response.data.data);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 1000); // 1초 딜레이
         }
       } catch (error) {
         console.error("추천 도서 목록을 불러오는데 실패했습니다:", error);
+        setIsLoading(false);
       }
     };
 
@@ -207,51 +232,80 @@ const TodaysPage = () => {
     setCurrentIndex((prev) => (prev < books.length - 1 ? prev + 1 : 0));
   };
 
-  if (!books.length) return <div>로딩중...</div>;
+  const EmptyContainer = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+  `;
+
+  const EmptyImage = styled.img``;
+
+  if (!books.length || isLoading) {
+    return (
+      <MainContainer>
+        <h1>로딩중..</h1>
+      </MainContainer>
+    );
+  }
 
   const currentBook = books[currentIndex];
 
   // 컴포넌트 return 부분 수정
   return (
     <MainContainer>
-      <SlideContainer>
-        <SlideCard>
-          <SlideImageContainer>
-            <SlideImage src={currentBook.image_url} alt={currentBook.title} />
-          </SlideImageContainer>
-          <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
-            <BasicInfo>
-              <DetailInfo isVisible={showDetail}>
-                <BookDescription>
-                  {currentBook.intro || currentBook.publisher_review || "도서 설명이 없습니다."}
-                </BookDescription>
-              </DetailInfo>
-              <TagContainer>
-                {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
-              </TagContainer>
-              <BookTitle>{currentBook.title}</BookTitle>
-              <AuthorButtonWrapper>
-                <BookAuthor>{currentBook.authors}</BookAuthor>
-                <DetailButton
-                  onClick={(e) => {
-                    e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
-                    setShowDetail(!showDetail);
-                  }}
-                >
-                  {showDetail ? "간단히 보기" : "상세 보기"}
-                </DetailButton>
-              </AuthorButtonWrapper>
-            </BasicInfo>
-          </SlideInfo>
-        </SlideCard>
-        <NavigationButton direction="left" onClick={handlePrevious}>
-          <FaChevronLeft />
-        </NavigationButton>
-        <NavigationButton direction="right" onClick={handleNext}>
-          <FaChevronRight />
-        </NavigationButton>
-      </SlideContainer>
-      <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+      {!books.length ? (
+        <EmptyContainer>
+          <EmptyImage src="/todays_empty.png" alt="오늘의 책 준비중" />
+        </EmptyContainer>
+      ) : (
+        <>
+          <SlideContainer>
+            <SlideCard>
+              <SlideImageContainer>
+                <SlideImageBg src={currentBook.image_url} alt={currentBook.title} />
+                <SlideImage src={currentBook.image_url} alt={currentBook.title} />
+              </SlideImageContainer>
+              <SlideInfo onClick={() => navigate(`/book-detail/${currentBook.book_id}`)}>
+                <BasicInfo>
+                  <DetailInfo isVisible={showDetail}>
+                    <BookDescription>
+                      {currentBook.intro || currentBook.publisher_review || "도서 설명이 없습니다."}
+                    </BookDescription>
+                  </DetailInfo>
+                  <TagContainer>
+                    {currentBook.tags?.split(",").map((tag, index) => <Tag key={index}>{tag.trim()}</Tag>) || []}
+                  </TagContainer>
+                  <BookTitle>{currentBook.title}</BookTitle>
+                  <AuthorButtonWrapper>
+                    <BookAuthor>{currentBook.authors}</BookAuthor>
+                    <DetailButton
+                      onClick={(e) => {
+                        e.stopPropagation(); // 상위 요소로의 이벤트 전파 방지
+                        setShowDetail(!showDetail);
+                      }}
+                    >
+                      {showDetail ? "간단히 보기" : "상세 보기"}
+                    </DetailButton>
+                  </AuthorButtonWrapper>
+                </BasicInfo>
+              </SlideInfo>
+            </SlideCard>
+            <NavigationButton direction="left" onClick={handlePrevious}>
+              <FaChevronLeft />
+            </NavigationButton>
+            <NavigationButton direction="right" onClick={handleNext}>
+              <FaChevronRight />
+            </NavigationButton>
+          </SlideContainer>
+          <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+        </>
+      )}
     </MainContainer>
   );
 };
