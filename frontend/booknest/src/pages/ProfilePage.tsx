@@ -154,7 +154,7 @@ const Section = styled.section`
 
 const SectionTitle = styled.h3`
   margin-bottom: 15px;
-  color: #102C57;
+  color: #102c57;
   font-size: 1.3rem;
 `;
 
@@ -233,6 +233,27 @@ const FollowButton = styled.button<{ isFollowing: boolean }>`
 
   &:hover {
     background-color: ${(props) => (props.isFollowing ? "#e1e1e1" : "#6ab36e")};
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const NestButton = styled.button`
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  background-color: #7bc47f;
+  color: white;
+  cursor: pointer;
+  width: 8rem;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: #6ab36e;
   }
 `;
 
@@ -418,9 +439,12 @@ const ProfilePage = () => {
                 {isOwnProfile ? (
                   <EditButton onClick={() => setShowEditModal(true)}>프로필 수정</EditButton>
                 ) : (
-                  <FollowButton isFollowing={isFollowing} onClick={handleFollowToggle}>
-                    {isFollowing ? "팔로잉" : "팔로우"}
-                  </FollowButton>
+                  <ButtonContainer>
+                    <FollowButton isFollowing={isFollowing} onClick={handleFollowToggle}>
+                      {isFollowing ? "팔로잉" : "팔로우"}
+                    </FollowButton>
+                    <NestButton onClick={() => navigate(`/nest/${userId}`)}>둥지로 가기</NestButton>
+                  </ButtonContainer>
                 )}
               </UserNameSection>
             </UserBasicInfo>
@@ -450,7 +474,6 @@ const ProfilePage = () => {
             <div>코멘트</div>
           </div>
         </UserStats>
-        
 
         <hr />
 
@@ -500,7 +523,6 @@ const ProfilePage = () => {
             </AuthorItem>
           </AuthorList>
         </Section>
-
       </ProfileContainer>
     </BlankBox>
   );

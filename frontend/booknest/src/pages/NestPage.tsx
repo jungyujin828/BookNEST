@@ -86,18 +86,9 @@ const NestPage = () => {
         {activeTab === "둥지" && <AddButton onClick={() => setShowSearchModal(true)}>도서 추가</AddButton>}
       </HeaderSection>
 
-      {showSearchModal && (
-        <BookSearchModal 
-          onClose={() => setShowSearchModal(false)} 
-          onBookAdded={handleBookAdded}
-        />
-      )}
+      {showSearchModal && <BookSearchModal onClose={() => setShowSearchModal(false)} onBookAdded={handleBookAdded} />}
 
-      {activeTab === "둥지" ? (
-        <NestBookList ref={nestBookListRef} />
-      ) : (
-        <BookmarkList />
-      )}
+      {activeTab === "둥지" ? <NestBookList ref={nestBookListRef} /> : <BookmarkList />}
     </Container>
   );
 };
