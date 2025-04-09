@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 import api from "../api/axios";
 import { useNavigate } from "react-router-dom";
@@ -204,6 +204,99 @@ const ResultCount = styled.div`
   font-size: 14px;
 `;
 
+const SuggestionContainer = styled.div`
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 8px 0;
+`;
+
+const ToggleContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+`;
+
+const ToggleButton = styled.button<{ expanded?: boolean }>`
+  width: 100%;
+  max-width: 300px;
+  height: 40px;
+  background-color: white;
+  color: #666;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover {
+    background-color: #f8f8f8;
+  }
+
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid #666;
+    border-bottom: 2px solid #666;
+    margin-left: 8px;
+    transform: ${props => props.expanded ? 'rotate(-135deg)' : 'rotate(45deg)'};
+    transition: transform 0.3s ease;
+  }
+`;
+
+const NoResultsMessage = styled.div`
+  margin: 40px 0;
+  padding: 30px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+`;
+
+const NoResultsIcon = styled.div`
+  margin-bottom: 20px;
+  font-size: 50px;
+  color: #cccccc;
+`;
+
+const NoResultsTitle = styled.h3`
+  font-size: 18px;
+  color: #555;
+  margin-bottom: 12px;
+  font-weight: 500;
+`;
+
+const NoResultsText = styled.p`
+  font-size: 14px;
+  color: #888;
+  line-height: 1.6;
+`;
+
+const TagHighlight = styled.span`
+  display: inline-block;
+  background-color: #e6fff4;
+  color: #00c473;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin: 0 2px;
+  font-weight: 500;
+`;
+
+const TermHighlight = styled.span`
+  color: #00c473;
+  font-weight: 500;
+`;
+
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"books" | "users">(
@@ -223,6 +316,19 @@ const SearchPage = () => {
   const navigate = useNavigate();
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(true);
+
+  // Remove the previous useEffect and use a ref to track the initial render
+  const isInitialMount = useRef(true);
+
+  // Modify the initial useEffect to not collapse tags based on search results
+  useEffect(() => {
+    // Just initialize for first render, don't auto-collapse
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Don't automatically collapse tags on initial load
+    }
+  }, []);
 
   // 검색 파라미터 업데이트 함수
   const updateSearchParams = (newSearchTerm?: string, newTags?: string[], newType?: "books" | "users") => {
@@ -297,6 +403,11 @@ const SearchPage = () => {
         setTotalBooks(processedData.totalElements);
         setTotalPages(processedData.totalPages);
         setBooks(processedData.content);
+        
+        // 태그 선택시에는 자동으로 접히지 않도록 제거
+        // if (processedData.content.length > 0) {
+        //   setIsTagsExpanded(false);
+        // }
       }
     } catch (error) {
       console.error("Failed to search with tags:", error);
@@ -317,6 +428,7 @@ const SearchPage = () => {
     updateSearchParams(value, selectedTags);
   };
 
+  // Modify handleSearchResult to not collapse tags
   const handleSearchResult = (data: any) => {
     if (activeTab === "books") {
       setCurrentPage(1);
@@ -324,6 +436,9 @@ const SearchPage = () => {
       setTotalPages(data.totalPages);
       setBooks(data.content);
       setIsSearchActive(true);
+      
+      // Don't auto-collapse tags after search
+      // setIsTagsExpanded(false);
     } else {
       // 유저 검색 결과도 페이지네이션 처리
       if (data.content && Array.isArray(data.content)) {
@@ -386,14 +501,17 @@ const SearchPage = () => {
 
   // SearchTag에서는 onSearch 호출 제거
 
-  const triggerSearch = async (page: number = currentPage) => {
-    console.log("SearchPage - Triggering Search with tags:", selectedTags);
+  const triggerSearch = async (page: number = currentPage, termToSearch?: string) => {
+    // Use the provided term if available, otherwise use current searchTerm
+    const searchTermToUse = termToSearch !== undefined ? termToSearch : searchTerm;
+    
+    console.log("SearchPage - Triggering Search with term:", searchTermToUse, "tags:", selectedTags);
     try {
       const response = await api.get("/api/search/book", {
         params: {
           page,
           size: 10,
-          ...(searchTerm && { title: searchTerm }),
+          ...(searchTermToUse && { title: searchTermToUse }),
           ...(selectedTags.length > 0 && { tags: selectedTags }),
         },
         headers: {
@@ -442,16 +560,56 @@ const SearchPage = () => {
     }, 200);
   };
 
+  const toggleTags = () => {
+    setIsTagsExpanded(prev => !prev);
+  };
+
+  // Update the shouldShowTags condition to be more strict
   const shouldShowTags =
     activeTab === "books" &&
     !showRecent &&
-    (selectedTags.length > 0 || // 태그가 선택된 경우는 항상 보여주기
-      (!isSearchFocused && !books.length)); // 검색바에 포커스가 없고, 검색 결과가 없는 경우에만 보여주기
+    isTagsExpanded;
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     triggerSearch(page);
   };
+
+  // Function for searching by tags
+  const handleTagSearch = async () => {
+    // Execute search with current search term
+    await triggerSearch(1, searchTerm);
+  };
+
+  // Remove the complex click outside handlers and refs
+  const tagSectionRef = useRef<HTMLDivElement>(null);
+
+  // Add an event handler to the page body to close tags when clicking outside
+  useEffect(() => {
+    const handlePageClick = (event: MouseEvent) => {
+      // If the tags are expanded and the click is outside the tag section
+      if (isTagsExpanded && 
+          tagSectionRef.current && 
+          !tagSectionRef.current.contains(event.target as Node)) {
+        // Don't collapse if clicking on the toggle button when tags are hidden
+        const targetElement = event.target as HTMLElement;
+        if (targetElement.closest('.toggle-button')) {
+          return;
+        }
+        
+        // Collapse tags
+        setIsTagsExpanded(false);
+      }
+    };
+
+    // Add the event listener to the document
+    document.addEventListener('click', handlePageClick);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('click', handlePageClick);
+    };
+  }, [isTagsExpanded]);
 
   return (
     <SearchContainer>
@@ -479,39 +637,108 @@ const SearchPage = () => {
           selectedTags={selectedTags}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}
+          onUpdateSearchParams={(term) => updateSearchParams(term, selectedTags, activeTab)}
         />
 
         {showRecent && searchTerm === "" && (
-          <>
+          <SuggestionContainer>
             <SearchRecent
               onSelect={(query) => {
+                // First set the search term
                 setSearchTerm(query);
+                // Update search parameters
+                updateSearchParams(query, selectedTags, activeTab);
+                // Instead of using searchBarRef.current?.handleSearch(), directly trigger the search
+                // with the selected query
+                triggerSearch(1, query);
                 setIsSearchActive(true);
-                searchBarRef.current?.handleSearch();
               }}
               onClose={() => setShowRecent(false)}
             />
             <SearchHot
               onSelect={(query) => {
+                // First set the search term
                 setSearchTerm(query);
+                // Update search parameters
+                updateSearchParams(query, selectedTags, activeTab);
+                // Instead of using searchBarRef.current?.handleSearch(), directly trigger the search
+                // with the selected query
+                triggerSearch(1, query);
                 setIsSearchActive(true);
-                searchBarRef.current?.handleSearch();
               }}
             />
-          </>
+          </SuggestionContainer>
         )}
       </SearchBarWrapper>
 
-      {shouldShowTags && (
-        <SearchTag
-          selectedTags={selectedTags}
-          onTagSelect={handleTagSelect}
-          onClearTags={() => setSelectedTags([])}
-          onSearch={() => triggerSearch(1)}
-        />
+      {activeTab === "books" && shouldShowTags && (
+        <div ref={tagSectionRef}>
+          <SearchTag
+            selectedTags={selectedTags}
+            onTagSelect={handleTagSelect}
+            onClearTags={() => setSelectedTags([])}
+            onSearch={handleTagSearch}
+          />
+          <ToggleContainer>
+            <ToggleButton 
+              className="toggle-button"
+              expanded={isTagsExpanded} 
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleTags();
+              }}
+            >
+              {isTagsExpanded ? "태그 접기" : "태그 펼치기"}
+            </ToggleButton>
+          </ToggleContainer>
+        </div>
+      )}
+      
+      {activeTab === "books" && !shouldShowTags && (
+        <ToggleContainer>
+          <ToggleButton 
+            className="toggle-button"
+            expanded={isTagsExpanded} 
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleTags();
+            }}
+          >
+            {isTagsExpanded ? "태그 접기" : "태그 펼치기"}
+          </ToggleButton>
+        </ToggleContainer>
       )}
 
       {activeTab === "books" && books.length > 0 && <ResultCount>총 {totalBooks}개의 검색결과</ResultCount>}
+
+      {activeTab === "books" && books.length === 0 && searchTerm && (
+        <NoResultsMessage>
+          <NoResultsIcon>😥</NoResultsIcon>
+          <NoResultsTitle>
+            {selectedTags.length > 0 
+              ? "태그와 검색어에 일치하는 도서를 찾지 못했어요"
+              : "검색어에 일치하는 도서를 찾지 못했어요"}
+          </NoResultsTitle>
+          <NoResultsText>
+            {selectedTags.length > 0 
+              ? (
+                <>
+                  죄송합니다. {selectedTags.map((tag, index) => (
+                    <TagHighlight key={index}>#{tag}</TagHighlight>
+                  ))} 태그와 <TermHighlight>'{searchTerm}'</TermHighlight> 검색어에 해당하는 도서를 찾을 수 없었어요.
+                  <br/>다른 검색어나 태그로 다시 시도해 보시겠어요?
+                </>
+              ) 
+              : (
+                <>
+                  죄송합니다. <TermHighlight>'{searchTerm}'</TermHighlight>에 해당하는 도서를 찾을 수 없었어요.
+                  <br/>다른 검색어로 다시 시도해 보시거나, 태그를 선택해 보시겠어요?
+                </>
+              )
+            }
+          </NoResultsText>
+        </NoResultsMessage>
+      )}
 
       {activeTab === "books" ? (
         <>

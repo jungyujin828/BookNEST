@@ -36,7 +36,7 @@ const SearchItem = styled.div`
 `;
 
 const RankIcon = styled.span`
-  color: #7bc47f;
+  color: #00c473;
   margin-right: 12px;
   font-size: 16px;
   font-weight: bold;

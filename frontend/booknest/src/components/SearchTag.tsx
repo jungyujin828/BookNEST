@@ -112,6 +112,10 @@ const useTagScroll = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Add touch state variables
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
   const SCROLL_AMOUNT = 150;
 
@@ -132,6 +136,56 @@ const useTagScroll = () => {
     if (listRef.current) {
         listRef.current.style.transform = `translateX(-${newPosition}px)`;
     }
+  };
+
+  // Touch event handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // Prevent default to avoid page scrolling in some mobile browsers
+    // but don't prevent it for all browsers as it can break scrolling in some
+    if (window.innerWidth < 768) {
+      setTouchStart(e.targetTouches[0].clientX);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart !== null && window.innerWidth < 768) {
+      setTouchEnd(e.targetTouches[0].clientX);
+      
+      // Calculate how far we've moved
+      const diff = touchStart - e.targetTouches[0].clientX;
+      
+      // If significant movement, prevent default scrolling in some cases
+      if (Math.abs(diff) > 10 && listRef.current) {
+        const { scrollWidth, clientWidth } = listRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        
+        // Only prevent default if we're not at the boundaries
+        if ((diff > 0 && scrollPosition < maxScroll) || 
+            (diff < 0 && scrollPosition > 0)) {
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;  // Swiping left (scrolls content right)
+    const isRightSwipe = distance < -50; // Swiping right (scrolls content left)
+    
+    if (isLeftSwipe) {
+      handleScroll('right');
+    }
+    
+    if (isRightSwipe) {
+      handleScroll('left');
+    }
+    
+    // Reset touch states
+    setTouchStart(null);
+    setTouchEnd(null);
   };
 
   // 스크롤 가능 여부 상태 추가
@@ -165,8 +219,6 @@ const useTagScroll = () => {
     
     // ResizeObserver 설정
     const resizeObserver = new ResizeObserver(() => {
-      // ResizeObserver 콜백에서도 스크롤 체크 실행
-      // requestAnimationFrame으로 브라우저 렌더링 사이클에 맞춤
       requestAnimationFrame(checkScroll);
     });
 
@@ -189,7 +241,6 @@ const useTagScroll = () => {
         resizeObserver.disconnect();
         clearTimeout(timeoutId);
     };
-  // scrollPosition 외에 listRef, containerRef의 변경도 감지 (초기 마운트 시 ref 할당 감지)
   }, [scrollPosition, listRef, containerRef]); 
 
   return {
@@ -197,22 +248,39 @@ const useTagScroll = () => {
     listRef,
     containerRef,
     handleScroll,
-    canScrollLeft, // 상태 변수 반환
-    canScrollRight, // 상태 변수 반환
+    canScrollLeft,
+    canScrollRight,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd
   };
 };
 
 // 각 태그 카테고리별 스크롤을 위한 컴포넌트
 const ScrollableTagList: React.FC<{ tags: string[]; selectedTags: string[]; onTagSelect: (tag: string) => void }> = 
 ({ tags, selectedTags, onTagSelect }) => {
-  const { listRef, containerRef, handleScroll, canScrollLeft, canScrollRight } = useTagScroll();
+  const { 
+    listRef, 
+    containerRef, 
+    handleScroll, 
+    canScrollLeft, 
+    canScrollRight,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd
+  } = useTagScroll();
 
   return (
     <TagListContainer ref={containerRef}>
       {canScrollLeft && (
         <NavigationButton direction="left" onClick={() => handleScroll('left')} />
       )}
-      <TagList ref={listRef}>
+      <TagList 
+        ref={listRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {tags.map((tag) => (
           <TagButton
             key={tag}
@@ -289,6 +357,7 @@ const TagListContainer = styled.div`
   position: relative;
   width: 100%;
   overflow: hidden; 
+  -webkit-overflow-scrolling: touch; /* Better iOS scrolling */
 `;
 
 const TagList = styled.div`
@@ -297,7 +366,8 @@ const TagList = styled.div`
   gap: 8px;
   padding: 5px 0; 
   transition: transform 0.3s ease;
-  transform: translateX(0); 
+  transform: translateX(0);
+  touch-action: pan-x; /* Optimize for horizontal touch */
 `;
 
 const TagButton = styled.button<{ selected: boolean }>`

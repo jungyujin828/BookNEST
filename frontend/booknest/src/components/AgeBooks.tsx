@@ -62,6 +62,8 @@ const BookListContainer = styled.div`
   overflow: hidden;
   margin: 0 -16px;
   padding: 0 16px;
+  -webkit-overflow-scrolling: touch; /* Better iOS scrolling */
+  overscroll-behavior-x: contain; /* Prevent overscroll on Android */
   
   @media (min-width: 768px) {
     margin: 0;
@@ -74,6 +76,8 @@ const BookList = styled.div`
   gap: 12px;
   transition: transform 0.3s ease;
   padding: 10px 0;
+  touch-action: pan-x; /* Optimize for horizontal touch */
+  will-change: transform; /* Optimize performance on Android */
   
   @media (min-width: 768px) {
     gap: 20px;
@@ -278,6 +282,11 @@ const AgeBooks = () => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  
+  // Add touch state for mobile swipe
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
 
@@ -294,6 +303,90 @@ const AgeBooks = () => {
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
   };
+  
+  // Add touch event handlers for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (window.innerWidth < 768) {
+      setTouchStart(e.targetTouches[0].clientX);
+      setIsScrolling(false);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStart !== null && window.innerWidth < 768) {
+      setTouchEnd(e.targetTouches[0].clientX);
+      
+      // Calculate how far we've moved
+      const diff = touchStart - e.targetTouches[0].clientX;
+      
+      // If significant movement, prevent default scrolling in some cases
+      if (Math.abs(diff) > 10) {
+        // Check if we're at the boundaries
+        if (bookListRef.current) {
+          const { scrollWidth, clientWidth } = bookListRef.current;
+          const maxScroll = scrollWidth - clientWidth;
+          
+          // Only prevent default if we're not at the boundaries
+          if ((diff > 0 && scrollPosition < maxScroll) || 
+              (diff < 0 && scrollPosition > 0)) {
+            e.preventDefault();
+            setIsScrolling(true);
+          }
+        }
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;  // Swiping left (scrolls content right)
+    const isRightSwipe = distance < -50; // Swiping right (scrolls content left)
+    
+    if (isLeftSwipe) {
+      handleScroll('right');
+    }
+    
+    if (isRightSwipe) {
+      handleScroll('left');
+    }
+    
+    // Reset touch states
+    setTouchStart(null);
+    setTouchEnd(null);
+    setIsScrolling(false);
+  };
+
+  // Add passive event listener for better performance on Android
+  useEffect(() => {
+    const bookList = bookListRef.current;
+    if (!bookList) return;
+
+    // Add passive event listeners for better performance
+    const options = { passive: true };
+    
+    const handleTouchStartPassive = (e: TouchEvent) => {
+      if (window.innerWidth < 768) {
+        setTouchStart(e.touches[0].clientX);
+        setIsScrolling(false);
+      }
+    };
+    
+    const handleTouchMovePassive = (e: TouchEvent) => {
+      if (touchStart !== null && window.innerWidth < 768) {
+        setTouchEnd(e.touches[0].clientX);
+      }
+    };
+    
+    bookList.addEventListener('touchstart', handleTouchStartPassive, options);
+    bookList.addEventListener('touchmove', handleTouchMovePassive, options);
+    
+    return () => {
+      bookList.removeEventListener('touchstart', handleTouchStartPassive);
+      bookList.removeEventListener('touchmove', handleTouchMovePassive);
+    };
+  }, [touchStart]);
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
@@ -367,7 +460,12 @@ const AgeBooks = () => {
             onClick={() => handleScroll('left')}
           />
         )}
-        <BookList ref={bookListRef}>
+        <BookList 
+          ref={bookListRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           {ageBooks && ageBooks.length > 0 ? (
             ageBooks.map((book) => (
               <BookCard 
