@@ -99,7 +99,6 @@ const HomePage = () => {
 
   return (
     <PageWrapper>
-      <TestButton onClick={fetchUserInfo}>Get User Info</TestButton>
       <HomeContainer>
         <TodayBestComments />
         <BestSeller />
