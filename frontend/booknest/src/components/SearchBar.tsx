@@ -5,6 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useRef,
+  useEffect,
 } from "react";
 import { useRecentStore } from "../store/useRecentStore";
 import SearchRecent from "./SearchRecent";
@@ -44,6 +45,30 @@ const SearchInput = styled.input`
 
   &::placeholder {
     color: #666;
+  }
+`;
+
+const AutocompleteList = styled.ul`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  padding: 8px 0;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+`;
+
+const AutocompleteItem = styled.li`
+  padding: 8px 16px;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: #f5f5f5;
   }
 `;
 
@@ -149,31 +174,75 @@ const SearchBar = forwardRef<any, SearchBarProps>(
     const { addRecent } = useRecentStore();
     const inputRef = useRef<HTMLInputElement>(null);
     const [isSearching, setIsSearching] = useState(false);
+    const [autocompleteResults, setAutocompleteResults] = useState<string[]>([]);
+    const [showAutocomplete, setShowAutocomplete] = useState(false);
+
+    const fetchAutocomplete = async (keyword: string) => {
+      if (!keyword.trim()) {
+        setAutocompleteResults([]);
+        return;
+      }
+
+      try {
+        const response = await api.get('/api/search/autocomplete', {
+          params: { keyword },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setAutocompleteResults(response.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch autocomplete:', error);
+        setAutocompleteResults([]);
+      }
+    };
+
+    useEffect(() => {
+      const debounceTimer = setTimeout(() => {
+        if (searchTerm) {
+          fetchAutocomplete(searchTerm);
+        } else {
+          setAutocompleteResults([]);
+        }
+      }, 300);
+
+      return () => clearTimeout(debounceTimer);
+    }, [searchTerm]);
 
     const handleSearch = async () => {
       if (!searchTerm.trim()) return;
       
       setIsSearching(true);
+      setShowAutocomplete(false);
       if (searchTerm.trim()) {
         addRecent(searchTerm);
       }
+
       try {
-        const endpoint =
-          searchType === "books" ? "/api/search/book" : "/api/search/user";
-        const params =
-          searchType === "books"
-            ? {
-                title: searchTerm,
-                tags: selectedTags,
-                page: 1,
-                size: 10,
-              }
-            : { name: searchTerm, page: 1, size: 10 };
+        const endpoint = searchType === "books" ? "/api/search/book" : "/api/search/user";
+        const params = new URLSearchParams();
+        
+        if (searchType === "books") {
+          params.append("title", searchTerm);
+          params.append("page", "1");
+          params.append("size", "10");
+          if (selectedTags && selectedTags.length > 0) {
+            selectedTags.forEach(tag => params.append("tags", tag));
+          }
+        } else {
+          params.append("name", searchTerm);
+          params.append("page", "1");
+          params.append("size", "10");
+        }
 
         const response = await api.get(endpoint, {
           params,
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -182,13 +251,10 @@ const SearchBar = forwardRef<any, SearchBarProps>(
             ...response.data.data,
             content: response.data.data.content.map((item: any) => ({
               ...item,
-              tags:
-                item.tags?.filter(
-                  (tag: string) => tag !== "_tagsparsefailure"
-                ) || [],
+              tags: item.tags?.filter((tag: string) => tag !== "_tagsparsefailure") || [],
             })),
           };
-          onSearchResult(processedData.content);
+          onSearchResult(processedData);
         }
       } catch (error) {
         console.error(`Failed to search ${searchType}:`, error);
@@ -208,15 +274,25 @@ const SearchBar = forwardRef<any, SearchBarProps>(
     };
 
     const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      setShowAutocomplete(true);
       if (onFocus) {
         onFocus();
       }
     };
 
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+      setTimeout(() => {
+        setShowAutocomplete(false);
+      }, 200);
+      
       if (onBlur) {
         onBlur();
       }
+    };
+
+    const handleAutocompleteClick = (value: string) => {
+      onSearchChange(value);
+      handleSearch();
     };
 
     useImperativeHandle(ref, () => ({
@@ -238,6 +314,18 @@ const SearchBar = forwardRef<any, SearchBarProps>(
             onBlur={handleInputBlur}
           />
           {searchTerm && <ClearButton onClick={onClear} />}
+          {showAutocomplete && autocompleteResults.length > 0 && (
+            <AutocompleteList>
+              {autocompleteResults.map((result, index) => (
+                <AutocompleteItem
+                  key={index}
+                  onClick={() => handleAutocompleteClick(result)}
+                >
+                  {result}
+                </AutocompleteItem>
+              ))}
+            </AutocompleteList>
+          )}
         </SearchInputWrapper>
         <SearchButton 
           onClick={handleSearch}

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useBookStore } from '../store/useBookStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface Book {
   bookId: number;
@@ -11,21 +11,16 @@ interface Book {
   imageUrl: string;
   authors: string[];
   tag: string;
+  categories: string[];
 }
 
-interface TagBooksResponse {
+interface FavoriteTagResponse {
   success: boolean;
-  data: {
-    description: string;
-    books: Book[];
-  };
-  error: null | {
-    code: string;
-    message: string;
-  };
+  data: Book[];
+  error: null | string;
 }
 
-const TagBooksContainer = styled.div`
+const Container = styled.div`
   padding: 16px;
   position: relative;
   
@@ -46,7 +41,7 @@ const Title = styled.h2`
   }
 `;
 
-const HighlightTag = styled.span`
+const TagHighlight = styled.span`
   color: #7bc47f;
   font-weight: bold;
 `;
@@ -120,11 +115,7 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  line-height: 1.3;
-  height: 2.6em;
+  white-space: nowrap;
   
   @media (min-width: 768px) {
     font-size: 16px;
@@ -135,12 +126,10 @@ const BookTitle = styled.h3`
 const BookAuthor = styled.p`
   font-size: 12px;
   color: #666;
+  margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  margin-bottom: 4px;
+  white-space: nowrap;
   
   @media (min-width: 768px) {
     font-size: 14px;
@@ -151,20 +140,6 @@ const BookAuthor = styled.p`
 const BookDate = styled.p`
   font-size: 11px;
   color: #999;
-  
-  @media (min-width: 768px) {
-    font-size: 12px;
-  }
-`;
-
-const BookTag = styled.span`
-  display: inline-block;
-  padding: 2px 8px;
-  background-color: #f0f8f1;
-  color: #7bc47f;
-  border-radius: 12px;
-  font-size: 11px;
-  margin-top: 4px;
   
   @media (min-width: 768px) {
     font-size: 12px;
@@ -261,30 +236,16 @@ const LoadingMessage = styled.div`
   }
 `;
 
-const TagBooks = () => {
-  const [tagBooks, setTagBooks] = useState<Book[]>([]);
+const FavoriteTagBooks = () => {
+  const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [description, setDescription] = useState<string>('');
-  const [tag, setTag] = useState<string>('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const navigate = useNavigate();
+  const { userDetail } = useAuthStore();
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
-
-  const updateScrollButtonsVisibility = () => {
-    if (!bookListRef.current) return;
-    
-    const hasHorizontalOverflow = bookListRef.current.scrollWidth > bookListRef.current.clientWidth;
-    
-    setCanScrollLeft(scrollPosition > 0);
-    setCanScrollRight(
-      hasHorizontalOverflow && scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    );
-  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
@@ -298,105 +259,64 @@ const TagBooks = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
-    
-    // Update buttons visibility after scrolling
-    setTimeout(updateScrollButtonsVisibility, 300);
   };
-
-  // Update buttons visibility on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (scrollPosition > 0) {
-        // Reset position when window is resized
-        if (bookListRef.current) {
-          setScrollPosition(0);
-          bookListRef.current.style.transform = `translateX(0)`;
-        }
-      }
-      
-      // Update buttons after resize
-      setTimeout(updateScrollButtonsVisibility, 300);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [scrollPosition]);
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
   };
 
-  const extractTagFromDescription = (description: string) => {
-    // "태그명 태그의 추천 도서입니다." 형식에서 태그명 추출
-    const match = description.match(/(.+?)\s*태그의/);
-    return match ? match[1] : '';
-  };
-
-  // 저자 표시 형식 변환
-  const formatAuthors = (authors: string[]) => {
-    if (!authors || !Array.isArray(authors)) return '작가 미상';
-    
-    if (authors.length <= 1) return authors.join(', ');
-    if (authors.length <= 2) return authors.join(', ');
-    return `${authors[0]} 외 ${authors.length - 1}명`;
-  };
-
   useEffect(() => {
-    const fetchTagBooks = async () => {
+    const fetchFavoriteTagBooks = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const response = await api.get<TagBooksResponse>('/api/book/tag', {
+        const response = await api.get('/api/book/favorite-tag', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
-          }
+            "Content-Type": "application/json",
+          },
         });
         
         if (response.data.success && response.data.data) {
-          setTagBooks(response.data.data.books);
-          setDescription(response.data.data.description);
-          const extractedTag = extractTagFromDescription(response.data.data.description);
-          setTag(extractedTag);
+          setBooks(response.data.data);
         } else {
-          setError('태그별 추천 도서 정보를 불러오는데 실패했습니다.');
-          setTagBooks([]);
+          setError('추천 도서 정보를 불러오는데 실패했습니다.');
+          setBooks([]);
         }
       } catch (err) {
         console.error('API Error:', err);
         setError('서버 오류가 발생했습니다.');
-        setTagBooks([]);
+        setBooks([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchTagBooks();
+    fetchFavoriteTagBooks();
   }, []);
 
-  // Update scroll buttons visibility when books load
-  useEffect(() => {
-    if (tagBooks.length > 0) {
-      setTimeout(updateScrollButtonsVisibility, 300);
-    }
-  }, [tagBooks]);
-
   if (loading) {
-    return <LoadingMessage>태그별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
+    return <LoadingMessage>추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
 
   if (error) {
     return <ErrorMessage>{error}</ErrorMessage>;
   }
 
-  if (!tagBooks || tagBooks.length === 0) {
-    return <ErrorMessage>태그별 추천 도서 목록이 없습니다.</ErrorMessage>;
+  if (!books.length) {
+    return null;
   }
 
+  const canScrollLeft = scrollPosition > 0;
+  const canScrollRight = bookListRef.current 
+    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    : false;
+
   return (
-    <TagBooksContainer>
+    <Container>
       <Title>
-        {description}
+        {userDetail?.nickname}님을 위한 # <TagHighlight>"{books[0]?.tag}"</TagHighlight> 도서!
       </Title>
       <BookListContainer>
         {canScrollLeft && (
@@ -406,7 +326,7 @@ const TagBooks = () => {
           />
         )}
         <BookList ref={bookListRef}>
-          {tagBooks.map((book) => (
+          {books.map((book) => (
             <BookCard 
               key={book.bookId}
               onClick={() => handleBookClick(book.bookId)}
@@ -417,9 +337,8 @@ const TagBooks = () => {
               />
               <BookInfo>
                 <BookTitle>{book.title}</BookTitle>
-                <BookAuthor>{formatAuthors(book.authors)}</BookAuthor>
+                <BookAuthor>{book.authors.join(', ')}</BookAuthor>
                 <BookDate>{book.publishedDate}</BookDate>
-                <BookTag>#{book.tag}</BookTag>
               </BookInfo>
             </BookCard>
           ))}
@@ -431,8 +350,8 @@ const TagBooks = () => {
           />
         )}
       </BookListContainer>
-    </TagBooksContainer>
+    </Container>
   );
 };
 
-export default TagBooks; 
+export default FavoriteTagBooks; 

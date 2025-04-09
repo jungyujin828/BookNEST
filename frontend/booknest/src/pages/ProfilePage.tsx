@@ -9,6 +9,7 @@ import LogoutModal from "../components/LogoutModal";
 import DeleteAccountModal from "../components/DeleteAccountModal";
 import EditInfoModal from "../components/EditInfoModal";
 import ProfileImageUpload from "../components/ProfileImageUpload";
+import ArchetypeCard from "../components/ArchetypeCard";
 
 // Import theme for breakpoints
 import { theme } from "../styles/theme";
@@ -153,17 +154,8 @@ const Section = styled.section`
 
 const SectionTitle = styled.h3`
   margin-bottom: 15px;
-`;
-
-const ArchetypeCard = styled.div`
-  background: #fff9e6;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-`;
-
-const DonutChart = styled.div`
-  // 도넛 차트 스타일링
+  color: #102C57;
+  font-size: 1.3rem;
 `;
 
 const TagCloud = styled.div`
@@ -458,19 +450,14 @@ const ProfilePage = () => {
             <div>코멘트</div>
           </div>
         </UserStats>
+        
 
         <hr />
 
         <Section>
           <SectionTitle>아키타입</SectionTitle>
-          <ArchetypeCard>
-            <h4>명랑한 아이기꾼 앵무새</h4>
-            <p>"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."</p>
-            <DonutChart>{/* 도넛 차트 구현 필요 */}</DonutChart>
-          </ArchetypeCard>
+          <ArchetypeCard />
         </Section>
-
-        <hr />
 
         <Section>
           <SectionTitle>선호태그</SectionTitle>
@@ -513,6 +500,7 @@ const ProfilePage = () => {
             </AuthorItem>
           </AuthorList>
         </Section>
+
       </ProfileContainer>
     </BlankBox>
   );
