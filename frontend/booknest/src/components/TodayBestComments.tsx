@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaCaretUp } from 'react-icons/fa';
+import { RiMedalFill, RiMedalLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -9,6 +10,7 @@ interface BestReview {
   bookId: number;
   bookName: string;
   reviewerName: string;
+  reviewerProfileUrl: string;
   content: string;
   myLiked: boolean;
   totalLikes: number;
@@ -19,120 +21,144 @@ interface BestReview {
 }
 
 const Container = styled.div`
-  padding: 20px;
+  padding: 24px;
   background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 `;
 
 const Title = styled.h2`
   font-size: 24px;
-  color: #333;
-  margin-bottom: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 `;
 
-const ViewAllLink = styled.span`
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const ReviewCard = styled.div`
-  padding: 16px;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  padding: 20px;
+  border-radius: 12px;
   margin-bottom: 16px;
   background-color: #fff;
-  transition: transform 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
   cursor: pointer;
+  position: relative;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const ReviewHeader = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  padding-right: 100px;
 `;
 
-const ReviewerInfo = styled.div`
+const UserProfile = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  gap: 12px;
 `;
 
-const ReviewerName = styled.span`
-  font-weight: bold;
-  color: #495057;
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
 `;
 
-const RankBadge = styled.span<{ rank: number }>`
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: bold;
-  color: white;
-  background-color: ${props => {
+const RankBadge = styled.div<{ rank: number }>`
+  margin-right: 8px;
+  color: ${props => {
     switch (props.rank) {
-      case 1: return '#FFD700';
-      case 2: return '#C0C0C0';
-      case 3: return '#CD7F32';
+      case 1: return '#FFB800';
+      case 2: return '#A3A3A3';
+      case 3: return '#C77B30';
       default: return '#6c757d';
     }
   }};
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+`;
+
+const ReviewerName = styled.span`
+  font-weight: 600;
+  font-size: 16px;
+  color: #1a1a1a;
 `;
 
 const ReviewContent = styled.p`
-  margin: 12px 0;
-  color: #495057;
+  margin: 0 0 16px 0;
+  color: #333;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: -0.3px;
 `;
 
-const LikeInfo = styled.div`
+const BookInfo = styled.div`
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+`;
+
+const BookTitle = styled.span`
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+`;
+
+const InteractionBar = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #868e96;
-  font-size: 14px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
 `;
 
-const LikeButton = styled.button`
+const LikeButton = styled.button<{ isLiked: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #868e96;
-  font-size: 14px;
-  transition: color 0.2s;
-  z-index: 1;
+  color: ${props => props.isLiked ? '#ff4b4b' : '#868e96'};
+  font-size: 16px;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
 
   &:hover {
-    color: #ff6b6b;
+    opacity: 0.8;
   }
 
-  &.liked {
-    color: #ff6b6b;
+  svg {
+    font-size:16px;
   }
 `;
 
-const BookTitle = styled.span`
-  font-size: 12px;
-  color: #666;
-  margin-left: 4px;
+const TodayLikes = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #00c473;
+  font-size: 16px;
+  padding: 4px 8px;
+  opacity: 0.8;
+  
+  svg {
+    font-size: 22px;
+    height: 38px;
+    width: 18px;
+    transform: scaleY(1.3);
+  }
 `;
 
 const TodayBestComments: React.FC = () => {
@@ -190,42 +216,68 @@ const TodayBestComments: React.FC = () => {
     navigate(`/book-detail/${bookId}`);
   };
 
+  const getRankIcon = (rank: number) => {
+    switch (rank) {
+      case 1:
+        return <RiMedalFill />;
+      case 2:
+        return <RiMedalFill />;
+      case 3:
+        return <RiMedalFill />;
+      default:
+        return <RiMedalLine />;
+    }
+  };
+
   if (loading) {
     return <div>로딩 중...</div>;
   }
 
   return (
     <Container>
-      <Title>
-        오늘의 BEST 한줄평
-      </Title>
+      <Title>오늘의 BEST 한줄평</Title>
       {bestReviews.map((review) => (
         <ReviewCard 
           key={review.reviewId}
           onClick={(e) => handleReviewClick(review.bookId, e)}
         >
-          <ReviewHeader>
-            <ReviewerInfo>
-              <ReviewerName>{review.reviewerName}</ReviewerName>
-              <RankBadge rank={review.rank}>{review.rank}위</RankBadge>
-              <BookTitle>『{review.bookName}』</BookTitle>
-            </ReviewerInfo>
-          </ReviewHeader>
-          <ReviewContent>{review.content}</ReviewContent>
-          <LikeInfo>
+          <InteractionBar>
             <LikeButton 
+              isLiked={review.myLiked}
               onClick={(e) => {
                 e.stopPropagation();
                 handleLikeToggle(review.reviewId);
               }}
-              className={review.myLiked ? 'liked' : ''}
               disabled={likeLoading[review.reviewId]}
             >
               {review.myLiked ? <FaHeart /> : <FaRegHeart />}
-              <span>좋아요 {review.totalLikes}개</span>
+              {review.totalLikes}
             </LikeButton>
-            <span>(오늘 +{review.todayLikes})</span>
-          </LikeInfo>
+            {review.todayLikes > 0 && (
+              <TodayLikes>
+                <FaCaretUp />
+                {review.todayLikes}
+              </TodayLikes>
+            )}
+          </InteractionBar>
+          <ReviewHeader>
+            <RankBadge rank={review.rank}>
+              {getRankIcon(review.rank)}
+            </RankBadge>
+            <UserProfile>
+              <ProfileImage 
+                src={review.reviewerProfileUrl || '/default-profile.png'} 
+                alt={review.reviewerName} 
+              />
+              <ReviewerName>{review.reviewerName}</ReviewerName>
+            </UserProfile>
+          </ReviewHeader>
+          
+          <ReviewContent>{review.content}</ReviewContent>
+          
+          <BookInfo>
+            <BookTitle>『{review.bookName}』</BookTitle>
+          </BookInfo>
         </ReviewCard>
       ))}
     </Container>
