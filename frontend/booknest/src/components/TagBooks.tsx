@@ -267,22 +267,9 @@ const TagBooks = () => {
   const [tag, setTag] = useState<string>('');
   const [scrollPosition, setScrollPosition] = useState(0);
   const bookListRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const navigate = useNavigate();
 
   const SCROLL_AMOUNT = window.innerWidth < 768 ? 300 : 400;
-
-  const updateScrollButtonsVisibility = () => {
-    if (!bookListRef.current) return;
-    
-    const hasHorizontalOverflow = bookListRef.current.scrollWidth > bookListRef.current.clientWidth;
-    
-    setCanScrollLeft(scrollPosition > 0);
-    setCanScrollRight(
-      hasHorizontalOverflow && scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
-    );
-  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!bookListRef.current) return;
@@ -296,29 +283,7 @@ const TagBooks = () => {
 
     setScrollPosition(newPosition);
     bookListRef.current.style.transform = `translateX(-${newPosition}px)`;
-    
-    // Update buttons visibility after scrolling
-    setTimeout(updateScrollButtonsVisibility, 300);
   };
-
-  // Update buttons visibility on window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (scrollPosition > 0) {
-        // Reset position when window is resized
-        if (bookListRef.current) {
-          setScrollPosition(0);
-          bookListRef.current.style.transform = `translateX(0)`;
-        }
-      }
-      
-      // Update buttons after resize
-      setTimeout(updateScrollButtonsVisibility, 300);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [scrollPosition]);
 
   const handleBookClick = (bookId: number) => {
     navigate(`/book-detail/${bookId}`);
@@ -370,13 +335,6 @@ const TagBooks = () => {
     fetchTagBooks();
   }, []);
 
-  // Update scroll buttons visibility when books load
-  useEffect(() => {
-    if (tagBooks.length > 0) {
-      setTimeout(updateScrollButtonsVisibility, 300);
-    }
-  }, [tagBooks]);
-
   if (loading) {
     return <LoadingMessage>태그별 추천 도서 목록을 불러오는 중...</LoadingMessage>;
   }
@@ -390,6 +348,10 @@ const TagBooks = () => {
   }
 
   const extractedTag = extractTagFromBooks(tagBooks);
+  const canScrollLeft = scrollPosition > 0;
+  const canScrollRight = bookListRef.current 
+    ? scrollPosition < bookListRef.current.scrollWidth - bookListRef.current.clientWidth
+    : false;
 
   return (
     <TagBooksContainer>
