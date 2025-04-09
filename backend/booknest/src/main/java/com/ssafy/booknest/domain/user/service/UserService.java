@@ -130,6 +130,7 @@ public class UserService {
     }
 
     // 유저 정보 조회
+    @Transactional(readOnly = true)
     public UserInfoResponse getUserInfo(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -147,6 +148,7 @@ public class UserService {
 
 
     // 유저 정보 조회
+    @Transactional(readOnly = true)
     public UserMypageResponse getUserMypage(Integer userId, Integer targetUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

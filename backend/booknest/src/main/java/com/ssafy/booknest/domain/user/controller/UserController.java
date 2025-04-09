@@ -54,14 +54,6 @@ public class UserController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<ApiResponse<String>> test(
-            @AuthenticationPrincipal UserPrincipal userPrincipal){
-        Integer userId = authenticationUtil.getCurrentUserId(userPrincipal);
-
-        return ApiResponse.success("이것은 테스트입니다. userId = " + userId);
-    }
-
     // 회원정보 수정
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<Void>> updateUser(
