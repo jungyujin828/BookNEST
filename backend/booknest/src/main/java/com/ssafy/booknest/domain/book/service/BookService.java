@@ -15,15 +15,18 @@ import com.ssafy.booknest.domain.book.repository.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
+import com.ssafy.booknest.domain.user.entity.category.UserCategoryRecommendation;
+import com.ssafy.booknest.domain.user.entity.tag.UserTagRecommendation;
 import com.ssafy.booknest.domain.user.enums.Gender;
-import com.ssafy.booknest.domain.user.repository.UserCategoryAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
-import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryRecommendationRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagRecommendationRepository;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
-import jakarta.persistence.Cacheable;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +62,8 @@ public class BookService {
     private final LibraryBookRepository libraryBookRepository;
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
     private final UserTagAnalysisRepository userTagAnalysisRepository;
+    private final UserTagRecommendationRepository userTagRecommendationRepository;
+    private final UserCategoryRecommendationRepository userCategoryRecommendationRepository;
 
     private final TagVectorService tagVectorService;
 
@@ -323,30 +328,31 @@ public class BookService {
     @Transactional(readOnly = true)
     public List<FavoriteTagBookResponse> getFavoriteTagBooks(Integer userId) {
 
+        // 1. 유저 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        List<String> tags = userTagAnalysisRepository.findTopTagsByUserId(userId);
-        if (tags == null || tags.isEmpty()) return List.of();
+        // 2. user_tag_recommendation 테이블에서 해당 유저의 추천 도서 조회
+        List<UserTagRecommendation> recommendations = userTagRecommendationRepository.findByUser(user);
 
-        String randomTag = tags.get(new Random().nextInt(tags.size()));
+        // 3. 랜덤 태그 하나 선택
+        Map<String, List<UserTagRecommendation>> groupedByTag = recommendations.stream()
+                .collect(Collectors.groupingBy(UserTagRecommendation::getTag));
 
-        Set<Integer> excludedIdSet = new HashSet<>();
-        excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
-        excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
-        excludedIdSet.addAll(bookMarkRepository.findBookIdsByUserId(userId));
-        if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
+        if (groupedByTag.isEmpty()) return List.of();
 
-        List<Integer> selectedIds = bookRepository.findRandomBookIdsByTagNameExcluding(randomTag, new ArrayList<>(excludedIdSet));
+        List<String> tagList = new ArrayList<>(groupedByTag.keySet());
+        String randomTag = tagList.get(new Random().nextInt(tagList.size()));
 
-        List<Book> books = bookRepository.findAllByIdWithAuthors(selectedIds);
+        // 4. 해당 태그의 책 15권 중 랜덤 섞기
+        List<UserTagRecommendation> selectedList = groupedByTag.get(randomTag);
+        Collections.shuffle(selectedList);
 
-        return books.stream()
-                .map(book -> FavoriteTagBookResponse.of(book, randomTag))
+        return selectedList.stream()
+                .limit(15)
+                .map(rec -> FavoriteTagBookResponse.of(rec.getBook(), randomTag))
                 .toList();
     }
-
-
 
 
     // 사용자가 가장 많이 본 카테고리에서 추천
@@ -357,38 +363,29 @@ public class BookService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 2. 선호 카테고리 가져오기
-        List<String> categories = userCategoryAnalysisRepository.findTopCategoryNamesByUserId(userId);
-        if (categories == null || categories.isEmpty()) {
-            throw new RuntimeException("유저의 선호 카테고리가 없습니다.");
-        }
+        // 2. 추천 테이블에서 유저의 모든 추천 도서 조회
+        List<UserCategoryRecommendation> recommendations = userCategoryRecommendationRepository.findByUser(user);
 
-        // 3. 랜덤 카테고리 선택
-        String randomCategory = categories.get(new Random().nextInt(categories.size()));
+        // 3. 카테고리별로 그룹화
+        Map<String, List<UserCategoryRecommendation>> grouped = recommendations.stream()
+                .collect(Collectors.groupingBy(UserCategoryRecommendation::getCategory));
 
-        // 4. 제외할 도서 ID 수집
-        Set<Integer> excludedIdSet = new HashSet<>();
-        excludedIdSet.addAll(ratingRepository.findBookIdsByUserId(userId));
-        excludedIdSet.addAll(nestRepository.findBookIdsByUserId(userId));
-        excludedIdSet.addAll(bookMarkRepository.findBookIdsByUserId(userId));
-        if (excludedIdSet.isEmpty()) excludedIdSet.add(-1);
-        List<Integer> excludedIds = new ArrayList<>(excludedIdSet);
+        if (grouped.isEmpty()) return List.of();
 
-        // 5. 해당 카테고리에서 제외 도서 빼고 ID만 조회
-        List<Integer> candidateIds = bookRepository.findBookIdsByCategoryNameExcluding(randomCategory, excludedIds);
+        // 4. 랜덤 카테고리 선택
+        List<String> categoryList = new ArrayList<>(grouped.keySet());
+        String randomCategory = categoryList.get(new Random().nextInt(categoryList.size()));
 
-        // 6. Java에서 랜덤 추출
-        Collections.shuffle(candidateIds);
-        List<Integer> selectedIds = candidateIds.stream().limit(15).toList();
+        // 5. 해당 카테고리의 추천 도서 중 15권 랜덤 추출
+        List<UserCategoryRecommendation> selected = grouped.get(randomCategory);
+        Collections.shuffle(selected);
 
-        // 7. 최종 Book 엔티티 조회
-        List<Book> books = bookRepository.findAllById(selectedIds);
-
-        // 8. DTO 변환
-        return books.stream()
-                .map(book -> FavoriteCategoryBookResponse.of(book, randomCategory))
+        return selected.stream()
+                .limit(15)
+                .map(rec -> FavoriteCategoryBookResponse.of(rec.getBook(), randomCategory))
                 .toList();
     }
+
 
 
 

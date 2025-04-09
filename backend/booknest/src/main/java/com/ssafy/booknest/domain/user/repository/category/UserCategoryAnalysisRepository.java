@@ -1,14 +1,13 @@
-package com.ssafy.booknest.domain.user.repository;
+package com.ssafy.booknest.domain.user.repository.category;
 
 import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.entity.UserCategoryAnalysis;
+import com.ssafy.booknest.domain.user.entity.category.UserCategoryAnalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface UserCategoryAnalysisRepository extends JpaRepository<UserCategoryAnalysis, Integer> {

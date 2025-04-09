@@ -1,12 +1,12 @@
-package com.ssafy.booknest.domain.user.scheduler;
+package com.ssafy.booknest.domain.user.scheduler.tag;
 
 import com.ssafy.booknest.domain.book.entity.BookTag;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.user.entity.User;
-import com.ssafy.booknest.domain.user.entity.UserTagAnalysis;
+import com.ssafy.booknest.domain.user.entity.tag.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
-import com.ssafy.booknest.domain.user.repository.UserTagAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class UserTagAnalysisScheduler {
 
     private final RatingRepository ratingRepository;
-    private final UserRepository userRepository;
     private final UserTagAnalysisRepository userTagAnalysisRepository;
 
     @Transactional
@@ -81,6 +80,7 @@ public class UserTagAnalysisScheduler {
         }
 
         log.info("[태그 배치 완료] 유저 분석 테이블 갱신 완료");
+        log.info("***************************************************************************************************");
         log.info("***************************************************************************************************");
     }
 }
