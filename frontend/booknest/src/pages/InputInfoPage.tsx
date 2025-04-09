@@ -14,10 +14,9 @@ declare global {
 
 // 스타일 컴포넌트 정의
 const Container = styled.div`
-  max-width: 37.5rem; // 600px
+  padding-top: 1rem;
+  max-width: 500px;
   margin: 0 auto;
-  padding: 1.25rem; // 20px
-  background-color: #fff;
 `;
 
 const Title = styled.h1`
@@ -29,13 +28,13 @@ const Title = styled.h1`
 `;
 
 const InputGroup = styled.div`
-  margin-bottom: 1.25rem; // 20px
+  margin-bottom: 1rem; // 20px
 `;
 
 const Label = styled.label`
   display: block;
   font-size: 16px; // 16px
-  margin-bottom: 0.5rem; // 8px
+  margin-bottom: 0.5rem;
   font-weight: 500;
 `;
 
@@ -48,8 +47,9 @@ const InputRow = styled.div`
   align-items: center;
 `;
 
-const Input = styled.input`
+const NicknameInput = styled.input`
   flex: 1;
+  width: 70%;
   height: 3.125rem; // 50px
   border: 0.0625rem solid #ddd; // 1px
   border-radius: 0.3125rem; // 5px
@@ -59,9 +59,14 @@ const Input = styled.input`
   background-color: #ffffff;
 `;
 
-const FullInput = styled(Input)`
-  width: 100%;
-  margin-top: 10px;
+const FullInput = styled.input`
+  flex: 1;
+  height: 50px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 0 15px;
+  font-size: 16px;
+  background-color: #ffffff;
 `;
 
 const ConfirmButton = styled.button`
@@ -111,6 +116,7 @@ const AddressRow = styled.div`
 
 const AddressInput = styled.input`
   flex: 1;
+  width: 70%;
   height: 50px;
   border: 1px solid #ddd;
   border-radius: 5px;
@@ -206,8 +212,7 @@ const InputInfoPage = () => {
   // Daum Postcode 스크립트 로드
   useEffect(() => {
     const script = document.createElement("script");
-    script.src =
-      "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+    script.src = "//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
     script.async = true;
     document.body.appendChild(script);
 
@@ -263,11 +268,7 @@ const InputInfoPage = () => {
         const isDuplicate = response.data.data; // true면 중복
         setIsNicknameValid(!isDuplicate); // 중복이면 false, 아니면 true
         setIsNicknameValidated(!isDuplicate); // 중복이면 false, 아니면 true
-        setErrorMessage(
-          isDuplicate
-            ? "이미 사용 중인 닉네임입니다."
-            : "사용 가능한 닉네임입니다."
-        );
+        setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
       }
     } catch (error) {
       console.error("닉네임 중복 확인 오류:", error);
@@ -301,10 +302,7 @@ const InputInfoPage = () => {
           }
           // 건물명이 있고, 공동주택일 경우 추가
           if (data.buildingName !== "" && data.apartment === "Y") {
-            extraAddress +=
-              extraAddress !== ""
-                ? ", " + data.buildingName
-                : data.buildingName;
+            extraAddress += extraAddress !== "" ? ", " + data.buildingName : data.buildingName;
           }
           // 표시할 참고항목이 있을 경우 괄호까지 추가한 최종 문자열 생성
           if (extraAddress !== "") {
@@ -391,10 +389,7 @@ const InputInfoPage = () => {
 
   const formatBirthdate = (date: string): string => {
     if (date.length !== 8) return "";
-    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(
-      6,
-      8
-    )}`;
+    return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   };
 
   // handleSubmit 함수 수정
@@ -431,9 +426,7 @@ const InputInfoPage = () => {
         navigate("/eval-book");
       }
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.error?.message ||
-        "회원 정보 업데이트에 실패했습니다.";
+      const errorMessage = error.response?.data?.error?.message || "회원 정보 업데이트에 실패했습니다.";
       setErrorMessage(errorMessage);
     }
   };
@@ -448,7 +441,7 @@ const InputInfoPage = () => {
             닉네임<Required>*</Required>
           </Label>
           <InputRow>
-            <Input
+            <NicknameInput
               type="text"
               placeholder="사용하실 닉네임을 입력해주세요"
               value={nickname}
@@ -458,12 +451,8 @@ const InputInfoPage = () => {
               중복 확인
             </ConfirmButton>
           </InputRow>
-          {!isNicknameValid && errorMessage && (
-            <ErrorText>{errorMessage}</ErrorText>
-          )}
-          {isNicknameValid && errorMessage && (
-            <SuccessText>{errorMessage}</SuccessText>
-          )}
+          {!isNicknameValid && errorMessage && <ErrorText>{errorMessage}</ErrorText>}
+          {isNicknameValid && errorMessage && <SuccessText>{errorMessage}</SuccessText>}
         </InputGroup>
 
         <InputGroup>
@@ -497,12 +486,7 @@ const InputInfoPage = () => {
         <InputGroup>
           <Label>주소</Label>
           <AddressRow>
-            <AddressInput
-              type="text"
-              placeholder="주소를 검색해주세요"
-              value={address}
-              readOnly
-            />
+            <AddressInput type="text" placeholder="주소를 검색해주세요" value={address} readOnly />
             <AddressButton type="button" onClick={handleFindAddress}>
               주소 검색
             </AddressButton>
@@ -517,25 +501,14 @@ const InputInfoPage = () => {
 
         <SubmitButton
           type="submit"
-          disabled={
-            !isNicknameValidated ||
-            gender === "" ||
-            birthdate.length !== 8 ||
-            birthdateError !== ""
-          }
+          disabled={!isNicknameValidated || gender === "" || birthdate.length !== 8 || birthdateError !== ""}
           style={{
             backgroundColor:
-              isNicknameValidated &&
-              gender !== "" &&
-              birthdate.length === 8 &&
-              birthdateError === ""
+              isNicknameValidated && gender !== "" && birthdate.length === 8 && birthdateError === ""
                 ? "#7bc47f"
                 : "#cccccc",
             cursor:
-              isNicknameValidated &&
-              gender !== "" &&
-              birthdate.length === 8 &&
-              birthdateError === ""
+              isNicknameValidated && gender !== "" && birthdate.length === 8 && birthdateError === ""
                 ? "pointer"
                 : "not-allowed",
           }}
@@ -554,10 +527,7 @@ const InputInfoPage = () => {
         <AddressModal>
           <AddressModalContent>
             <CloseButton onClick={handleCloseAddressModal}>×</CloseButton>
-            <div
-              id="addressLayer"
-              style={{ width: "100%", height: "400px" }}
-            ></div>
+            <div id="addressLayer" style={{ width: "100%", height: "400px" }}></div>
           </AddressModalContent>
         </AddressModal>
       )}
