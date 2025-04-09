@@ -22,7 +22,7 @@ const BlankBox = styled.div`
 
 const ProfileContainer = styled.div`
   background-color: #ffffff;
-  padding: 1rem;
+  padding: 3.5%;
 
   @media (min-width: ${theme.breakpoints.desktop}) {
     border-left: 1px solid #dddddd;
@@ -104,7 +104,6 @@ const UserName = styled.h2`
 
 const ProfileImage = styled.div`
   width: 10rem;
-  height: 10rem;
   border-radius: 50%;
   overflow: hidden;
   img {
@@ -153,7 +152,7 @@ const Section = styled.section`
 `;
 
 const SectionTitle = styled.h3`
-  margin-bottom: 15px;
+  margin: 1rem 0;
   color: #102c57;
   font-size: 1.3rem;
 `;
@@ -161,21 +160,22 @@ const SectionTitle = styled.h3`
 const TagCloud = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  justify-content: center;
+  align-items: center;
 `;
 
-const Tag = styled.span<{ color?: string }>`
-  padding: 5px 10px;
-  border-radius: 15px;
-  background-color: ${(props) => props.color || "#e0e0e0"};
-  color: ${(props) => (props.color ? "white" : "black")};
+const TagRow = styled.div`
+  display: flex;
+  gap: 20px;
+  justify-content: center;
 `;
 
-const BestReview = styled.div`
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+const Tag = styled.span<{ color?: string; size?: string }>`
+  padding: 4px 4px;
+  color: ${(props) => props.color || "#e0e0e0"};
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
 `;
 
 const AuthorList = styled.div`
@@ -188,6 +188,12 @@ const AuthorItem = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer; // 커서 스타일 추가
+
+  &:hover {
+    background-color: #f8f9fa; // 호버 효과 추가
+    border-radius: 8px;
+  }
 
   img {
     width: 40px;
@@ -255,6 +261,12 @@ const NestButton = styled.button`
   &:hover {
     background-color: #6ab36e;
   }
+`;
+
+const Divider = styled.hr`
+  border: none;
+  height: 1px;
+  background-color: #dddddd;
 `;
 
 const ProfilePage = () => {
@@ -383,6 +395,20 @@ const ProfilePage = () => {
     }
   };
 
+  const getRandomColor = () => {
+    const colors = [
+      "#8BC34A", // 연한 녹색
+      "#90CAF9", // 연한 파랑
+      "#FFCC80", // 연한 주황
+      "#F48FB1", // 연한 분홍
+      "#CE93D8", // 연한 보라
+      "#80DEEA", // 연한 시안
+      "#9FA8DA", // 연한 인디고
+      "#BCAAA4", // 연한 브라운
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+  };
+
   return (
     <BlankBox>
       <ProfileContainer>
@@ -462,7 +488,7 @@ const ProfilePage = () => {
           />
         )}
 
-        <hr />
+        <Divider />
 
         <UserStats>
           <div onClick={() => navigate(`${ROUTES.MY_EVALUATED_BOOKS}/${userId}`)}>
@@ -475,52 +501,52 @@ const ProfilePage = () => {
           </div>
         </UserStats>
 
-        <hr />
+        <Divider />
 
         <Section>
           <SectionTitle>아키타입</SectionTitle>
           <ArchetypeCard />
         </Section>
 
+        <Divider />
+
         <Section>
           <SectionTitle>선호태그</SectionTitle>
           <TagCloud>
-            <Tag color="#ff69b4">서양</Tag>
-            <Tag color="#4169e1">디스토피아</Tag>
-            <Tag color="#32cd32">고등학생</Tag>
-            <Tag color="#ffa500">영화</Tag>
-            <Tag color="#8a2be2">인문학</Tag>
-            <Tag color="#ff4500">영화화</Tag>
-            <Tag color="#2e8b57">로맨스</Tag>
+            {(() => {
+              const tags = [...(displayData?.favoriteTags || []), ...(displayData?.favoriteCategories || [])].slice(
+                0,
+                10
+              );
+              const rows = [
+                tags.slice(0, 3), // 첫 번째 줄: 3개
+                tags.slice(3, 7), // 두 번째 줄: 4개
+                tags.slice(7, 10), // 세 번째 줄: 3개
+              ];
+
+              return rows.map((rowTags, rowIndex) => (
+                <TagRow key={`row-${rowIndex}`}>
+                  {rowTags.map((tag, index) => (
+                    <Tag key={`tag-${rowIndex}-${index}`} color={getRandomColor()}>
+                      {tag}
+                    </Tag>
+                  ))}
+                </TagRow>
+              ));
+            })()}
           </TagCloud>
         </Section>
 
-        <hr />
-
-        <Section>
-          <SectionTitle>BEST 한줄평</SectionTitle>
-          <BestReview>
-            <p>"우리는 행복하지만, 이 행복이 근심을 모르는 것"</p>
-            <div>❤️ 203</div>
-          </BestReview>
-        </Section>
-
-        <hr />
+        <Divider />
         <Section>
           <SectionTitle>선호하는 작가</SectionTitle>
           <AuthorList>
-            <AuthorItem>
-              <img src="/author1.jpg" alt="김초엽" />
-              <div>김초엽</div>
-            </AuthorItem>
-            <AuthorItem>
-              <img src="/author2.jpg" alt="J.K 롤링" />
-              <div>J.K 롤링</div>
-            </AuthorItem>
-            <AuthorItem>
-              <img src="/author3.jpg" alt="칼 세이건" />
-              <div>칼 세이건</div>
-            </AuthorItem>
+            {displayData?.favoriteAuthors?.map((author, index) => (
+              <AuthorItem key={`author-${index}`} onClick={() => navigate(`/search?type=books&query=${author.name}`)}>
+                <img src={author.imageUrl} alt={author.name} />
+                <div>{author.name}</div>
+              </AuthorItem>
+            )) || <div style={{ textAlign: "center", color: "#666" }}>선호하는 작가가 없습니다</div>}
           </AuthorList>
         </Section>
       </ProfileContainer>
