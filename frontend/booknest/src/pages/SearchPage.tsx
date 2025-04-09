@@ -324,7 +324,14 @@ const SearchPage = () => {
       setBooks(data.content);
       setIsSearchActive(true);
     } else {
-      setUsers(data);
+      // 유저 검색 결과도 페이지네이션 처리
+      if (data.content && Array.isArray(data.content)) {
+        setUsers(data.content);
+      } else if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        setUsers([]);
+      }
       setBooks([]);
     }
   };
@@ -435,10 +442,10 @@ const SearchPage = () => {
   };
 
   const shouldShowTags =
-    activeTab === "books" && !showRecent && (
-      selectedTags.length > 0 || // 태그가 선택된 경우는 항상 보여주기
-      (!isSearchFocused && !books.length) // 검색바에 포커스가 없고, 검색 결과가 없는 경우에만 보여주기
-    );
+    activeTab === "books" &&
+    !showRecent &&
+    (selectedTags.length > 0 || // 태그가 선택된 경우는 항상 보여주기
+      (!isSearchFocused && !books.length)); // 검색바에 포커스가 없고, 검색 결과가 없는 경우에만 보여주기
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -515,19 +522,22 @@ const SearchPage = () => {
                   <BookTitle>{book.title}</BookTitle>
                   <BookAuthor>
                     {(() => {
-                      // authors가 문자열인지 확인
-                      if (!book.authors || typeof book.authors !== 'string') {
-                        return book.authors || '작가 미상';
+                      // authors가 배열인지 확인
+                      if (Array.isArray(book.authors)) {
+                        if (book.authors.length === 0) return "작가 미상";
+                        if (book.authors.length === 1) return book.authors[0];
+                        if (book.authors.length === 2) return `${book.authors[0]}, ${book.authors[1]}`;
+                        return `${book.authors[0]} 외 ${book.authors.length - 1}명`;
                       }
-                      
-                      // 저자 문자열을 쉼표로 분리
-                      const authorsList = book.authors.split(',');
-                      if (authorsList.length <= 1) {
-                        return book.authors;
-                      } else {
-                        // 첫 번째 저자만 표시하고 나머지는 "외 N명"으로 표시
-                        return `${authorsList[0].trim()} 외 ${authorsList.length - 1}명`;
+
+                      // 문자열인 경우 기존 로직 유지
+                      if (!book.authors || typeof book.authors !== "string") {
+                        return "작가 미상";
                       }
+                      const authorsList = book.authors.split(",").map((author) => author.trim());
+                      if (authorsList.length <= 1) return book.authors;
+                      if (authorsList.length === 2) return `${authorsList[0]}, ${authorsList[1]}`;
+                      return `${authorsList[0]} 외 ${authorsList.length - 1}명`;
                     })()}
                   </BookAuthor>
                   {book.tags && book.tags.length > 0 && (
