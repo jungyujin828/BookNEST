@@ -32,9 +32,9 @@ spring:
     allow-bean-definition-overriding: true
 
 logging.level:
-  org.hibernate.SQL: warn  # Hibernate SQL 로그는 경고 수준으로 설정
-  com.zaxxer.hikari.HikariConfig: OFF  # HikariConfig 로그를 끔
-  com.zaxxer.hikari: OFF  # Hikari 로그를 끔
+  org.hibernate.SQL: info  # Hibernate SQL 로그는 경고 수준으로 설정
+  com.zaxxer.hikari.HikariConfig: DEBUG  # HikariConfig 로그를 끔
+  com.zaxxer.hikari: TRACE  # Hikari 로그를 끔
 
 server:
   port: 80  # 서버 포트를 80으로 변경
