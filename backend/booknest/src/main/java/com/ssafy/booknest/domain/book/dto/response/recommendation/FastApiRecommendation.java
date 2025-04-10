@@ -1,4 +1,4 @@
-package com.ssafy.booknest.domain.book.dto.response;
+package com.ssafy.booknest.domain.book.dto.response.recommendation;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

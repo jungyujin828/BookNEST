@@ -1,6 +1,6 @@
 package com.ssafy.booknest.domain.book.repository;
 
-import com.ssafy.booknest.domain.book.entity.TagRandomBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.TagRandomBook;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

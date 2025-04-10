@@ -1,11 +1,12 @@
 package com.ssafy.booknest.domain.book.service;
 
-import com.ssafy.booknest.domain.book.dto.response.*;
 import com.ssafy.booknest.domain.book.dto.response.BookDetailResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookPurchaseResponse;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.ReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.recommendation.*;
 import com.ssafy.booknest.domain.book.entity.*;
+import com.ssafy.booknest.domain.book.entity.recommendation.*;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.book.repository.*;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
@@ -186,7 +187,7 @@ public class BookService {
         Set<Integer> addedBookIds = new HashSet<>();
 
         for (PopularAuthorBook popular : page.getContent()) {
-            Book book = popular.getBook(); // LAZY 로딩
+            Book book = popular.getBook();
             if (book != null && addedBookIds.add(book.getId())) {
                 result.add(BookResponse.of(book));
             }

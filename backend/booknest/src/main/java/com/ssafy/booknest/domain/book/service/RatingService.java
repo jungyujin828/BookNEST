@@ -1,9 +1,8 @@
 package com.ssafy.booknest.domain.book.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.response.BookResponse;
-import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
-import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.MyRatingResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.IgnoredBook;
 import com.ssafy.booknest.domain.book.entity.Rating;

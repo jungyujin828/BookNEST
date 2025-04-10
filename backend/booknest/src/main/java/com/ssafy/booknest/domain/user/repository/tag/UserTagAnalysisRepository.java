@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 public interface UserTagAnalysisRepository extends JpaRepository<UserTagAnalysis, Integer> {
 
-    Optional<UserTagAnalysis> findByUser(User user);
 
     void deleteByUser(User user);
 

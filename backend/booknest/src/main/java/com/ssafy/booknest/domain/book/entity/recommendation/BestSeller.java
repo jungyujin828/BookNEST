@@ -1,8 +1,8 @@
-package com.ssafy.booknest.domain.book.entity;
+package com.ssafy.booknest.domain.book.entity.recommendation;
 
+import com.ssafy.booknest.domain.book.entity.Book;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 
 @Entity

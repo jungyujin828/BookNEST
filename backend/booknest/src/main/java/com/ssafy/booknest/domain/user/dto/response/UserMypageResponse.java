@@ -20,7 +20,7 @@ public class UserMypageResponse {
     private Boolean isFollowing;
     private List<String> favoriteTags;
     private List<String> favoriteCategories;
-    private List<FavoriteAuthorDto> favoriteAuthors;  // <-- 타입 변경됨
+    private List<FavoriteAuthorDto> favoriteAuthors;
 
     public static UserMypageResponse of(
             User user,

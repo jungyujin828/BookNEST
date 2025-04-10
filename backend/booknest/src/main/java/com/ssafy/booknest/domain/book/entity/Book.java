@@ -1,7 +1,7 @@
 package com.ssafy.booknest.domain.book.entity;
 
+import com.ssafy.booknest.domain.book.entity.recommendation.BestSeller;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
-import com.ssafy.booknest.domain.user.entity.tag.UserTagAnalysis;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
