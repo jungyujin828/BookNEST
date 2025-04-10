@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import api from '../api/axios';
 import { Review } from '../components/ReviewList';
 import { useAuthStore } from '../store/useAuthStore';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaExclamationCircle, FaInfoCircle } from 'react-icons/fa';
 
 const PageContainer = styled.div`
   max-width: 800px;
@@ -96,6 +96,70 @@ const LoadMoreButton = styled.button`
   }
 `;
 
+// Modal components
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ModalMessage = styled.p`
+  margin-bottom: 1.5rem;
+  color: #555;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const ModalButton = styled.button<{ isPrimary?: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: ${props => props.isPrimary ? '#00c437' : '#f1f3f5'};
+  color: ${props => props.isPrimary ? 'white' : '#495057'};
+  
+  &:hover {
+    background-color: ${props => props.isPrimary ? '#00b368' : '#e9ecef'};
+  }
+`;
+
+// Modal type definition
+type ModalType = 'info' | 'error' | null;
+
 interface BookDetailResponse {
   success: boolean;
   data: {
@@ -120,6 +184,21 @@ const BookAllCommentPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const { userDetail } = useAuthStore();
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
+
+  // Modal state
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalMessage, setModalMessage] = useState('');
+  
+  // Modal functions
+  const openModal = (type: ModalType, message: string) => {
+    setModalType(type);
+    setModalMessage(message);
+  };
+  
+  const closeModal = () => {
+    setModalType(null);
+    setModalMessage('');
+  };
 
   const fetchReviews = async (pageNum: number) => {
     try {
@@ -147,7 +226,7 @@ const BookAllCommentPage: React.FC = () => {
 
   const handleLikeToggle = async (reviewId: number) => {
     if (!userDetail) {
-      alert('로그인이 필요한 기능입니다.');
+      openModal('info', '로그인이 필요한 기능입니다.');
       return;
     }
     
@@ -169,7 +248,7 @@ const BookAllCommentPage: React.FC = () => {
       fetchReviews(0);
     } catch (err) {
       console.error('좋아요 처리 실패:', err);
-      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
     }
@@ -185,6 +264,27 @@ const BookAllCommentPage: React.FC = () => {
 
   return (
     <PageContainer>
+      {/* Modal component */}
+      {modalType && (
+        <ModalOverlay onClick={closeModal}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>
+              {modalType === 'error' ? (
+                <><FaExclamationCircle color="#dc2626" /> 오류</>
+              ) : (
+                <><FaInfoCircle color="#00c437" /> 안내</>
+              )}
+            </ModalTitle>
+            <ModalMessage>{modalMessage}</ModalMessage>
+            <ModalButtons>
+              <ModalButton isPrimary onClick={closeModal}>
+                확인
+              </ModalButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+      
       <PageTitle>전체 리뷰</PageTitle>
       {reviews.map((review) => {
         const isUserReview = userDetail?.userId === review.reviewerId;

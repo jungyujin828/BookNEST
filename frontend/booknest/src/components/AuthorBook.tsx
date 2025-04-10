@@ -422,7 +422,7 @@ const AuthorBook = () => {
   return (
     <AuthorBookContainer>
       <Title>
-        화제의 작가<AuthorHighlight>{commonAuthor}</AuthorHighlight>의 도서
+        화제의 작가 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (

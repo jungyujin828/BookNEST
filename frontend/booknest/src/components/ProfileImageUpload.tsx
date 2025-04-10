@@ -105,10 +105,84 @@ const ResetButton = styled.button`
   }
 `;
 
+// Modal components
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+`;
+
+const ModalMessage = styled.p`
+  margin-bottom: 1.5rem;
+  color: #555;
+`;
+
+const ModalButton = styled.button`
+  background-color: #00c437;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  
+  &:hover {
+    background-color: #00a02e;
+  }
+`;
+
+const ErrorMessage = styled.div`
+  color: #e74c3c;
+  font-weight: 500;
+`;
+
+const SuccessMessage = styled.div`
+  color: #00c437;
+  font-weight: 500;
+`;
+
 const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl }) => {
   const [isUploading, setIsUploading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
+  const [isSuccess, setIsSuccess] = useState(true);
   const { setUserDetail, userDetail } = useAuthStore();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const openModal = (title: string, message: string, success: boolean = true) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setIsSuccess(success);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+  };
 
   const handleClick = () => {
     console.log("이미지 클릭됨");
@@ -181,13 +255,13 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
     // 파일 타입 검증
     if (!file.type.startsWith("image/")) {
-      alert("이미지 파일만 업로드 가능합니다.");
+      openModal("업로드 실패", "이미지 파일만 업로드 가능합니다.", false);
       return;
     }
 
     // 파일 크기 검증 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert("파일 크기는 5MB를 초과할 수 없습니다.");
+      openModal("업로드 실패", "파일 크기는 5MB를 초과할 수 없습니다.", false);
       return;
     }
 
@@ -215,10 +289,10 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
         localStorage.setItem("userDetail", JSON.stringify(updatedUserDetail));
       }
 
-      alert("프로필 이미지가 성공적으로 업데이트되었습니다.");
+      openModal("업로드 성공", "프로필 이미지가 성공적으로 업데이트되었습니다.", true);
     } catch (error) {
       console.error("프로필 이미지 업로드 실패:", error);
-      alert("프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.");
+      openModal("업로드 실패", "프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.", false);
     } finally {
       setIsUploading(false);
     }
@@ -259,7 +333,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
       window.location.reload();
     } catch (error) {
       console.error("프로필 이미지 초기화 실패:", error);
-      alert("프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.");
+      openModal("초기화 실패", "프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.", false);
     } finally {
       setIsUploading(false);
     }
@@ -289,6 +363,20 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
           </ResetButton>
         </ButtonContainer>
       </EditImageContainer>
+
+      {modalOpen && (
+        <ModalOverlay onClick={closeModal}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>{modalTitle}</ModalTitle>
+            {isSuccess ? (
+              <SuccessMessage>{modalMessage}</SuccessMessage>
+            ) : (
+              <ErrorMessage>{modalMessage}</ErrorMessage>
+            )}
+            <ModalButton onClick={closeModal}>확인</ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </div>
   );
 };

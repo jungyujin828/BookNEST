@@ -2,7 +2,8 @@ import React, { useEffect, useState, forwardRef, useImperativeHandle } from "rea
 import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaTrash, FaExclamationCircle, FaInfoCircle } from "react-icons/fa";
+import { SortOption, ViewMode } from "../pages/NestPage";
 
 interface NestBook {
   bookId: number;
@@ -42,25 +43,32 @@ interface UserInfo {
 interface NestBookListProps {
   userId?: number;
   nestId?: number;
+  sortOption?: SortOption;
+  searchTerm?: string;
+  viewMode?: ViewMode;
 }
 
 const Container = styled.div`
   width: 100%;
 `;
 
-const BookGrid = styled.div`
+const BookGrid = styled.div<{ viewMode: ViewMode }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
+  grid-template-columns: ${props => props.viewMode === "cover" 
+    ? "repeat(auto-fill, minmax(180px, 1fr))" 
+    : "repeat(auto-fill, minmax(220px, 1fr))"};
+  gap: ${props => props.viewMode === "cover" ? "16px" : "24px"};
   margin-bottom: 32px;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: ${props => props.viewMode === "cover" 
+      ? "repeat(auto-fill, minmax(130px, 1fr))" 
+      : "repeat(auto-fill, minmax(160px, 1fr))"};
+    gap: ${props => props.viewMode === "cover" ? "12px" : "16px"};
   }
 `;
 
-const BookCard = styled.div`
+const BookCard = styled.div<{ viewMode: ViewMode }>`
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -69,6 +77,7 @@ const BookCard = styled.div`
   transition: transform 0.2s ease-in-out;
   background-color: white;
   position: relative;
+  height: ${props => props.viewMode === "cover" ? "auto" : "auto"};
 
   &:hover {
     transform: translateY(-5px);
@@ -77,14 +86,18 @@ const BookCard = styled.div`
   &:hover .delete-button {
     opacity: 1;
   }
+  
+  &:hover .cover-title {
+    opacity: 1;
+  }
 `;
 
-const BookCover = styled.div`
+const BookCover = styled.div<{ viewMode: ViewMode }>`
   position: relative;
-  height: 260px;
-
+  height: ${props => props.viewMode === "cover" ? "240px" : "260px"};
+  
   @media (max-width: 768px) {
-    height: 220px;
+    height: ${props => props.viewMode === "cover" ? "180px" : "220px"};
   }
 
   img {
@@ -123,6 +136,13 @@ const BookAuthor = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const CreatedAtTag = styled.div`
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  margin-bottom: 8px;
 `;
 
 const RatingContainer = styled.div`
@@ -257,6 +277,31 @@ const StyledLink = styled(Link)`
   display: block;
 `;
 
+const CoverOnlyTitle = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.2s;
+`;
+
+// 날짜 포맷 함수 추가
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `등록일: ${year}.${month}.${day}`;
+};
+
 const renderRatingStars = (rating: number) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
@@ -273,14 +318,113 @@ const renderRatingStars = (rating: number) => {
   return stars;
 };
 
+// 정렬 함수 추가
+const sortBooks = (books: NestBook[], sortOption: SortOption): NestBook[] => {
+  switch (sortOption) {
+    case "latest":
+      return [...books].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    case "oldest":
+      return [...books].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    case "rating":
+      return [...books].sort((a, b) => b.userRating - a.userRating);
+    case "title":
+      return [...books].sort((a, b) => a.title.localeCompare(b.title));
+    default:
+      return books;
+  }
+};
+
+// 검색 필터링 함수 추가
+const filterBooksByTitle = (books: NestBook[], searchTerm: string): NestBook[] => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return books;
+  }
+  
+  const lowercasedSearch = searchTerm.toLowerCase();
+  // 제목의 첫글자부터 연속으로 두글자 이상 일치하는 도서만 필터링
+  return books.filter(book => 
+    book.title.toLowerCase().includes(lowercasedSearch) && 
+    book.title.toLowerCase().indexOf(lowercasedSearch) === 0
+  );
+};
+
+// 모달 타입 정의
+type ModalType = 'delete' | 'error' | null;
+
+// 모달 관련 스타일
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const ModalButton = styled.button<{ isPrimary?: boolean; isError?: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: ${props => {
+    if (props.isError) return '#dc2626';
+    if (props.isPrimary) return '#00c473';
+    return '#f1f3f5';
+  }};
+  color: ${props => (props.isPrimary || props.isError) ? 'white' : '#495057'};
+  
+  &:hover {
+    background-color: ${props => {
+      if (props.isError) return '#c41d1d';
+      if (props.isPrimary) return '#00b368';
+      return '#e9ecef';
+    }};
+  }
+`;
+
 const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProps>(
-  ({ userId: propUserId, nestId: propNestId }, ref) => {
+  ({ userId: propUserId, nestId: propNestId, sortOption = "latest", searchTerm = "", viewMode = "full" }, ref) => {
     const [books, setBooks] = useState<NestBook[]>([]);
+    const [sortedBooks, setSortedBooks] = useState<NestBook[]>([]);
+    const [filteredBooks, setFilteredBooks] = useState<NestBook[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
       pageNumber: 1,
       totalPages: 1,
       totalElements: 0,
-      pageSize: 10,
+      pageSize: 12,
       first: true,
       last: true,
     });
@@ -290,8 +434,28 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
     const [error, setError] = useState<string | null>(null);
     const [isAuthError, setIsAuthError] = useState(false);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    
+    // 모달 상태 관리 추가
+    const [modalType, setModalType] = useState<ModalType>(null);
+    const [modalMessage, setModalMessage] = useState('');
+    const [bookToDelete, setBookToDelete] = useState<number | null>(null);
 
     const navigate = useNavigate();
+
+    // 모달 열기 함수
+    const openModal = (type: ModalType, message: string = '') => {
+      setModalType(type);
+      setModalMessage(message);
+    };
+
+    // 모달 닫기 함수
+    const closeModal = () => {
+      setModalType(null);
+      setModalMessage('');
+      if (modalType === 'delete') {
+        setBookToDelete(null);
+      }
+    };
 
     // 사용자 정보 조회
     const fetchUserInfo = async () => {
@@ -317,14 +481,22 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         setError(null);
         setIsAuthError(false);
 
+        // 디버그 정보 추가 - props로 전달된 값 확인
+        console.log("Props 값:", { propUserId, propNestId });
+        console.log("Current 값:", { currentUserId, currentNestId });
+
         // 우선순위: props로 전달된 값 > 사용자 정보에서 가져온 값
         const effectiveUserId = propUserId || currentUserId;
-        const effectiveNestId = propNestId || currentNestId;
+        // nestId가 없는 경우 userId를 사용 (백엔드 API 요구사항)
+        const effectiveNestId = propNestId || currentNestId || effectiveUserId;
+
+        // 디버그 정보 추가 - 유효한 값 확인
+        console.log("Effective 값:", { effectiveUserId, effectiveNestId });
 
         // API 스펙에 맞게 Query Parameter 수정
         const params: Record<string, any> = {
           page: page,
-          size: 10,
+          size: 12,
         };
 
         // userId와 nestId 값이 있는 경우만 파라미터에 추가
@@ -374,7 +546,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
               pageNumber: 1,
               totalPages: 1,
               totalElements: 0,
-              pageSize: 10,
+              pageSize: 12,
               first: true,
               last: true,
             });
@@ -401,9 +573,28 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       }
     };
 
+    // 정렬된 도서 목록 업데이트 useEffect 추가
+    useEffect(() => {
+      const sorted = sortBooks(books, sortOption);
+      setSortedBooks(sorted);
+    }, [books, sortOption]);
+    
+    // 검색어로 필터링된 도서 목록 업데이트
+    useEffect(() => {
+      const filtered = filterBooksByTitle(sortedBooks, searchTerm);
+      setFilteredBooks(filtered);
+    }, [sortedBooks, searchTerm]);
+
+    // 컴포넌트 마운트 시에 nestId 값이 존재하는지 로그로 확인
+    useEffect(() => {
+      console.log("NestBookList 마운트 - Props 확인:", { propUserId, propNestId });
+    }, [propUserId, propNestId]);
+
     // 컴포넌트 마운트 시 사용자 정보를 먼저 조회하고, 그 후 도서 목록 조회
     useEffect(() => {
       const initializeData = async () => {
+        console.log("initializeData 실행 - 현재 props:", { propUserId, propNestId });
+        
         // props로 userId나 nestId가 전달되지 않은 경우 사용자 정보 조회
         if (!propUserId && !propNestId) {
           const userInfoData = await fetchUserInfo();
@@ -438,10 +629,15 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       event.preventDefault();
       event.stopPropagation();
 
-      if (!window.confirm("정말로 이 책을 둥지에서 삭제하시겠습니까?")) {
-        return;
-      }
-
+      // 삭제 확인 모달 열기
+      setBookToDelete(bookId);
+      openModal('delete', "정말로 이 책을 둥지에서 삭제하시겠습니까?");
+    };
+    
+    // 실제 삭제 처리 함수
+    const confirmDeleteBook = async () => {
+      if (!bookToDelete) return;
+      
       try {
         setLoading(true);
 
@@ -451,7 +647,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         // API 요청 바디 구성
         const requestBody = {
           nestId: effectiveNestId,
-          bookId: bookId,
+          bookId: bookToDelete,
         };
 
         // DELETE 요청 보내기 (데이터를 바디에 포함)
@@ -461,7 +657,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
 
         if (response.data.success) {
           // 삭제 성공 후 도서 목록에서 해당 도서 제거
-          const updatedBooks = books.filter((book) => book.bookId !== bookId);
+          const updatedBooks = books.filter((book) => book.bookId !== bookToDelete);
           setBooks(updatedBooks);
 
           // 화면에 표시할 도서가 없어진 경우 목록 다시 불러오기
@@ -471,6 +667,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
             // 첫 페이지에서 마지막 항목이 삭제된 경우
             fetchNestBooks(currentPage, propUserId, effectiveNestId);
           }
+          
+          // 모달 닫기
+          closeModal();
         } else {
           throw new Error(response.data.error?.message || "도서 삭제에 실패했습니다.");
         }
@@ -478,8 +677,8 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         console.error("Failed to delete book from nest:", err);
         console.error("Error details:", err.response?.data || err.message);
 
-        // 오류 메시지 표시
-        alert(err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");
+        // 오류 메시지 모달 표시
+        openModal('error', err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");
       } finally {
         setLoading(false);
       }
@@ -535,6 +734,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       },
     }));
 
+    // 다른 사람의 둥지인지 확인하는 로직 추가
+    const isOtherUserNest = propUserId !== undefined && userInfo?.userId !== propUserId;
+
     if (loading && books.length === 0) {
       return <LoadingState>둥지 도서 목록을 불러오는 중...</LoadingState>;
     }
@@ -552,35 +754,89 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       return <ErrorState>{error}</ErrorState>;
     }
 
+    // 검색 결과가 없는 경우
+    if (books.length > 0 && filteredBooks.length === 0 && searchTerm) {
+      return <EmptyState>검색 결과가 없습니다.</EmptyState>;
+    }
+
     if (books.length === 0) {
       return <EmptyState>둥지에 추가한 도서가 없습니다.</EmptyState>;
     }
 
     return (
       <Container>
-        <BookGrid>
-          {books.map((book) => (
-            <BookCard key={`${book.bookId}-${book.createdAt}`}>
-              <DeleteButton
-                onClick={(e) => handleDeleteBook(book.bookId, e)}
-                title="둥지에서 삭제"
-                className="delete-button"
-              >
-                <FaTrash size={14} />
-              </DeleteButton>
+        {/* 모달 컴포넌트 */}
+        {modalType && (
+          <ModalOverlay>
+            <ModalContent>
+              {modalType === 'delete' && (
+                <>
+                  <ModalTitle>
+                    <FaExclamationCircle color="#dc2626" />
+                    도서 삭제
+                  </ModalTitle>
+                  <p>{modalMessage}</p>
+                  <ModalButtons>
+                    <ModalButton onClick={closeModal}>취소</ModalButton>
+                    <ModalButton 
+                      isError 
+                      onClick={confirmDeleteBook}
+                    >
+                      삭제
+                    </ModalButton>
+                  </ModalButtons>
+                </>
+              )}
+
+              {modalType === 'error' && (
+                <>
+                  <ModalTitle>
+                    <FaExclamationCircle color="#dc2626" />
+                    오류
+                  </ModalTitle>
+                  <p>{modalMessage}</p>
+                  <ModalButtons>
+                    <ModalButton isPrimary onClick={closeModal}>
+                      확인
+                    </ModalButton>
+                  </ModalButtons>
+                </>
+              )}
+            </ModalContent>
+          </ModalOverlay>
+        )}
+        
+        <BookGrid viewMode={viewMode}>
+          {filteredBooks.map((book) => (
+            <BookCard key={`${book.bookId}-${book.createdAt}`} viewMode={viewMode}>
+              {!isOtherUserNest && (
+                <DeleteButton
+                  onClick={(e) => handleDeleteBook(book.bookId, e)}
+                  title="둥지에서 삭제"
+                  className="delete-button"
+                >
+                  <FaTrash size={14} />
+                </DeleteButton>
+              )}
               <StyledLink to={`/book-detail/${book.bookId}`}>
-                <BookCover>
+                <BookCover viewMode={viewMode}>
                   <img src={book.imageUrl} alt={book.title} />
+                  {viewMode === "cover" && (
+                    <CoverOnlyTitle className="cover-title">{book.title}</CoverOnlyTitle>
+                  )}
                 </BookCover>
-                <BookInfo>
-                  <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors}</BookAuthor>
-                  <RatingContainer>
-                    <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
-                    <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
-                  </RatingContainer>
-                  {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
-                </BookInfo>
+                {viewMode === "full" && (
+                  <BookInfo>
+                    <BookTitle>{book.title}</BookTitle>
+                    <BookAuthor>{book.authors}</BookAuthor>
+                    <RatingContainer>
+                      <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
+                      <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
+                    </RatingContainer>
+                    <CreatedAtTag>{formatDate(book.createdAt)}</CreatedAtTag>
+                    {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
+                  </BookInfo>
+                )}
               </StyledLink>
             </BookCard>
           ))}
