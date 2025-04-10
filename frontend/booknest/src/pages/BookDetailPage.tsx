@@ -202,6 +202,20 @@ const SectionTitle = styled.h2`
   font-size: 20px;
   margin-bottom: 16px;
   color: #333;
+  display: inline;
+  position: relative;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 2px;
+    width: 100%;
+    height: 10px;
+    background-color: rgba(0, 196, 115, 0.4);
+    z-index: -1;
+    transform: skewX(-4deg);
+  }
 `;
 
 const Content = styled.p<{ isExpanded?: boolean }>`
@@ -987,6 +1001,8 @@ const BookDetailPage = () => {
               )}
             </Section>
           )}
+
+          <SectionTitle>한줄평</SectionTitle>
 
           <CommentForm bookId={Number(bookId)} onCommentSubmit={handleCommentSubmit} />
           <div ref={reviewListRef}>

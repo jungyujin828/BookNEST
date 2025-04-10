@@ -290,7 +290,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
 
   return (
     <ReviewSection>
-      <SectionTitle>리뷰</SectionTitle>
+      
       {sortedReviews.length > 0 ? (
         <>
           {sortedReviews.map((review) => {
@@ -326,7 +326,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
                           <ActionButton 
                             className="delete"
                             onClick={() => {
-                              if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+                              if (window.confirm('정말로 이 한줄평을 삭제하시겠습니까?')) {
                                 handleCommentDelete(review.reviewId);
                               }
                             }}
@@ -355,16 +355,16 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
               onClick={loadMoreReviews}
               disabled={reviewsLoading}
             >
-              {reviewsLoading ? '로딩 중...' : reviews.totalElements > 5 ? '전체 리뷰 보기' : '더보기'}
+              {reviewsLoading ? '로딩 중...' : reviews.totalElements > 5 ? '전체 한줄평 보기' : '더보기'}
             </LoadMoreButton>
           )}
           
           <ReviewPagination>
-            <span>총 {reviews.totalElements}개의 리뷰 중 {sortedReviews.length}개 표시 중</span>
+            <span>총 {reviews.totalElements}개의 한줄평 중 {sortedReviews.length}개 표시 중</span>
           </ReviewPagination>
         </>
       ) : (
-        <EmptyReviews>아직 작성된 리뷰가 없습니다.</EmptyReviews>
+        <EmptyReviews>아직 작성된 한줄평이 없습니다.</EmptyReviews>
       )}
     </ReviewSection>
   );
