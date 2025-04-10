@@ -3,18 +3,14 @@ package com.ssafy.booknest.domain.book.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.booknest.domain.book.client.FastApiClient;
-import com.ssafy.booknest.domain.book.dto.response.FastApiRecommendation;
-import com.ssafy.booknest.domain.book.dto.response.FastApiResponse;
+import com.ssafy.booknest.domain.book.dto.response.recommendation.FastApiRecommendation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.HttpHeaders;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

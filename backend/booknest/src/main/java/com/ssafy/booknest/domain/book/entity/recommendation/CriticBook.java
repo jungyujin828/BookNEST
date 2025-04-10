@@ -1,5 +1,6 @@
-package com.ssafy.booknest.domain.book.entity;
+package com.ssafy.booknest.domain.book.entity.recommendation;
 
+import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

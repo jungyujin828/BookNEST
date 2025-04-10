@@ -57,18 +57,9 @@ public class NaverOAuthStrategy implements OAuthStrategy {
                 throw new CustomException(ErrorCode.OAUTH_SERVER_ERROR);
             }
 
-            // 닉네임 없으면 기본값 생성
-            String nickname = user.getNickname();
-            if (nickname == null || nickname.isBlank()) {
-                nickname = "naver_user_" + UUID.randomUUID().toString().substring(0, 8);
-            }
-
-            String email = user.getEmail();
 
             return OAuthUserInfo.builder()
                     .id(user.getId())
-                    .email(email)
-                    .nickname(nickname)
                     .build();
 
         } catch (IOException e) {
