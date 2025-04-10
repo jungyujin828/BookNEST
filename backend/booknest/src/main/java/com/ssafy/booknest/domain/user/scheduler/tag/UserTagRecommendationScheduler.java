@@ -25,7 +25,7 @@ public class UserTagRecommendationScheduler {
     private final BookRepository bookRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 5, initialDelay = 1000 * 60 * 2)
+    @Scheduled(fixedRate = 1000 * 60 * 30 * 3, initialDelay = 1000 * 60 * 3) // 1시간 30분 마다 실행
     public void runUserTagRecommendationBatch() {
         log.info("[추천 배치 시작] 유저 선호 태그 기반 추천 도서 저장 시작");
 

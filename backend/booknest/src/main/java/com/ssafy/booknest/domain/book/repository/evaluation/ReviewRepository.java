@@ -1,7 +1,7 @@
-package com.ssafy.booknest.domain.book.repository;
+package com.ssafy.booknest.domain.book.repository.evaluation;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Review;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

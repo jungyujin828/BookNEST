@@ -25,7 +25,7 @@ public class UserCategoryRecommendationScheduler {
     private final BookRepository bookRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 5, initialDelay = 1000 * 60 * 1)
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 1, initialDelay = 1000 * 60 * 3) // 1시간 마다 실행
     public void runCategoryRecommendationBatch() {
         log.info("[카테고리 추천 배치 시작] 유저 선호 카테고리 기반 추천 도서 저장");
 

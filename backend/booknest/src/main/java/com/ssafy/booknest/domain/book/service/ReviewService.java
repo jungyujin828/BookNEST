@@ -4,10 +4,13 @@ import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.evaluation.BestReviewResponse;
 import com.ssafy.booknest.domain.book.dto.response.evaluation.UserReviewResponse;
 import com.ssafy.booknest.domain.book.entity.*;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
+import com.ssafy.booknest.domain.book.entity.evaluation.ReviewLike;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewLikeRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewLikeRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
@@ -56,7 +59,7 @@ public class ReviewService {
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
 
         // 평점이 있으면 포함해서 빌더에 설정
-        Optional<Rating> ratingOptional = ratingRepository.findByUserIdAndBookId(userId, bookId);
+        Optional<Rating> ratingOptional = ratingRepository.getRatingByUserIdAndBookId(userId, bookId);
 
         Review review = Review.builder()
                 .user(user)

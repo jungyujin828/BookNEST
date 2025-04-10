@@ -1,9 +1,6 @@
 package com.ssafy.booknest.domain.nest.dto.response;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.entity.Review;
-import com.ssafy.booknest.domain.nest.entity.BookNest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

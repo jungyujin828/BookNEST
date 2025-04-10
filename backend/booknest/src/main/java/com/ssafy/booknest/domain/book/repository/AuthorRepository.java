@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface AuthorRepository extends JpaRepository<Author, Integer> {
 
+    // 작가 이름 목록 조회
     Optional<Author> findByName(String name);
 }

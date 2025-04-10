@@ -1,6 +1,6 @@
-package com.ssafy.booknest.domain.book.repository;
+package com.ssafy.booknest.domain.book.repository.evaluation;
 
-import com.ssafy.booknest.domain.book.entity.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,9 +15,9 @@ import java.util.Optional;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
+    // 특정 유저의 해당 책에 대한 평점 조회
     Optional<Rating> getRatingByUserIdAndBookId(Integer userId, Integer bookId);
 
-    Optional<Rating> findByUserIdAndBookId(Integer userId, Integer bookId);
 
     boolean existsByUserIdAndBookId(Integer userId, Integer bookId);
 

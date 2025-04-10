@@ -35,9 +35,4 @@ public class PopularAuthorBook extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    public PopularAuthorBook(String authorName, Book book) {
-        this.authorName = authorName;
-        this.book = book;
-        this.updatedAt = LocalDateTime.now();
-    }
 }

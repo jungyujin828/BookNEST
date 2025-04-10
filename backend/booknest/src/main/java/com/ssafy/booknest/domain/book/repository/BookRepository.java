@@ -24,6 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     @Query("SELECT ROUND(AVG(r.rating), 2) FROM Rating r WHERE r.book.id = :bookId")
     Optional<Double> findAverageRatingByBookId(@Param("bookId") int bookId);
 
+    // 특정 도서와 관련 한줄평 조회
     @Query("""
     SELECT b FROM Book b
     LEFT JOIN FETCH b.reviews r
@@ -32,7 +33,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
 """)
     Optional<Book> findBookDetailById(@Param("bookId") Integer bookId);
 
-    // 화제의 작가 최상위 3명의 책 가져오기
+    // 화제의 작가의 도서들 조회
     @Query("""
         SELECT b FROM Book b
         JOIN b.bookAuthors ba
@@ -43,7 +44,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findBooksByAuthorNameLike(@Param("author") String author, Pageable pageable);
 
 
-
+    // 평가가 등록된 도서 중 제외할 ID 리스트를 뺀 후, 평점 개수 기준으로 내림차순 정렬하여 페이징 조회
     @Query("""
     SELECT b 
     FROM Book b 
@@ -53,9 +54,11 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     """)
     Page<Book> findMostRatedBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
 
+    // 제외할 ID 리스트를 제외한 도서 중 최근 출간일 순으로 정렬하여 페이징 조회
     @Query("SELECT b FROM Book b WHERE b.id NOT IN :excludedIds ORDER BY b.publishedDate DESC")
     Page<Book> findRecentBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
 
+    // 제외할 ID 리스트를 제외한 도서 중 무작위 순서로 페이징 조회
     @Query("SELECT b FROM Book b WHERE b.id NOT IN :excludedIds ORDER BY function('RAND')")
     Page<Book> findRandomBooksExcluding(@Param("excludedIds") List<Integer> excludedIds, Pageable pageable);
 
@@ -71,46 +74,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findRandomBooksByTag(@Param("tag") String tag, Pageable pageable);
 
 
-    // 특정 태그를 가진 책에서 해당 유저가 평가하지 않은 책
-    @Query(value = """
-    SELECT b.id
-    FROM book b
-    JOIN book_tag bt ON b.id = bt.book_id
-    JOIN tag t ON bt.tag_id = t.id
-    WHERE t.name = :tagName
-      AND b.id NOT IN (:excludedIds)
-    ORDER BY RAND()
-    LIMIT 15
-    """, nativeQuery = true)
-    List<Integer> findRandomBookIdsByTagNameExcluding(
-            @Param("tagName") String tagName,
-            @Param("excludedIds") List<Integer> excludedIds
-    );
-
-
-
-
-    // 특정 카테고리를 가진 책에서 해당 유저가 평가하지 않은 책
-    @Query("""
-        SELECT b.id
-        FROM Book b
-        JOIN b.bookCategories bc
-        JOIN bc.category c
-        WHERE c.name = :categoryName
-        AND b.id NOT IN :excludedIds
-     """)
-    List<Integer> findBookIdsByCategoryNameExcluding(
-            @Param("categoryName") String categoryName,
-            @Param("excludedIds") List<Integer> excludedIds
-    );
-
-
-    @EntityGraph(attributePaths = {"bookAuthors", "bookAuthors.author"})
-    @Query("SELECT b FROM Book b WHERE b.id IN :ids")
-    List<Book> findAllByIdWithAuthors(@Param("ids") List<Integer> ids);
-
-
-
+    // 지정된 카테고리 이름에 해당하는 도서 중 랜덤으로 도서 목록 조회 (페이징 지원)
     @Query("""
     SELECT b FROM Book b
     JOIN b.bookCategories bc

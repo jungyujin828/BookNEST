@@ -3,15 +3,12 @@ package com.ssafy.booknest.domain.book.dto.response.recommendation;
 import com.ssafy.booknest.domain.book.entity.recommendation.AgeGenderBook;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.user.enums.Gender;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

@@ -13,13 +13,15 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Tag {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name="name", nullable = false)
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "tag")
-    private List<BookTag> tags = new ArrayList<>();
+    private List<BookTag> bookTags = new ArrayList<>();
 }

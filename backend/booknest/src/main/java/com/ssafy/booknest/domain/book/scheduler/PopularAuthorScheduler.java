@@ -3,10 +3,10 @@ package com.ssafy.booknest.domain.book.scheduler;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.BookAuthor;
 import com.ssafy.booknest.domain.book.entity.recommendation.PopularAuthorBook;
-import com.ssafy.booknest.domain.book.entity.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.recommandation.PopularAuthorBookRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ public class PopularAuthorScheduler {
     private static final int TOP_AUTHOR_COUNT = 1; // 상위 작가 수
     private static final int MAX_BOOKS_PER_AUTHOR = 15; // 작가당 최대 저장할 책 수
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 3) // 3시간마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 4) // 4시간마다 실행
     @Transactional
     public void runPopularAuthorBatch() {
         log.info("[배치 시작] 평점 기반 화제의 작가 선정");

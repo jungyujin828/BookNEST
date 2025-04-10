@@ -1,5 +1,6 @@
-package com.ssafy.booknest.domain.book.entity;
+package com.ssafy.booknest.domain.book.entity.evaluation;
 
+import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;

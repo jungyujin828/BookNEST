@@ -1,11 +1,10 @@
 package com.ssafy.booknest.domain.user.scheduler.tag;
 
 import com.ssafy.booknest.domain.book.entity.BookTag;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.tag.UserTagAnalysis;
-import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +24,7 @@ public class UserTagAnalysisScheduler {
     private final UserTagAnalysisRepository userTagAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 5) // 5분마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 30 * 3) // 1시간 30분 마다 실행
     public void runUserTagAnalysisBatch() {
         log.info("[태그 배치 시작] 유저 선호 분석");
 

@@ -1,5 +1,6 @@
-package com.ssafy.booknest.domain.book.entity;
+package com.ssafy.booknest.domain.book.entity.evaluation;
 
+import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
 import jakarta.persistence.*;
@@ -40,7 +41,7 @@ public class Review extends BaseEntity {
     private Book book;
 
     @Builder.Default
-    @OneToMany(mappedBy = "review")
+    @OneToMany(mappedBy = "review", orphanRemoval = true)
     private List<ReviewLike> reviewLikes = new ArrayList<>();
 
     public void updateRating(Double rating) {
