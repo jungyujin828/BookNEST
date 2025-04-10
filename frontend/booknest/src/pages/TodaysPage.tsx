@@ -244,13 +244,15 @@ const TodaysPage = () => {
     background-color: white;
   `;
 
-  const EmptyImage = styled.img``;
+  const EmptyImage = styled.img`
+    height: 100%;
+  `;
 
   if (!books.length || isLoading) {
     return (
-      <MainContainer>
-        <h1>로딩중..</h1>
-      </MainContainer>
+      <EmptyContainer>
+        <EmptyImage src="/todays_empty.png" alt="오늘의 책 준비중" />
+      </EmptyContainer>
     );
   }
 

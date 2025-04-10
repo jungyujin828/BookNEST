@@ -5,11 +5,11 @@ import AuthorBook from "../components/AuthorBook";
 import AgeBooks from "../components/AgeBooks";
 import CriticBooks from "../components/CriticBooks";
 import TodayBestComments from "../components/TodayBestComments";
-import LibraryBooks from '../components/LibraryBooks';
-import TagBooks from '../components/TagBooks';
-import FavoriteCategoryBooks from '../components/FavoriteCategoryBooks';
-import FavoriteTagBooks from '../components/FavoriteTagBooks';
-import RecentTagBooks from '../components/RecentTagBooks';
+import LibraryBooks from "../components/LibraryBooks";
+import TagBooks from "../components/TagBooks";
+import FavoriteCategoryBooks from "../components/FavoriteCategoryBooks";
+import FavoriteTagBooks from "../components/FavoriteTagBooks";
+import RecentTagBooks from "../components/RecentTagBooks";
 import { useAuthStore } from "../store/useAuthStore";
 import api from "../api/axios";
 
@@ -91,11 +91,11 @@ const HomePage = () => {
   return (
     <PageWrapper>
       <HomeContainer>
-        <TodayBestComments />
         <RecentTagBooks />
         <FavoriteCategoryBooks />
         <FavoriteTagBooks />
         <AgeBooks />
+        <TodayBestComments />
         <BestSeller />
         <AuthorBook />
         <CriticBooks />
