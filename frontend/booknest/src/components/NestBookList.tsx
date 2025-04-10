@@ -111,6 +111,7 @@ const BookTitle = styled.h3`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none;
 `;
 
 const BookAuthor = styled.p`
@@ -160,7 +161,7 @@ const PaginationContainer = styled.div`
 `;
 
 const PageButton = styled.button<{ isActive?: boolean }>`
-  background-color: ${(props) => (props.isActive ? "#4CAF50" : "white")};
+  background-color: ${(props) => (props.isActive ? "#00c473" : "white")};
   color: ${(props) => (props.isActive ? "white" : "#333")};
   border: 1px solid #ddd;
   padding: 8px 12px;
@@ -170,7 +171,7 @@ const PageButton = styled.button<{ isActive?: boolean }>`
   transition: background-color 0.2s, color 0.2s;
 
   &:hover {
-    background-color: ${(props) => (props.isActive ? "#45a049" : "#f5f5f5")};
+    background-color: ${(props) => (props.isActive ? "#00b368" : "#f5f5f5")};
   }
 
   &:disabled {
@@ -212,7 +213,7 @@ const LoginRequiredState = styled.div`
 `;
 
 const LoginButton = styled.button`
-  background-color: #4caf50;
+  background-color: #00c473;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -223,7 +224,7 @@ const LoginButton = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #00b368;
   }
 `;
 
@@ -248,6 +249,12 @@ const DeleteButton = styled.button`
   &:hover {
     background-color: rgb(220, 53, 69);
   }
+`;
+
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
 `;
 
 const renderRatingStars = (rating: number) => {
@@ -561,7 +568,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
               >
                 <FaTrash size={14} />
               </DeleteButton>
-              <Link to={`/book-detail/${book.bookId}`}>
+              <StyledLink to={`/book-detail/${book.bookId}`}>
                 <BookCover>
                   <img src={book.imageUrl} alt={book.title} />
                 </BookCover>
@@ -574,7 +581,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
                   </RatingContainer>
                   {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
                 </BookInfo>
-              </Link>
+              </StyledLink>
             </BookCard>
           ))}
         </BookGrid>

@@ -87,7 +87,19 @@ const SearchRecent: React.FC<SearchRecentProps> = ({ onSelect, onClose }) => {
 
   const handleDelete = (e: React.MouseEvent, query: string) => {
     e.stopPropagation();
+    e.preventDefault();
     removeRecent(query);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleClearAll = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    clearRecent();
   };
 
   // Get the last 5 recent searches to display
@@ -98,7 +110,12 @@ const SearchRecent: React.FC<SearchRecentProps> = ({ onSelect, onClose }) => {
       <Title>
         <h3>최근 검색어</h3>
         {recentSearches.length > 0 && (
-          <ClearButton onClick={clearRecent}>모두 삭제</ClearButton>
+          <ClearButton 
+            onClick={handleClearAll}
+            onMouseDown={handleMouseDown}
+          >
+            모두 삭제
+          </ClearButton>
         )}
       </Title>
 
@@ -109,7 +126,10 @@ const SearchRecent: React.FC<SearchRecentProps> = ({ onSelect, onClose }) => {
         >
           <TimeIcon>⏱</TimeIcon>
           <QueryText>{item.query}</QueryText>
-          <DeleteButton onClick={(e) => handleDelete(e, item.query)}>
+          <DeleteButton 
+            onClick={(e) => handleDelete(e, item.query)}
+            onMouseDown={handleMouseDown}
+          >
             ×
           </DeleteButton>
         </SearchItem>

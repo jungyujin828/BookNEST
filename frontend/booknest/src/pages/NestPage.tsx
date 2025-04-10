@@ -12,8 +12,8 @@ const Container = styled.div`
 
 const TabContainer = styled.div`
   display: flex;
-  border-bottom: 1px solid #ddd;
   margin-bottom: 20px;
+  flex-grow: 1;
 `;
 
 const Tab = styled.button<{ $active: boolean }>`
@@ -21,44 +21,71 @@ const Tab = styled.button<{ $active: boolean }>`
   border: none;
   background: none;
   font-size: 16px;
-  font-weight: ${(props) => (props.$active ? "bold" : "normal")};
-  color: ${(props) => (props.$active ? "#4a90e2" : "#666")};
+  font-weight: ${(props) => (props.$active ? "600" : "normal")};
+  color: ${(props) => (props.$active ? "#00c473" : "#666")};
   cursor: pointer;
   position: relative;
+  transition: all 0.2s ease;
+  border-radius: 4px;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -1px;
+    bottom: 0;
     left: 0;
     width: 100%;
-    height: 2px;
-    background-color: ${(props) => (props.$active ? "#4a90e2" : "transparent")};
+    height: 3px;
+    background-color: ${(props) => (props.$active ? "#00c473" : "transparent")};
+    border-radius: 3px;
   }
 
   &:hover {
-    color: #4a90e2;
+    color: #00c473;
+    background-color: ${(props) => (props.$active ? "transparent" : "rgba(0, 196, 115, 0.05)")};
   }
 `;
 
 const AddButton = styled.button`
-  padding: 8px 16px;
-  background-color: #4a90e2;
+  padding: 10px 18px;
+  background-color: #00c473;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-left: auto;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 196, 115, 0.2);
 
   &:hover {
-    background-color: #357abd;
+    background-color: #00b368;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 196, 115, 0.3);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 196, 115, 0.2);
+  }
+
+  &::before {
+    content: "+";
+    margin-right: 6px;
+    font-size: 18px;
+    font-weight: 400;
   }
 `;
 
 const HeaderSection = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  justify-content: space-between;
+  background-color: white;
+  padding: 5px;
+  border-radius: 12px;
 `;
 
 const NestPage = () => {

@@ -317,11 +317,36 @@ const SearchPage = () => {
   const searchBarRef = useRef<any>(null);
   const navigate = useNavigate();
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isTagsExpanded, setIsTagsExpanded] = useState(true);
 
   // Remove the previous useEffect and use a ref to track the initial render
   const isInitialMount = useRef(true);
+
+  // Handle browser back button to go back to previous page instead of previous search
+  useEffect(() => {
+    const handlePopState = () => {
+      // 페이지가 처음 로드될 때는 아무 동작 안함
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+      
+      // 현재 URL이 /search로 시작하고 쿼리 파라미터가 변경된 경우,
+      // 브라우저 뒤로가기 버튼을 누른 것이므로 실제 이전 페이지로 이동
+      const pathName = window.location.pathname;
+      if (pathName === '/search') {
+        // 검색 내역 지우고 메인 페이지로 이동
+        navigate(-1);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
 
   // Modify the initial useEffect to not collapse tags based on search results
   useEffect(() => {
@@ -357,7 +382,8 @@ const SearchPage = () => {
       params.set("type", newType);
     }
 
-    setSearchParams(params);
+    // replace: true 옵션을 추가하여 브라우저 히스토리에 새 항목을 추가하지 않고 현재 항목을 대체
+    setSearchParams(params, { replace: true });
   };
 
   // 기존 핸들러들 수정
@@ -383,6 +409,7 @@ const SearchPage = () => {
     setSelectedTags(newSelectedTags);
     updateSearchParams(searchTerm, newSelectedTags);
     setIsSearchActive(true);
+    setIsSearching(true);
 
     // 검색 실행
     try {
@@ -433,6 +460,8 @@ const SearchPage = () => {
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -442,6 +471,10 @@ const SearchPage = () => {
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
+      setIsSearchActive(false);
+    } else {
+      // 검색어 입력 중일 때는 isSearchActive를 true로 설정
+      setIsSearchActive(true);
     }
     updateSearchParams(value, selectedTags);
   };
@@ -453,7 +486,7 @@ const SearchPage = () => {
       setTotalBooks(data.totalElements);
       setTotalPages(data.totalPages);
       setBooks(data.content);
-      setIsSearchActive(true);
+      setIsSearchActive(false); // 검색 완료 후 isSearchActive를 false로 재설정
       
       // Don't auto-collapse tags after search
       // setIsTagsExpanded(false);
@@ -467,6 +500,7 @@ const SearchPage = () => {
         setUsers([]);
       }
       setBooks([]);
+      setIsSearchActive(false); // 검색 완료 후 isSearchActive를 false로 재설정
     }
   };
 
@@ -524,6 +558,7 @@ const SearchPage = () => {
     const searchTermToUse = termToSearch !== undefined ? termToSearch : searchTerm;
     
     console.log("SearchPage - Triggering Search with term:", searchTermToUse, "tags:", selectedTags);
+    setIsSearching(true);
     try {
       const response = await api.get("/api/search/book", {
         params: {
@@ -561,6 +596,8 @@ const SearchPage = () => {
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -575,7 +612,7 @@ const SearchPage = () => {
     setIsSearchFocused(false);
     setTimeout(() => {
       setShowRecent(false);
-    }, 200);
+    }, 300);
   };
 
   const toggleTags = () => {
@@ -594,9 +631,18 @@ const SearchPage = () => {
     triggerSearch(page);
   };
 
-  // Function for searching by tags
+  // Update the tag search function to clear results when all tags are cleared
   const handleTagSearch = async () => {
-    // Execute search with current search term
+    // If there are no tags, clear the book results regardless of search term
+    if (selectedTags.length === 0) {
+      setBooks([]);
+      setTotalBooks(0);
+      setTotalPages(0);
+      setIsSearchActive(false);
+      return;
+    }
+    
+    // Otherwise, execute search with current search term
     await triggerSearch(1, searchTerm);
   };
 
@@ -700,7 +746,10 @@ const SearchPage = () => {
           <SearchTag
             selectedTags={selectedTags}
             onTagSelect={handleTagSelect}
-            onClearTags={() => setSelectedTags([])}
+            onClearTags={() => {
+              // 태그 전체 해제 시 페이지 새로고침
+              window.location.href = '/search';
+            }}
             onSearch={handleTagSearch}
           />
           <ToggleContainer>
@@ -735,9 +784,9 @@ const SearchPage = () => {
 
       {activeTab === "books" && books.length > 0 && <ResultCount>총 {totalBooks}개의 검색결과</ResultCount>}
 
-      {activeTab === "books" && books.length === 0 && searchTerm && (
+      {activeTab === "books" && books.length === 0 && searchTerm && !isSearching && !isSearchActive && (
         <NoResultsMessage>
-          <NoResultsIcon>검색 결과 없음</NoResultsIcon>
+          <NoResultsIcon>🐣</NoResultsIcon>
           <NoResultsTitle>
             {selectedTags.length > 0 
               ? "태그와 검색어에 일치하는 도서를 찾지 못했어요"
