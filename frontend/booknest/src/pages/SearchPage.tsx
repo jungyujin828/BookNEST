@@ -298,6 +298,14 @@ const TermHighlight = styled.span`
   font-weight: 500;
 `;
 
+const BackButton = styled.button`
+  display: none; /* 불필요한 컴포넌트이므로 화면에서 숨김 처리 */
+`;
+
+const BackIcon = styled.span`
+  display: none;
+`;
+
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<"books" | "users">(
@@ -324,29 +332,21 @@ const SearchPage = () => {
   // Remove the previous useEffect and use a ref to track the initial render
   const isInitialMount = useRef(true);
 
-  // Handle browser back button to go back to previous page instead of previous search
+  // 페이지 로드시 URL의 검색 파라미터로 검색 실행
   useEffect(() => {
-    const handlePopState = () => {
-      // 페이지가 처음 로드될 때는 아무 동작 안함
-      if (isInitialMount.current) {
-        isInitialMount.current = false;
-        return;
-      }
+    // 검색어나 태그가 URL에 있으면 검색 실행
+    const query = searchParams.get("query");
+    const tags = searchParams.get("tags")?.split(",").filter(Boolean) || [];
+    
+    if (query || tags.length > 0) {
+      // 페이지가 마운트된 직후에 검색 실행
+      const timer = setTimeout(() => {
+        triggerSearch(1, query || "");
+      }, 300);
       
-      // 현재 URL이 /search로 시작하고 쿼리 파라미터가 변경된 경우,
-      // 브라우저 뒤로가기 버튼을 누른 것이므로 실제 이전 페이지로 이동
-      const pathName = window.location.pathname;
-      if (pathName === '/search') {
-        // 검색 내역 지우고 메인 페이지로 이동
-        navigate(-1);
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [navigate]);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Modify the initial useEffect to not collapse tags based on search results
   useEffect(() => {
@@ -683,6 +683,14 @@ const SearchPage = () => {
 
   return (
     <SearchContainer>
+      {/* 뒤로가기 버튼은 필요 없으므로 제거
+      {(books.length > 0 || users.length > 0 || (searchTerm && !isSearching)) && (
+        <BackButton onClick={() => window.location.href = '/search'}>
+          <BackIcon>←</BackIcon> 검색 초기화
+        </BackButton>
+      )}
+      */}
+      
       <TabContainer>
         <Tab active={activeTab === "books"} onClick={() => handleTabChange("books")}>
           도서
