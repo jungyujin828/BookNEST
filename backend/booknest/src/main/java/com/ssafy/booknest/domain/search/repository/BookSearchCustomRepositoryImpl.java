@@ -37,13 +37,14 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
                             .functionScore(fs -> fs
                                     .query(inner -> inner
                                             .bool(b -> b
-                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.0f)))
-                                                    .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f)))
-                                                    .should(s3 -> s3.matchPhrase(mp -> mp.field("authors.autocomplete").query(keyword).boost(4.0f)))
-                                                    .should(s5 -> s5.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.5f)))
-                                                    .should(s6 -> s6.match(mp -> mp.field("title").query(keyword).boost(1.5f)))
-                                                    .should(s7 -> s7.matchPhrase(mp -> mp.field("authors").query(keyword).boost(5.5f)))
-                                                    .should(s8 -> s8.match(mp -> mp.field("authors").query(keyword).boost(1.5f)))
+                                                            // 오토컴플리트 위주 + 일반 필드 보조
+                                                            .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.0f)))
+                                                            .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f)))
+                                                            .should(s3 -> s3.matchPhrase(mp -> mp.field("authors.autocomplete").query(keyword).boost(3.5f)))
+                                                            .should(s4 -> s4.match(m -> m.field("authors.autocomplete").query(keyword).boost(2.5f)))
+                                                            .should(s5 -> s5.matchPhrase(mp -> mp.field("title").query(keyword).boost(1.5f)))
+                                                            .should(s6 -> s6.matchPhrase(mp -> mp.field("authors").query(keyword).boost(1.5f)))
+                                                            .minimumShouldMatch("1")
                                             )
                                     )
                                     .functions(fns -> fns
