@@ -478,7 +478,7 @@ const ModalTitle = styled.h3`
 const ModalButton = styled.button<{ $variant?: "primary" | "secondary" }>`
   padding: 8px 16px;
   margin: 8px;
-  background-color: ${(props) => (props.$variant === "primary" ? "#4a90e2" : "#6c757d")};
+  background-color: ${(props) => (props.$variant === "primary" ? "#00c473" : "#6c757d")};
   color: white;
   border: none;
   border-radius: 4px;
@@ -486,7 +486,7 @@ const ModalButton = styled.button<{ $variant?: "primary" | "secondary" }>`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: ${(props) => (props.$variant === "primary" ? "#357abd" : "#5a6268")};
+    background-color: ${(props) => (props.$variant === "primary" ? "#00b369" : "#5a6268")};
   }
 `;
 
@@ -655,14 +655,24 @@ const BookDetailPage = () => {
   };
 
   const handleRatingChange = async (newRating: number) => {
+    if (!book) return;
+    
     try {
-      // 책 정보를 다시 불러와서 평균 평점 업데이트
-      const response = await api.get(`/api/book/${bookId}`);
-
-      if (response.data.success) {
-        setBook(response.data.data);
-      } else {
-        throw new Error("Failed to fetch updated book data");
+      // 이전 평점과 현재 평점이 다를 경우에만 UI 업데이트
+      const oldUserRating = userRatings[book.bookId] || 0;
+      
+      // 사용자에게 즉각적인 피드백을 주기 위해 UI를 먼저 업데이트
+      // 평점이 변경되었음을 시각적으로 표시하기 위해 별점 컴포넌트 상태 업데이트
+      if (oldUserRating !== newRating) {
+        // 모든 평점 정보를 가져오는 API 호출
+        const response = await api.get(`/api/book/${bookId}`);
+        
+        if (response.data.success) {
+          // 새로운 평균 평점으로 즉시 UI 업데이트
+          setBook(response.data.data);
+        } else {
+          throw new Error("Failed to fetch updated book data");
+        }
       }
     } catch (err) {
       console.error("Error updating rating:", err);
