@@ -44,6 +44,7 @@ public class AdminIndexController {
                             .properties("image_url", p -> p.keyword(k -> k))
                             .properties("authors", p -> p.text(t -> t.analyzer("korean_analyzer")))
                             .properties("tags", p -> p.keyword(k -> k))
+                            .properties("total_ratings", p -> p.integer(i -> i))  // total_ratings 필드를 추가
                     )
             );
 
@@ -53,4 +54,5 @@ public class AdminIndexController {
                     .body("오류: " + e.getMessage());
         }
     }
+
 }
