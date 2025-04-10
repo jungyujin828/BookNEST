@@ -594,9 +594,18 @@ const SearchPage = () => {
     triggerSearch(page);
   };
 
-  // Function for searching by tags
+  // Update the tag search function to clear results when all tags are cleared
   const handleTagSearch = async () => {
-    // Execute search with current search term
+    // If there are no tags and no search term, clear the book results
+    if (selectedTags.length === 0 && !searchTerm) {
+      setBooks([]);
+      setTotalBooks(0);
+      setTotalPages(0);
+      setIsSearchActive(false);
+      return;
+    }
+    
+    // Otherwise, execute search with current search term
     await triggerSearch(1, searchTerm);
   };
 
