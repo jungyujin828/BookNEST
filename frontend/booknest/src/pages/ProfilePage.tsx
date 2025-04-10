@@ -469,7 +469,7 @@ const ProfilePage = () => {
                     <FollowButton isFollowing={isFollowing} onClick={handleFollowToggle}>
                       {isFollowing ? "팔로잉" : "팔로우"}
                     </FollowButton>
-                    <NestButton onClick={() => navigate(`/nest/${userId}`)}>둥지로 가기</NestButton>
+                    <NestButton onClick={() => navigate(`/nest/${userId}?nestId=${profileData?.nestId || userId}`)}>둥지로 가기</NestButton>
                   </ButtonContainer>
                 )}
               </UserNameSection>

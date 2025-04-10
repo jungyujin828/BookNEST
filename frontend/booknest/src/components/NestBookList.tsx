@@ -394,9 +394,17 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         setError(null);
         setIsAuthError(false);
 
+        // 디버그 정보 추가 - props로 전달된 값 확인
+        console.log("Props 값:", { propUserId, propNestId });
+        console.log("Current 값:", { currentUserId, currentNestId });
+
         // 우선순위: props로 전달된 값 > 사용자 정보에서 가져온 값
         const effectiveUserId = propUserId || currentUserId;
-        const effectiveNestId = propNestId || currentNestId;
+        // nestId가 없는 경우 userId를 사용 (백엔드 API 요구사항)
+        const effectiveNestId = propNestId || currentNestId || effectiveUserId;
+
+        // 디버그 정보 추가 - 유효한 값 확인
+        console.log("Effective 값:", { effectiveUserId, effectiveNestId });
 
         // API 스펙에 맞게 Query Parameter 수정
         const params: Record<string, any> = {
@@ -490,9 +498,16 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       setFilteredBooks(filtered);
     }, [sortedBooks, searchTerm]);
 
+    // 컴포넌트 마운트 시에 nestId 값이 존재하는지 로그로 확인
+    useEffect(() => {
+      console.log("NestBookList 마운트 - Props 확인:", { propUserId, propNestId });
+    }, [propUserId, propNestId]);
+
     // 컴포넌트 마운트 시 사용자 정보를 먼저 조회하고, 그 후 도서 목록 조회
     useEffect(() => {
       const initializeData = async () => {
+        console.log("initializeData 실행 - 현재 props:", { propUserId, propNestId });
+        
         // props로 userId나 nestId가 전달되지 않은 경우 사용자 정보 조회
         if (!propUserId && !propNestId) {
           const userInfoData = await fetchUserInfo();
@@ -624,6 +639,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       },
     }));
 
+    // 다른 사람의 둥지인지 확인하는 로직 추가
+    const isOtherUserNest = propUserId !== undefined && userInfo?.userId !== propUserId;
+
     if (loading && books.length === 0) {
       return <LoadingState>둥지 도서 목록을 불러오는 중...</LoadingState>;
     }
@@ -655,13 +673,15 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         <BookGrid viewMode={viewMode}>
           {filteredBooks.map((book) => (
             <BookCard key={`${book.bookId}-${book.createdAt}`} viewMode={viewMode}>
-              <DeleteButton
-                onClick={(e) => handleDeleteBook(book.bookId, e)}
-                title="둥지에서 삭제"
-                className="delete-button"
-              >
-                <FaTrash size={14} />
-              </DeleteButton>
+              {!isOtherUserNest && (
+                <DeleteButton
+                  onClick={(e) => handleDeleteBook(book.bookId, e)}
+                  title="둥지에서 삭제"
+                  className="delete-button"
+                >
+                  <FaTrash size={14} />
+                </DeleteButton>
+              )}
               <StyledLink to={`/book-detail/${book.bookId}`}>
                 <BookCover viewMode={viewMode}>
                   <img src={book.imageUrl} alt={book.title} />

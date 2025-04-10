@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
 import { FaPlus, FaSearch, FaTimes, FaThLarge, FaList } from "react-icons/fa";
 import NestBookList from "../components/NestBookList";
 import BookmarkList from "../components/BookmarkList";
@@ -352,6 +352,9 @@ const getSortLabel = (sortOption: SortOption): string => {
 };
 
 const NestPage = () => {
+  const { userId } = useParams();
+  const [searchParams] = useSearchParams();
+  const nestId = searchParams.get("nestId");
   const [activeTab, setActiveTab] = useState<"둥지" | "찜">("둥지");
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
@@ -416,9 +419,11 @@ const NestPage = () => {
                 <FaTimes size={16} />
               </ClearButton>
             </SearchBarContainer>
-            <AddButton onClick={() => setShowSearchModal(true)}>
-              <FaPlus size={14} /> <span>도서추가</span>
-            </AddButton>
+            {!userId && (
+              <AddButton onClick={() => setShowSearchModal(true)}>
+                <FaPlus size={14} /> <span>도서추가</span>
+              </AddButton>
+            )}
           </TopActionContainer>
           
           <ControlsContainer>
@@ -464,6 +469,8 @@ const NestPage = () => {
           sortOption={sortOption} 
           searchTerm={searchTerm}
           viewMode={viewMode}
+          userId={userId ? parseInt(userId) : undefined}
+          nestId={nestId ? parseInt(nestId) : undefined}
         />
       ) : (
         <BookmarkList />

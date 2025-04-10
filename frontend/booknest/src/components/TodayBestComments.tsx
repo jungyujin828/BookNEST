@@ -249,17 +249,46 @@ const TodayBestComments: React.FC = () => {
     try {
       const review = bestReviews.find(r => r.reviewId === reviewId);
       if (!review) return;
+
+      // 낙관적 UI 업데이트 (먼저 UI 업데이트)
+      const updatedReviews = bestReviews.map(r => {
+        if (r.reviewId === reviewId) {
+          // 좋아요 상태를 토글하고 좋아요 수를 조정
+          const newTotalLikes = r.myLiked ? r.totalLikes - 1 : r.totalLikes + 1;
+          const newTodayLikes = r.myLiked ? r.todayLikes - 1 : r.todayLikes + 1;
+          return {
+            ...r,
+            myLiked: !r.myLiked,
+            totalLikes: newTotalLikes,
+            todayLikes: newTodayLikes >= 0 ? newTodayLikes : 0
+          };
+        }
+        return r;
+      });
       
+      setBestReviews(updatedReviews);
+      
+      // API 호출
       if (review.myLiked) {
         await api.delete(`/api/book/review/${reviewId}/like`);
       } else {
         await api.post(`/api/book/review/${reviewId}/like`);
       }
       
-      // 리뷰 목록 새로고침
-      fetchBestReviews();
+      // 더 이상 fetchBestReviews()를 호출하지 않음
     } catch (err) {
       console.error('좋아요 처리 실패:', err);
+      
+      // 에러 발생 시 원래 상태로 롤백
+      const rollbackReviews = bestReviews.map(r => {
+        if (r.reviewId === reviewId) {
+          const originalReview = bestReviews.find(orig => orig.reviewId === reviewId);
+          return originalReview || r;
+        }
+        return r;
+      });
+      
+      setBestReviews(rollbackReviews);
       alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
