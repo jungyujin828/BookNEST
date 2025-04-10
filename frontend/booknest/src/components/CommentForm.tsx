@@ -59,8 +59,8 @@ const TextArea = styled.textarea`
   
   &:focus {
     outline: none;
-    border-color: #4CAF50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+    border-color: #00c437;
+    box-shadow: 0 0 0 2px rgba(0, 196, 55, 0.1);
   }
 `;
 
@@ -92,10 +92,10 @@ const Button = styled.button`
 `;
 
 const SubmitButton = styled(Button)`
-  background-color: #4CAF50;
+  background-color: #00c437;
 
   &:hover:not(:disabled) {
-    background-color: #45a049;
+    background-color: #00b030;
   }
 `;
 
@@ -225,7 +225,7 @@ const CommentForm = ({
           onCommentDelete(reviewId);
         }
       } else {
-        // setError(response.data.error?.message || '리뷰 삭제에 실패했습니다.');
+        setError(response.data.error?.message || '한줄평 삭제에 실패했습니다.');
       }
     } catch (err) {
       console.error('Delete API Error:', err);
@@ -254,7 +254,7 @@ const CommentForm = ({
 
   return (
     <FormContainer>
-      <Title>{isEdit ? '코멘트 수정' : '코멘트 작성'}</Title>
+      <Title>{isEdit ? '한줄평 수정' : '한줄평 작성'}</Title>
       <Form onSubmit={handleSubmit}>
         <TextArea
           value={content}

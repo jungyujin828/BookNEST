@@ -90,7 +90,7 @@ const EvaluateBookPage = () => {
         setLoading(true);
         setError(null);
 
-        const response = await api.get("/api/book/eval", {
+        const response = await api.get("/api/search/eval", {
           params: {
             keyword: sortBy,
             page: page,

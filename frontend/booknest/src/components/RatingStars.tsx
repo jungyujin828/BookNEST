@@ -106,6 +106,9 @@ const RatingStars: React.FC<RatingStarsProps> = ({
           response.data.error?.message || `Failed to ${method} rating`
         );
       }
+      
+      // API 호출 성공 후 평균 평점 업데이트를 위해 onRatingChange 다시 호출
+      onRatingChange(score);
     } catch (error) {
       console.error(
         `Failed to ${currentRating > 0 ? "update" : "create"} rating:`,
