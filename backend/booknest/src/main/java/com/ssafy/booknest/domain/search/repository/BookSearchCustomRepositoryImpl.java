@@ -32,15 +32,18 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             // 검색 쿼리 요청 작성
             SearchRequest request = SearchRequest.of(s -> s
                     .index("book")
-                    .size(10)
+                    .size(15)
                     .query(q -> q
                             .functionScore(fs -> fs
                                     .query(inner -> inner
                                             .bool(b -> b
-                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.5f)))
+                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.0f)))
                                                     .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f)))
                                                     .should(s3 -> s3.matchPhrase(mp -> mp.field("authors.autocomplete").query(keyword).boost(4.0f)))
-                                                    .should(s4 -> s4.match(m -> m.field("authors.autocomplete").query(keyword).boost(6.5f)))
+                                                    .should(s5 -> s5.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.5f)))
+                                                    .should(s6 -> s6.match(mp -> mp.field("title").query(keyword).boost(1.5f)))
+                                                    .should(s7 -> s7.matchPhrase(mp -> mp.field("authors").query(keyword).boost(5.5f)))
+                                                    .should(s8 -> s8.match(mp -> mp.field("authors").query(keyword).boost(1.5f)))
                                             )
                                     )
                                     .functions(fns -> fns
@@ -78,7 +81,7 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             }
 
             return suggestions.stream()
-                    .limit(10) // 혹시라도 초과되었을 경우 안전장치
+                    .limit(7) // 혹시라도 초과되었을 경우 안전장치
                     .collect(Collectors.toList());
 
         } catch (IOException e) {
