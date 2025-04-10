@@ -29,42 +29,47 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
     @Override
     public List<String> autocompleteTitle(String keyword) {
         try {
-            SearchResponse<Void> response = elasticsearchClient.search(s -> s
-                            .index("book")
-                            .size(10)
-                            .query(q -> q
-                                    .bool(b -> b
-                                            .should(s1 -> s1.match(m -> m.field("title.autocomplete").query(keyword)))
-                                            .should(s2 -> s2.match(m -> m.field("authors.autocomplete").query(keyword)))
+            // 검색 쿼리 요청 작성
+            SearchRequest request = SearchRequest.of(s -> s
+                    .index("book")
+                    .size(10)
+                    .query(q -> q
+                            .functionScore(fs -> fs
+                                    .query(inner -> inner
+                                            .bool(b -> b
+                                                    .should(s1 -> s1.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f))) // 제목 자동완성 정확도 우선
+                                                    .should(s2 -> s2.match(m -> m.field("authors.autocomplete").query(keyword).boost(2.0f))) // 저자 자동완성 정확도
+                                            )
                                     )
+                                    .functions(fns -> fns
+                                            .fieldValueFactor(fvf -> fvf
+                                                    .field("totalRatings")  // 평점에 따른 가중치 적용
+                                                    .factor(1.0)
+                                                    .modifier(FieldValueFactorModifier.Log1p)  // 평점 차이를 강조
+                                                    .missing(0.0)  // 평점이 없으면 기본값 0
+                                            )
+                                    )
+                                    .boostMode(FunctionBoostMode.Multiply)  // 점수 계산 방식 설정
                             )
-                            .fields(
-                                    FieldAndFormat.of(f -> f.field("title")),
-                                    FieldAndFormat.of(f -> f.field("authors"))
-                            ),
-                    Void.class
+                    )
+                    .sort(so -> so
+                            .score(sc -> sc.order(SortOrder.Desc))  // 점수 기준 내림차순 정렬
+                    )
             );
 
+            // search 메소드 호출
+            SearchResponse<SearchedBook> response = elasticsearchClient.search(request, SearchedBook.class);
+
             Set<String> suggestions = new LinkedHashSet<>();
-            for (Hit<Void> hit : response.hits().hits()) {
-                Map<String, JsonData> fields = hit.fields();
+            for (Hit<SearchedBook> hit : response.hits().hits()) {
+                SearchedBook book = hit.source();  // 실제 검색된 문서 정보
 
-                if (fields.containsKey("title")) {
-                    Object titleObj = fields.get("title").to(Object.class);
-                    if (titleObj instanceof List<?>) {
-                        ((List<?>) titleObj).forEach(t -> suggestions.add(t.toString()));
-                    } else {
-                        suggestions.add(titleObj.toString());
-                    }
+                // 검색된 책의 제목과 저자를 결과에 추가
+                if (book.getTitle() != null) {
+                    suggestions.add(book.getTitle());
                 }
-
-                if (fields.containsKey("authors")) {
-                    Object authorObj = fields.get("authors").to(Object.class);
-                    if (authorObj instanceof List<?>) {
-                        ((List<?>) authorObj).forEach(a -> suggestions.add(a.toString()));
-                    } else {
-                        suggestions.add(authorObj.toString());
-                    }
+                if (book.getAuthors() != null) {
+                    suggestions.addAll(book.getAuthors());
                 }
             }
 
