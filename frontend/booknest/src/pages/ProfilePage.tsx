@@ -499,7 +499,7 @@ const ProfilePage = () => {
 
         <Section>
           <SectionTitle>아키타입</SectionTitle>
-          <ArchetypeCard />
+          <ArchetypeCard archetype={displayData?.archetype} />
         </Section>
 
         <Divider />
