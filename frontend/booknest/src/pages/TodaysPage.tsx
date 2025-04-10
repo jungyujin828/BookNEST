@@ -208,7 +208,7 @@ const TodaysPage = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await api.get("/api/book/today");
+        const response = await api.get("/api/book/recent-keyword");
         if (response.data.success) {
           setBooks(response.data.data);
           setTimeout(() => {

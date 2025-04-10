@@ -484,7 +484,7 @@ const ModalContent = styled.div`
   text-align: center;
 `;
 
-const ModalTitle = styled.h3`
+const ModalTitle = styled.h3<{ color?: string }>`
   margin: 0 0 16px 0;
   color: ${(props) => props.color || "#333"};
 `;
@@ -545,6 +545,32 @@ const BookDetailPage = () => {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  // New alert modal state
+  const [alertModal, setAlertModal] = useState({
+    open: false,
+    message: '',
+    title: '', 
+    onConfirm: () => {},
+    isError: false
+  });
+
+  // Function to show alert modal
+  const showAlertModal = (message: string, title: string = '알림', onConfirm = () => {}, isError = false) => {
+    setAlertModal({
+      open: true,
+      message,
+      title,
+      onConfirm,
+      isError
+    });
+  };
+
+  // Function to close alert modal
+  const closeAlertModal = () => {
+    setAlertModal(prev => ({...prev, open: false}));
+    alertModal.onConfirm();
+  };
 
   useEffect(() => {
     // URL에 fromReviews 파라미터가 있으면 리뷰 섹션으로 스크롤
@@ -722,12 +748,12 @@ const BookDetailPage = () => {
 
   const handleAddToNest = () => {
     if (userRatings[Number(bookId)] === 0) {
-      alert("평점 등록은 필수입니다");
+      showAlertModal("평점 등록은 필수입니다", "평점 필요", undefined, true);
       return;
     }
 
     if (!userInfo || !userInfo.nestId) {
-      alert("사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.");
+      showAlertModal("사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.", "사용자 정보 오류", undefined, true);
       return;
     }
 
@@ -755,14 +781,13 @@ const BookDetailPage = () => {
       console.error("Error adding to nest:", error);
       
       if (error.response?.status === 409) {
-        alert("이미 둥지에 등록된 도서입니다.");
+        showAlertModal("이미 둥지에 등록된 도서입니다.", "중복 등록", undefined, true);
       } else if (error.response?.status === 400) {
-        alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
+        showAlertModal("잘못된 요청입니다. 필수 정보를 확인해주세요.", "요청 오류", undefined, true);
       } else if (error.response?.status === 401) {
-        alert("로그인이 필요한 서비스입니다.");
-        navigate(ROUTES.LOGIN);
+        showAlertModal("로그인이 필요한 서비스입니다.", "인증 오류", () => navigate(ROUTES.LOGIN), true);
       } else {
-        alert("둥지 등록 중 오류가 발생했습니다.");
+        showAlertModal("둥지 등록 중 오류가 발생했습니다.", "등록 오류", undefined, true);
       }
     } finally {
       setIsProcessing(false);
@@ -791,9 +816,9 @@ const BookDetailPage = () => {
     } catch (error: any) {
       console.error("Delete from nest error:", error);
       if (error.response?.status === 401) {
-        alert("로그인이 필요한 서비스입니다.");
+        showAlertModal("로그인이 필요한 서비스입니다.", "인증 오류", () => navigate(ROUTES.LOGIN), true);
       } else {
-        alert("둥지에서 도서 삭제 중 오류가 발생했습니다.");
+        showAlertModal("둥지에서 도서 삭제 중 오류가 발생했습니다.", "삭제 오류", undefined, true);
       }
     } finally {
       setIsProcessing(false);
@@ -1066,6 +1091,21 @@ const BookDetailPage = () => {
                 </ModalButton>
                 <ModalButton onClick={() => setShowDeleteSuccessModal(false)}>
                   계속 둘러보기
+                </ModalButton>
+              </ModalContent>
+            </ModalOverlay>
+          )}
+
+          {/* Alert Modal */}
+          {alertModal.open && (
+            <ModalOverlay onClick={closeAlertModal}>
+              <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalTitle color={alertModal.isError ? "#dc3545" : "#00c473"}>
+                  {alertModal.title}
+                </ModalTitle>
+                <div style={{ marginBottom: '20px' }}>{alertModal.message}</div>
+                <ModalButton $variant="primary" onClick={closeAlertModal}>
+                  확인
                 </ModalButton>
               </ModalContent>
             </ModalOverlay>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { FaHeart, FaRegHeart, FaTimes } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaTimes, FaExclamationCircle, FaInfoCircle } from 'react-icons/fa';
 import api from '../api/axios';
 import CommentForm from './CommentForm';
 import { useNavigate } from 'react-router-dom';
@@ -173,6 +173,9 @@ const ReviewPagination = styled.div`
   margin-top: 8px;
 `;
 
+// 모달 타입 정의
+type ModalType = 'delete' | 'error' | 'info' | 'login' | null;
+
 // 모달 관련 스타일 추가
 const ModalOverlay = styled.div`
   position: fixed;
@@ -202,6 +205,10 @@ const ModalTitle = styled.h3`
   margin-bottom: 16px;
   font-size: 18px;
   color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 `;
 
 const ModalButtons = styled.div`
@@ -211,17 +218,25 @@ const ModalButtons = styled.div`
   margin-top: 24px;
 `;
 
-const ModalButton = styled.button<{ isPrimary?: boolean }>`
+const ModalButton = styled.button<{ isPrimary?: boolean; isError?: boolean }>`
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  background-color: ${props => props.isPrimary ? '#dc2626' : '#f1f3f5'};
-  color: ${props => props.isPrimary ? 'white' : '#495057'};
+  background-color: ${props => {
+    if (props.isError) return '#dc2626';
+    if (props.isPrimary) return '#00c473';
+    return '#f1f3f5';
+  }};
+  color: ${props => (props.isPrimary || props.isError) ? 'white' : '#495057'};
   
   &:hover {
-    background-color: ${props => props.isPrimary ? '#c41d1d' : '#e9ecef'};
+    background-color: ${props => {
+      if (props.isError) return '#c41d1d';
+      if (props.isPrimary) return '#00b368';
+      return '#e9ecef';
+    }};
   }
 `;
 
@@ -231,9 +246,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  // 삭제 확인 모달 상태 추가
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  // 모달 상태 관리
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalMessage, setModalMessage] = useState('');
   const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
+  
   const navigate = useNavigate();
 
   // 리뷰 정렬 - 내 리뷰를 최상단에, 나머지는 최신순
@@ -267,33 +285,40 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
     setEditingReviewId(null);
   };
 
+  // 모달 열기 함수
+  const openModal = (type: ModalType, message: string = '') => {
+    setModalType(type);
+    setModalMessage(message);
+  };
+
+  // 모달 닫기 함수
+  const closeModal = () => {
+    setModalType(null);
+    setModalMessage('');
+    if (modalType === 'delete') {
+      setReviewToDelete(null);
+    }
+  };
+
   const handleCommentDelete = async (reviewId: number) => {
     try {
       const response = await api.delete(`/api/book/review/${reviewId}`);
       if (response.data.success) {
         onReviewChange();
-        // 모달 닫기
-        setShowDeleteModal(false);
-        setReviewToDelete(null);
+        closeModal();
       } else {
-        alert('리뷰 삭제에 실패했습니다.');
+        openModal('error', '리뷰 삭제에 실패했습니다.');
       }
     } catch (err) {
       console.error('Delete API Error:', err);
-      alert('서버 오류가 발생했습니다.');
+      openModal('error', '서버 오류가 발생했습니다.');
     }
   };
 
   // 삭제 모달 열기 함수
   const openDeleteModal = (reviewId: number) => {
     setReviewToDelete(reviewId);
-    setShowDeleteModal(true);
-  };
-
-  // 삭제 모달 닫기 함수
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
-    setReviewToDelete(null);
+    openModal('delete');
   };
 
   const handleEditClick = (reviewId: number) => {
@@ -306,7 +331,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
 
   const handleLikeToggle = async (reviewId: number) => {
     if (!currentUserId) {
-      alert('로그인이 필요한 기능입니다.');
+      openModal('login', '로그인이 필요한 기능입니다.');
       return;
     }
     
@@ -327,7 +352,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
       onReviewChange();
     } catch (err) {
       console.error('Like API Error:', err);
-      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
     }
@@ -360,21 +385,80 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
 
   return (
     <ReviewSection>
-      {/* 삭제 확인 모달 */}
-      {showDeleteModal && (
+      {/* 모달 컴포넌트 */}
+      {modalType && (
         <ModalOverlay>
           <ModalContent>
-            <ModalTitle>한줄평 삭제</ModalTitle>
-            <p>정말로 이 한줄평을 삭제하시겠습니까?</p>
-            <ModalButtons>
-              <ModalButton onClick={closeDeleteModal}>취소</ModalButton>
-              <ModalButton 
-                isPrimary 
-                onClick={() => reviewToDelete && handleCommentDelete(reviewToDelete)}
-              >
-                삭제
-              </ModalButton>
-            </ModalButtons>
+            {modalType === 'delete' && (
+              <>
+                <ModalTitle>
+                  <FaExclamationCircle color="#dc2626" />
+                  한줄평 삭제
+                </ModalTitle>
+                <p>정말로 이 한줄평을 삭제하시겠습니까?</p>
+                <ModalButtons>
+                  <ModalButton onClick={closeModal}>취소</ModalButton>
+                  <ModalButton 
+                    isError 
+                    onClick={() => reviewToDelete && handleCommentDelete(reviewToDelete)}
+                  >
+                    삭제
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'error' && (
+              <>
+                <ModalTitle>
+                  <FaExclamationCircle color="#dc2626" />
+                  오류
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton isPrimary onClick={closeModal}>
+                    확인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'info' && (
+              <>
+                <ModalTitle>
+                  <FaInfoCircle color="#00c473" />
+                  안내
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton isPrimary onClick={closeModal}>
+                    확인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'login' && (
+              <>
+                <ModalTitle>
+                  <FaInfoCircle color="#00c473" />
+                  로그인 필요
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton onClick={closeModal}>취소</ModalButton>
+                  <ModalButton 
+                    isPrimary 
+                    onClick={() => {
+                      closeModal();
+                      navigate('/login');
+                    }}
+                  >
+                    로그인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
           </ModalContent>
         </ModalOverlay>
       )}

@@ -384,7 +384,7 @@ const RecentTagBooks = () => {
         setLoading(true);
         setError(null);
         
-        const response = await api.get<RecentTagResponse>('/api/book/recent-keyword', {
+        const response = await api.get<RecentTagResponse>('/api/book/today', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
             "Content-Type": "application/json",
@@ -434,15 +434,7 @@ const RecentTagBooks = () => {
   return (
     <Container>
       <Title>
-        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한
-        {tags.map((tag, index) => (
-          <React.Fragment key={index}>
-            {index === 0 ? ' ' : ''}
-            <TagHighlight>#{tag.trim()}</TagHighlight>
-            {index < tags.length - 1 ? ', ' : ''}
-          </React.Fragment>
-        ))}
-        {' '}도서
+        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한 오늘의 도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (

@@ -2,7 +2,7 @@ import React, { useEffect, useState, forwardRef, useImperativeHandle } from "rea
 import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa";
+import { FaStar, FaStarHalfAlt, FaTrash, FaExclamationCircle, FaInfoCircle } from "react-icons/fa";
 import { SortOption, ViewMode } from "../pages/NestPage";
 
 interface NestBook {
@@ -348,6 +348,73 @@ const filterBooksByTitle = (books: NestBook[], searchTerm: string): NestBook[] =
   );
 };
 
+// 모달 타입 정의
+type ModalType = 'delete' | 'error' | null;
+
+// 모달 관련 스타일
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const ModalButton = styled.button<{ isPrimary?: boolean; isError?: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: ${props => {
+    if (props.isError) return '#dc2626';
+    if (props.isPrimary) return '#00c473';
+    return '#f1f3f5';
+  }};
+  color: ${props => (props.isPrimary || props.isError) ? 'white' : '#495057'};
+  
+  &:hover {
+    background-color: ${props => {
+      if (props.isError) return '#c41d1d';
+      if (props.isPrimary) return '#00b368';
+      return '#e9ecef';
+    }};
+  }
+`;
+
 const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProps>(
   ({ userId: propUserId, nestId: propNestId, sortOption = "latest", searchTerm = "", viewMode = "full" }, ref) => {
     const [books, setBooks] = useState<NestBook[]>([]);
@@ -367,8 +434,28 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
     const [error, setError] = useState<string | null>(null);
     const [isAuthError, setIsAuthError] = useState(false);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    
+    // 모달 상태 관리 추가
+    const [modalType, setModalType] = useState<ModalType>(null);
+    const [modalMessage, setModalMessage] = useState('');
+    const [bookToDelete, setBookToDelete] = useState<number | null>(null);
 
     const navigate = useNavigate();
+
+    // 모달 열기 함수
+    const openModal = (type: ModalType, message: string = '') => {
+      setModalType(type);
+      setModalMessage(message);
+    };
+
+    // 모달 닫기 함수
+    const closeModal = () => {
+      setModalType(null);
+      setModalMessage('');
+      if (modalType === 'delete') {
+        setBookToDelete(null);
+      }
+    };
 
     // 사용자 정보 조회
     const fetchUserInfo = async () => {
@@ -542,10 +629,15 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       event.preventDefault();
       event.stopPropagation();
 
-      if (!window.confirm("정말로 이 책을 둥지에서 삭제하시겠습니까?")) {
-        return;
-      }
-
+      // 삭제 확인 모달 열기
+      setBookToDelete(bookId);
+      openModal('delete', "정말로 이 책을 둥지에서 삭제하시겠습니까?");
+    };
+    
+    // 실제 삭제 처리 함수
+    const confirmDeleteBook = async () => {
+      if (!bookToDelete) return;
+      
       try {
         setLoading(true);
 
@@ -555,7 +647,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         // API 요청 바디 구성
         const requestBody = {
           nestId: effectiveNestId,
-          bookId: bookId,
+          bookId: bookToDelete,
         };
 
         // DELETE 요청 보내기 (데이터를 바디에 포함)
@@ -565,7 +657,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
 
         if (response.data.success) {
           // 삭제 성공 후 도서 목록에서 해당 도서 제거
-          const updatedBooks = books.filter((book) => book.bookId !== bookId);
+          const updatedBooks = books.filter((book) => book.bookId !== bookToDelete);
           setBooks(updatedBooks);
 
           // 화면에 표시할 도서가 없어진 경우 목록 다시 불러오기
@@ -575,6 +667,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
             // 첫 페이지에서 마지막 항목이 삭제된 경우
             fetchNestBooks(currentPage, propUserId, effectiveNestId);
           }
+          
+          // 모달 닫기
+          closeModal();
         } else {
           throw new Error(response.data.error?.message || "도서 삭제에 실패했습니다.");
         }
@@ -582,8 +677,8 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         console.error("Failed to delete book from nest:", err);
         console.error("Error details:", err.response?.data || err.message);
 
-        // 오류 메시지 표시
-        alert(err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");
+        // 오류 메시지 모달 표시
+        openModal('error', err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");
       } finally {
         setLoading(false);
       }
@@ -670,6 +765,47 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
 
     return (
       <Container>
+        {/* 모달 컴포넌트 */}
+        {modalType && (
+          <ModalOverlay>
+            <ModalContent>
+              {modalType === 'delete' && (
+                <>
+                  <ModalTitle>
+                    <FaExclamationCircle color="#dc2626" />
+                    도서 삭제
+                  </ModalTitle>
+                  <p>{modalMessage}</p>
+                  <ModalButtons>
+                    <ModalButton onClick={closeModal}>취소</ModalButton>
+                    <ModalButton 
+                      isError 
+                      onClick={confirmDeleteBook}
+                    >
+                      삭제
+                    </ModalButton>
+                  </ModalButtons>
+                </>
+              )}
+
+              {modalType === 'error' && (
+                <>
+                  <ModalTitle>
+                    <FaExclamationCircle color="#dc2626" />
+                    오류
+                  </ModalTitle>
+                  <p>{modalMessage}</p>
+                  <ModalButtons>
+                    <ModalButton isPrimary onClick={closeModal}>
+                      확인
+                    </ModalButton>
+                  </ModalButtons>
+                </>
+              )}
+            </ModalContent>
+          </ModalOverlay>
+        )}
+        
         <BookGrid viewMode={viewMode}>
           {filteredBooks.map((book) => (
             <BookCard key={`${book.bookId}-${book.createdAt}`} viewMode={viewMode}>

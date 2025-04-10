@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled from '@emotion/styled';
-import { FaHeart, FaRegHeart, FaCaretUp } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaCaretUp, FaExclamationCircle } from 'react-icons/fa';
 import { RiMedalFill, RiMedalLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
@@ -202,6 +202,65 @@ const TodayLikes = styled.div`
   }
 `;
 
+// 모달 타입 정의
+type ModalType = 'error' | null;
+
+// 모달 스타일 컴포넌트 추가
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const ModalButton = styled.button<{ isPrimary?: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: ${props => props.isPrimary ? '#00c473' : '#f1f3f5'};
+  color: ${props => props.isPrimary ? 'white' : '#495057'};
+  
+  &:hover {
+    background-color: ${props => props.isPrimary ? '#00b368' : '#e9ecef'};
+  }
+`;
+
 const TodayBestComments: React.FC = () => {
   const navigate = useNavigate();
   const [bestReviews, setBestReviews] = useState<BestReview[]>([]);
@@ -209,6 +268,22 @@ const TodayBestComments: React.FC = () => {
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
   const [scrollPosition, setScrollPosition] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // 모달 상태 관리
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalMessage, setModalMessage] = useState('');
+
+  // 모달 열기 함수
+  const openModal = (type: ModalType, message: string = '') => {
+    setModalType(type);
+    setModalMessage(message);
+  };
+
+  // 모달 닫기 함수
+  const closeModal = () => {
+    setModalType(null);
+    setModalMessage('');
+  };
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!containerRef.current) return;
@@ -289,7 +364,7 @@ const TodayBestComments: React.FC = () => {
       });
       
       setBestReviews(rollbackReviews);
-      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
     }
@@ -321,6 +396,28 @@ const TodayBestComments: React.FC = () => {
 
   return (
     <div>
+      {/* 모달 컴포넌트 */}
+      {modalType && (
+        <ModalOverlay>
+          <ModalContent>
+            {modalType === 'error' && (
+              <>
+                <ModalTitle>
+                  <FaExclamationCircle color="#dc2626" />
+                  오류
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton isPrimary onClick={closeModal}>
+                    확인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+          </ModalContent>
+        </ModalOverlay>
+      )}
+      
       <Title>
         <HighlightText>오늘의</HighlightText> BEST <HighlightText>한줄평</HighlightText>
       </Title>
