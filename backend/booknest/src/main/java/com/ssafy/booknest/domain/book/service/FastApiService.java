@@ -5,11 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.booknest.domain.book.client.FastApiClient;
 import com.ssafy.booknest.domain.book.dto.response.recommendation.FastApiRecommendation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FastApiService {
@@ -20,7 +25,7 @@ public class FastApiService {
         Map<String, Object> response = fastApiClient.requestTodayRecommendation(userId);
 
         // 예외 처리
-        if (!"ok".equals(response.get("db_status"))) {
+        if (!"ok".equals(response.get("es_status"))) {
             throw new RuntimeException("FastAPI 오류: " + response.get("detail"));
         }
 
@@ -38,7 +43,7 @@ public class FastApiService {
         Map<String, Object> response = fastApiClient.requestLoanLogRecommendation(userId);
 
         // 예외 처리
-        if (!"ok".equals(response.get("db_status"))) {
+        if (!"ok".equals(response.get("es_status"))) {
             throw new RuntimeException("FastAPI 오류: " + response.get("detail"));
         }
 
@@ -56,7 +61,7 @@ public class FastApiService {
         Map<String, Object> response = fastApiClient.requestRecentTagRecommendation(userId);
 
         // 예외 처리
-        if (!"ok".equals(response.get("db_status"))) {
+        if (!"ok".equals(response.get("es_status"))) {
             throw new RuntimeException("FastAPI 오류: " + response.get("detail"));
         }
 

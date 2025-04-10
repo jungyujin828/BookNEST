@@ -6,6 +6,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.JsonData;
+import com.ssafy.booknest.domain.search.record.BookEval;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
@@ -78,6 +79,19 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
         try {
             elasticsearchClient.index(i -> i
                     .index("book")
+                    .id(book.getBookId().toString())
+                    .document(book)
+            );
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public void saveBookEval(BookEval book) {
+        try {
+            elasticsearchClient.index(i -> i
+                    .index("book_eval")
                     .id(book.getBookId().toString())
                     .document(book)
             );

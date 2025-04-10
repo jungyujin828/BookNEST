@@ -1,8 +1,24 @@
 package com.ssafy.booknest.domain.search.service;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.ScriptSortType;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.json.JsonData;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.ssafy.booknest.domain.book.dto.response.BookResponse;
+import com.ssafy.booknest.domain.book.enums.BookEvalType;
+import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.search.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.search.dto.response.UserSearchResponse;
+import com.ssafy.booknest.domain.search.record.BookEval;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.domain.search.record.SerachedUser;
 import com.ssafy.booknest.domain.search.repository.BookSearchCustomRepository;
@@ -18,9 +34,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +45,8 @@ public class SearchService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final PopularKeywordService popularKeywordService;
+    private final RatingRepository ratingRepository;
+    private final ElasticsearchClient elasticsearchClient;
 
     public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, List<String> tags, Pageable pageable) {
         User user = userRepository.findById(userId)
@@ -89,5 +106,62 @@ public class SearchService {
 
     public List<String> autocompleteTitle(String keyword) {
         return bookSearchRepository.autocompleteTitle(keyword);
+    }
+
+    public CustomPage<BookResponse> getEvalBookList(Integer userId, BookEvalType keyword, Pageable pageable) throws IOException {
+        List<Integer> evaluatedBookIds = ratingRepository.findBookIdsByUserId(userId);
+
+        Query excludeEvaluatedBooks = QueryBuilders.bool(b -> b
+                .mustNot(QueryBuilders.terms(t -> t
+                        .field("book_id")
+                        .terms(terms -> terms.value(
+                                evaluatedBookIds.stream().map(FieldValue::of).toList()
+                        ))
+                )));
+
+        SearchRequest.Builder builder = new SearchRequest.Builder()
+                .index("book_eval")
+                .size(pageable.getPageSize())
+                .from((int) pageable.getOffset())
+                .query(excludeEvaluatedBooks);
+
+        if (keyword == BookEvalType.POPULAR) {
+            builder.sort(s -> s.field(f -> f.field("total_ratings").order(SortOrder.Desc)));
+        } else if (keyword == BookEvalType.RECENT) {
+            builder.sort(s -> s.field(f -> f.field("published_date").order(SortOrder.Desc)));
+        } else {
+            builder.sort(s -> s
+                    .script(sc -> sc
+                            .type(ScriptSortType.Number)
+                            .script(script -> script.inline(inline -> inline.source("Math.random()")))
+                            .order(SortOrder.Asc)
+                    )
+            );
+        }
+
+        SearchResponse<JsonData> response = elasticsearchClient.search(builder.build(), JsonData.class);
+
+        List<BookResponse> books = response.hits().hits().stream()
+                .map(hit -> {
+                    Map<String, Object> source = hit.source().to(Map.class);
+                    return BookResponse.builder()
+                            .bookId(Optional.ofNullable((Integer) source.get("book_id")).orElse(-1))
+                            .title((String) source.get("title"))
+                            .imageUrl((String) source.get("image_url"))
+                            .publishedDate((String) source.get("published_date"))
+                            .authors((List<String>) source.get("authors"))
+                            .build();
+                })
+                .toList();
+
+        long totalHits = response.hits().total().value();
+
+        Page<BookResponse> page = new PageImpl<>(books, pageable, totalHits);
+        return new CustomPage<>(page);
+    }
+
+    public BookEval saveBookEval(BookEval book) {
+        bookSearchRepository.saveBookEval(book);
+        return book;
     }
 }
