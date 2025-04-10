@@ -424,7 +424,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       pageNumber: 1,
       totalPages: 1,
       totalElements: 0,
-      pageSize: 10,
+      pageSize: 12,
       first: true,
       last: true,
     });
@@ -496,7 +496,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         // API 스펙에 맞게 Query Parameter 수정
         const params: Record<string, any> = {
           page: page,
-          size: 10,
+          size: 12,
         };
 
         // userId와 nestId 값이 있는 경우만 파라미터에 추가
@@ -546,7 +546,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
               pageNumber: 1,
               totalPages: 1,
               totalElements: 0,
-              pageSize: 10,
+              pageSize: 12,
               first: true,
               last: true,
             });

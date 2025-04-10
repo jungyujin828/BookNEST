@@ -265,7 +265,7 @@ const CircleButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   padding: 0;
-  
+
   &:hover {
     transform: translateY(-2px);
   }
@@ -705,13 +705,13 @@ const BookDetailPage = () => {
       // 평점이 변경되었음을 시각적으로 표시하기 위해 별점 컴포넌트 상태 업데이트
       if (oldUserRating !== newRating) {
         // 모든 평점 정보를 가져오는 API 호출
-        const response = await api.get(`/api/book/${bookId}`);
-        
-        if (response.data.success) {
+      const response = await api.get(`/api/book/${bookId}`);
+
+      if (response.data.success) {
           // 새로운 평균 평점으로 즉시 UI 업데이트
-          setBook(response.data.data);
-        } else {
-          throw new Error("Failed to fetch updated book data");
+        setBook(response.data.data);
+      } else {
+        throw new Error("Failed to fetch updated book data");
         }
       }
     } catch (err) {

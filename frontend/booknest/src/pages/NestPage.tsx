@@ -337,6 +337,15 @@ const ClearButton = styled.button`
   }
 `;
 
+const BookmarkControlsContainer = styled(ControlsContainer)`
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    justify-content: flex-end;
+  }
+`;
+
 const getSortLabel = (sortOption: SortOption): string => {
   switch (sortOption) {
     case "latest":
@@ -361,6 +370,8 @@ const NestPage = () => {
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
+  const [bookmarkSortOption, setBookmarkSortOption] = useState<SortOption>("latest");
+  const [showBookmarkSortDropdown, setShowBookmarkSortDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("full");
   const nestBookListRef = useRef<{ fetchNestBooks: () => void } | null>(null);
@@ -384,6 +395,11 @@ const NestPage = () => {
   const handleSortChange = (option: SortOption) => {
     setSortOption(option);
     setShowSortDropdown(false);
+  };
+
+  const handleBookmarkSortChange = (option: SortOption) => {
+    setBookmarkSortOption(option);
+    setShowBookmarkSortDropdown(false);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -473,6 +489,41 @@ const NestPage = () => {
         </>
       )}
 
+      {activeTab === "찜" && (
+        <BookmarkControlsContainer>
+          <ViewModeButton onClick={toggleViewMode}>
+            {viewMode === "full" ? (
+              <>
+                <FaThLarge size={14} /> 표지만
+              </>
+            ) : (
+              <>
+                <FaList size={14} /> 전체
+              </>
+            )}
+          </ViewModeButton>
+          <SortContainer>
+            <SortButton onClick={() => setShowBookmarkSortDropdown(!showBookmarkSortDropdown)}>
+              {getSortLabel(bookmarkSortOption)} <FaSort />
+            </SortButton>
+            <SortDropdown isOpen={showBookmarkSortDropdown}>
+              <SortOption isActive={bookmarkSortOption === "latest"} onClick={() => handleBookmarkSortChange("latest")}>
+                최신순
+              </SortOption>
+              <SortOption isActive={bookmarkSortOption === "oldest"} onClick={() => handleBookmarkSortChange("oldest")}>
+                오래된순
+              </SortOption>
+              <SortOption isActive={bookmarkSortOption === "rating"} onClick={() => handleBookmarkSortChange("rating")}>
+                별점 높은순
+              </SortOption>
+              <SortOption isActive={bookmarkSortOption === "title"} onClick={() => handleBookmarkSortChange("title")}>
+                제목순
+              </SortOption>
+            </SortDropdown>
+          </SortContainer>
+        </BookmarkControlsContainer>
+      )}
+
       {showSearchModal && <BookSearchModal onClose={() => setShowSearchModal(false)} onBookAdded={handleBookAdded} />}
 
       {activeTab === "둥지" ? (
@@ -485,7 +536,10 @@ const NestPage = () => {
           nestId={nestId ? parseInt(nestId) : undefined}
         />
       ) : (
-        <BookmarkList />
+        <BookmarkList 
+          viewMode={viewMode}
+          sortOption={bookmarkSortOption}
+        />
       )}
     </Container>
   );
