@@ -114,16 +114,19 @@ public class UserService {
         }
     }
 
+    // 도로명 주소에서 시(예: 서울특별시, 부산광역시 등)만 추출
     private String extractCity(String roadAddress) {
         if (roadAddress == null || roadAddress.isBlank()) return "";
         return roadAddress.split(" ")[0];
     }
 
+    // 도로명 주소에서 구 또는 군(예: 강남구, 해운대구 등)만 추출
     private String extractDistrict(String roadAddress) {
         if (roadAddress == null || roadAddress.isBlank()) return "";
         String[] parts = roadAddress.split(" ");
         return parts.length > 1 ? parts[1] : "";
     }
+
 
 
     // 닉네임 중복확인

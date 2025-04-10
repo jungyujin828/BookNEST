@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface UserCategoryRecommendationRepository extends JpaRepository<UserCategoryRecommendation, Integer> {
 
+    // 특정 userId에 해당하는 추천 카테고리 목록을 조회합니다.
     List<UserCategoryRecommendation> findByUserId(Integer userId);
 
 }
