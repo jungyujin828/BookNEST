@@ -421,7 +421,7 @@ const TodayBestComments: React.FC = () => {
   }
 
   return (
-    <div>
+    <TodayBestContainer>
       {/* 모달 컴포넌트 */}
       {modalType && (
         <ModalOverlay>
