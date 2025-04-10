@@ -10,5 +10,7 @@ import java.util.List;
 @Repository
 public interface UserTagRecommendationRepository extends JpaRepository<UserTagRecommendation, Integer> {
 
-    List<UserTagRecommendation> findByUser(User user);
+    List<UserTagRecommendation> findByUserId(Integer userId);
+
+
 }

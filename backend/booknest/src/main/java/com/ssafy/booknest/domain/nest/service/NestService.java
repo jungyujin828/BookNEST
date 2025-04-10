@@ -50,7 +50,7 @@ public class NestService {
     private final UserActionLogger userActionLogger;
     private final TagVectorService tagVectorService;
 
-
+    // 둥지 내에 도서 목록 조회
     @Transactional
     public CustomPage<NestBookListResponse> getNestBookList(Integer userId, Integer nestId, Integer nestUserId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -67,6 +67,7 @@ public class NestService {
         return new CustomPage<>(responseList);
     }
 
+    // 둥지에 도서 등록
     @Transactional
     public AddBookNestResponse addBookNest(Integer userId, AddBookNestRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() ->
@@ -132,6 +133,7 @@ public class NestService {
                 .build();
     }
 
+    // 둥지 내에 도서 삭제
     @Transactional
     public void deleteBookNest(Integer userId, DeleteBookNestRequest request) {
         User user = userRepository.findById(userId).orElseThrow(() ->

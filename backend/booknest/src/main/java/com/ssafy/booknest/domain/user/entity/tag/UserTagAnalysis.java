@@ -24,13 +24,12 @@ public class UserTagAnalysis extends BaseEntity {
     @Column(name = "favorite_tag")
     private String favoriteTag;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
 
     public void update(String favoriteTag) {
         this.favoriteTag = favoriteTag;

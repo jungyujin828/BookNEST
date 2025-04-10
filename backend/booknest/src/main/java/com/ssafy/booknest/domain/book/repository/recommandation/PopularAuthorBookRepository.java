@@ -10,8 +10,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PopularAuthorBookRepository extends JpaRepository<PopularAuthorBook, Integer> {
 
+    // 인기 작가 도서 순위 목록을 페이지 단위로 조회
     @Query("SELECT p FROM PopularAuthorBook p ORDER BY p.rank ASC")
     Page<PopularAuthorBook> findTopRankedAuthors(Pageable pageable);
-
 
 }

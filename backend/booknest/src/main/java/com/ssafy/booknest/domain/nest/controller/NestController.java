@@ -30,6 +30,7 @@ public class NestController {
     private final AuthenticationUtil authenticationUtil;
     private final UserActionLogger userActionLogger;
 
+    // 타겟 유저의 서재(nest) 내 도서 목록을 조회 (페이징 처리 포함)
     @GetMapping("")
     public ResponseEntity<ApiResponse<CustomPage<NestBookListResponse>>> getNestBookList(
             @RequestParam("userId") Integer targetUserId,
@@ -41,6 +42,7 @@ public class NestController {
         return ApiResponse.success(nestService.getNestBookList(userId, nestId, targetUserId, pageable));
     }
 
+    // 사용자의 서재(둥지)에 도서를 추가하고, 사용자 행동 로그를 기록
     @PostMapping("")
     public ResponseEntity<ApiResponse<AddBookNestResponse>> addBookNest(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -97,7 +99,7 @@ public class NestController {
         return ApiResponse.success(responseList);
     }
 
-
+    // 사용자가 둥지(서재)에서 도서를 삭제
     @DeleteMapping("")
     public ResponseEntity<ApiResponse<Void>> deleteBookNest(
             @AuthenticationPrincipal UserPrincipal userPrincipal,

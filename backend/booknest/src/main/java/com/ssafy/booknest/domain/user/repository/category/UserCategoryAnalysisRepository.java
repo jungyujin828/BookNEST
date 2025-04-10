@@ -12,8 +12,9 @@ import java.util.List;
 @Repository
 public interface UserCategoryAnalysisRepository extends JpaRepository<UserCategoryAnalysis, Integer> {
 
-    void deleteByUser(User user);
+    void deleteByUserId(Integer userId);
 
-    @Query("SELECT u.favoriteCategory FROM UserCategoryAnalysis u WHERE u.user.id = :userId")
+    @Query("SELECT u.favoriteCategory FROM UserCategoryAnalysis u WHERE u.userId = :userId")
     List<String> findTopCategoryNamesByUserId(@Param("userId") Integer userId);
+
 }

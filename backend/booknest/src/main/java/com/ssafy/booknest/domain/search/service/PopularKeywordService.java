@@ -15,8 +15,10 @@ public class PopularKeywordService {
 
     private final RedisTemplate<String, String> redisTemplate;
 
+    // 날짜 포맷: yyyyMMdd 형식으로 사용 (ex: 20250410)
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.BASIC_ISO_DATE;
 
+    // 오늘 날짜 기준 키워드 카운트를 1 증가시키고 TTL 2일 설정
     public void increaseKeywordCount(String keyword) {
         String key = getTodayKey();
         redisTemplate.opsForZSet().incrementScore(key, keyword, 1);
@@ -24,12 +26,14 @@ public class PopularKeywordService {
         redisTemplate.expire(key, Duration.ofDays(2));
     }
 
+    // 오늘 날짜 기준 상위 5개 키워드 반환
     public List<String> getTodayPopularKeywords() {
         String key = getTodayKey();
         Set<String> keywords = redisTemplate.opsForZSet().reverseRange(key, 0, 4);
         return new ArrayList<>(keywords);
     }
 
+    // 오늘의 상위 키워드 5개를 별도 키로 스냅샷 저장
     public void snapshotTodayTopKeywords() {
         String todayKey = getTodayKey();
         String snapshotKey = getSnapshotKey(LocalDate.now().format(FORMATTER));
@@ -45,10 +49,13 @@ public class PopularKeywordService {
         redisTemplate.expire(snapshotKey, Duration.ofDays(30));
     }
 
+    // 오늘 날짜 기반 인기 키워드 키 생성
     private String getTodayKey() {
         return "popular_keywords:" + LocalDate.now().format(FORMATTER);
     }
 
+
+    // 특정 날짜 기반 스냅샷 키 생성
     private String getSnapshotKey(String date) {
         return "daily_snapshot:" + date;
     }

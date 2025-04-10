@@ -41,6 +41,7 @@ public interface FollowRepository extends JpaRepository<Follow, Integer> {
     @Query("SELECT f.following.id FROM Follow f WHERE f.follower.id = :followerId AND f.following.id IN :followingIds")
     List<Integer> findFollowingIds(@Param("followerId") Integer followerId, @Param("followingIds") List<Integer> followingIds);
 
+    // 특정 유저가 팔로우하거나 팔로우당한 모든 관계를 삭제
     @Modifying
     @Query("DELETE FROM Follow f WHERE f.follower.id = :userId OR f.following.id = :userId")
     void deleteAllByUserId(@Param("userId") Integer userId);

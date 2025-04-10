@@ -286,7 +286,6 @@ public class BookService {
     }
 
 
-
     // 태그별 랜덤 추천
     @Transactional(readOnly = true)
     public List<TagBookResponse> getTagRandomBooks(Integer userId) {
@@ -335,7 +334,7 @@ public class BookService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 2. user_tag_recommendation 테이블에서 해당 유저의 추천 도서 조회
-        List<UserTagRecommendation> recommendations = userTagRecommendationRepository.findByUser(user);
+        List<UserTagRecommendation> recommendations = userTagRecommendationRepository.findByUserId(userId);
 
         // 3. 랜덤 태그 하나 선택
         Map<String, List<UserTagRecommendation>> groupedByTag = recommendations.stream()
@@ -366,7 +365,7 @@ public class BookService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 추천 테이블에서 유저의 모든 추천 도서 조회
-        List<UserCategoryRecommendation> recommendations = userCategoryRecommendationRepository.findByUser(user);
+        List<UserCategoryRecommendation> recommendations = userCategoryRecommendationRepository.findByUserId(user.getId());
 
         // 3. 카테고리별로 그룹화
         Map<String, List<UserCategoryRecommendation>> grouped = recommendations.stream()
@@ -387,58 +386,4 @@ public class BookService {
                 .map(rec -> FavoriteCategoryBookResponse.of(rec.getBook(), randomCategory))
                 .toList();
     }
-
-
-
-
-//    // 온라인 무료 도서관 추천(이거 좀 나중에 다시)
-//    public List<String> getOnlineLibrary(Integer userId, Integer bookId) {
-//
-//        Book book = bookRepository.findBookDetailById(bookId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
-//
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-//
-//        Address address = user.getAddress();
-//        if (address == null) {
-//            throw new CustomException(ErrorCode.ADDRESS_NOT_FOUND);
-//        }
-//
-//        // 주소 정보에서 city, district 추출
-//        String city = address.getCity();
-//        String district = address.getDistrict();
-//
-//        // 해당 지역의 ebook 리스트 가져오기
-//        List<Ebook> ebooks = ebookRepository.findByCityAndDistrict(city, district);
-//
-//        // redirectUrl만 뽑아서 반환
-//        return ebooks.stream()
-//                .map(Ebook::getRedirectUrl)
-//                .collect(Collectors.toList());
-//    }
-
-
-
-//    // 내 지역에서 가장 많이 읽은 책
-//    public List<BookResponse> getMostReadBooksByRegion() {
-//        List<Book> mostReadBooksByRegion = bookRepository.findMostReadBooksByRegion();
-//
-//        if (mostReadBooksByRegion.isEmpty()) {
-//            throw new CustomException(ErrorCode.BOOK_NOT_FOUND);
-//        }
-//
-//        return mostReadBooksByRegion.stream()
-//                .map(BookResponse::of)
-//                .collect(Collectors.toList());
-//    }
-
-//    // 내 성별과 나이대에서 많이 읽은 책
-//    public List<BookResponse> getMostReadBooksByGenderAndAge(Integer userId) {
-//        List<Book> MostReadBooksByGenderAndAge = bookRepository.findMostReadBooksByGenderAndAge();
-//
-//        return MostReadBooksByGenderAndAge.stream()
-//                .map(BookResponse::of)
-//                .collect(Collectors.toList());
-//    }
 }

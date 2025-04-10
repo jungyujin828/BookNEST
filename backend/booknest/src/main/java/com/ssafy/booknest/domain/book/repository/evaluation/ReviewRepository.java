@@ -14,13 +14,11 @@ import java.util.Optional;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
+    // 해당 유저가 해당 도서에 남긴 한줄평
     Optional<Review> findByUserIdAndBookId(Integer userId, Integer bookId);
 
-
+    // 해당 유저가 해당 도서에 한줄평을 남겼는 지 여부
     boolean existsByUserIdAndBookId(Integer userId, Integer bookId);
-
-
-    boolean existsByUserIdAndBookIdAndRatingIsNotNull(Integer userId, Integer bookId);
 
     // 가장 최근 수정된 순으로 한줄평 목록 가져오기
     Page<Review> findByUserIdOrderByUpdatedAtDesc(Integer userId, Pageable pageable);

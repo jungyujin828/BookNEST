@@ -23,6 +23,7 @@ public class FollowController {
     private final FollowService followService;
     private final AuthenticationUtil authenticationUtil;
 
+    // 타겟 유저 팔로우
     @PostMapping("")
     public ResponseEntity<ApiResponse<Void>> followUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -33,6 +34,7 @@ public class FollowController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
+    // 타겟 유저 팔로우 취소
     @DeleteMapping("")
     public ResponseEntity<ApiResponse<Void>> unfollowUser(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -43,6 +45,7 @@ public class FollowController {
         return ApiResponse.success(HttpStatus.OK);
     }
 
+    // 팔로잉 목록 조회
     @GetMapping("/following")
     public ResponseEntity<ApiResponse<CustomPage<FollowResponse>>> getFollowingList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -53,6 +56,7 @@ public class FollowController {
         return ApiResponse.success(followService.getFollowingList(userId, targetUserId, pageable));
     }
 
+    // 팔로워 목록 조회
     @GetMapping("/follower")
     public ResponseEntity<ApiResponse<CustomPage<FollowResponse>>> getFollowerList(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
@@ -62,5 +66,4 @@ public class FollowController {
 
         return ApiResponse.success(followService.getFollowerList(userId, targetUserId, pageable));
     }
-
 }

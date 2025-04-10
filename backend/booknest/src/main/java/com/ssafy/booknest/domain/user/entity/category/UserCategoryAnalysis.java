@@ -23,13 +23,12 @@ public class UserCategoryAnalysis extends BaseEntity {
     @Column(name = "favorite_category")
     private String favoriteCategory;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
 
     public void update(String favoriteCategory) {
         this.favoriteCategory = favoriteCategory;

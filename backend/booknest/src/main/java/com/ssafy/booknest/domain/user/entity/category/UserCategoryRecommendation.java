@@ -26,8 +26,8 @@ public class UserCategoryRecommendation extends BaseEntity {
 
     private String category;
 
-    @ManyToOne
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
 
     @ManyToOne
     private Book book;

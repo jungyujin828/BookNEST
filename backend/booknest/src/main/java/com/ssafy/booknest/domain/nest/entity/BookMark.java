@@ -14,12 +14,10 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BookMark extends BaseEntity {
 
-    // 찜 목록을 책과 연결
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id")
     private Book book;
 
-    // 찜 목록이 어떤 서재의 책인지 연결
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nest_id")
     private Nest nest;

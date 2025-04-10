@@ -25,7 +25,7 @@ public class UserTagRecommendationScheduler {
     private final BookRepository bookRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 30 * 3, initialDelay = 1000 * 60 * 3) // 1시간 30분 마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 90, initialDelay = 1000 * 60 * 3) // 1시간 30분 마다 실행
     public void runUserTagRecommendationBatch() {
         log.info("[추천 배치 시작] 유저 선호 태그 기반 추천 도서 저장 시작");
 
@@ -38,12 +38,15 @@ public class UserTagRecommendationScheduler {
 
         for (UserTagAnalysis analysis : analyses) {
             String tag = analysis.getFavoriteTag();
+            Integer userId = analysis.getUserId(); // userId로 변경
 
+            // 3. 추천 도서 조회
             List<Book> recommendedBooks = bookRepository.findRandomBooksByTag(tag, PageRequest.of(0, 15));
 
+            // 4. 추천 도서 저장
             for (Book book : recommendedBooks) {
                 UserTagRecommendation recommendation = UserTagRecommendation.builder()
-                        .user(analysis.getUser())
+                        .userId(userId) // userId로 저장
                         .tag(tag)
                         .book(book)
                         .build();
@@ -54,7 +57,6 @@ public class UserTagRecommendationScheduler {
         }
 
         log.info("[추천 배치 완료] 총 추천 저장 건수: {}", saved);
-        log.info("***************************************************************************************************");
         log.info("***************************************************************************************************");
     }
 }
