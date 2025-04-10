@@ -12,8 +12,10 @@ import java.util.List;
 @Repository
 public interface UserCategoryAnalysisRepository extends JpaRepository<UserCategoryAnalysis, Integer> {
 
+    // 특정 userId를 가진 사용자의 카테고리 분석 데이터를 삭제합니다.
     void deleteByUserId(Integer userId);
 
+    // 특정 userId에 해당하는 사용자의 선호 카테고리 이름 목록을 조회합니다.
     @Query("SELECT u.favoriteCategory FROM UserCategoryAnalysis u WHERE u.userId = :userId")
     List<String> findTopCategoryNamesByUserId(@Param("userId") Integer userId);
 
