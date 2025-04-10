@@ -37,8 +37,10 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
                             .functionScore(fs -> fs
                                     .query(inner -> inner
                                             .bool(b -> b
-                                                    .should(s1 -> s1.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f))) // 제목 자동완성 정확도 우선
-                                                    .should(s2 -> s2.match(m -> m.field("authors.autocomplete").query(keyword).boost(2.0f))) // 저자 자동완성 정확도
+                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.0f))) // 제목 자동완성: 구문 일치 우선
+                                                    .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(2.0f))) // 제목 자동완성: 단어 일치
+                                                    .should(s3 -> s3.match(m -> m.field("authors.autocomplete").query(keyword).boost(2.0f))) // 저자 자동완성: 전체 일치
+                                                    .should(s4 -> s4.term(t -> t.field("authors").value(keyword).boost(5.0f))) // 저자 전체 일치: 높은 가중치
                                             )
                                     )
                                     .functions(fns -> fns
@@ -156,18 +158,18 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             if (hasKeyword) {
                 Query keywordFunctionScore = Query.of(q -> q.functionScore(fs -> fs
                         .query(inner -> inner.bool(b -> b
-                                .should(s -> s.match(m -> m.field("title").query(keyword).boost(3.0f))) // boost 추가
-                                .should(s -> s.match(m -> m.field("authors").query(keyword).boost(2.0f))) // boost 추가
-                                .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.0f))) // boost 추가
-                                .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(4.0f))) // boost 추가
+                                .should(s -> s.match(m -> m.field("title").query(keyword).boost(3.0f)))
+                                .should(s -> s.match(m -> m.field("authors").query(keyword).boost(3.0f)))
+                                .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.0f)))
+                                .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(5.0f)))
                         ))
-                        .boostMode(FunctionBoostMode.Multiply) // Sum -> Multiply로 변경
+                        .boostMode(FunctionBoostMode.Multiply)
                         .functions(fns -> fns
                                 .fieldValueFactor(fvf -> fvf
                                         .field("totalRatings")
-                                        .factor(1.0)
+                                        .factor(6.0)
                                         .modifier(FieldValueFactorModifier.Log1p)
-                                        .missing(0.0) // totalRatings가 없으면 기본값 0.0
+                                        .missing(0.0)
                                 )
                         )
                 ));
