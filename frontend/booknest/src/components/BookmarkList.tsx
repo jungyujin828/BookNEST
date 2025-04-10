@@ -74,6 +74,7 @@ const BookTitle = styled.h3`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-decoration: none;
 `;
 
 const BookAuthor = styled.p`
@@ -126,7 +127,7 @@ const LoginRequiredState = styled.div`
 `;
 
 const LoginButton = styled.button`
-  background-color: #4caf50;
+  background-color: #00c473;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -137,7 +138,7 @@ const LoginButton = styled.button`
   transition: background-color 0.2s;
 
   &:hover {
-    background-color: #45a049;
+    background-color: #00b368;
   }
 `;
 
@@ -192,6 +193,13 @@ const DropdownItem = styled.button<{ isActive: boolean }>`
   &:hover {
     background-color: #f5f5f5;
   }
+`;
+
+// Add styled Link component
+const StyledLink = styled(Link)`
+  text-decoration: none;
+  color: inherit;
+  display: block;
 `;
 
 interface BookmarkListProps {
@@ -332,7 +340,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ userId }) => {
       <BookGrid>
         {sortedBookmarks.map((book) => (
           <BookCard key={`${book.bookId}-${book.createdAt}`}>
-            <Link to={`/book-detail/${book.bookId}`}>
+            <StyledLink to={`/book-detail/${book.bookId}`}>
               <BookCover>
                 <img src={book.imageUrl} alt={book.title} />
               </BookCover>
@@ -341,7 +349,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ userId }) => {
                 <BookAuthor>{formatAuthors(book.authors)}</BookAuthor>
                 <CreatedAt>찜한 날짜: {new Date(book.createdAt).toLocaleDateString()}</CreatedAt>
               </BookInfo>
-            </Link>
+            </StyledLink>
           </BookCard>
         ))}
       </BookGrid>

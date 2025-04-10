@@ -35,9 +35,9 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  flex-direction: column; 
-  align-items: flex-start; 
-  gap: 4px; 
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
   line-height: 1.4;
   
   @media (min-width: 768px) {
@@ -413,8 +413,8 @@ const FavoriteTagBooks = () => {
   return (
     <Container>
       <Title>
-        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은</span>
-        <span><TagHighlight>#{books[0]?.tag}</TagHighlight> 도서!</span>
+        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님이 많이 읽은
+        {' '}<TagHighlight>#{books[0]?.tag}</TagHighlight> 도서!
       </Title>
       <BookListContainer>
         {canScrollLeft && (

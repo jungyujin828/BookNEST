@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { theme } from "../styles/theme";
 
 import styled from "@emotion/styled";
@@ -14,8 +14,9 @@ import BookmarkButton from "../components/BookmarkButton";
 import AddToNestButton from "../components/AddToNestButton";
 import DeleteToNestButton from "../components/DeleteToNestButton";
 import ReviewList, { Review, ReviewsPage } from "../components/ReviewList";
-import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaShoppingCart, FaHome, FaTrash, FaBookmark } from "react-icons/fa";
 import useNestStore from "../store/useNestStore";
+import { ROUTES } from "../constants/paths";
 
 interface BookDetail {
   bookId: number;
@@ -233,30 +234,65 @@ const ErrorMessage = styled.div`
 
 const ButtonContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+  flex-direction: row;
+  gap: 24px;
+  margin-top: 24px;
+  justify-content: center;
 `;
 
-const PurchaseButton = styled.button`
-  flex: 1;
-  padding: 12px 24px;
-  background-color: #4caf50;
-  color: white;
+const CircleButton = styled.button`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: bold;
+  background: none;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-
+  transition: all 0.2s ease-in-out;
+  padding: 0;
+  
   &:hover {
-    background-color: #45a049;
+    transform: translateY(-2px);
   }
 
   &:active {
-    background-color: #3d8b40;
+    transform: translateY(0);
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const IconCircle = styled.div<{ bgColor: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: ${props => props.bgColor};
+  color: white;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+
+  svg {
+    font-size: 24px;
+  }
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+  }
+`;
+
+const ButtonText = styled.span`
+  font-size: 14px;
+  color: #495057;
+  text-align: center;
 `;
 
 const BookHeader = styled.div`
@@ -411,6 +447,49 @@ const ReviewPagination = styled.div`
   margin-top: 8px;
 `;
 
+// Add modal components
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin: 0 0 16px 0;
+  color: ${(props) => props.color || "#333"};
+`;
+
+const ModalButton = styled.button<{ $variant?: "primary" | "secondary" }>`
+  padding: 8px 16px;
+  margin: 8px;
+  background-color: ${(props) => (props.$variant === "primary" ? "#00c473" : "#6c757d")};
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: ${(props) => (props.$variant === "primary" ? "#00b369" : "#5a6268")};
+  }
+`;
+
 const BookDetailPage = () => {
   const { bookId } = useParams();
   const [book, setBook] = useState<BookDetail | null>(null);
@@ -425,7 +504,8 @@ const BookDetailPage = () => {
   const indexRef = useRef<HTMLParagraphElement>(null);
   const publisherReviewRef = useRef<HTMLParagraphElement>(null);
   const reviewListRef = useRef<HTMLDivElement>(null);
-  const location = useLocation(); // Add this import at the top
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // Zustand store
   const {
@@ -440,9 +520,17 @@ const BookDetailPage = () => {
   // 모달 상태
   const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   const { userRatings } = useRatingStore();
   const { setNestStatus, getNestStatus } = useNestStore();
+
+  // Modal states
+  const [showAddConfirmModal, setShowAddConfirmModal] = useState(false);
+  const [showAddSuccessModal, setShowAddSuccessModal] = useState(false);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showDeleteSuccessModal, setShowDeleteSuccessModal] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // URL에 fromReviews 파라미터가 있으면 리뷰 섹션으로 스크롤
@@ -522,6 +610,12 @@ const BookDetailPage = () => {
     fetchBookDetail();
   }, [bookId, setNestStatus]);
 
+  useEffect(() => {
+    if (book) {
+      setIsBookmarked(book.isBookMarked);
+    }
+  }, [book]);
+
   const handlePurchaseClick = async () => {
     try {
       setStoreLoading("purchaseUrls", true);
@@ -561,14 +655,24 @@ const BookDetailPage = () => {
   };
 
   const handleRatingChange = async (newRating: number) => {
+    if (!book) return;
+    
     try {
-      // 책 정보를 다시 불러와서 평균 평점 업데이트
-      const response = await api.get(`/api/book/${bookId}`);
-
-      if (response.data.success) {
-        setBook(response.data.data);
-      } else {
-        throw new Error("Failed to fetch updated book data");
+      // 이전 평점과 현재 평점이 다를 경우에만 UI 업데이트
+      const oldUserRating = userRatings[book.bookId] || 0;
+      
+      // 사용자에게 즉각적인 피드백을 주기 위해 UI를 먼저 업데이트
+      // 평점이 변경되었음을 시각적으로 표시하기 위해 별점 컴포넌트 상태 업데이트
+      if (oldUserRating !== newRating) {
+        // 모든 평점 정보를 가져오는 API 호출
+        const response = await api.get(`/api/book/${bookId}`);
+        
+        if (response.data.success) {
+          // 새로운 평균 평점으로 즉시 UI 업데이트
+          setBook(response.data.data);
+        } else {
+          throw new Error("Failed to fetch updated book data");
+        }
       }
     } catch (err) {
       console.error("Error updating rating:", err);
@@ -602,6 +706,135 @@ const BookDetailPage = () => {
     }
   };
 
+  const handleAddToNest = () => {
+    if (userRatings[Number(bookId)] === 0) {
+      alert("평점 등록은 필수입니다");
+      return;
+    }
+
+    if (!userInfo || !userInfo.nestId) {
+      alert("사용자 정보를 불러올 수 없습니다. 다시 로그인해주세요.");
+      return;
+    }
+
+    setShowAddConfirmModal(true);
+  };
+
+  const handleConfirmAdd = async () => {
+    setIsProcessing(true);
+    setShowAddConfirmModal(false);
+
+    try {
+      const requestData = {
+        bookId: Number(bookId),
+        nestId: userInfo!.nestId,
+        rating: userRatings[Number(bookId)].toString(),
+      };
+
+      const response = await api.post("/api/nest", requestData);
+
+      if (response.data.success) {
+        handleNestUpdate();
+        setShowAddSuccessModal(true);
+      }
+    } catch (error: any) {
+      console.error("Error adding to nest:", error);
+      
+      if (error.response?.status === 409) {
+        alert("이미 둥지에 등록된 도서입니다.");
+      } else if (error.response?.status === 400) {
+        alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
+      } else if (error.response?.status === 401) {
+        alert("로그인이 필요한 서비스입니다.");
+        navigate(ROUTES.LOGIN);
+      } else {
+        alert("둥지 등록 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDeleteFromNest = () => {
+    setShowDeleteConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsProcessing(true);
+    try {
+      const response = await api.delete("/api/nest", {
+        data: {
+          nestId: userInfo?.nestId,
+          bookId: Number(bookId)
+        }
+      });
+
+      if (response.data.success) {
+        setShowDeleteConfirmModal(false);
+        handleNestUpdate();
+        setShowDeleteSuccessModal(true);
+      }
+    } catch (error: any) {
+      console.error("Delete from nest error:", error);
+      if (error.response?.status === 401) {
+        alert("로그인이 필요한 서비스입니다.");
+      } else {
+        alert("둥지에서 도서 삭제 중 오류가 발생했습니다.");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleGoToNest = () => {
+    navigate(ROUTES.NEST);
+  };
+
+  const handleBookmarkClick = async () => {
+    if (!book) return;
+    
+    try {
+      // Optimistic update
+      setIsBookmarked(!isBookmarked);
+      const newIsBookmarked = !isBookmarked;
+      
+      // Also update the book state optimistically
+      setBook(prevBook => {
+        if (!prevBook) return null;
+        return { ...prevBook, isBookMarked: newIsBookmarked };
+      });
+
+      const requestData = {
+        bookId: book.bookId.toString(),
+      };
+
+      let response;
+      if (isBookmarked) {
+        // 찜 해제
+        response = await api.delete("/api/nest/bookmark", {
+          data: requestData,
+        });
+      } else {
+        // 찜하기
+        response = await api.post("/api/nest/bookmark", requestData);
+      }
+
+      if (!response.data.success) {
+        throw new Error("Failed to toggle bookmark");
+      }
+    } catch (error) {
+      console.error("Failed to toggle bookmark:", error);
+      // 에러 발생 시 상태 되돌리기
+      setIsBookmarked(!isBookmarked);
+      
+      // Also revert the book state
+      setBook(prevBook => {
+        if (!prevBook) return null;
+        return { ...prevBook, isBookMarked: isBookmarked };
+      });
+    }
+  };
+
   if (loading) {
     return <LoadingMessage>도서 정보를 불러오는 중...</LoadingMessage>;
   }
@@ -615,23 +848,38 @@ const BookDetailPage = () => {
       {book && (
         <>
           <BookHeader>
-            <BookTitle>{book.title}</BookTitle>
-            <BookmarkButton bookId={book.bookId} isBookMarked={book.isBookMarked} />
           </BookHeader>
           <TopSection>
             <ImageSection>
               <BookImage src={book.imageUrl} alt={book.title} />
               <ButtonContainer>
                 {getNestStatus(book.bookId) ? (
-                  <DeleteToNestButton bookId={book.bookId} nestId={userInfo?.nestId || 0} onDelete={handleNestUpdate} />
+                  <CircleButton onClick={handleDeleteFromNest} disabled={isProcessing}>
+                    <IconCircle bgColor="#6c757d">
+                      <FaTrash />
+                    </IconCircle>
+                    <ButtonText>둥지제거</ButtonText>
+                  </CircleButton>
                 ) : (
-                  <AddToNestButton
-                    bookId={book.bookId}
-                    currentRating={userRatings[book.bookId] || 0}
-                    onAdd={handleNestUpdate}
-                  />
+                  <CircleButton onClick={handleAddToNest} disabled={isProcessing}>
+                    <IconCircle bgColor="#00c473">
+                      <FaBookmark />
+                    </IconCircle>
+                    <ButtonText>둥지담기</ButtonText>
+                  </CircleButton>
                 )}
-                <PurchaseButton onClick={handlePurchaseClick}>구매하기</PurchaseButton>
+                <CircleButton onClick={handleBookmarkClick}>
+                  <IconCircle bgColor={isBookmarked ? '#FF6B6B' : '#E9ECEF'}>
+                    <FaHeart style={{color: 'white'}} />
+                  </IconCircle>
+                  <ButtonText>찜하기</ButtonText>
+                </CircleButton>
+                <CircleButton onClick={handlePurchaseClick}>
+                  <IconCircle bgColor="#3F51B5">
+                    <FaShoppingCart />
+                  </IconCircle>
+                  <ButtonText>구매하기</ButtonText>
+                </CircleButton>
               </ButtonContainer>
             </ImageSection>
             <InfoSection>
@@ -750,7 +998,62 @@ const BookDetailPage = () => {
             />
           </div>
 
-          {/* 중복된 ReviewList 컴포넌트 제거 */}
+          {/* Add Modals at the bottom */}
+          {showAddConfirmModal && (
+            <ModalOverlay onClick={() => setShowAddConfirmModal(false)}>
+              <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalTitle>둥지에 등록하시겠습니까?</ModalTitle>
+                <ModalButton $variant="primary" onClick={handleConfirmAdd}>
+                  등록하기
+                </ModalButton>
+                <ModalButton onClick={() => setShowAddConfirmModal(false)}>
+                  취소
+                </ModalButton>
+              </ModalContent>
+            </ModalOverlay>
+          )}
+
+          {showAddSuccessModal && (
+            <ModalOverlay onClick={() => setShowAddSuccessModal(false)}>
+              <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalTitle>둥지에 등록되었습니다</ModalTitle>
+                <ModalButton $variant="primary" onClick={handleGoToNest}>
+                  둥지 바로가기
+                </ModalButton>
+                <ModalButton onClick={() => setShowAddSuccessModal(false)}>
+                  계속 둘러보기
+                </ModalButton>
+              </ModalContent>
+            </ModalOverlay>
+          )}
+
+          {showDeleteConfirmModal && (
+            <ModalOverlay onClick={() => setShowDeleteConfirmModal(false)}>
+              <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalTitle>둥지에서 삭제하시겠습니까?</ModalTitle>
+                <ModalButton $variant="primary" onClick={handleConfirmDelete}>
+                  삭제
+                </ModalButton>
+                <ModalButton onClick={() => setShowDeleteConfirmModal(false)}>
+                  취소
+                </ModalButton>
+              </ModalContent>
+            </ModalOverlay>
+          )}
+
+          {showDeleteSuccessModal && (
+            <ModalOverlay onClick={() => setShowDeleteSuccessModal(false)}>
+              <ModalContent onClick={(e) => e.stopPropagation()}>
+                <ModalTitle>둥지에서 삭제되었습니다</ModalTitle>
+                <ModalButton $variant="primary" onClick={handleGoToNest}>
+                  둥지 바로가기
+                </ModalButton>
+                <ModalButton onClick={() => setShowDeleteSuccessModal(false)}>
+                  계속 둘러보기
+                </ModalButton>
+              </ModalContent>
+            </ModalOverlay>
+          )}
 
           <PurchaseModal
             isOpen={isPurchaseModalOpen}

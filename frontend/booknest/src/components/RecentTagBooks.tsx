@@ -35,9 +35,9 @@ const Title = styled.h2`
   margin-bottom: 16px;
   color: #333;
   display: flex;
-  flex-direction: column; 
-  align-items: flex-start; 
-  gap: 4px; 
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
   line-height: 1.4;
   
   @media (min-width: 768px) {
@@ -130,11 +130,27 @@ const BookTitle = styled.h3`
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  max-height: 2.8em; /* Approximately 2 lines */
+  line-height: 1.4;
+  
+  /* Let short titles appear on one line */
+  &:not(.force-two-lines) {
+    white-space: normal;
+  }
+  
+  /* Titles that don't overflow will naturally stay on one line */
   
   @media (min-width: 768px) {
     font-size: 16px;
     margin-bottom: 8px;
+    max-height: 1.5em; /* One line for wider screens */
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    white-space: nowrap;
   }
 `;
 
@@ -418,16 +434,15 @@ const RecentTagBooks = () => {
   return (
     <Container>
       <Title>
-        <span><NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한</span>
-        <span>
-          {tags.map((tag, index) => (
-            <React.Fragment key={index}>
-              <TagHighlight>#{tag.trim()}</TagHighlight>
-              {index < tags.length - 1 ? ', ' : ''}
-            </React.Fragment>
-          ))}
-          {' '}도서
-        </span>
+        <NicknameHighlight>{userDetail?.nickname}</NicknameHighlight>님의 취향이 가득한
+        {tags.map((tag, index) => (
+          <React.Fragment key={index}>
+            {index === 0 ? ' ' : ''}
+            <TagHighlight>#{tag.trim()}</TagHighlight>
+            {index < tags.length - 1 ? ', ' : ''}
+          </React.Fragment>
+        ))}
+        {' '}도서
       </Title>
       <BookListContainer>
         {canScrollLeft && (

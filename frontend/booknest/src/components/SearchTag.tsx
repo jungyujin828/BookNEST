@@ -336,8 +336,8 @@ const SearchTag: React.FC<SearchTagProps> = ({
 
   const handleClearTags = () => {
     console.log("Clearing all tags");
-    onClearTags();
-    onSearch();
+    onClearTags(); // Clear the tags in the parent component
+    onSearch(); // This will trigger a search with no tags, which should clear the books
   };
 
   return (
@@ -372,46 +372,51 @@ const TagSection = styled.div`
 `;
 
 const TagCategory = styled.div`
-  margin-bottom: 10px;
-  min-height: 80px; /* Add a minimum height to prevent collapsing */
+  margin-bottom: 4px;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
 `;
 
 const CategoryTitle = styled.h3`
-  margin: 0 0 5px 0;
-  font-size: 16px; 
+  margin: 0;
+  font-size: 14px; 
   color: #333; 
   font-weight: bold;
+  flex-shrink: 0;
+  margin-right: 10px;
+  min-width: 50px;
 `;
 
 const TagListContainer = styled.div`
   position: relative;
-  width: 100%;
+  flex: 1;
   overflow: hidden; 
-  -webkit-overflow-scrolling: touch; /* Better iOS scrolling */
-  display: flex; /* Always display as flex */
-  min-height: 50px; /* Add a minimum height to prevent collapsing */
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  min-height: 32px;
 `;
 
 const TagList = styled.div`
   display: flex;
   flex-wrap: nowrap; 
-  gap: 8px;
-  padding: 5px 0; 
+  gap: 4px; /* Further reduced gap between tags */
+  padding: 3px 0; 
   transition: transform 0.3s ease;
   transform: translateX(0);
-  touch-action: pan-x; /* Optimize for horizontal touch */
-  width: 100%; /* Ensure full width */
-  min-height: 40px; /* Add a minimum height to prevent collapsing */
+  touch-action: pan-x;
+  width: 100%;
+  min-height: 32px; /* Further reduced minimum height */
 `;
 
 const TagButton = styled.button<{ selected: boolean }>`
-  padding: 8px 16px; 
-  border-radius: 20px; 
+  padding: 4px 8px; /* Further reduced padding */
+  border-radius: 12px; /* Further reduced radius */
   border: 1px solid ${(props) => (props.selected ? "#00c473" : "#ddd")};
   background-color: ${(props) => (props.selected ? "#e6fff4" : "white")};
   color: ${(props) => (props.selected ? "#00c473" : "#555")};
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px; /* Even smaller font size */
   font-weight: 500;
   white-space: nowrap; 
   flex-shrink: 0; 
@@ -429,23 +434,22 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   top: 50%;
   transform: translateY(-50%);
   ${props => props.direction === 'left' ? 'left: 0px;' : 'right: 0px;'}
-  width: 30px;
-  height: 40px;
-  border-radius: 8px;
+  width: 20px; /* Even smaller buttons */
+  height: 30px;
+  border-radius: 4px;
   background-color: white;
   border: 1px solid #eee;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
   transition: all 0.2s ease-in-out;
-  
 
   &:hover {
     background-color: #f8f8f8;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
   }
 
   &:active {
@@ -455,8 +459,8 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 
   &::before {
     content: '';
-    width: 10px;
-    height: 10px;
+    width: 6px; /* Even smaller arrow */
+    height: 6px;
     border-top: 2px solid #555;
     border-right: 2px solid #555;
     transform: ${props => props.direction === 'left' ? 'rotate(-135deg) translateX(1px)' : 'rotate(45deg) translateX(-1px)'};
@@ -471,30 +475,30 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
 const SelectedTagsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 20px;
-  padding-top: 16px;
+  gap: 4px; /* Further reduced gap */
+  margin-top: 12px;
+  padding-top: 8px;
   border-top: 1px solid #eee;
 `;
 
 const SelectedTag = styled.span`
-  padding: 6px 12px;
-  border-radius: 16px;
+  padding: 3px 8px; /* Further reduced padding */
+  border-radius: 10px; /* Further reduced radius */
   background-color: #00c473;
   color: #ffffff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px; /* Even smaller font */
   font-weight: 500;
 `;
 
 const ClearTagsButton = styled.button`
-  padding: 6px 12px;
-  border-radius: 16px;
+  padding: 3px 8px; /* Further reduced padding */
+  border-radius: 10px; /* Further reduced radius */
   border: 1px solid #ddd;
   background-color: white;
   color: #666;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px; /* Even smaller font */
   margin-left: auto; 
 
   &:hover {

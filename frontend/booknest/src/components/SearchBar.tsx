@@ -16,6 +16,12 @@ interface SearchBarProps {
   onUpdateSearchParams: (searchTerm: string) => void;
 }
 
+const NoResultsIcon = styled.div`
+  font-size: 48px;
+  text-align: center;
+  margin: 20px 0;
+`;
+
 const SearchBarContainer = styled.div`
   position: relative;
   margin-bottom: 20px;
@@ -103,12 +109,17 @@ const ClearButton = styled.button`
   right: 15px;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
+  opacity: 0.7;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &::before,
   &::after {
@@ -117,16 +128,18 @@ const ClearButton = styled.button`
     width: 2px;
     height: 16px;
     background-color: #666;
-    top: 0;
-    left: 50%;
   }
 
   &::before {
-    transform: translateX(-50%) rotate(45deg);
+    transform: rotate(45deg);
   }
 
   &::after {
-    transform: translateX(-50%) rotate(-45deg);
+    transform: rotate(-45deg);
+  }
+
+  &:hover {
+    opacity: 1;
   }
 
   &:hover::before,
@@ -280,7 +293,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setTimeout(() => {
         setShowAutocomplete(false);
-      }, 200);
+      }, 300);
 
       if (onBlur) {
         onBlur();
@@ -311,7 +324,18 @@ const SearchBar = forwardRef<any, SearchBarProps>(
             onFocus={handleInputFocus}
             onBlur={handleInputBlur}
           />
-          {searchTerm && <ClearButton onClick={onClear} />}
+          {searchTerm && (
+            <ClearButton 
+              onClick={() => {
+                onClear();
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }} 
+              type="button"
+              aria-label="Clear search text"
+            />
+          )}
           {showAutocomplete && autocompleteResults.length > 0 && (
             <AutocompleteList>
               {autocompleteResults.map((result, index) => (

@@ -1,5 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
+import kyoboLogo from '../assets/images/bookstore/kyobo.jpg';
+import yes24Logo from '../assets/images/bookstore/yes24.png';
+import aladinLogo from '../assets/images/bookstore/aladin.png';
 
 interface PurchaseUrls {
   aladinUrl: string;
@@ -66,10 +69,49 @@ const PurchaseLink = styled.a`
   }
 `;
 
+const StoreLogoContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+`;
+
+const StoreLogoLink = styled.a<{ disabled: boolean }>`
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${props => props.disabled ? 0.5 : 1};
+`;
+
 const StoreLogo = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
   margin-right: 12px;
+  transition: transform 0.2s;
+  object-fit: cover;
+  border: 2px solid #00c437;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const StoreLogoCircle = styled.div`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #00c437;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 196, 55, 0.3);
+  }
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -123,40 +165,45 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
         )}
         
         {!isLoading && !error && purchaseUrls && (
-          <LinkList>
-            <PurchaseLink 
-              href={purchaseUrls.aladinUrl || '#'} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={(e) => !purchaseUrls.aladinUrl && e.preventDefault()}
-              style={{ opacity: purchaseUrls.aladinUrl ? 1 : 0.5 }}
-            >
-              <StoreLogo src="/images/aladin-logo.png" alt="알라딘" />
-              {purchaseUrls.aladinUrl ? '알라딘에서 구매하기' : '알라딘 구매링크 없음'}
-            </PurchaseLink>
-            
-            <PurchaseLink 
-              href={purchaseUrls.kyoboUrl || '#'} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={(e) => !purchaseUrls.kyoboUrl && e.preventDefault()}
-              style={{ opacity: purchaseUrls.kyoboUrl ? 1 : 0.5 }}
-            >
-              <StoreLogo src="/images/kyobo-logo.png" alt="교보문고" />
-              {purchaseUrls.kyoboUrl ? '교보문고에서 구매하기' : '교보문고 구매링크 없음'}
-            </PurchaseLink>
-            
-            <PurchaseLink 
-              href={purchaseUrls.yes24Url || '#'} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              onClick={(e) => !purchaseUrls.yes24Url && e.preventDefault()}
-              style={{ opacity: purchaseUrls.yes24Url ? 1 : 0.5 }}
-            >
-              <StoreLogo src="/images/yes24-logo.png" alt="YES24" />
-              {purchaseUrls.yes24Url ? 'YES24에서 구매하기' : 'YES24 구매링크 없음'}
-            </PurchaseLink>
-          </LinkList>
+          <>
+            <StoreLogoContainer>
+              <StoreLogoLink 
+                href={purchaseUrls.kyoboUrl || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => !purchaseUrls.kyoboUrl && e.preventDefault()}
+                disabled={!purchaseUrls.kyoboUrl}
+              >
+                <StoreLogoCircle>
+                  <img src={kyoboLogo} alt="교보문고" />
+                </StoreLogoCircle>
+              </StoreLogoLink>
+              
+              <StoreLogoLink 
+                href={purchaseUrls.yes24Url || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => !purchaseUrls.yes24Url && e.preventDefault()}
+                disabled={!purchaseUrls.yes24Url}
+              >
+                <StoreLogoCircle>
+                  <img src={yes24Logo} alt="YES24" />
+                </StoreLogoCircle>
+              </StoreLogoLink>
+              
+              <StoreLogoLink 
+                href={purchaseUrls.aladinUrl || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => !purchaseUrls.aladinUrl && e.preventDefault()}
+                disabled={!purchaseUrls.aladinUrl}
+              >
+                <StoreLogoCircle>
+                  <img src={aladinLogo} alt="알라딘" />
+                </StoreLogoCircle>
+              </StoreLogoLink>
+            </StoreLogoContainer>
+          </>
         )}
       </ModalContent>
     </ModalOverlay>
