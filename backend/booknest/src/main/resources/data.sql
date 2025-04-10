@@ -4,8 +4,8 @@ INSERT INTO user (id, nickname, archetype, provider, provider_id, created_at, up
 VALUES
     (1, '테스트맨1', '갓 태어난 참새', 'KAKAO', 112312312, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
     (2, '테스트맨2', '예민한 앵무새', 'NAVER', 1231440, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (3, '테스트맨3', '갓 태어난 참새', 'GOOGLE', 987654321, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
-    (4, '테스트맨4', '갓 태어난 참새', 'KAKAO', 554433221, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (3, '테스트맨3', '논리적인 부엉이', 'GOOGLE', 987654321, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
+    (4, '테스트맨4', '모험가 알바트로스', 'KAKAO', 554433221, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png'),
     (5, '테스트맨5', '갓 태어난 참새', 'NAVER', 667788990, NOW(), NOW(), 'https://res.cloudinary.com/gominsushi/image/upload/v1743145995/bird_xbfc1j.png');
 -- INSERT INTO user (id, nickname, archetype, provider, provider_id, created_at, updated_at, profile_url, gender, birthdate)
 -- VALUES
