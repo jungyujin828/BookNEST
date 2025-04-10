@@ -6,7 +6,6 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.json.JsonData;
 import com.ssafy.booknest.domain.search.record.BookEval;
 import com.ssafy.booknest.domain.search.record.SearchedBook;
 import com.ssafy.booknest.global.error.ErrorCode;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -37,10 +37,10 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
                             .functionScore(fs -> fs
                                     .query(inner -> inner
                                             .bool(b -> b
-                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.0f))) // 제목 자동완성: 구문 일치 우선
-                                                    .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(2.0f))) // 제목 자동완성: 단어 일치
-                                                    .should(s3 -> s3.match(m -> m.field("authors.autocomplete").query(keyword).boost(2.0f))) // 저자 자동완성: 전체 일치
-                                                    .should(s4 -> s4.term(t -> t.field("authors").value(keyword).boost(5.0f))) // 저자 전체 일치: 높은 가중치
+                                                    .should(s1 -> s1.matchPhrase(mp -> mp.field("title.autocomplete").query(keyword).boost(4.5f)))
+                                                    .should(s2 -> s2.match(m -> m.field("title.autocomplete").query(keyword).boost(3.0f)))
+                                                    .should(s3 -> s3.matchPhrase(mp -> mp.field("authors.autocomplete").query(keyword).boost(4.0f)))
+                                                    .should(s4 -> s4.match(m -> m.field("authors.autocomplete").query(keyword).boost(6.5f)))
                                             )
                                     )
                                     .functions(fns -> fns
@@ -64,18 +64,22 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
 
             Set<String> suggestions = new LinkedHashSet<>();
             for (Hit<SearchedBook> hit : response.hits().hits()) {
-                SearchedBook book = hit.source();  // 실제 검색된 문서 정보
+                SearchedBook book = hit.source();
 
-                // 검색된 책의 제목과 저자를 결과에 추가
                 if (book.getTitle() != null) {
                     suggestions.add(book.getTitle());
                 }
                 if (book.getAuthors() != null) {
                     suggestions.addAll(book.getAuthors());
                 }
+
+                // 10개 이상 모이면 루프 중단
+                if (suggestions.size() >= 10) break;
             }
 
-            return new ArrayList<>(suggestions);
+            return suggestions.stream()
+                    .limit(10) // 혹시라도 초과되었을 경우 안전장치
+                    .collect(Collectors.toList());
 
         } catch (IOException e) {
             throw new CustomException(ErrorCode.ELASTICSEARCH_ERROR);
@@ -118,9 +122,9 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             if (!hasTags && hasKeyword) {
                 Query keywordQuery = Query.of(q -> q.bool(b -> b
                         .should(s -> s.match(m -> m.field("title").query(keyword).boost(3.0f)))
-                        .should(s -> s.match(m -> m.field("authors").query(keyword).boost(2.0f)))
+                        .should(s -> s.match(m -> m.field("authors").query(keyword).boost(3.0f)))
                         .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.0f)))
-                        .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(4.0f)))
+                        .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(5.0f)))
                 ));
 
                 SearchRequest request = SearchRequest.of(s -> s
