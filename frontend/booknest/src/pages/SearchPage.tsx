@@ -608,8 +608,8 @@ const SearchPage = () => {
 
   // Update the tag search function to clear results when all tags are cleared
   const handleTagSearch = async () => {
-    // If there are no tags and no search term, clear the book results
-    if (selectedTags.length === 0 && !searchTerm) {
+    // If there are no tags, clear the book results regardless of search term
+    if (selectedTags.length === 0) {
       setBooks([]);
       setTotalBooks(0);
       setTotalPages(0);
@@ -721,7 +721,10 @@ const SearchPage = () => {
           <SearchTag
             selectedTags={selectedTags}
             onTagSelect={handleTagSelect}
-            onClearTags={() => setSelectedTags([])}
+            onClearTags={() => {
+              // 태그 전체 해제 시 페이지 새로고침
+              window.location.href = '/search';
+            }}
             onSearch={handleTagSearch}
           />
           <ToggleContainer>
