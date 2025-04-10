@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -28,6 +28,7 @@ public class BookResponse {
                 .publishedDate(book.getPublishedDate())
                 .authors(book.getBookAuthors().stream()
                         .map(bookAuthor -> bookAuthor.getAuthor().getName())
+                        .distinct()
                         .collect(Collectors.toList()))
                 .build();
     }

@@ -1,17 +1,10 @@
 package com.ssafy.booknest.domain.book.controller;
 
-import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
 import com.ssafy.booknest.domain.book.dto.response.*;
-import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
+import com.ssafy.booknest.domain.book.dto.response.recommendation.*;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
-import com.ssafy.booknest.domain.book.enums.BookSearchType;
-import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
 import com.ssafy.booknest.domain.book.service.BookService;
 import com.ssafy.booknest.domain.book.service.FastApiService;
-import com.ssafy.booknest.domain.book.service.RatingService;
-import com.ssafy.booknest.domain.book.service.ReviewService;
-import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;
@@ -21,11 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,13 +24,9 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private final BookService bookService;
-    private final UserService userService;
     private final AuthenticationUtil authenticationUtil;
-    private final ReviewService reviewService;
-    private final RatingService ratingService;
     private final FastApiService fastApiService;
     private final UserActionLogger userActionLogger;
-    private final PopularAuthorBookRepository popularAuthorBookRepository;
 
     // 베스트 셀러 목록 조회
     @GetMapping("/best")

@@ -2,8 +2,8 @@ package com.ssafy.booknest.domain.user.service;
 
 import com.ssafy.booknest.domain.book.entity.Author;
 import com.ssafy.booknest.domain.book.repository.AuthorRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateImgRequest;
 import com.ssafy.booknest.domain.user.dto.response.FavoriteAuthorDto;
@@ -15,6 +15,8 @@ import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.UserAuthorAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.*;
+import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
+import com.ssafy.booknest.domain.user.repository.tag.UserTagAnalysisRepository;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +89,7 @@ public class UserService {
             String district = extractDistrict(addr.getRoadAddress());
 
             if (current == null) {
-                // 처음 등록
+
                 Address newAddress = Address.builder()
                         .roadAddress(addr.getRoadAddress())
                         .oldAddress(addr.getOldAddress())
@@ -171,19 +173,24 @@ public class UserService {
 
         List<FavoriteAuthorDto> favoriteAuthors = authorNames.stream()
                 .map(name -> {
-                    // 이름 기준으로 Author 엔티티에서 검색
                     Author author = authorRepository.findByName(name)
                             .orElse(Author.builder()
                                     .name(name)
-                                    .imageUrl(null) // 이미지 없으면 null 또는 기본 이미지
+                                    .imageUrl(null)
                                     .build());
+
+                    String imageUrl = author.getImageUrl();
+                    if (imageUrl == null || imageUrl.isBlank()) {
+                        imageUrl = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+                    }
 
                     return FavoriteAuthorDto.builder()
                             .name(author.getName())
-                            .imageUrl(author.getImageUrl())
+                            .imageUrl(imageUrl)
                             .build();
                 })
                 .collect(Collectors.toList());
+
 
 
         return UserMypageResponse.of(

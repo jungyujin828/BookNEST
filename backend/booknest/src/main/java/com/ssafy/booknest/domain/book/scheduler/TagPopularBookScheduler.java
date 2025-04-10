@@ -1,12 +1,11 @@
 package com.ssafy.booknest.domain.book.scheduler;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.TagRandomBook;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.entity.recommendation.TagRandomBook;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.TagRandomBookRepository;
-import com.ssafy.booknest.domain.nest.entity.BookNest;
-import com.ssafy.booknest.domain.nest.entity.Nest;
-import com.ssafy.booknest.domain.nest.repository.NestRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.recommandation.TagRandomBookRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,50 +21,54 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TagPopularBookScheduler {
 
-    private final NestRepository nestRepository;
+    private final RatingRepository ratingRepository;
     private final TagRandomBookRepository tagRandomBookRepository;
     private final BookRepository bookRepository;
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 2시간마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 5) // 5시간마다 실행
     @Transactional
     public void runTagBasedBookBatch() {
-        log.info("[배치 시작] 태그별 인기 도서 선정 시작");
+        log.info("[배치 시작] 평점 기반 태그별 인기 도서 선정 시작");
 
-        List<Nest> allNests = nestRepository.findAllWithBooksOnly();
-        Map<String, Map<Book, Long>> tagBookCount = new HashMap<>();
+        List<Rating> ratings = ratingRepository.findAllWithBookAndTags();
 
-        // 사용자 서재에서 책별 태그 카운트 수집
-        for (Nest nest : allNests) {
-            for (BookNest bookNest : nest.getBookNests()) {
-                Book book = bookNest.getBook();
-                Set<String> tags = book.getBookTags().stream()
-                        .map(bt -> bt.getTag().getName())
-                        .collect(Collectors.toSet()); // 중복 태그 제거
+        // 태그별 책 점수 누적
+        Map<String, Map<Book, List<Double>>> tagScoreMap = new HashMap<>();
 
-                for (String tag : tags) {
-                    tagBookCount
-                            .computeIfAbsent(tag, k -> new HashMap<>())
-                            .merge(book, 1L, Long::sum);
-                }
+        for (Rating rating : ratings) {
+            Book book = rating.getBook();
+            double score = rating.getRating();
+
+            Set<String> tags = book.getBookTags().stream()
+                    .map(bt -> bt.getTag().getName())
+                    .collect(Collectors.toSet());
+
+            for (String tag : tags) {
+                tagScoreMap
+                        .computeIfAbsent(tag, k -> new HashMap<>())
+                        .computeIfAbsent(book, b -> new ArrayList<>())
+                        .add(score);
             }
         }
 
-        // 기존 데이터 초기화
         tagRandomBookRepository.deleteAllInBatch();
 
-        // 태그별 상위 15권 선정 및 저장
-        for (Map.Entry<String, Map<Book, Long>> entry : tagBookCount.entrySet()) {
+        for (Map.Entry<String, Map<Book, List<Double>>> entry : tagScoreMap.entrySet()) {
             String tag = entry.getKey();
-            Map<Book, Long> bookCounts = entry.getValue();
+            Map<Book, List<Double>> bookScores = entry.getValue();
 
-            // 상위 15권 정렬 및 중복 제거
-            LinkedHashSet<Book> topBooks = bookCounts.entrySet().stream()
-                    .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+            // 평균 평점 기준 정렬
+            LinkedHashSet<Book> topBooks = bookScores.entrySet().stream()
+                    .sorted((e1, e2) -> {
+                        double avg1 = e1.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+                        double avg2 = e2.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+                        return Double.compare(avg2, avg1); // 내림차순
+                    })
                     .map(Map.Entry::getKey)
                     .limit(15)
                     .collect(Collectors.toCollection(LinkedHashSet::new));
 
-            // 부족할 경우 랜덤으로 보충 (중복 방지)
+            // 부족하면 랜덤 보충
             if (topBooks.size() < 15) {
                 List<Book> randomBooks = bookRepository.findRandomBooksByTag(tag, PageRequest.of(0, 15 - topBooks.size()));
                 for (Book book : randomBooks) {
@@ -87,6 +90,6 @@ public class TagPopularBookScheduler {
         }
 
         log.info("[배치 완료] 태그별 인기 도서 테이블 갱신 완료");
-        log.info("***************************************************************************************************");
+        log.info("***********************************************************************************************");
     }
 }

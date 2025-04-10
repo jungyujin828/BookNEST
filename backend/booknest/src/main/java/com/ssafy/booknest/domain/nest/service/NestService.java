@@ -2,10 +2,10 @@ package com.ssafy.booknest.domain.nest.service;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.entity.Review;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewRepository;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.domain.nest.dto.request.AddBookNestRequest;
 import com.ssafy.booknest.domain.nest.dto.request.DeleteBookNestRequest;
@@ -17,11 +17,12 @@ import com.ssafy.booknest.domain.nest.entity.BookNest;
 import com.ssafy.booknest.domain.nest.entity.Nest;
 import com.ssafy.booknest.domain.nest.repository.BookMarkRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.nest.repository.NestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
 import com.ssafy.booknest.global.common.CustomPage;
+import com.ssafy.booknest.global.common.util.TagVectorService;
 import com.ssafy.booknest.global.common.util.UserActionLogger;
 import com.ssafy.booknest.global.error.ErrorCode;
 import com.ssafy.booknest.global.error.exception.CustomException;
@@ -45,7 +46,9 @@ public class NestService {
     private final NestRepository nestRepository;
     private final BookMarkRepository bookMarkRepository;
     private final RatingService ratingService;
+
     private final UserActionLogger userActionLogger;
+    private final TagVectorService tagVectorService;
 
 
     @Transactional
@@ -116,6 +119,11 @@ public class NestService {
             bookNestRepository.save(bookNest);
         }
 
+        List<String> tags = book.getTagNames();
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, 0.4); // 서재 등록 가중치
+        }
+
         return AddBookNestResponse.builder()
                 .nestId(nest.getId())
                 .bookId(book.getId())
@@ -139,6 +147,11 @@ public class NestService {
 
         BookNest bookNest = bookNestRepository.findByNestIdAndBookId(nest.getId(), book.getId()).orElseThrow(() ->
                 new CustomException(ErrorCode.BOOKNEST_NOT_FOUND));
+
+        List<String> tags = book.getTagNames();
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, -0.4); // 서재 등록 가중치
+        }
 
         bookNestRepository.delete(bookNest);
     }
@@ -165,6 +178,11 @@ public class NestService {
                 .build();
 
         bookMarkRepository.save(bookMark);
+
+        List<String> tags = book.getTagNames();
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, 0.325); // 찜 등록 가중치
+        }
     }
 
     // 찜하기 취소
@@ -178,12 +196,18 @@ public class NestService {
         Nest nest = nestRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.NEST_NOT_FOUND));
 
-
         BookMark bookMark = bookMarkRepository.findByNestIdAndBookId(nest.getId(), bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.BOOKMARK_NOT_FOUND));
 
 
         bookMarkRepository.delete(bookMark);
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new CustomException(ErrorCode.BOOK_NOT_FOUND));
+        List<String> tags = book.getTagNames();
+        for (String tag : tags) {
+            tagVectorService.increaseTagScore(userId, tag, -0.325); // 찜 등록 가중치
+        }
     }
 
     // 찜목록 조회
@@ -199,6 +223,5 @@ public class NestService {
                 .map(bookMark -> BookMarkListResponse.of(bookMark.getBook(), bookMark.getCreatedAt()))
                 .toList();
     }
-
 
 }

@@ -22,10 +22,5 @@ public class NaverUserResponse {
         @JsonProperty("id")
         private String id;
 
-        @JsonProperty("email")
-        private String email;
-
-        @JsonProperty("nickname")
-        private String nickname;
     }
 }

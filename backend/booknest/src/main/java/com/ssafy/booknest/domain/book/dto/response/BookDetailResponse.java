@@ -1,17 +1,15 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
+import com.ssafy.booknest.domain.book.dto.response.evaluation.ReviewResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.global.common.CustomPage;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -63,5 +61,4 @@ public class BookDetailResponse {
                 .reviews(new CustomPage<>(reviewPage))
                 .build();
     }
-
 }

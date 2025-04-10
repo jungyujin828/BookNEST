@@ -1,9 +1,11 @@
 package com.ssafy.booknest.domain.user.entity;
 
-import com.ssafy.booknest.domain.book.entity.IgnoredBook;
+import com.ssafy.booknest.domain.book.entity.evaluation.IgnoredBook;
 import com.ssafy.booknest.domain.nest.entity.TodayBook;
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.nest.entity.Nest;
+import com.ssafy.booknest.domain.user.entity.category.UserCategoryAnalysis;
+import com.ssafy.booknest.domain.user.entity.tag.UserTagAnalysis;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.enums.Provider;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;

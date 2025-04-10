@@ -6,15 +6,12 @@ import co.elastic.clients.elasticsearch._types.ScriptSortType;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.JsonData;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.ssafy.booknest.domain.book.dto.response.BookResponse;
 import com.ssafy.booknest.domain.book.enums.BookEvalType;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.search.dto.response.BookSearchResponse;
 import com.ssafy.booknest.domain.search.dto.response.UserSearchResponse;
@@ -133,7 +130,10 @@ public class SearchService {
             builder.sort(s -> s
                     .script(sc -> sc
                             .type(ScriptSortType.Number)
-                            .script(script -> script.inline(inline -> inline.source("Math.random()")))
+                            .script(script -> script
+                                    .source("Math.random()")
+                                    .lang("painless")
+                            )
                             .order(SortOrder.Asc)
                     )
             );
