@@ -1,4 +1,4 @@
-package com.ssafy.booknest.domain.book.dto.response;
+package com.ssafy.booknest.domain.book.dto.response.evaluation;
 
 import com.ssafy.booknest.domain.book.entity.Review;
 import com.ssafy.booknest.domain.user.entity.User;

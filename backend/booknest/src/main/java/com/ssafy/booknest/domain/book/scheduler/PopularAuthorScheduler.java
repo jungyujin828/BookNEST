@@ -2,7 +2,7 @@ package com.ssafy.booknest.domain.book.scheduler;
 
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.BookAuthor;
-import com.ssafy.booknest.domain.book.entity.PopularAuthorBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.PopularAuthorBook;
 import com.ssafy.booknest.domain.book.entity.Rating;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.PopularAuthorBookRepository;
@@ -26,8 +26,8 @@ public class PopularAuthorScheduler {
     private final BookRepository bookRepository;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
 
-    private static final int TOP_AUTHOR_COUNT = 3; // 상위 작가 수
-    private static final int MAX_BOOKS_PER_AUTHOR = 30; // 작가당 최대 저장할 책 수
+    private static final int TOP_AUTHOR_COUNT = 1; // 상위 작가 수
+    private static final int MAX_BOOKS_PER_AUTHOR = 15; // 작가당 최대 저장할 책 수
 
     @Scheduled(fixedRate = 1000 * 60 * 60 * 3) // 3시간마다 실행
     @Transactional
@@ -60,10 +60,10 @@ public class PopularAuthorScheduler {
                         entry -> entry.getValue().stream().mapToDouble(Double::doubleValue).average().orElse(0.0)
                 ));
 
-        // 상위 15명의 작가 추출
+        // 상위 TOP_AUTHOR_COUNT 명의 작가 추출
         List<String> topAuthors = authorAvgRating.entrySet().stream()
                 .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .limit(15)
+                .limit(TOP_AUTHOR_COUNT)
                 .map(Map.Entry::getKey)
                 .toList();
 
@@ -79,8 +79,8 @@ public class PopularAuthorScheduler {
         int rank = 1;
 
         for (String author : topAuthors) {
-            // 작가별 책 최대 50권까지 가져오도록 설정 (필요하면 더 늘려도 됩니다)
-            List<Book> books = bookRepository.findBooksByAuthorNameLike(author, PageRequest.of(0, 50));
+            // 작가별 책 최대 MAX_BOOKS_PER_AUTHOR권까지 가져오도록 설정
+            List<Book> books = bookRepository.findBooksByAuthorNameLike(author, PageRequest.of(0, MAX_BOOKS_PER_AUTHOR));
 
             for (Book book : books) {
                 popularList.add(PopularAuthorBook.builder()
@@ -105,5 +105,4 @@ public class PopularAuthorScheduler {
         log.info("[배치 완료] 화제의 작가 도서 테이블 갱신 완료");
         log.info("***********************************************************************************************");
     }
-
 }

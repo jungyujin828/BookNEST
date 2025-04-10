@@ -1,13 +1,9 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.ReviewRequest;
-import com.ssafy.booknest.domain.book.dto.response.BestReviewResponse;
-import com.ssafy.booknest.domain.book.dto.response.ReviewResponse;
-import com.ssafy.booknest.domain.book.dto.response.UserReviewResponse;
-import com.ssafy.booknest.domain.book.service.BookService;
-import com.ssafy.booknest.domain.book.service.RatingService;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.BestReviewResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.UserReviewResponse;
 import com.ssafy.booknest.domain.book.service.ReviewService;
-import com.ssafy.booknest.domain.user.service.UserService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;
 import com.ssafy.booknest.global.common.util.AuthenticationUtil;

@@ -53,7 +53,6 @@ public class OAuthService {
             log.debug("Received user info from provider - id: {}, email: {}",
                     userInfo.getId(), userInfo.getEmail());
 
-            // 3. 유저 정보로 로그인 처리하기
 
             // 3. 기존 회원인지 확인
             Optional<User> existingUser = userRepository.findByProviderAndProviderIdAndDeletedAtIsNull(

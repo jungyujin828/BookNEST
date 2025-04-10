@@ -1,6 +1,6 @@
-package com.ssafy.booknest.domain.book.dto.response;
+package com.ssafy.booknest.domain.book.dto.response.recommendation;
 
-import com.ssafy.booknest.domain.book.entity.AgeGenderBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.AgeGenderBook;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import lombok.AllArgsConstructor;

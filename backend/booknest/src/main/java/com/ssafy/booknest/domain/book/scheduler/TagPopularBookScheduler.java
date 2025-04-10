@@ -2,7 +2,7 @@ package com.ssafy.booknest.domain.book.scheduler;
 
 import com.ssafy.booknest.domain.book.entity.Book;
 import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.entity.TagRandomBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.TagRandomBook;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
 import com.ssafy.booknest.domain.book.repository.RatingRepository;
 import com.ssafy.booknest.domain.book.repository.TagRandomBookRepository;

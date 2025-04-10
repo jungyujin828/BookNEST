@@ -1,8 +1,8 @@
 package com.ssafy.booknest.domain.book.controller;
 
 import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
-import com.ssafy.booknest.domain.book.dto.response.MyRatingResponse;
-import com.ssafy.booknest.domain.book.dto.response.UserRatingResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.MyRatingResponse;
+import com.ssafy.booknest.domain.book.dto.response.evaluation.UserRatingResponse;
 import com.ssafy.booknest.domain.book.service.RatingService;
 import com.ssafy.booknest.global.common.CustomPage;
 import com.ssafy.booknest.global.common.response.ApiResponse;

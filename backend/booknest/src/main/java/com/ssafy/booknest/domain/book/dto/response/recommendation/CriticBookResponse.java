@@ -1,7 +1,7 @@
-package com.ssafy.booknest.domain.book.dto.response;
+package com.ssafy.booknest.domain.book.dto.response.recommendation;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.CriticBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.CriticBook;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

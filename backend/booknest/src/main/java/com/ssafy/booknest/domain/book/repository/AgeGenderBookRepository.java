@@ -1,9 +1,8 @@
 package com.ssafy.booknest.domain.book.repository;
 
-import com.ssafy.booknest.domain.book.entity.AgeGenderBook;
+import com.ssafy.booknest.domain.book.entity.recommendation.AgeGenderBook;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.user.enums.Gender;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
