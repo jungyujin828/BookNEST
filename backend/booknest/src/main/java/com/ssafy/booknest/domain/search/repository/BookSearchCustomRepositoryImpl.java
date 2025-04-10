@@ -1,5 +1,6 @@
 package com.ssafy.booknest.domain.search.repository;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -109,10 +110,10 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             // 키워드만 있는 경우
             if (!hasTags && hasKeyword) {
                 Query keywordQuery = Query.of(q -> q.bool(b -> b
-                        .should(s -> s.match(m -> m.field("title").query(keyword)))
-                        .should(s -> s.match(m -> m.field("authors").query(keyword)))
-                        .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword)))
-                        .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword)))
+                        .should(s -> s.match(m -> m.field("title").query(keyword).boost(3.0f)))
+                        .should(s -> s.match(m -> m.field("authors").query(keyword).boost(2.0f)))
+                        .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.0f)))
+                        .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(4.0f)))
                 ));
 
                 SearchRequest request = SearchRequest.of(s -> s
@@ -120,6 +121,9 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
                         .query(keywordQuery)
                         .from((int) pageable.getOffset())
                         .size(pageable.getPageSize())
+                        .sort(so -> so
+                                .score(sc -> sc.order(SortOrder.Desc)) // score 기준 내림차순 정렬 추가
+                        )
                 );
 
                 SearchResponse<SearchedBook> response = elasticsearchClient.search(request, SearchedBook.class);
@@ -145,13 +149,25 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             }
 
             if (hasKeyword) {
-                Query keywordQuery = Query.of(q -> q.bool(b -> b
-                        .should(s -> s.match(m -> m.field("title").query(keyword)))
-                        .should(s -> s.match(m -> m.field("authors").query(keyword)))
-                        .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword)))
-                        .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword)))
+                Query keywordFunctionScore = Query.of(q -> q.functionScore(fs -> fs
+                        .query(inner -> inner.bool(b -> b
+                                .should(s -> s.match(m -> m.field("title").query(keyword).boost(3.0f))) // boost 추가
+                                .should(s -> s.match(m -> m.field("authors").query(keyword).boost(2.0f))) // boost 추가
+                                .should(s -> s.matchPhrase(mp -> mp.field("title").query(keyword).boost(5.0f))) // boost 추가
+                                .should(s -> s.matchPhrase(mp -> mp.field("authors").query(keyword).boost(4.0f))) // boost 추가
+                        ))
+                        .boostMode(FunctionBoostMode.Multiply) // Sum -> Multiply로 변경
+                        .functions(fns -> fns
+                                .fieldValueFactor(fvf -> fvf
+                                        .field("totalRatings")
+                                        .factor(1.0)
+                                        .modifier(FieldValueFactorModifier.Log1p)
+                                        .missing(0.0) // totalRatings가 없으면 기본값 0.0
+                                )
+                        )
                 ));
-                mustQueries.add(keywordQuery);
+
+                mustQueries.add(keywordFunctionScore);
             }
 
             Query finalQuery = Query.of(q -> q.bool(b -> b.must(mustQueries)));
@@ -161,6 +177,9 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
                     .query(finalQuery)
                     .from((int) pageable.getOffset())
                     .size(pageable.getPageSize())
+                    .sort(so -> so
+                            .score(sc -> sc.order(SortOrder.Desc)) // score 기준 내림차순 정렬 추가
+                    )
             );
 
             SearchResponse<SearchedBook> response = elasticsearchClient.search(request, SearchedBook.class);
@@ -176,4 +195,6 @@ public class BookSearchCustomRepositoryImpl implements BookSearchCustomRepositor
             throw new RuntimeException("비상비상: ", e);
         }
     }
+
+
 }

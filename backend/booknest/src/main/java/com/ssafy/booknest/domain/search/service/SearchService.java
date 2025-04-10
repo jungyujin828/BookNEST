@@ -136,10 +136,7 @@ public class SearchService {
             builder.sort(s -> s
                     .script(sc -> sc
                             .type(ScriptSortType.Number)
-                            .script(script -> script
-                                    .source("Math.random()")
-                                    .lang("painless")
-                            )
+                            .script(script -> script.inline(inline -> inline.source("Math.random()")))
                             .order(SortOrder.Asc)
                     )
             );
