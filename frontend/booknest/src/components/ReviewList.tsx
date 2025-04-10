@@ -11,10 +11,12 @@ export interface Review {
   bookId: number;
   content: string;
   reviewerName: string;
+  profileURL: string;
   likes: number;
   myLiked: boolean;
   createdAt: string;
   updatedAt: string;
+  rating?: number;
 }
 
 export interface ReviewsPage {
@@ -63,6 +65,11 @@ const ReviewInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const ReviewerInfo = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const ReviewContent = styled.div`
@@ -238,6 +245,16 @@ const ModalButton = styled.button<{ isPrimary?: boolean; isError?: boolean }>`
       return '#e9ecef';
     }};
   }
+`;
+
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  border: 1px solid #e9ecef;
+  background-color: #f8f9fa;
 `;
 
 const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange, currentUserId }) => {
@@ -471,10 +488,25 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
               <ReviewCard key={review.reviewId} isUserReview={isUserReview}>
                 <ReviewHeader>
                   <ReviewInfo>
-                    <ReviewerName>{review.reviewerName}</ReviewerName>
-                    <ReviewDate>
-                      {new Date(review.updatedAt).toLocaleDateString()}
-                    </ReviewDate>
+                    <ProfileImage 
+                      src={review.profileURL || "/images/default-profile.png"} 
+                      alt={`${review.reviewerName}의 프로필`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src.indexOf('default-profile.png') === -1) {
+                          target.src = "/images/default-profile.png";
+                        } else {
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-size='16' text-anchor='middle' dominant-baseline='middle' font-family='Arial' fill='%23aaa'%3E%3C/text%3E%3C/svg%3E";
+                          target.onerror = null;
+                        }
+                      }}
+                    />
+                    <ReviewerInfo>
+                      <ReviewerName>{review.reviewerName}</ReviewerName>
+                      <ReviewDate>
+                        {new Date(review.updatedAt).toLocaleDateString()}
+                      </ReviewDate>
+                    </ReviewerInfo>
                   </ReviewInfo>
                 </ReviewHeader>
                 {editingReviewId === review.reviewId ? (
