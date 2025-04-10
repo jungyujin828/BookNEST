@@ -587,7 +587,7 @@ const SearchPage = () => {
     setIsSearchFocused(false);
     setTimeout(() => {
       setShowRecent(false);
-    }, 200);
+    }, 300);
   };
 
   const toggleTags = () => {

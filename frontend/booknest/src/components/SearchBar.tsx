@@ -293,7 +293,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
     const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
       setTimeout(() => {
         setShowAutocomplete(false);
-      }, 200);
+      }, 300);
 
       if (onBlur) {
         onBlur();
