@@ -1,16 +1,13 @@
 package com.ssafy.booknest.domain.book.dto.response.evaluation;
 
-import com.ssafy.booknest.domain.book.entity.Review;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

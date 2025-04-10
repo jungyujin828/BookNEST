@@ -1,11 +1,11 @@
 package com.ssafy.booknest.domain.book.scheduler;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
 import com.ssafy.booknest.domain.book.entity.recommendation.TagRandomBook;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.TagRandomBookRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.recommandation.TagRandomBookRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ public class TagPopularBookScheduler {
     private final TagRandomBookRepository tagRandomBookRepository;
     private final BookRepository bookRepository;
 
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 2) // 2시간마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 5) // 5시간마다 실행
     @Transactional
     public void runTagBasedBookBatch() {
         log.info("[배치 시작] 평점 기반 태그별 인기 도서 선정 시작");

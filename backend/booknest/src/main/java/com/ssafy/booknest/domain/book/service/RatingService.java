@@ -4,13 +4,13 @@ import com.ssafy.booknest.domain.book.dto.request.RatingRequest;
 import com.ssafy.booknest.domain.book.dto.response.evaluation.MyRatingResponse;
 import com.ssafy.booknest.domain.book.dto.response.evaluation.UserRatingResponse;
 import com.ssafy.booknest.domain.book.entity.Book;
-import com.ssafy.booknest.domain.book.entity.IgnoredBook;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.entity.Review;
+import com.ssafy.booknest.domain.book.entity.evaluation.IgnoredBook;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
 import com.ssafy.booknest.domain.book.repository.BookRepository;
-import com.ssafy.booknest.domain.book.repository.IgnoredBookRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.IgnoredBookRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewRepository;
 import com.ssafy.booknest.domain.nest.repository.BookNestRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
@@ -92,7 +92,7 @@ public class RatingService {
 
         Double score = 0.0;
 
-        Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
+        Rating rating = ratingRepository.getRatingByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
 
         score = rating.getRating();
@@ -135,7 +135,7 @@ public class RatingService {
         Double score = 0.0;
 
         // 평점이 존재하지 않으면 예외 발생
-        Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
+        Rating rating = ratingRepository.getRatingByUserIdAndBookId(userId, bookId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RATING_NOT_FOUND));
 
         // 평점 작성자와 현재 사용자 불일치 시 접근 금지
@@ -192,7 +192,7 @@ public class RatingService {
 
     // 사용자의 해당 책에 대한 평점 가져오기
     public MyRatingResponse getUserRating(Integer userId, Integer bookId) {
-        Rating rating = ratingRepository.findByUserIdAndBookId(userId, bookId)
+        Rating rating = ratingRepository.getRatingByUserIdAndBookId(userId, bookId)
                 .orElse(null);
         return MyRatingResponse.of(rating, bookId);
     }

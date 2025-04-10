@@ -1,8 +1,8 @@
 package com.ssafy.booknest.domain.user.scheduler;
 
 import com.ssafy.booknest.domain.book.entity.BookAuthor;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.UserAuthorAnalysis;
 import com.ssafy.booknest.domain.user.repository.UserAuthorAnalysisRepository;
@@ -24,7 +24,7 @@ public class UserAuthorAnalysisScheduler {
     private final UserAuthorAnalysisRepository userAuthorAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 6) // 6분마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 3) // 30분마다 실행
     public void runUserAuthorAnalysisBatch() {
         log.info("[작가 배치 시작] 유저 선호 분석");
 

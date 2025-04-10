@@ -1,5 +1,7 @@
 package com.ssafy.booknest.domain.book.entity;
 
+import com.ssafy.booknest.domain.book.entity.evaluation.IgnoredBook;
+import com.ssafy.booknest.domain.book.entity.evaluation.Review;
 import com.ssafy.booknest.domain.book.entity.recommendation.BestSeller;
 import com.ssafy.booknest.domain.nest.entity.BookMark;
 import com.ssafy.booknest.global.common.Entity.BaseEntity;
@@ -80,7 +82,7 @@ public class Book extends BaseEntity {
     public String getAuthors() {
         return bookAuthors.stream()
                 .map(bookAuthor -> bookAuthor.getAuthor().getName()) // 저자 이름 가져오기
-                .collect(Collectors.joining(", ")); // 쉼표(,)로 구분하여 문자열로 변환
+                .collect(Collectors.joining(", "));
     }
 
     public List<String> getTagNames() {

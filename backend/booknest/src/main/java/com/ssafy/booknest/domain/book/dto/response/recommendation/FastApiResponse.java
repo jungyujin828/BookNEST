@@ -1,17 +1,15 @@
 package com.ssafy.booknest.domain.book.dto.response.recommendation;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class FastApiResponse {
+
     private String db_status;
     private List<FastApiRecommendation> result;
 

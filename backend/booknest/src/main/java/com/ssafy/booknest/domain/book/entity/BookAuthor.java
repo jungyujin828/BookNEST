@@ -24,4 +24,5 @@ public class BookAuthor {
     @ManyToOne
     @JoinColumn(name="author_id")
     private Author author;
+
 }

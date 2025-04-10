@@ -2,8 +2,8 @@ package com.ssafy.booknest.domain.user.service;
 
 import com.ssafy.booknest.domain.book.entity.Author;
 import com.ssafy.booknest.domain.book.repository.AuthorRepository;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
-import com.ssafy.booknest.domain.book.repository.ReviewRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.ReviewRepository;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;
 import com.ssafy.booknest.domain.user.dto.request.UserUpdateImgRequest;
 import com.ssafy.booknest.domain.user.dto.response.FavoriteAuthorDto;
