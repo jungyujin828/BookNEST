@@ -36,7 +36,7 @@ public class BookDetailResponse {
 
     private CustomPage<ReviewResponse> reviews;
 
-    public static BookDetailResponse of(Book book, Double avgRating, Integer userId, Page<ReviewResponse> reviewPage, Boolean isBookMarked) {
+    public static BookDetailResponse of(Book book, Double avgRating, Page<ReviewResponse> reviewPage, Boolean isBookMarked) {
 
         return BookDetailResponse.builder()
                 .bookId(book.getId())

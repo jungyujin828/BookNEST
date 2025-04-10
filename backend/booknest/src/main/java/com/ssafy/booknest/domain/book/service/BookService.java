@@ -94,7 +94,7 @@ public class BookService {
         Page<ReviewResponse> responsePage = reviewPage.map(review -> ReviewResponse.of(review, userId));
         boolean isBookMarked = bookMarkRepository.existsByBookIdAndUserId(book.getId(), userId);
 
-        return BookDetailResponse.of(book, avgRating, userId, responsePage, isBookMarked);
+        return BookDetailResponse.of(book, avgRating, responsePage, isBookMarked);
     }
 
     // 구매 사이트 조회
