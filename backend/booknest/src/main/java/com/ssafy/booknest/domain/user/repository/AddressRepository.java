@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Integer> {
 
+    // 특정 userId에 해당하는 주소 정보를 Optional로 조회합니다.
     Optional<Address> findByUserId(Integer userId);
 }
