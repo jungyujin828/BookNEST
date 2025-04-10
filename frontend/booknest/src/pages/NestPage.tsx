@@ -431,7 +431,7 @@ const NestPage = () => {
                 <FaTimes size={16} />
               </ClearButton>
             </SearchBarContainer>
-            {!userId && (
+            {!isOtherUserNest && (
               <AddButton onClick={() => setShowSearchModal(true)}>
                 <FaPlus size={14} /> <span>도서추가</span>
               </AddButton>
