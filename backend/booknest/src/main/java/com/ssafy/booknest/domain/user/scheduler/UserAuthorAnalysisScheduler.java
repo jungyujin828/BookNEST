@@ -24,30 +24,30 @@ public class UserAuthorAnalysisScheduler {
     private final UserAuthorAnalysisRepository userAuthorAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 3) // 30분마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 3) // 3시간마다 실행
     public void runUserAuthorAnalysisBatch() {
         log.info("[작가 배치 시작] 유저 선호 분석");
 
         List<Rating> allRatings = ratingRepository.findAllWithBookAndAuthor();
 
-        Map<User, Map<String, List<Double>>> userAuthorRatings = new HashMap<>();
+        Map<Integer, Map<String, List<Double>>> userAuthorRatings = new HashMap<>();
 
         // 1. 유저별 작가별 평점 수집
         for (Rating rating : allRatings) {
-            User user = rating.getUser();
-            userAuthorRatings.putIfAbsent(user, new HashMap<>());
+            Integer userId = rating.getUser().getId(); // User -> userId
+            userAuthorRatings.putIfAbsent(userId, new HashMap<>());
 
             for (BookAuthor bookAuthor : rating.getBook().getBookAuthors()) {
                 String authorName = bookAuthor.getAuthor().getName();
-                userAuthorRatings.get(user)
+                userAuthorRatings.get(userId)
                         .computeIfAbsent(authorName, k -> new ArrayList<>())
                         .add(rating.getRating());
             }
         }
 
         // 2. 유저별 평균 평점 기준 상위 작가 5명 저장
-        for (Map.Entry<User, Map<String, List<Double>>> entry : userAuthorRatings.entrySet()) {
-            User user = entry.getKey();
+        for (Map.Entry<Integer, Map<String, List<Double>>> entry : userAuthorRatings.entrySet()) {
+            Integer userId = entry.getKey();
             Map<String, List<Double>> authorRatings = entry.getValue();
 
             List<String> topAuthors = authorRatings.entrySet().stream()
@@ -62,12 +62,12 @@ public class UserAuthorAnalysisScheduler {
                     .toList();
 
             // 기존 분석 데이터 삭제
-            userAuthorAnalysisRepository.deleteByUser(user);
+            userAuthorAnalysisRepository.deleteByUserId(userId);
 
             // 새로 저장
             for (String author : topAuthors) {
                 UserAuthorAnalysis analysis = UserAuthorAnalysis.builder()
-                        .user(user)
+                        .userId(userId) // User -> userId
                         .favoriteAuthor(author)
                         .build();
                 userAuthorAnalysisRepository.save(analysis);
@@ -78,4 +78,3 @@ public class UserAuthorAnalysisScheduler {
         log.info("********************************************");
     }
 }
-

@@ -22,13 +22,12 @@ public class UserAuthorAnalysis extends BaseEntity {
     @Column(name = "favorite_author")
     private String favoriteAuthor;
 
+    @Column(name = "user_id", nullable = false)
+    private Integer userId;
+
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
 
     public void update(String favoriteAuthor) {
         this.favoriteAuthor = favoriteAuthor;

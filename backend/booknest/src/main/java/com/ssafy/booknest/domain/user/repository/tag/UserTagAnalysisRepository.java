@@ -14,10 +14,10 @@ import java.util.Optional;
 public interface UserTagAnalysisRepository extends JpaRepository<UserTagAnalysis, Integer> {
 
 
-    void deleteByUser(User user);
+    void deleteByUserId(Integer userId);
 
     // 유저 가장 좋아하는 태그 조회
-    @Query("SELECT u.favoriteTag FROM UserTagAnalysis u WHERE u.user.id = :userId")
+    @Query("SELECT u.favoriteTag FROM UserTagAnalysis u WHERE u.userId = :userId")
     List<String> findTopTagsByUserId(@Param("userId") Integer userId);
 
 

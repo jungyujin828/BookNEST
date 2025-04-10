@@ -26,7 +26,7 @@ public class PopularAuthorScheduler {
     private final BookRepository bookRepository;
     private final PopularAuthorBookRepository popularAuthorBookRepository;
 
-    private static final int TOP_AUTHOR_COUNT = 1; // 상위 작가 수
+    private static final int TOP_AUTHOR_COUNT = 2; // 상위 작가 수
     private static final int MAX_BOOKS_PER_AUTHOR = 15; // 작가당 최대 저장할 책 수
 
     @Scheduled(fixedRate = 1000 * 60 * 60 * 4) // 4시간마다 실행

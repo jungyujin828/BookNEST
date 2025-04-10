@@ -17,23 +17,6 @@ import java.util.Optional;
 @Repository
 public interface NestRepository extends JpaRepository<Nest, Integer> {
 
-    @Query("SELECT bn.book FROM BookNest bn WHERE bn.nest.id = :nestId")
-    Page<Book> findBooksByNestId(@Param("nestId") Integer nestId, Pageable pageable);
-
     Optional<Nest> findByUser(User user);
 
-    @Query("""
-    SELECT DISTINCT n FROM Nest n
-    JOIN FETCH n.bookNests bn
-    JOIN FETCH bn.book b
-    """)
-    List<Nest> findAllWithBooksOnly();
-
-    // 회원이 둥지에 등록 한 책 목록
-    @Query("""
-    SELECT bn.book.id
-    FROM BookNest bn
-    WHERE bn.nest.user.id = :userId
-""")
-    List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
 }
