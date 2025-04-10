@@ -49,7 +49,7 @@ public class RatingService {
         }
 
         // 평점 등록인데 이미 점수가 저장 되어 있으면 등록 불가
-        if (ratingRepository.existsByUserIdAndBookId(userId, bookId) || !reviewRepository.existsByUserIdAndBookId(userId, bookId)) {
+        if (ratingRepository.existsByUserIdAndBookId(userId, bookId)) {
             throw new CustomException(ErrorCode.RATING_ALREADY_EXISTS);
         }
 
