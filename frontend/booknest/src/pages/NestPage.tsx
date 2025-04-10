@@ -25,14 +25,38 @@ const Container = styled.div`
   }
 `;
 
+const HeaderSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: white;
+  padding: 5px;
+  border-radius: 12px;
+  position: relative;
+`;
+
 const TabContainer = styled.div`
   display: flex;
-  margin-bottom: 20px;
-  flex-grow: 1;
+  justify-content: center;
+  margin-bottom: 0;
+  width: 100%;
+  position: relative;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #ddd;
+  }
 `;
 
 const Tab = styled.button<{ $active: boolean }>`
-  padding: 10px 20px;
+  flex: 1;
+  padding: 10px 0;
   border: none;
   background: none;
   font-size: 16px;
@@ -41,7 +65,8 @@ const Tab = styled.button<{ $active: boolean }>`
   cursor: pointer;
   position: relative;
   transition: all 0.2s ease;
-  border-radius: 4px;
+  text-align: center;
+  z-index: 1;
 
   &::after {
     content: "";
@@ -51,12 +76,12 @@ const Tab = styled.button<{ $active: boolean }>`
     width: 100%;
     height: 3px;
     background-color: ${(props) => (props.$active ? "#00c473" : "transparent")};
-    border-radius: 3px;
+    border-radius: 0;
+    transition: background-color 0.3s ease;
   }
 
   &:hover {
     color: #00c473;
-    background-color: ${(props) => (props.$active ? "transparent" : "rgba(0, 196, 115, 0.05)")};
   }
 `;
 
@@ -71,6 +96,9 @@ const AddButton = styled.button`
   font-weight: 500;
   display: flex;
   align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: fit-content;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 196, 115, 0.2);
 
@@ -94,11 +122,23 @@ const AddButton = styled.button`
     padding: 0 12px;
     font-size: 14px;
   }
+  
+  @media (max-width: 380px) {
+    min-width: 42px;
+    padding: 0 8px;
+    
+    span {
+      display: none;
+    }
+    
+    svg {
+      margin-right: 0;
+    }
+  }
 `;
 
 const SortContainer = styled.div`
   position: relative;
-  margin-right: 16px;
 `;
 
 const SortButton = styled.button`
@@ -113,6 +153,7 @@ const SortButton = styled.button`
   display: flex;
   align-items: center;
   transition: all 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
     background-color: #f5f5f5;
@@ -125,6 +166,14 @@ const SortButton = styled.button`
   @media (max-width: 480px) {
     padding: 0 12px;
     font-size: 14px;
+  }
+  
+  @media (max-width: 380px) {
+    padding: 0 8px;
+    
+    svg {
+      margin-left: 4px;
+    }
   }
 `;
 
@@ -173,6 +222,7 @@ const ViewModeButton = styled.button`
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
+  white-space: nowrap;
 
   &:hover {
     background-color: #f5f5f5;
@@ -186,16 +236,14 @@ const ViewModeButton = styled.button`
     padding: 0 12px;
     font-size: 14px;
   }
-`;
-
-const HeaderSection = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  justify-content: space-between;
-  background-color: white;
-  padding: 5px;
-  border-radius: 12px;
+  
+  @media (max-width: 380px) {
+    padding: 0 8px;
+    
+    svg {
+      margin-right: 4px;
+    }
+  }
 `;
 
 const TopActionContainer = styled.div`
@@ -205,6 +253,10 @@ const TopActionContainer = styled.div`
   gap: 10px;
   width: 100%;
   margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    flex-wrap: nowrap;
+  }
 `;
 
 const SearchBarContainer = styled.div`
@@ -217,9 +269,15 @@ const SearchBarContainer = styled.div`
   border-radius: 8px;
   padding: 0 12px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
   
   @media (max-width: 768px) {
     max-width: none;
+    min-width: 0;
+  }
+  
+  @media (max-width: 380px) {
+    flex: 1;
   }
 `;
 
@@ -232,7 +290,8 @@ const ControlsContainer = styled.div`
   margin-bottom: 20px;
   
   @media (max-width: 768px) {
-    justify-content: space-between;
+    justify-content: flex-end;
+    gap: 6px;
   }
 `;
 
@@ -241,6 +300,7 @@ const SearchInput = styled.input`
   border: none;
   background: transparent;
   padding: 0 8px;
+  padding-right: 30px;
   height: 100%;
   font-size: 15px;
   outline: none;
@@ -260,10 +320,16 @@ const ClearButton = styled.button`
   background: none;
   color: #777;
   cursor: pointer;
-  padding: 0 8px;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
   
   &:hover {
     color: #333;
@@ -351,7 +417,7 @@ const NestPage = () => {
               </ClearButton>
             </SearchBarContainer>
             <AddButton onClick={() => setShowSearchModal(true)}>
-              <FaPlus size={14} /> 도서추가
+              <FaPlus size={14} /> <span>도서추가</span>
             </AddButton>
           </TopActionContainer>
           
