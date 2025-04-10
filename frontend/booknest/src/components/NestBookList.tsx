@@ -3,7 +3,7 @@ import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa";
-import { SortOption } from "../pages/NestPage";
+import { SortOption, ViewMode } from "../pages/NestPage";
 
 interface NestBook {
   bookId: number;
@@ -45,25 +45,30 @@ interface NestBookListProps {
   nestId?: number;
   sortOption?: SortOption;
   searchTerm?: string;
+  viewMode?: ViewMode;
 }
 
 const Container = styled.div`
   width: 100%;
 `;
 
-const BookGrid = styled.div`
+const BookGrid = styled.div<{ viewMode: ViewMode }>`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 24px;
+  grid-template-columns: ${props => props.viewMode === "cover" 
+    ? "repeat(auto-fill, minmax(180px, 1fr))" 
+    : "repeat(auto-fill, minmax(220px, 1fr))"};
+  gap: ${props => props.viewMode === "cover" ? "16px" : "24px"};
   margin-bottom: 32px;
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 16px;
+    grid-template-columns: ${props => props.viewMode === "cover" 
+      ? "repeat(auto-fill, minmax(130px, 1fr))" 
+      : "repeat(auto-fill, minmax(160px, 1fr))"};
+    gap: ${props => props.viewMode === "cover" ? "12px" : "16px"};
   }
 `;
 
-const BookCard = styled.div`
+const BookCard = styled.div<{ viewMode: ViewMode }>`
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -72,6 +77,7 @@ const BookCard = styled.div`
   transition: transform 0.2s ease-in-out;
   background-color: white;
   position: relative;
+  height: ${props => props.viewMode === "cover" ? "auto" : "auto"};
 
   &:hover {
     transform: translateY(-5px);
@@ -80,14 +86,18 @@ const BookCard = styled.div`
   &:hover .delete-button {
     opacity: 1;
   }
+  
+  &:hover .cover-title {
+    opacity: 1;
+  }
 `;
 
-const BookCover = styled.div`
+const BookCover = styled.div<{ viewMode: ViewMode }>`
   position: relative;
-  height: 260px;
-
+  height: ${props => props.viewMode === "cover" ? "240px" : "260px"};
+  
   @media (max-width: 768px) {
-    height: 220px;
+    height: ${props => props.viewMode === "cover" ? "180px" : "220px"};
   }
 
   img {
@@ -267,6 +277,22 @@ const StyledLink = styled(Link)`
   display: block;
 `;
 
+const CoverOnlyTitle = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 0.2s;
+`;
+
 // 날짜 포맷 함수 추가
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -323,7 +349,7 @@ const filterBooksByTitle = (books: NestBook[], searchTerm: string): NestBook[] =
 };
 
 const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProps>(
-  ({ userId: propUserId, nestId: propNestId, sortOption = "latest", searchTerm = "" }, ref) => {
+  ({ userId: propUserId, nestId: propNestId, sortOption = "latest", searchTerm = "", viewMode = "full" }, ref) => {
     const [books, setBooks] = useState<NestBook[]>([]);
     const [sortedBooks, setSortedBooks] = useState<NestBook[]>([]);
     const [filteredBooks, setFilteredBooks] = useState<NestBook[]>([]);
@@ -626,9 +652,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
 
     return (
       <Container>
-        <BookGrid>
+        <BookGrid viewMode={viewMode}>
           {filteredBooks.map((book) => (
-            <BookCard key={`${book.bookId}-${book.createdAt}`}>
+            <BookCard key={`${book.bookId}-${book.createdAt}`} viewMode={viewMode}>
               <DeleteButton
                 onClick={(e) => handleDeleteBook(book.bookId, e)}
                 title="둥지에서 삭제"
@@ -637,19 +663,24 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
                 <FaTrash size={14} />
               </DeleteButton>
               <StyledLink to={`/book-detail/${book.bookId}`}>
-                <BookCover>
+                <BookCover viewMode={viewMode}>
                   <img src={book.imageUrl} alt={book.title} />
+                  {viewMode === "cover" && (
+                    <CoverOnlyTitle className="cover-title">{book.title}</CoverOnlyTitle>
+                  )}
                 </BookCover>
-                <BookInfo>
-                  <BookTitle>{book.title}</BookTitle>
-                  <BookAuthor>{book.authors}</BookAuthor>
-                  <RatingContainer>
-                    <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
-                    <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
-                  </RatingContainer>
-                  <CreatedAtTag>{formatDate(book.createdAt)}</CreatedAtTag>
-                  {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
-                </BookInfo>
+                {viewMode === "full" && (
+                  <BookInfo>
+                    <BookTitle>{book.title}</BookTitle>
+                    <BookAuthor>{book.authors}</BookAuthor>
+                    <RatingContainer>
+                      <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
+                      <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
+                    </RatingContainer>
+                    <CreatedAtTag>{formatDate(book.createdAt)}</CreatedAtTag>
+                    {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
+                  </BookInfo>
+                )}
               </StyledLink>
             </BookCard>
           ))}

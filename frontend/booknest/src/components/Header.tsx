@@ -28,7 +28,7 @@ const HeaderContainer = styled.header`
 `;
 
 const Logo = styled.div`
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
   color: #00c473;
   width: fit-content;

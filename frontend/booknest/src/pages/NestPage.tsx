@@ -2,13 +2,14 @@ import React, { useState, useRef } from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus, FaSearch, FaTimes, FaThLarge, FaList } from "react-icons/fa";
 import NestBookList from "../components/NestBookList";
 import BookmarkList from "../components/BookmarkList";
 import BookSearchModal from "../components/BookSearchModal";
 import { FaSort } from "react-icons/fa";
 
 export type SortOption = "latest" | "oldest" | "rating" | "title";
+export type ViewMode = "full" | "cover";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -52,7 +53,7 @@ const Tab = styled.button<{ $active: boolean }>`
 `;
 
 const AddButton = styled.button`
-  padding: 10px 18px;
+  padding: 8px 16px;
   background-color: #00c473;
   color: white;
   border: none;
@@ -61,7 +62,6 @@ const AddButton = styled.button`
   font-weight: 500;
   display: flex;
   align-items: center;
-  justify-content: center;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 196, 115, 0.2);
 
@@ -76,11 +76,9 @@ const AddButton = styled.button`
     box-shadow: 0 2px 4px rgba(0, 196, 115, 0.2);
   }
 
-  &::before {
-    content: "+";
-    margin-right: 6px;
-    font-size: 18px;
-    font-weight: 400;
+  svg {
+    margin-right: 8px;
+    font-size: 14px;
   }
 `;
 
@@ -142,6 +140,29 @@ const ActionContainer = styled.div`
   align-items: center;
 `;
 
+const ViewModeButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 16px;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  svg {
+    margin-right: 8px;
+  }
+`;
+
 const HeaderSection = styled.div`
   display: flex;
   align-items: center;
@@ -183,13 +204,15 @@ const SearchIcon = styled.div`
 const ClearButton = styled.button`
   border: none;
   background: none;
-  color: #00c437;
+  color: #777;
   cursor: pointer;
-  font-weight: bold;
   padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   &:hover {
-    color: #009e2c;
+    color: #333;
   }
 `;
 
@@ -214,6 +237,7 @@ const NestPage = () => {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>("latest");
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("full");
   const nestBookListRef = useRef<{ fetchNestBooks: () => void } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -237,6 +261,10 @@ const NestPage = () => {
     setSearchTerm("");
   };
 
+  const toggleViewMode = () => {
+    setViewMode(viewMode === "full" ? "cover" : "full");
+  };
+
   return (
     <Container>
       <HeaderSection>
@@ -251,6 +279,17 @@ const NestPage = () => {
         <ActionContainer>
           {activeTab === "둥지" && (
             <>
+              <ViewModeButton onClick={toggleViewMode}>
+                {viewMode === "full" ? (
+                  <>
+                    <FaThLarge size={14} /> 표지만
+                  </>
+                ) : (
+                  <>
+                    <FaList size={14} /> 전체
+                  </>
+                )}
+              </ViewModeButton>
               <SortContainer>
                 <SortButton onClick={() => setShowSortDropdown(!showSortDropdown)}>
                   {getSortLabel(sortOption)} <FaSort />
@@ -270,7 +309,9 @@ const NestPage = () => {
                   </SortOption>
                 </SortDropdown>
               </SortContainer>
-              <AddButton onClick={() => setShowSearchModal(true)}>도서 추가</AddButton>
+              <AddButton onClick={() => setShowSearchModal(true)}>
+                <FaPlus size={14} /> 도서추가
+              </AddButton>
             </>
           )}
         </ActionContainer>
@@ -289,7 +330,7 @@ const NestPage = () => {
           <ClearButton 
             onClick={clearSearch}
           >
-            초기화
+            <FaTimes size={16} />
           </ClearButton>
         </SearchBarContainer>
       )}
@@ -301,6 +342,7 @@ const NestPage = () => {
           ref={nestBookListRef} 
           sortOption={sortOption} 
           searchTerm={searchTerm}
+          viewMode={viewMode}
         />
       ) : (
         <BookmarkList />
