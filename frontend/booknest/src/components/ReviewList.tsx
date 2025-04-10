@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from '@emotion/styled';
-import { FaHeart, FaRegHeart } from 'react-icons/fa';
+import { FaHeart, FaRegHeart, FaTimes, FaExclamationCircle, FaInfoCircle } from 'react-icons/fa';
 import api from '../api/axios';
 import CommentForm from './CommentForm';
 import { useNavigate } from 'react-router-dom';
@@ -11,10 +11,12 @@ export interface Review {
   bookId: number;
   content: string;
   reviewerName: string;
+  profileURL: string;
   likes: number;
   myLiked: boolean;
   createdAt: string;
   updatedAt: string;
+  rating?: number;
 }
 
 export interface ReviewsPage {
@@ -63,6 +65,11 @@ const ReviewInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+`;
+
+const ReviewerInfo = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 const ReviewContent = styled.div`
@@ -173,12 +180,95 @@ const ReviewPagination = styled.div`
   margin-top: 8px;
 `;
 
+// 모달 타입 정의
+type ModalType = 'delete' | 'error' | 'info' | 'login' | null;
+
+// 모달 관련 스타일 추가
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+`;
+
+const ModalTitle = styled.h3`
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+`;
+
+const ModalButton = styled.button<{ isPrimary?: boolean; isError?: boolean }>`
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: ${props => {
+    if (props.isError) return '#dc2626';
+    if (props.isPrimary) return '#00c473';
+    return '#f1f3f5';
+  }};
+  color: ${props => (props.isPrimary || props.isError) ? 'white' : '#495057'};
+  
+  &:hover {
+    background-color: ${props => {
+      if (props.isError) return '#c41d1d';
+      if (props.isPrimary) return '#00b368';
+      return '#e9ecef';
+    }};
+  }
+`;
+
+const ProfileImage = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 12px;
+  border: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+`;
+
 const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange, currentUserId }) => {
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
   const [likedReviews, setLikedReviews] = useState<{[key: number]: boolean}>({});
   const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  
+  // 모달 상태 관리
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [modalMessage, setModalMessage] = useState('');
+  const [reviewToDelete, setReviewToDelete] = useState<number | null>(null);
+  
   const navigate = useNavigate();
 
   // 리뷰 정렬 - 내 리뷰를 최상단에, 나머지는 최신순
@@ -212,18 +302,40 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
     setEditingReviewId(null);
   };
 
+  // 모달 열기 함수
+  const openModal = (type: ModalType, message: string = '') => {
+    setModalType(type);
+    setModalMessage(message);
+  };
+
+  // 모달 닫기 함수
+  const closeModal = () => {
+    setModalType(null);
+    setModalMessage('');
+    if (modalType === 'delete') {
+      setReviewToDelete(null);
+    }
+  };
+
   const handleCommentDelete = async (reviewId: number) => {
     try {
       const response = await api.delete(`/api/book/review/${reviewId}`);
       if (response.data.success) {
         onReviewChange();
+        closeModal();
       } else {
-        alert('리뷰 삭제에 실패했습니다.');
+        openModal('error', '리뷰 삭제에 실패했습니다.');
       }
     } catch (err) {
       console.error('Delete API Error:', err);
-      alert('서버 오류가 발생했습니다.');
+      openModal('error', '서버 오류가 발생했습니다.');
     }
+  };
+
+  // 삭제 모달 열기 함수
+  const openDeleteModal = (reviewId: number) => {
+    setReviewToDelete(reviewId);
+    openModal('delete');
   };
 
   const handleEditClick = (reviewId: number) => {
@@ -236,7 +348,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
 
   const handleLikeToggle = async (reviewId: number) => {
     if (!currentUserId) {
-      alert('로그인이 필요한 기능입니다.');
+      openModal('login', '로그인이 필요한 기능입니다.');
       return;
     }
     
@@ -257,7 +369,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
       onReviewChange();
     } catch (err) {
       console.error('Like API Error:', err);
-      alert('좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
     }
@@ -290,7 +402,84 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
 
   return (
     <ReviewSection>
-      <SectionTitle>리뷰</SectionTitle>
+      {/* 모달 컴포넌트 */}
+      {modalType && (
+        <ModalOverlay>
+          <ModalContent>
+            {modalType === 'delete' && (
+              <>
+                <ModalTitle>
+                  <FaExclamationCircle color="#dc2626" />
+                  한줄평 삭제
+                </ModalTitle>
+                <p>정말로 이 한줄평을 삭제하시겠습니까?</p>
+                <ModalButtons>
+                  <ModalButton onClick={closeModal}>취소</ModalButton>
+                  <ModalButton 
+                    isError 
+                    onClick={() => reviewToDelete && handleCommentDelete(reviewToDelete)}
+                  >
+                    삭제
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'error' && (
+              <>
+                <ModalTitle>
+                  <FaExclamationCircle color="#dc2626" />
+                  오류
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton isPrimary onClick={closeModal}>
+                    확인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'info' && (
+              <>
+                <ModalTitle>
+                  <FaInfoCircle color="#00c473" />
+                  안내
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton isPrimary onClick={closeModal}>
+                    확인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+
+            {modalType === 'login' && (
+              <>
+                <ModalTitle>
+                  <FaInfoCircle color="#00c473" />
+                  로그인 필요
+                </ModalTitle>
+                <p>{modalMessage}</p>
+                <ModalButtons>
+                  <ModalButton onClick={closeModal}>취소</ModalButton>
+                  <ModalButton 
+                    isPrimary 
+                    onClick={() => {
+                      closeModal();
+                      navigate('/login');
+                    }}
+                  >
+                    로그인
+                  </ModalButton>
+                </ModalButtons>
+              </>
+            )}
+          </ModalContent>
+        </ModalOverlay>
+      )}
+      
       {sortedReviews.length > 0 ? (
         <>
           {sortedReviews.map((review) => {
@@ -299,10 +488,25 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
               <ReviewCard key={review.reviewId} isUserReview={isUserReview}>
                 <ReviewHeader>
                   <ReviewInfo>
-                    <ReviewerName>{review.reviewerName}</ReviewerName>
-                    <ReviewDate>
-                      {new Date(review.updatedAt).toLocaleDateString()}
-                    </ReviewDate>
+                    <ProfileImage 
+                      src={review.profileURL || "/images/default-profile.png"} 
+                      alt={`${review.reviewerName}의 프로필`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src.indexOf('default-profile.png') === -1) {
+                          target.src = "/images/default-profile.png";
+                        } else {
+                          target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-size='16' text-anchor='middle' dominant-baseline='middle' font-family='Arial' fill='%23aaa'%3E%3C/text%3E%3C/svg%3E";
+                          target.onerror = null;
+                        }
+                      }}
+                    />
+                    <ReviewerInfo>
+                      <ReviewerName>{review.reviewerName}</ReviewerName>
+                      <ReviewDate>
+                        {new Date(review.updatedAt).toLocaleDateString()}
+                      </ReviewDate>
+                    </ReviewerInfo>
                   </ReviewInfo>
                 </ReviewHeader>
                 {editingReviewId === review.reviewId ? (
@@ -325,11 +529,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
                           </ActionButton>
                           <ActionButton 
                             className="delete"
-                            onClick={() => {
-                              if (window.confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-                                handleCommentDelete(review.reviewId);
-                              }
-                            }}
+                            onClick={() => openDeleteModal(review.reviewId)}
                           >
                             삭제
                           </ActionButton>
@@ -355,16 +555,16 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
               onClick={loadMoreReviews}
               disabled={reviewsLoading}
             >
-              {reviewsLoading ? '로딩 중...' : reviews.totalElements > 5 ? '전체 리뷰 보기' : '더보기'}
+              {reviewsLoading ? '로딩 중...' : reviews.totalElements > 5 ? '전체 한줄평 보기' : '더보기'}
             </LoadMoreButton>
           )}
           
           <ReviewPagination>
-            <span>총 {reviews.totalElements}개의 리뷰 중 {sortedReviews.length}개 표시 중</span>
+            <span>총 {reviews.totalElements}개의 한줄평 중 {sortedReviews.length}개 표시 중</span>
           </ReviewPagination>
         </>
       ) : (
-        <EmptyReviews>아직 작성된 리뷰가 없습니다.</EmptyReviews>
+        <EmptyReviews>아직 작성된 한줄평이 없습니다.</EmptyReviews>
       )}
     </ReviewSection>
   );

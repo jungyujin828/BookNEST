@@ -254,7 +254,6 @@ const CommentForm = ({
 
   return (
     <FormContainer>
-      <Title>{isEdit ? '한줄평 수정' : '한줄평 작성'}</Title>
       <Form onSubmit={handleSubmit}>
         <TextArea
           value={content}
