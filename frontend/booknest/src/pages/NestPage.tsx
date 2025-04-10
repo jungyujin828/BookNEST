@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "@emotion/styled";
 import { css } from "@emotion/react";
 import { useNavigate, useLocation, useParams, useSearchParams } from "react-router-dom";
@@ -7,6 +7,7 @@ import NestBookList from "../components/NestBookList";
 import BookmarkList from "../components/BookmarkList";
 import BookSearchModal from "../components/BookSearchModal";
 import { FaSort } from "react-icons/fa";
+import { useAuthStore } from "../store/useAuthStore";
 
 export type SortOption = "latest" | "oldest" | "rating" | "title";
 export type ViewMode = "full" | "cover";
@@ -353,6 +354,7 @@ const getSortLabel = (sortOption: SortOption): string => {
 
 const NestPage = () => {
   const { userId } = useParams();
+  const { userDetail } = useAuthStore();
   const [searchParams] = useSearchParams();
   const nestId = searchParams.get("nestId");
   const [activeTab, setActiveTab] = useState<"둥지" | "찜">("둥지");
@@ -364,6 +366,14 @@ const NestPage = () => {
   const nestBookListRef = useRef<{ fetchNestBooks: () => void } | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const isOtherUserNest = userId && userDetail?.userId !== parseInt(userId);
+
+  useEffect(() => {
+    if (isOtherUserNest && activeTab === "찜") {
+      setActiveTab("둥지");
+    }
+  }, [isOtherUserNest, activeTab]);
 
   const handleBookAdded = () => {
     if (nestBookListRef.current) {
@@ -395,9 +405,11 @@ const NestPage = () => {
           <Tab $active={activeTab === "둥지"} onClick={() => setActiveTab("둥지")}>
             둥지
           </Tab>
-          <Tab $active={activeTab === "찜"} onClick={() => setActiveTab("찜")}>
-            찜
-          </Tab>
+          {!isOtherUserNest && (
+            <Tab $active={activeTab === "찜"} onClick={() => setActiveTab("찜")}>
+              찜
+            </Tab>
+          )}
         </TabContainer>
       </HeaderSection>
 
