@@ -91,11 +91,11 @@ const HomePage = () => {
   return (
     <PageWrapper>
       <HomeContainer>
+        <TodayBestComments />
         <RecentTagBooks />
         <FavoriteCategoryBooks />
         <FavoriteTagBooks />
         <AgeBooks />
-        <TodayBestComments />
         <BestSeller />
         <AuthorBook />
         <CriticBooks />
