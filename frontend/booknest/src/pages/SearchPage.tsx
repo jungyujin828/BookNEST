@@ -324,6 +324,30 @@ const SearchPage = () => {
   // Remove the previous useEffect and use a ref to track the initial render
   const isInitialMount = useRef(true);
 
+  // Handle browser back button to go back to previous page instead of previous search
+  useEffect(() => {
+    const handlePopState = () => {
+      // 페이지가 처음 로드될 때는 아무 동작 안함
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+        return;
+      }
+      
+      // 현재 URL이 /search로 시작하고 쿼리 파라미터가 변경된 경우,
+      // 브라우저 뒤로가기 버튼을 누른 것이므로 실제 이전 페이지로 이동
+      const pathName = window.location.pathname;
+      if (pathName === '/search') {
+        // 검색 내역 지우고 메인 페이지로 이동
+        navigate(-1);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
+
   // Modify the initial useEffect to not collapse tags based on search results
   useEffect(() => {
     // Just initialize for first render, don't auto-collapse
@@ -358,7 +382,8 @@ const SearchPage = () => {
       params.set("type", newType);
     }
 
-    setSearchParams(params);
+    // replace: true 옵션을 추가하여 브라우저 히스토리에 새 항목을 추가하지 않고 현재 항목을 대체
+    setSearchParams(params, { replace: true });
   };
 
   // 기존 핸들러들 수정
