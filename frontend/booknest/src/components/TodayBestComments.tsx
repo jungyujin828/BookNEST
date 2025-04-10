@@ -21,14 +21,40 @@ interface BestReview {
   updatedAt: string;
 }
 
+const TodayBestContainer = styled.div`
+  background-image: url("/bg2.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 20px;
+  border-radius: 16px;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    z-index: 0;
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 16px;
   justify-content: flex-start;
-  padding: 24px 0;
-  background-color: #fff;
+  padding-top: 24px;
   border-radius: 16px;
   overflow-x: auto;
   position: relative;
@@ -44,11 +70,9 @@ const Title = styled.h2`
   font-size: 24px;
   font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 24px;
   gap: 8px;
 `;
 
@@ -105,12 +129,16 @@ const ProfileImage = styled.img`
 
 const RankBadge = styled.div<{ rank: number }>`
   margin-right: 8px;
-  color: ${props => {
+  color: ${(props) => {
     switch (props.rank) {
-      case 1: return '#FFB800';
-      case 2: return '#A3A3A3';
-      case 3: return '#C77B30';
-      default: return '#6c757d';
+      case 1:
+        return "#FFB800";
+      case 2:
+        return "#A3A3A3";
+      case 3:
+        return "#C77B30";
+      default:
+        return "#6c757d";
     }
   }};
   font-size: 24px;
@@ -171,7 +199,7 @@ const LikeButton = styled.button<{ isLiked: boolean }>`
   display: flex;
   align-items: center;
   gap: 4px;
-  color: ${props => props.isLiked ? '#ff4b4b' : '#868e96'};
+  color: ${(props) => (props.isLiked ? "#ff4b4b" : "#868e96")};
   font-size: 16px;
   transition: all 0.2s ease;
   padding: 4px 8px;
@@ -181,7 +209,7 @@ const LikeButton = styled.button<{ isLiked: boolean }>`
   }
 
   svg {
-    font-size:16px;
+    font-size: 16px;
   }
 `;
 
@@ -193,7 +221,7 @@ const TodayLikes = styled.div`
   font-size: 16px;
   padding: 4px 8px;
   opacity: 0.8;
-  
+
   svg {
     font-size: 22px;
     height: 38px;
@@ -265,7 +293,7 @@ const TodayBestComments: React.FC = () => {
   const navigate = useNavigate();
   const [bestReviews, setBestReviews] = useState<BestReview[]>([]);
   const [loading, setLoading] = useState(true);
-  const [likeLoading, setLikeLoading] = useState<{[key: number]: boolean}>({});
+  const [likeLoading, setLikeLoading] = useState<{ [key: number]: boolean }>({});
   const [scrollPosition, setScrollPosition] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -285,27 +313,25 @@ const TodayBestComments: React.FC = () => {
     setModalMessage('');
   };
 
-  const handleScroll = (direction: 'left' | 'right') => {
+  const handleScroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
 
     const scrollAmount = 300;
-    const newPosition = direction === 'left' 
-      ? scrollPosition - scrollAmount
-      : scrollPosition + scrollAmount;
+    const newPosition = direction === "left" ? scrollPosition - scrollAmount : scrollPosition + scrollAmount;
 
     setScrollPosition(newPosition);
-    containerRef.current.scrollTo({ left: newPosition, behavior: 'smooth' });
+    containerRef.current.scrollTo({ left: newPosition, behavior: "smooth" });
   };
 
   const fetchBestReviews = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/api/book/best-reviews');
+      const response = await api.get("/api/book/best-reviews");
       if (response.data.success) {
         setBestReviews(response.data.data);
       }
     } catch (error) {
-      console.error('베스트 리뷰 로딩 실패:', error);
+      console.error("베스트 리뷰 로딩 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -318,11 +344,11 @@ const TodayBestComments: React.FC = () => {
 
   const handleLikeToggle = async (reviewId: number) => {
     if (likeLoading[reviewId]) return;
-    
-    setLikeLoading(prev => ({ ...prev, [reviewId]: true }));
-    
+
+    setLikeLoading((prev) => ({ ...prev, [reviewId]: true }));
+
     try {
-      const review = bestReviews.find(r => r.reviewId === reviewId);
+      const review = bestReviews.find((r) => r.reviewId === reviewId);
       if (!review) return;
 
       // 낙관적 UI 업데이트 (먼저 UI 업데이트)
@@ -366,12 +392,12 @@ const TodayBestComments: React.FC = () => {
       setBestReviews(rollbackReviews);
       openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
-      setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
+      setLikeLoading((prev) => ({ ...prev, [reviewId]: false }));
     }
   };
 
   const handleReviewClick = (bookId: number, event: React.MouseEvent) => {
-    if ((event.target as HTMLElement).closest('button')) {
+    if ((event.target as HTMLElement).closest("button")) {
       return;
     }
     navigate(`/book-detail/${bookId}`);
@@ -423,16 +449,11 @@ const TodayBestComments: React.FC = () => {
       </Title>
       <Container ref={containerRef}>
         {bestReviews.map((review) => (
-          <ReviewCard 
-            key={review.reviewId}
-            onClick={(e) => handleReviewClick(review.bookId, e)}
-          >
+          <ReviewCard key={review.reviewId} onClick={(e) => handleReviewClick(review.bookId, e)}>
             <ReviewHeader>
-              <RankBadge rank={review.rank}>
-                {getRankIcon(review.rank)}
-              </RankBadge>
+              <RankBadge rank={review.rank}>{getRankIcon(review.rank)}</RankBadge>
               <InteractionBar>
-                <LikeButton 
+                <LikeButton
                   isLiked={review.myLiked}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -452,23 +473,20 @@ const TodayBestComments: React.FC = () => {
               </InteractionBar>
             </ReviewHeader>
             <UserProfile>
-              <ProfileImage 
-                src={review.reviewerImgUrl || '/default-profile.png'} 
-                alt={review.reviewerName} 
-              />
+              <ProfileImage src={review.reviewerImgUrl || "/default-profile.png"} alt={review.reviewerName} />
               <ReviewerName>{review.reviewerName}</ReviewerName>
             </UserProfile>
-            
+
             <ReviewContent>{review.content}</ReviewContent>
-            
+
             <BookInfo>
               <BookTitle>『{review.bookName}』</BookTitle>
             </BookInfo>
           </ReviewCard>
         ))}
       </Container>
-    </div>
+    </TodayBestContainer>
   );
 };
 
-export default TodayBestComments; 
+export default TodayBestComments;

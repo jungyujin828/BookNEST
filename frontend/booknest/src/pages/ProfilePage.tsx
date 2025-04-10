@@ -173,7 +173,7 @@ const TagRow = styled.div`
 const Tag = styled.span<{ color?: string; size?: string }>`
   padding: 4px 4px;
   color: ${(props) => props.color || "#e0e0e0"};
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   text-align: center;
 `;
@@ -188,12 +188,6 @@ const AuthorItem = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer; // 커서 스타일 추가
-
-  &:hover {
-    background-color: #f8f9fa; // 호버 효과 추가
-    border-radius: 8px;
-  }
 
   img {
     width: 40px;
@@ -542,7 +536,7 @@ const ProfilePage = () => {
           <SectionTitle>선호하는 작가</SectionTitle>
           <AuthorList>
             {displayData?.favoriteAuthors?.map((author, index) => (
-              <AuthorItem key={`author-${index}`} onClick={() => navigate(`/search?type=books&query=${author.name}`)}>
+              <AuthorItem key={`author-${index}`}>
                 <img src={author.imageUrl} alt={author.name} />
                 <div>{author.name}</div>
               </AuthorItem>

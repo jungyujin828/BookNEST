@@ -173,23 +173,27 @@ const DetailButton = styled.span`
 `;
 
 const EvaluateButton = styled.button`
-  position:relative;
-  background-color: #00c473;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #f5f5f5;
   top: 2rem;
   padding: 1rem 2rem;
-  color: white;
+  color: #1a1a1a;
   border: none;
   border-radius: 30px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 93%;
+  max-width: 400px;
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    background-color: "#1a1a1a"};
+    background-color: #ebebeb;
   }
-
 `;
 
 const DetailInfo = styled.div<{ isVisible: boolean }>`
@@ -244,13 +248,15 @@ const TodaysPage = () => {
     background-color: white;
   `;
 
-  const EmptyImage = styled.img``;
+  const EmptyImage = styled.img`
+    height: 100%;
+  `;
 
   if (!books.length || isLoading) {
     return (
-      <MainContainer>
-        <h1>로딩중..</h1>
-      </MainContainer>
+      <EmptyContainer>
+        <EmptyImage src="/todays_empty.png" alt="오늘의 책 준비중" />
+      </EmptyContainer>
     );
   }
 
@@ -303,7 +309,11 @@ const TodaysPage = () => {
               <FaChevronRight />
             </NavigationButton>
           </SlideContainer>
-          <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>도서 평가하기</EvaluateButton>
+          <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>
+            <p>
+              더 다양한 추천을 보고싶다면? <br /> ⭐ 평가하기
+            </p>
+          </EvaluateButton>
         </>
       )}
     </MainContainer>
