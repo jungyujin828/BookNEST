@@ -25,25 +25,26 @@ public class UserCategoryRecommendationScheduler {
     private final BookRepository bookRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 60 * 1, initialDelay = 1000 * 60 * 3) // 1시간 마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 1, initialDelay = 1000 * 60 * 3) // 1시간마다 실행
     public void runCategoryRecommendationBatch() {
         log.info("[카테고리 추천 배치 시작] 유저 선호 카테고리 기반 추천 도서 저장");
 
-        // 1. 기존 추천 전부 삭제
+        // 1. 기존 추천 모두 삭제
         recommendationRepository.deleteAllInBatch();
 
-        // 2. 유저별 선호 카테고리 가져오기
+        // 2. 유저별 선호 카테고리 분석 결과 가져오기
         List<UserCategoryAnalysis> allAnalyses = analysisRepository.findAll();
         int saved = 0;
 
         for (UserCategoryAnalysis analysis : allAnalyses) {
             String categoryName = analysis.getFavoriteCategory();
+            Integer userId = analysis.getUserId();
 
             List<Book> books = bookRepository.findRandomBooksByCategory(categoryName, PageRequest.of(0, 15));
 
             for (Book book : books) {
                 UserCategoryRecommendation recommendation = UserCategoryRecommendation.builder()
-                        .user(analysis.getUser())
+                        .userId(userId)
                         .category(categoryName)
                         .book(book)
                         .build();
@@ -55,5 +56,4 @@ public class UserCategoryRecommendationScheduler {
         log.info("[카테고리 추천 배치 완료] 총 저장된 추천 도서 수: {}", saved);
         log.info("*********************************************************");
     }
-
 }

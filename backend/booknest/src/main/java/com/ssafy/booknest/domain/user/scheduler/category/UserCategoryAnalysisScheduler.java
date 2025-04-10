@@ -62,12 +62,12 @@ public class UserCategoryAnalysisScheduler {
                     .toList();
 
             // 기존 분석 데이터 삭제
-            userCategoryAnalysisRepository.deleteByUser(user);
+            userCategoryAnalysisRepository.deleteByUserId(user.getId());
 
             // 새로운 분석 데이터 저장
             for (String category : topCategories) {
                 UserCategoryAnalysis analysis = UserCategoryAnalysis.builder()
-                        .user(user)
+                        .userId(user.getId())
                         .favoriteCategory(category)
                         .build();
                 userCategoryAnalysisRepository.save(analysis);

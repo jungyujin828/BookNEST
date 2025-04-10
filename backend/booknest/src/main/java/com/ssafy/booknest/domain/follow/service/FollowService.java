@@ -23,6 +23,7 @@ public class FollowService {
     private final UserRepository userRepository;
     private final RatingRepository ratingRepository;
 
+    // 타겟 유저 팔로우
     @Transactional
     public void followUser(Integer userId, Integer targetUserId) {
         User follower = userRepository.findById(userId).orElseThrow(() ->
@@ -38,6 +39,7 @@ public class FollowService {
         followRepository.save(follow);
     }
 
+    // 타겟 유저 팔로우 취소
     @Transactional
     public void unfollowUser(Integer userId, Integer targetUserId) {
         User follower = userRepository.findById(userId).orElseThrow(() ->
@@ -49,6 +51,7 @@ public class FollowService {
         followRepository.deleteByFollowerAndFollowing(follower, following);
     }
 
+    // 팔로잉 목록 조회
     public CustomPage<FollowResponse> getFollowingList(Integer userId, Integer targetUserId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -62,6 +65,7 @@ public class FollowService {
         }));
     }
 
+    // 팔로워 목록 조회
     public CustomPage<FollowResponse> getFollowerList(Integer userId, Integer targetUserId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));

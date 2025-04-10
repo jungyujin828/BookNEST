@@ -16,11 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class Yes24Service {
 
-    /**
-     * ISBN으로 YES24 도서 상세 페이지 링크를 반환
-     * @param isbn 검색할 도서 ISBN
-     * @return YES24 도서 링크 (없으면 null)
-     */
     public String getYes24UrlByIsbn(String isbn) {
         try {
             // 1. YES24 검색 URL 구성

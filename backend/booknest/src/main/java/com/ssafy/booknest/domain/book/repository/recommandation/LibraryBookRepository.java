@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface LibraryBookRepository extends JpaRepository<LibraryBook, Integer> {
 
-
+    // 특정 년도에 해당하는 도서 순위 목록 조회
     @Query("SELECT lb FROM LibraryBook lb WHERE lb.year = :year ORDER BY lb.rank ASC")
     List<LibraryBook> findTopByYearOrderByRank(@Param("year") Integer year);
 

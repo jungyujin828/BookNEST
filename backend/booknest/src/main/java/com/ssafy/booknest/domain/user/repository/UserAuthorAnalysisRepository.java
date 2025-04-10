@@ -12,11 +12,11 @@ import java.util.List;
 
 @Repository
 public interface UserAuthorAnalysisRepository extends JpaRepository<UserAuthorAnalysis, Integer> {
-    void deleteByUser(User user);
 
-
-    @Query("SELECT u.favoriteAuthor FROM UserAuthorAnalysis u WHERE u.user.id= :userId")
+    @Query("SELECT u.favoriteAuthor FROM UserAuthorAnalysis u WHERE u.userId= :userId")
     List<String> findAuthorNamesByUserId(@Param("userId") Integer userId);
 
     List<UserAuthorAnalysis> findByUserId(Integer targetUserId);
+
+    void deleteByUserId(Integer userId);
 }

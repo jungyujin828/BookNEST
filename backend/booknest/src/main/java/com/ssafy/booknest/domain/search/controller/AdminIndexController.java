@@ -17,6 +17,7 @@ public class AdminIndexController {
 
     private final ElasticsearchClient elasticsearchClient;
 
+    // 기존 book 인덱스를 삭제하고 새롭게 설정된 분석기 및 매핑으로 다시 생성
     @PostMapping("/reset")
     public ResponseEntity<String> resetBookIndex() {
         try {

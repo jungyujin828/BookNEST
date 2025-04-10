@@ -18,15 +18,17 @@ public interface RatingRepository extends JpaRepository<Rating, Integer> {
     // 특정 유저의 해당 책에 대한 평점 조회
     Optional<Rating> getRatingByUserIdAndBookId(Integer userId, Integer bookId);
 
-
+    // 특정 유저가 해당 책에 평점을 남겼는지 여부를 확인하는 메서드
     boolean existsByUserIdAndBookId(Integer userId, Integer bookId);
 
     // 가장 최근 수정된 순으로 평점 목록 가져오기
     Page<Rating> findByUserIdOrderByUpdatedAtDesc(Integer userId, Pageable pageable);
 
+    // 특정 유저가 남긴 평점의 개수를 반환하는 쿼리
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.user.id = :userId")
     Integer countRatings(@Param("userId") Integer userId);
 
+    // 특정 유저가 남긴 평점에 해당하는 책들의 ID를 반환하는 쿼리
     @Query("SELECT r.book.id FROM Rating r WHERE r.user.id = :userId")
     List<Integer> findBookIdsByUserId(@Param("userId") Integer userId);
 

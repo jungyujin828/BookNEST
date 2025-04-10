@@ -31,6 +31,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+
 import java.io.IOException;
 import java.util.*;
 
@@ -45,6 +46,7 @@ public class SearchService {
     private final RatingRepository ratingRepository;
     private final ElasticsearchClient elasticsearchClient;
 
+    // 도서 검색 (태그/키워드 기반) + 인기 검색어 카운트 처리
     public CustomPage<BookSearchResponse> searchBooks(Integer userId, String keyword, List<String> tags, Pageable pageable) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -64,14 +66,16 @@ public class SearchService {
         return new CustomPage<>(books.map(BookSearchResponse::of));
     }
 
-
+    // 도서 정보를 Elasticsearch에 저장
     public SearchedBook saveBook(SearchedBook book) {
         bookSearchRepository.save(book);
         return book;
     }
 
+    // 유저 정보를 Elasticsearch에 저장
     public SerachedUser saveUser(SerachedUser user) { return userSearchRepository.save(user); }
 
+    // 유저 검색 기능 + 팔로우 여부 반영
     public CustomPage<UserSearchResponse> searchUser(Integer userId, String name, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -101,10 +105,12 @@ public class SearchService {
         return new CustomPage<>(new PageImpl<>(responseList, pageable, users.getTotalElements()));
     }
 
+    // 도서 제목 자동완성 추천 키워드 리스트 반환
     public List<String> autocompleteTitle(String keyword) {
         return bookSearchRepository.autocompleteTitle(keyword);
     }
 
+    // 도서 평가 페이지용 도서 리스트 조회 (랜덤, 인기순, 최신순)
     public CustomPage<BookResponse> getEvalBookList(Integer userId, BookEvalType keyword, Pageable pageable) throws IOException {
         List<Integer> evaluatedBookIds = ratingRepository.findBookIdsByUserId(userId);
 
@@ -126,7 +132,7 @@ public class SearchService {
             builder.sort(s -> s.field(f -> f.field("total_ratings").order(SortOrder.Desc)));
         } else if (keyword == BookEvalType.RECENT) {
             builder.sort(s -> s.field(f -> f.field("published_date").order(SortOrder.Desc)));
-        } else {
+        }  else {
             builder.sort(s -> s
                     .script(sc -> sc
                             .type(ScriptSortType.Number)
@@ -157,6 +163,7 @@ public class SearchService {
         return new CustomPage<>(page);
     }
 
+    // 도서 평가 결과 Elasticsearch에 저장
     public BookEval saveBookEval(BookEval book) {
         bookSearchRepository.saveBookEval(book);
         return book;

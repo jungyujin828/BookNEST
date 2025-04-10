@@ -9,5 +9,7 @@ import java.util.List;
 
 @Repository
 public interface UserCategoryRecommendationRepository extends JpaRepository<UserCategoryRecommendation, Integer> {
-    List<UserCategoryRecommendation> findByUser(User user);
+
+    List<UserCategoryRecommendation> findByUserId(Integer userId);
+
 }

@@ -15,10 +15,12 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewLikeRepository extends JpaRepository<ReviewLike, Integer> {
+
+    // 특정 유저가 해당 한줄평을 남겼는지 여부
     boolean existsByUserAndReview(User user, Review review);
 
+    // 특정 유저의 해당 한줄평에 좋아요
     Optional<ReviewLike> findByUserAndReview(User user, Review review);
-
 
     // 오늘 좋아요 많이 받은 한줄평 3개 조회
     @Query("SELECT rl.review.id, COUNT(rl.id) " +
