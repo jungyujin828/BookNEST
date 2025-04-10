@@ -23,6 +23,9 @@ public class Author {
     @Column(name="image_url" , columnDefinition = "TEXT")
     private String imageUrl;
 
+    @Column(name="author_score", columnDefinition = "INT DEFAULT 0")
+    private Integer authorScore = 0;
+
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<BookAuthor> bookAuthors;
 

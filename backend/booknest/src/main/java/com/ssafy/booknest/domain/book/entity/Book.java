@@ -48,8 +48,8 @@ public class Book extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String publisherReview;
 
-    @Column(name="total_ratings")
-    private Integer totalRatings;
+    @Column(name = "total_ratings", columnDefinition = "INT DEFAULT 0")
+    private Integer totalRatings = 0;
 
     @Builder.Default
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY, orphanRemoval = true)
