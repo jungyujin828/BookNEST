@@ -1,8 +1,8 @@
 package com.ssafy.booknest.domain.user.scheduler.category;
 
 import com.ssafy.booknest.domain.book.entity.BookCategory;
-import com.ssafy.booknest.domain.book.entity.Rating;
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.entity.category.UserCategoryAnalysis;
 import com.ssafy.booknest.domain.user.repository.category.UserCategoryAnalysisRepository;
@@ -24,7 +24,7 @@ public class UserCategoryAnalysisScheduler {
     private final UserCategoryAnalysisRepository userCategoryAnalysisRepository;
 
     @Transactional
-    @Scheduled(fixedRate = 1000 * 60 * 4) // 4분마다 실행
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 1) // 1시간 마다 실행
     public void runUserCategoryAnalysisBatch() {
         log.info("[카테고리 배치 시작] 유저 선호 분석");
 

@@ -4,15 +4,12 @@ import com.ssafy.booknest.domain.book.enums.AgeGroup;
 import com.ssafy.booknest.domain.user.entity.User;
 import com.ssafy.booknest.domain.user.enums.Gender;
 import com.ssafy.booknest.domain.user.repository.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Data
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -41,7 +38,6 @@ public class AgeGenderBookResult {
                     int age = LocalDate.now().getYear() - birthYear + 1;
                     ageGroup = AgeGroup.fromAge(age);
                 } catch (NumberFormatException ignored) {
-                    // 생일 오류 무시
                 }
             }
         }
@@ -68,8 +64,7 @@ public class AgeGenderBookResult {
         return switch (gender) {
             case M -> "남성";
             case F -> "여성";
-            case O, N -> ""; // N, O 일 때는 성별 생략
+            case O, N -> "";
         };
     }
-
 }

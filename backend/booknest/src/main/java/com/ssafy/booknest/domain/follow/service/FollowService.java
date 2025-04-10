@@ -1,6 +1,6 @@
 package com.ssafy.booknest.domain.follow.service;
 
-import com.ssafy.booknest.domain.book.repository.RatingRepository;
+import com.ssafy.booknest.domain.book.repository.evaluation.RatingRepository;
 import com.ssafy.booknest.domain.follow.dto.response.FollowResponse;
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.follow.repository.FollowRepository;

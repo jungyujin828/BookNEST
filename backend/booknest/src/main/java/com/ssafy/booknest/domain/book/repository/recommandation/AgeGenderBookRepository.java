@@ -1,4 +1,4 @@
-package com.ssafy.booknest.domain.book.repository;
+package com.ssafy.booknest.domain.book.repository.recommandation;
 
 import com.ssafy.booknest.domain.book.entity.recommendation.AgeGenderBook;
 import com.ssafy.booknest.domain.book.enums.AgeGroup;
@@ -16,13 +16,14 @@ public interface AgeGenderBookRepository extends JpaRepository<AgeGenderBook, In
     // 성별과 나이대로 추천
     List<AgeGenderBook> findByAgeGroupAndGender(AgeGroup ageGroup, Gender gender);
 
-    // 성별을 입력하지 않을 때, 나이대에서만 추천
+    // 성별에서만 추천
+    List<AgeGenderBook> findByGender(Gender gender);
+
+    // 나이대에서만 추천
     List<AgeGenderBook> findByAgeGroup(AgeGroup ageGroup);
 
     // 성별이나 나이를 입력을 안하면 그냥 테이블에서 랜덤 추천
     @Query(value = "SELECT * FROM age_gender_book ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<AgeGenderBook> findRandomLimit(@Param("limit") int limit);
-
-    List<AgeGenderBook> findByGender(Gender gender);
 
 }

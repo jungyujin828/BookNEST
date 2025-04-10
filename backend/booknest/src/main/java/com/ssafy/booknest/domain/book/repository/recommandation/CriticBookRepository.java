@@ -1,4 +1,4 @@
-package com.ssafy.booknest.domain.book.repository;
+package com.ssafy.booknest.domain.book.repository.recommandation;
 
 import com.ssafy.booknest.domain.book.entity.recommendation.CriticBook;
 import org.springframework.data.jpa.repository.JpaRepository;

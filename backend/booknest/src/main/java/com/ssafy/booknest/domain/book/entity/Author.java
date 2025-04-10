@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Author {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,4 +25,5 @@ public class Author {
 
     @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
     private List<BookAuthor> bookAuthors;
+
 }

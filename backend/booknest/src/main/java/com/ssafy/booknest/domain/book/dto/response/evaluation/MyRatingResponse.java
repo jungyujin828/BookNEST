@@ -1,12 +1,9 @@
 package com.ssafy.booknest.domain.book.dto.response.evaluation;
 
-import com.ssafy.booknest.domain.book.entity.Rating;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.ssafy.booknest.domain.book.entity.evaluation.Rating;
+import lombok.*;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

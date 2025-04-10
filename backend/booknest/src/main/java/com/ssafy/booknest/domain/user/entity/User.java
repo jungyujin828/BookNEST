@@ -1,6 +1,6 @@
 package com.ssafy.booknest.domain.user.entity;
 
-import com.ssafy.booknest.domain.book.entity.IgnoredBook;
+import com.ssafy.booknest.domain.book.entity.evaluation.IgnoredBook;
 import com.ssafy.booknest.domain.nest.entity.TodayBook;
 import com.ssafy.booknest.domain.follow.entity.Follow;
 import com.ssafy.booknest.domain.nest.entity.Nest;

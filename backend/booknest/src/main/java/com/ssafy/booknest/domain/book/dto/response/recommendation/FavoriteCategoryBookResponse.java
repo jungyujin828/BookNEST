@@ -1,14 +1,11 @@
 package com.ssafy.booknest.domain.book.dto.response.recommendation;
 
 import com.ssafy.booknest.domain.book.entity.Book;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -37,5 +34,4 @@ public class FavoriteCategoryBookResponse {
                 .category(category)
                 .build();
     }
-
 }

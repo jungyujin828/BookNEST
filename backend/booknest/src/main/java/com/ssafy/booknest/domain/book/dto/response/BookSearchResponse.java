@@ -1,15 +1,12 @@
 package com.ssafy.booknest.domain.book.dto.response;
 
 import com.ssafy.booknest.domain.book.enums.BookSearchType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-@Data
+@Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -35,6 +32,4 @@ public class BookSearchResponse {
                 .searchType(searchType)
                 .build();
     }
-
-
 }
