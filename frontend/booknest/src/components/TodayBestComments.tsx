@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import styled from '@emotion/styled';
-import { FaHeart, FaRegHeart, FaCaretUp, FaExclamationCircle } from 'react-icons/fa';
-import { RiMedalFill, RiMedalLine } from 'react-icons/ri';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import React, { useState, useEffect, useRef } from "react";
+import styled from "@emotion/styled";
+import { FaHeart, FaRegHeart, FaCaretUp, FaExclamationCircle } from "react-icons/fa";
+import { RiMedalFill, RiMedalLine } from "react-icons/ri";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 interface BestReview {
   reviewId: number;
@@ -231,7 +231,7 @@ const TodayLikes = styled.div`
 `;
 
 // 모달 타입 정의
-type ModalType = 'error' | null;
+type ModalType = "error" | null;
 
 // 모달 스타일 컴포넌트 추가
 const ModalOverlay = styled.div`
@@ -281,11 +281,11 @@ const ModalButton = styled.button<{ isPrimary?: boolean }>`
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  background-color: ${props => props.isPrimary ? '#00c473' : '#f1f3f5'};
-  color: ${props => props.isPrimary ? 'white' : '#495057'};
-  
+  background-color: ${(props) => (props.isPrimary ? "#00c473" : "#f1f3f5")};
+  color: ${(props) => (props.isPrimary ? "white" : "#495057")};
+
   &:hover {
-    background-color: ${props => props.isPrimary ? '#00b368' : '#e9ecef'};
+    background-color: ${(props) => (props.isPrimary ? "#00b368" : "#e9ecef")};
   }
 `;
 
@@ -296,13 +296,13 @@ const TodayBestComments: React.FC = () => {
   const [likeLoading, setLikeLoading] = useState<{ [key: number]: boolean }>({});
   const [scrollPosition, setScrollPosition] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // 모달 상태 관리
   const [modalType, setModalType] = useState<ModalType>(null);
-  const [modalMessage, setModalMessage] = useState('');
+  const [modalMessage, setModalMessage] = useState("");
 
   // 모달 열기 함수
-  const openModal = (type: ModalType, message: string = '') => {
+  const openModal = (type: ModalType, message: string = "") => {
     setModalType(type);
     setModalMessage(message);
   };
@@ -310,7 +310,7 @@ const TodayBestComments: React.FC = () => {
   // 모달 닫기 함수
   const closeModal = () => {
     setModalType(null);
-    setModalMessage('');
+    setModalMessage("");
   };
 
   const handleScroll = (direction: "left" | "right") => {
@@ -352,7 +352,7 @@ const TodayBestComments: React.FC = () => {
       if (!review) return;
 
       // 낙관적 UI 업데이트 (먼저 UI 업데이트)
-      const updatedReviews = bestReviews.map(r => {
+      const updatedReviews = bestReviews.map((r) => {
         if (r.reviewId === reviewId) {
           // 좋아요 상태를 토글하고 좋아요 수를 조정
           const newTotalLikes = r.myLiked ? r.totalLikes - 1 : r.totalLikes + 1;
@@ -361,36 +361,36 @@ const TodayBestComments: React.FC = () => {
             ...r,
             myLiked: !r.myLiked,
             totalLikes: newTotalLikes,
-            todayLikes: newTodayLikes >= 0 ? newTodayLikes : 0
+            todayLikes: newTodayLikes >= 0 ? newTodayLikes : 0,
           };
         }
         return r;
       });
-      
+
       setBestReviews(updatedReviews);
-      
+
       // API 호출
       if (review.myLiked) {
         await api.delete(`/api/book/review/${reviewId}/like`);
       } else {
         await api.post(`/api/book/review/${reviewId}/like`);
       }
-      
+
       // 더 이상 fetchBestReviews()를 호출하지 않음
     } catch (err) {
-      console.error('좋아요 처리 실패:', err);
-      
+      console.error("좋아요 처리 실패:", err);
+
       // 에러 발생 시 원래 상태로 롤백
-      const rollbackReviews = bestReviews.map(r => {
+      const rollbackReviews = bestReviews.map((r) => {
         if (r.reviewId === reviewId) {
-          const originalReview = bestReviews.find(orig => orig.reviewId === reviewId);
+          const originalReview = bestReviews.find((orig) => orig.reviewId === reviewId);
           return originalReview || r;
         }
         return r;
       });
-      
+
       setBestReviews(rollbackReviews);
-      openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
+      openModal("error", "좋아요 처리에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setLikeLoading((prev) => ({ ...prev, [reviewId]: false }));
     }
@@ -421,12 +421,12 @@ const TodayBestComments: React.FC = () => {
   }
 
   return (
-    <div>
+    <TodayBestContainer>
       {/* 모달 컴포넌트 */}
       {modalType && (
         <ModalOverlay>
           <ModalContent>
-            {modalType === 'error' && (
+            {modalType === "error" && (
               <>
                 <ModalTitle>
                   <FaExclamationCircle color="#dc2626" />
@@ -443,7 +443,7 @@ const TodayBestComments: React.FC = () => {
           </ModalContent>
         </ModalOverlay>
       )}
-      
+
       <Title>
         <HighlightText>오늘의</HighlightText> BEST <HighlightText>한줄평</HighlightText>
       </Title>
