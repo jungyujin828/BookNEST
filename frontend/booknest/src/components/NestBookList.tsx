@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { FaStar, FaStarHalfAlt, FaTrash } from "react-icons/fa";
+import { SortOption } from "../pages/NestPage";
 
 interface NestBook {
   bookId: number;
@@ -42,6 +43,8 @@ interface UserInfo {
 interface NestBookListProps {
   userId?: number;
   nestId?: number;
+  sortOption?: SortOption;
+  searchTerm?: string;
 }
 
 const Container = styled.div`
@@ -123,6 +126,13 @@ const BookAuthor = styled.p`
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+`;
+
+const CreatedAtTag = styled.div`
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+  margin-bottom: 8px;
 `;
 
 const RatingContainer = styled.div`
@@ -257,6 +267,15 @@ const StyledLink = styled(Link)`
   display: block;
 `;
 
+// 날짜 포맷 함수 추가
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `등록일: ${year}.${month}.${day}`;
+};
+
 const renderRatingStars = (rating: number) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
@@ -273,9 +292,41 @@ const renderRatingStars = (rating: number) => {
   return stars;
 };
 
+// 정렬 함수 추가
+const sortBooks = (books: NestBook[], sortOption: SortOption): NestBook[] => {
+  switch (sortOption) {
+    case "latest":
+      return [...books].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    case "oldest":
+      return [...books].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    case "rating":
+      return [...books].sort((a, b) => b.userRating - a.userRating);
+    case "title":
+      return [...books].sort((a, b) => a.title.localeCompare(b.title));
+    default:
+      return books;
+  }
+};
+
+// 검색 필터링 함수 추가
+const filterBooksByTitle = (books: NestBook[], searchTerm: string): NestBook[] => {
+  if (!searchTerm || searchTerm.trim() === '') {
+    return books;
+  }
+  
+  const lowercasedSearch = searchTerm.toLowerCase();
+  // 제목의 첫글자부터 연속으로 두글자 이상 일치하는 도서만 필터링
+  return books.filter(book => 
+    book.title.toLowerCase().includes(lowercasedSearch) && 
+    book.title.toLowerCase().indexOf(lowercasedSearch) === 0
+  );
+};
+
 const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProps>(
-  ({ userId: propUserId, nestId: propNestId }, ref) => {
+  ({ userId: propUserId, nestId: propNestId, sortOption = "latest", searchTerm = "" }, ref) => {
     const [books, setBooks] = useState<NestBook[]>([]);
+    const [sortedBooks, setSortedBooks] = useState<NestBook[]>([]);
+    const [filteredBooks, setFilteredBooks] = useState<NestBook[]>([]);
     const [pagination, setPagination] = useState<PaginationInfo>({
       pageNumber: 1,
       totalPages: 1,
@@ -400,6 +451,18 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         setLoading(false);
       }
     };
+
+    // 정렬된 도서 목록 업데이트 useEffect 추가
+    useEffect(() => {
+      const sorted = sortBooks(books, sortOption);
+      setSortedBooks(sorted);
+    }, [books, sortOption]);
+    
+    // 검색어로 필터링된 도서 목록 업데이트
+    useEffect(() => {
+      const filtered = filterBooksByTitle(sortedBooks, searchTerm);
+      setFilteredBooks(filtered);
+    }, [sortedBooks, searchTerm]);
 
     // 컴포넌트 마운트 시 사용자 정보를 먼저 조회하고, 그 후 도서 목록 조회
     useEffect(() => {
@@ -552,6 +615,11 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
       return <ErrorState>{error}</ErrorState>;
     }
 
+    // 검색 결과가 없는 경우
+    if (books.length > 0 && filteredBooks.length === 0 && searchTerm) {
+      return <EmptyState>검색 결과가 없습니다.</EmptyState>;
+    }
+
     if (books.length === 0) {
       return <EmptyState>둥지에 추가한 도서가 없습니다.</EmptyState>;
     }
@@ -559,7 +627,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
     return (
       <Container>
         <BookGrid>
-          {books.map((book) => (
+          {filteredBooks.map((book) => (
             <BookCard key={`${book.bookId}-${book.createdAt}`}>
               <DeleteButton
                 onClick={(e) => handleDeleteBook(book.bookId, e)}
@@ -579,6 +647,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
                     <StarContainer>{renderRatingStars(book.userRating)}</StarContainer>
                     <RatingValue>{book.userRating.toFixed(1)}</RatingValue>
                   </RatingContainer>
+                  <CreatedAtTag>{formatDate(book.createdAt)}</CreatedAtTag>
                   {book.userReview && <ReviewText>{book.userReview}</ReviewText>}
                 </BookInfo>
               </StyledLink>

@@ -303,6 +303,8 @@ const SearchBar = forwardRef<any, SearchBarProps>(
     const handleAutocompleteClick = (value: string) => {
       onSearchChange(value);
       onUpdateSearchParams(value);
+      
+      // 자동완성으로 선택 후 곧바로 검색 실행
       handleSearch(value);
     };
 

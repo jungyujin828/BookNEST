@@ -327,7 +327,7 @@ const SearchPage = () => {
   const [isSearchActive, setIsSearchActive] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isTagsExpanded, setIsTagsExpanded] = useState(true);
+  const [isTagsExpanded, setIsTagsExpanded] = useState(false);
 
   // Remove the previous useEffect and use a ref to track the initial render
   const isInitialMount = useRef(true);
@@ -488,8 +488,13 @@ const SearchPage = () => {
       setBooks(data.content);
       setIsSearchActive(false); // 검색 완료 후 isSearchActive를 false로 재설정
       
-      // Don't auto-collapse tags after search
-      // setIsTagsExpanded(false);
+      // 태그가 없는 경우 태그 창을 항상 접음
+      if (selectedTags.length === 0) {
+        setIsTagsExpanded(false);
+      } else {
+        // 태그가 있으면 태그 창을 펼침
+        setIsTagsExpanded(true);
+      }
     } else {
       // 유저 검색 결과도 페이지네이션 처리
       if (data.content && Array.isArray(data.content)) {
@@ -711,7 +716,7 @@ const SearchPage = () => {
           }}
           searchType={activeTab}
           onSearchResult={handleSearchResult}
-          placeholder={activeTab === "books" ? "도서 검색" : "유저 검색"}
+          placeholder={activeTab === "books" ? "도서, 작가 검색" : "유저 검색"}
           selectedTags={selectedTags}
           onFocus={handleSearchFocus}
           onBlur={handleSearchBlur}
@@ -726,6 +731,10 @@ const SearchPage = () => {
                 setSearchTerm(query);
                 // Update search parameters
                 updateSearchParams(query, selectedTags, activeTab);
+                // 태그가 없는 경우 태그 창을 접음
+                if (selectedTags.length === 0) {
+                  setIsTagsExpanded(false);
+                }
                 // Instead of using searchBarRef.current?.handleSearch(), directly trigger the search
                 // with the selected query
                 triggerSearch(1, query);
@@ -739,6 +748,10 @@ const SearchPage = () => {
                 setSearchTerm(query);
                 // Update search parameters
                 updateSearchParams(query, selectedTags, activeTab);
+                // 태그가 없는 경우 태그 창을 접음
+                if (selectedTags.length === 0) {
+                  setIsTagsExpanded(false);
+                }
                 // Instead of using searchBarRef.current?.handleSearch(), directly trigger the search
                 // with the selected query
                 triggerSearch(1, query);
