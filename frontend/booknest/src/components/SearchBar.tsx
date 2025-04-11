@@ -203,7 +203,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           setAutocompleteResults(response.data.data);
         }
       } catch (error) {
-        console.error("Failed to fetch autocomplete:", error);
+        // console.error("Failed to fetch autocomplete:", error);
         setAutocompleteResults([]);
       }
     };
@@ -267,7 +267,7 @@ const SearchBar = forwardRef<any, SearchBarProps>(
           onSearchResult(processedData);
         }
       } catch (error) {
-        console.error(`Failed to search ${searchType}:`, error);
+        // console.error(`Failed to search ${searchType}:`, error);
       } finally {
         setIsSearching(false);
       }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
 import api from "../api/axios";
@@ -66,7 +66,7 @@ const EvaluateBookPage = () => {
         setBooks(paginatedData.content);
         setTotalPages(paginatedData.totalPages);
       } catch (error) {
-        console.error("데이터를 불러오는데 실패했습니다:", error);
+        // console.error("데이터를 불러오는데 실패했습니다:", error);
         setError("데이터를 불러오는데 실패했습니다. 다시 시도해주세요.");
       } finally {
         setLoading(false);
@@ -211,23 +211,58 @@ const EvaluateBookPage = () => {
 
   const [ratedBooks, setRatedBooks] = useState<Set<number>>(new Set());
 
-  const handleRatingChange = (bookId: number, rating: number) => {
-    console.log(`Book ${bookId} rated: ${rating}`);
+  // 마지막 호출 시간을 추적하기 위한 ref 추가
+  const lastRatingChangeRef = useRef<{ [key: number]: number }>({});
 
-    // 평점이 0이면 취소로 간주하고 해당 책을 ratedBooks에서 제거
-    if (rating === 0) {
-      setRatedBooks((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(bookId);
-        return newSet;
-      });
-    } else {
-      // 평점이 있으면 ratedBooks에 추가
-      setRatedBooks((prev) => {
-        const newSet = new Set(prev);
-        newSet.add(bookId);
-        return newSet;
-      });
+  const handleRatingChange = (bookId: number, rating: number) => {
+    // 동일한 bookId에 대해 짧은 시간 내에 중복 호출 방지
+    const now = Date.now();
+    const lastCallTime = lastRatingChangeRef.current[bookId] || 0;
+
+    if (now - lastCallTime < 300) {
+      // 300ms 내 중복 호출 무시
+      return;
+    }
+
+    lastRatingChangeRef.current[bookId] = now;
+    // console.log(`Book ${bookId} rated: ${rating}`);
+
+    // 로컬 스토리지에서 auth-storage 가져오기
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      const parsedStorage = JSON.parse(authStorage);
+
+      // 평점이 0이면 취소로 간주하고 해당 책을 ratedBooks에서 제거
+      if (rating === 0) {
+        setRatedBooks((prev) => {
+          const newSet = new Set(prev);
+          // 이미 평가한 책인 경우에만 totalRatings 감소
+          if (prev.has(bookId) && parsedStorage?.state?.userDetail?.totalRatings > 0) {
+            // totalRatings 감소
+            parsedStorage.state.userDetail.totalRatings -= 0.5;
+            localStorage.setItem("auth-storage", JSON.stringify(parsedStorage));
+            // 상태 업데이트
+            setTotalRatings(parsedStorage.state.userDetail.totalRatings);
+          }
+          newSet.delete(bookId);
+          return newSet;
+        });
+      } else {
+        // 평점이 있으면 ratedBooks에 추가
+        setRatedBooks((prev) => {
+          const newSet = new Set(prev);
+          // 새로 평가한 책인 경우에만 totalRatings 증가
+          if (!prev.has(bookId)) {
+            // totalRatings 증가
+            parsedStorage.state.userDetail.totalRatings += 0.5;
+            localStorage.setItem("auth-storage", JSON.stringify(parsedStorage));
+            // 상태 업데이트
+            setTotalRatings(parsedStorage.state.userDetail.totalRatings);
+          }
+          newSet.add(bookId);
+          return newSet;
+        });
+      }
     }
   };
 

@@ -220,7 +220,7 @@ const TodaysPage = () => {
           }, 1000); // 1초 딜레이
         }
       } catch (error) {
-        console.error("추천 도서 목록을 불러오는데 실패했습니다:", error);
+        // console.error("추천 도서 목록을 불러오는데 실패했습니다:", error);
         setIsLoading(false);
       }
     };

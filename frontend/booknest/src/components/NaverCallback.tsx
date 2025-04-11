@@ -77,7 +77,7 @@ const NaverCallback = () => {
         throw new Error(response.data.error?.message || '로그인에 실패했습니다. 다시 시도해주세요.');
       }
     } catch (err: any) {
-      console.error('Naver login error:', err);
+      // console.error('Naver login error:', err);
       
       // 에러 메시지 구체화
       if (err.response?.status === 401) {

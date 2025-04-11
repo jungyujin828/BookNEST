@@ -335,7 +335,7 @@ const SearchTag: React.FC<SearchTagProps> = ({
   }, [selectedTags]);
 
   const handleClearTags = () => {
-    console.log("Clearing all tags");
+    // console.log("Clearing all tags");
     onClearTags(); // Clear the tags in the parent component
     onSearch(); // This will trigger a search with no tags, which should clear the books
   };

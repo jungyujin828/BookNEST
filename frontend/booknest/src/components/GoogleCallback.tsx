@@ -55,6 +55,26 @@ const GoogleCallback = () => {
         if (!code) {
           throw new Error('Authorization code not found');
         }
+      } else {
+        throw new Error(response.data.error?.message || '로그인에 실패했습니다. 다시 시도해주세요.');
+      }
+    } catch (err: any) {
+      // console.error('Google login error:', err);
+      
+      // 에러 메시지 구체화
+      if (err.response?.status === 401) {
+        setError('인증에 실패했습니다. 다시 로그인해주세요.');
+      } else if (err.response?.status === 500) {
+        setError('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('알 수 없는 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
         const response = await api.post('/api/oauth/google', { code });
         

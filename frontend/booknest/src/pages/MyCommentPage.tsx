@@ -146,7 +146,7 @@ const MyCommentPage = () => {
         `/api/book/review?${params.toString()}`
       );
 
-      console.log("API Response:", response.data);
+      // console.log("API Response:", response.data);
 
       if (response.data.success) {
         setReviews(response.data.data.content);
@@ -155,7 +155,7 @@ const MyCommentPage = () => {
         setError("코멘트 목록을 불러오는데 실패했습니다.");
       }
     } catch (error: any) {
-      console.error("Failed to fetch reviews:", error);
+      // console.error("Failed to fetch reviews:", error);
 
       if (error.response?.status === 401) {
         alert("로그인이 필요한 서비스입니다.");
