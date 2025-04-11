@@ -388,13 +388,13 @@ const SearchPage = () => {
 
   // 기존 핸들러들 수정
   const handleTagSelect = async (tag: string) => {
-    console.log("SearchPage - Tag Selected:", tag);
-    console.log("SearchPage - Current Tags:", selectedTags);
+    // console.log("SearchPage - Tag Selected:", tag);
+    // console.log("SearchPage - Current Tags:", selectedTags);
 
     // 새로운 태그 배열 생성
     const newSelectedTags = selectedTags.includes(tag) ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
 
-    console.log("SearchPage - New Tags Array:", newSelectedTags);
+    // console.log("SearchPage - New Tags Array:", newSelectedTags);
 
     // 태그 선택 순서 업데이트
     if (selectedTags.includes(tag)) {
@@ -413,7 +413,7 @@ const SearchPage = () => {
 
     // 검색 실행
     try {
-      console.log("Searching with tags:", newSelectedTags);
+      // console.log("Searching with tags:", newSelectedTags);
       const response = await api.get("/api/search/book", {
         params: {
           page: 1,
@@ -438,11 +438,11 @@ const SearchPage = () => {
         },
       });
 
-      console.log("Search API Response:", response.data);
+      // console.log("Search API Response:", response.data);
 
       if (response.data.success) {
         const processedData: SearchResult = response.data.data;
-        console.log("Processed search results:", processedData);
+        // console.log("Processed search results:", processedData);
 
         setCurrentPage(1);
         setTotalBooks(processedData.totalElements);
@@ -455,7 +455,7 @@ const SearchPage = () => {
         // }
       }
     } catch (error) {
-      console.error("Failed to search with tags:", error);
+      // console.error("Failed to search with tags:", error);
       // 에러 발생 시 상태 초기화
       setBooks([]);
       setTotalBooks(0);
@@ -552,7 +552,7 @@ const SearchPage = () => {
         }
       }
     } catch (error) {
-      console.error("팔로우/언팔로우 작업 실패:", error);
+      // console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 
@@ -562,7 +562,7 @@ const SearchPage = () => {
     // Use the provided term if available, otherwise use current searchTerm
     const searchTermToUse = termToSearch !== undefined ? termToSearch : searchTerm;
     
-    console.log("SearchPage - Triggering Search with term:", searchTermToUse, "tags:", selectedTags);
+    // console.log("SearchPage - Triggering Search with term:", searchTermToUse, "tags:", selectedTags);
     setIsSearching(true);
     try {
       const response = await api.get("/api/search/book", {
@@ -596,7 +596,7 @@ const SearchPage = () => {
         setBooks(processedData.content);
       }
     } catch (error) {
-      console.error("Failed to search:", error);
+      // console.error("Failed to search:", error);
       // 에러 발생 시 상태 초기화
       setBooks([]);
       setTotalBooks(0);

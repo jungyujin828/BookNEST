@@ -64,7 +64,7 @@ const SearchHot: React.FC<SearchHotProps> = ({ onSelect }) => {
           setHotSearches(response.data.data);
         }
       } catch (error) {
-        console.error("Failed to fetch hot searches:", error);
+        // console.error("Failed to fetch hot searches:", error);
       }
     };
 

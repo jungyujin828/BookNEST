@@ -45,7 +45,7 @@ const IgnoreButton: React.FC<IgnoreButtonProps> = ({ bookId }) => {
           setIsIgnored(response.data.data);
         }
       } catch (error) {
-        console.error("Failed to fetch ignore status:", error);
+        // console.error("Failed to fetch ignore status:", error);
       }
     };
 
@@ -70,7 +70,7 @@ const IgnoreButton: React.FC<IgnoreButtonProps> = ({ bookId }) => {
         await api.delete(`/api/book/${bookId}/ignore`);
       }
     } catch (error) {
-      console.error("Failed to update ignore status:", error);
+      // console.error("Failed to update ignore status:", error);
       // Revert optimistic update on error
       setIsIgnored(isIgnored);
     } finally {

@@ -298,7 +298,7 @@ const ProfilePage = () => {
           setUserDetail(response.data.data);
         }
       } catch (error) {
-        console.error("사용자 정보 가져오기 실패:", error);
+        // console.error("사용자 정보 가져오기 실패:", error);
       }
     };
 
@@ -334,7 +334,7 @@ const ProfilePage = () => {
           setIsFollowing(response.data.data.isFollowing);
         }
       } catch (error) {
-        console.error("Failed to fetch user profile:", error);
+        // console.error("Failed to fetch user profile:", error);
       }
     };
 
@@ -385,7 +385,7 @@ const ProfilePage = () => {
         }
       }
     } catch (error) {
-      console.error("팔로우/언팔로우 작업 실패:", error);
+      // console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 

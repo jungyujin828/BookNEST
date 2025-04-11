@@ -97,7 +97,7 @@ const DeleteToNestButton: React.FC<DeleteToNestButtonProps> = ({ bookId, nestId,
         setShowSuccessModal(true);
       }
     } catch (error: any) {
-      console.error("Delete from nest error:", error);
+      // console.error("Delete from nest error:", error);
       if (error.response?.status === 401) {
         alert("로그인이 필요한 서비스입니다.");
       } else {

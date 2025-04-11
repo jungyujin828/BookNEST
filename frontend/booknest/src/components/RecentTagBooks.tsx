@@ -398,7 +398,7 @@ const RecentTagBooks = () => {
           setBooks([]);
         }
       } catch (err) {
-        console.error('API Error:', err);
+        // console.error('API Error:', err);
         setError('서버 오류가 발생했습니다.');
         setBooks([]);
       } finally {

@@ -66,7 +66,7 @@ const EvaluateBookPage = () => {
         setBooks(paginatedData.content);
         setTotalPages(paginatedData.totalPages);
       } catch (error) {
-        console.error("데이터를 불러오는데 실패했습니다:", error);
+        // console.error("데이터를 불러오는데 실패했습니다:", error);
         setError("데이터를 불러오는데 실패했습니다. 다시 시도해주세요.");
       } finally {
         setLoading(false);
@@ -225,7 +225,7 @@ const EvaluateBookPage = () => {
     }
 
     lastRatingChangeRef.current[bookId] = now;
-    console.log(`Book ${bookId} rated: ${rating}`);
+    // console.log(`Book ${bookId} rated: ${rating}`);
 
     // 로컬 스토리지에서 auth-storage 가져오기
     const authStorage = localStorage.getItem("auth-storage");

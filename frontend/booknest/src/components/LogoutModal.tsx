@@ -58,7 +58,7 @@ const LogoutModal = ({ onClose }: { onClose: () => void }) => {
         navigate("/login");
       }
     } catch (error) {
-      console.error("로그아웃 실패:", error);
+      // console.error("로그아웃 실패:", error);
     }
   };
 

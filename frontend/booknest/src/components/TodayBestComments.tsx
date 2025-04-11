@@ -331,7 +331,7 @@ const TodayBestComments: React.FC = () => {
         setBestReviews(response.data.data);
       }
     } catch (error) {
-      console.error("베스트 리뷰 로딩 실패:", error);
+      // console.error("베스트 리뷰 로딩 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -378,7 +378,7 @@ const TodayBestComments: React.FC = () => {
 
       // 더 이상 fetchBestReviews()를 호출하지 않음
     } catch (err) {
-      console.error("좋아요 처리 실패:", err);
+      // console.error("좋아요 처리 실패:", err);
 
       // 에러 발생 시 원래 상태로 롤백
       const rollbackReviews = bestReviews.map((r) => {

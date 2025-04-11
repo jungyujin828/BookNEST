@@ -80,7 +80,7 @@ const FollowersPage = () => {
           setFollowers(response.data.data.content);
         }
       } catch (error) {
-        console.error("팔로워 목록 가져오기 실패:", error);
+        // console.error("팔로워 목록 가져오기 실패:", error);
       }
     };
 
@@ -136,7 +136,7 @@ const FollowersPage = () => {
         }
       }
     } catch (error) {
-      console.error("팔로우/언팔로우 작업 실패:", error);
+      // console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 

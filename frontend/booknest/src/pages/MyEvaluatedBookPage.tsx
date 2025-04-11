@@ -175,7 +175,7 @@ const MyEvaluatedBookPage = () => {
         `/api/book/rating?${params.toString()}`
       );
 
-      console.log('API Response:', response.data);
+      // console.log('API Response:', response.data);
 
       if (response.data.success) {
         setBooks(response.data.data.content);
@@ -184,7 +184,7 @@ const MyEvaluatedBookPage = () => {
         setError('평가한 책 목록을 불러오는데 실패했습니다.');
       }
     } catch (error: any) {
-      console.error('Failed to fetch rated books:', error);
+      // console.error('Failed to fetch rated books:', error);
       
       if (error.response?.status === 401) {
         alert('로그인이 필요한 서비스입니다.');
