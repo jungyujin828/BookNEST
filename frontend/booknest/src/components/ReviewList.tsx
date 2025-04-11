@@ -327,7 +327,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
         openModal('error', '리뷰 삭제에 실패했습니다.');
       }
     } catch (err) {
-      console.error('Delete API Error:', err);
+      // console.error('Delete API Error:', err);
       openModal('error', '서버 오류가 발생했습니다.');
     }
   };
@@ -368,7 +368,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
       
       onReviewChange();
     } catch (err) {
-      console.error('Like API Error:', err);
+      // console.error('Like API Error:', err);
       openModal('error', '좋아요 처리에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setLikeLoading(prev => ({ ...prev, [reviewId]: false }));
@@ -393,7 +393,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ bookId, reviews, onReviewChange
           setCurrentPage(nextPage);
         }
       } catch (err) {
-        console.error("Failed to load more reviews:", err);
+        // console.error("Failed to load more reviews:", err);
       } finally {
         setReviewsLoading(false);
       }

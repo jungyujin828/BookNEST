@@ -185,7 +185,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
   };
 
   const handleClick = () => {
-    console.log("이미지 클릭됨");
+    // console.log("이미지 클릭됨");
     fileInputRef.current?.click();
   };
 
@@ -196,7 +196,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
     formData.append("resource_type", "image");
 
     try {
-      console.log("Cloudinary 업로드 시작...");
+      // console.log("Cloudinary 업로드 시작...");
       const response = await fetch(
         `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
@@ -207,15 +207,15 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Cloudinary 응답 에러:", errorData);
+        // console.error("Cloudinary 응답 에러:", errorData);
         throw new Error("이미지 업로드에 실패했습니다.");
       }
 
       const data = await response.json();
-      console.log("Cloudinary 업로드 성공:", data);
+      // console.log("Cloudinary 업로드 성공:", data);
       return data.secure_url;
     } catch (error) {
-      console.error("Cloudinary 업로드 실패:", error);
+      // console.error("Cloudinary 업로드 실패:", error);
       throw new Error("이미지 업로드에 실패했습니다.");
     }
   };
@@ -244,7 +244,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       return response.data;
     } catch (error) {
-      console.error("백엔드 업데이트 실패:", error);
+      // console.error("백엔드 업데이트 실패:", error);
       throw error;
     }
   };
@@ -270,7 +270,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       // Cloudinary에 이미지 업로드
       const imageUrl = await uploadToCloudinary(file);
-      console.log("받은 이미지 URL:", imageUrl);
+      // console.log("받은 이미지 URL:", imageUrl);
 
       // 백엔드 API 호출
       await updateProfileImageInBackend(imageUrl);
@@ -291,7 +291,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
 
       openModal("업로드 성공", "프로필 이미지가 성공적으로 업데이트되었습니다.", true);
     } catch (error) {
-      console.error("프로필 이미지 업로드 실패:", error);
+      // console.error("프로필 이미지 업로드 실패:", error);
       openModal("업로드 실패", "프로필 이미지 업로드에 실패했습니다. 다시 시도해주세요.", false);
     } finally {
       setIsUploading(false);
@@ -332,7 +332,7 @@ const ProfileImageUpload: React.FC<ProfileImageUploadProps> = ({ currentImageUrl
       // 페이지 새로고침
       window.location.reload();
     } catch (error) {
-      console.error("프로필 이미지 초기화 실패:", error);
+      // console.error("프로필 이미지 초기화 실패:", error);
       openModal("초기화 실패", "프로필 이미지 초기화에 실패했습니다. 다시 시도해주세요.", false);
     } finally {
       setIsUploading(false);

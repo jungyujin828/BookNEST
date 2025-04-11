@@ -406,7 +406,7 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
         setCurrentPage(page);
       }
     } catch (error) {
-      console.error("도서 검색 실패:", error);
+      // console.error("도서 검색 실패:", error);
     }
   };
 
@@ -452,7 +452,7 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
         rating: Math.round(rating).toString(),
         review: null,
       };
-      console.log("Request Data:", requestData);
+      // console.log("Request Data:", requestData);
 
       const response = await api.post("/api/nest", requestData);
 
@@ -473,19 +473,19 @@ const BookSearchModal: React.FC<BookSearchModalProps> = ({ onClose, onBookAdded 
         }
       }
     } catch (error: any) {
-      console.error("Full error:", error);
-      console.error("Error details:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        requestHeaders: error.config?.headers,
-        message: error.message,
-      });
+      // console.error("Full error:", error);
+      // console.error("Error details:", {
+      //   status: error.response?.status,
+      //   data: error.response?.data,
+      //   headers: error.response?.headers,
+      //   requestHeaders: error.config?.headers,
+      //   message: error.message,
+      // });
 
       if (error.response?.status === 409) {
         alert("이미 둥지에 등록된 도서입니다.");
       } else if (error.response?.status === 400) {
-        console.error("Request data that caused 400:", error.config?.data);
+        // console.error("Request data that caused 400:", error.config?.data);
         alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
       } else if (error.response?.status === 401) {
         alert("로그인이 필요한 서비스입니다.");

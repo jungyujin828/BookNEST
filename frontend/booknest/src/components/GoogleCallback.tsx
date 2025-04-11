@@ -75,7 +75,7 @@ const GoogleCallback = () => {
         throw new Error(response.data.error?.message || '로그인에 실패했습니다. 다시 시도해주세요.');
       }
     } catch (err: any) {
-      console.error('Google login error:', err);
+      // console.error('Google login error:', err);
       
       // 에러 메시지 구체화
       if (err.response?.status === 401) {

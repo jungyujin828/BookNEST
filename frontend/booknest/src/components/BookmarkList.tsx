@@ -356,7 +356,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ userId, viewMode: initialVi
       setError(null);
       setIsAuthError(false);
 
-      console.log("북마크 목록 조회 시작");
+      // console.log("북마크 목록 조회 시작");
       const response = await api.get("/api/nest/bookmark", {
         params: {
           page: page - 1,
@@ -364,7 +364,7 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ userId, viewMode: initialVi
           sort: getSortParameter(sortOption)
         }
       });
-      console.log("북마크 목록 응답:", response.data);
+      // console.log("북마크 목록 응답:", response.data);
 
       if (response.data.success) {
         // API 응답 형식에 따라 다르게 처리
@@ -413,9 +413,9 @@ const BookmarkList: React.FC<BookmarkListProps> = ({ userId, viewMode: initialVi
         throw new Error(response.data.error?.message || "북마크 목록을 불러오는데 실패했습니다.");
       }
     } catch (err: any) {
-      console.error("Failed to fetch bookmarks:", err);
-      console.error("Error details:", err.response?.data || err.message);
-      console.error("Error status:", err.response?.status);
+      // console.error("Failed to fetch bookmarks:", err);
+      // console.error("Error details:", err.response?.data || err.message);
+      // console.error("Error status:", err.response?.status);
 
       // 403 에러 (인증 관련) 처리
       if (err.response && (err.response.status === 403 || err.response.status === 401)) {

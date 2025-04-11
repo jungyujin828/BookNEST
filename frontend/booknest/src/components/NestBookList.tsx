@@ -460,9 +460,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
     // 사용자 정보 조회
     const fetchUserInfo = async () => {
       try {
-        console.log("사용자 정보 조회 시작");
+        // console.log("사용자 정보 조회 시작");
         const response = await api.get("/api/user/info");
-        console.log("사용자 정보 응답:", response.data);
+        // console.log("사용자 정보 응답:", response.data);
 
         if (response.data.success && response.data.data) {
           setUserInfo(response.data.data);
@@ -470,7 +470,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         }
         return null;
       } catch (err) {
-        console.error("사용자 정보 조회 실패:", err);
+        // console.error("사용자 정보 조회 실패:", err);
         return null;
       }
     };
@@ -482,8 +482,8 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         setIsAuthError(false);
 
         // 디버그 정보 추가 - props로 전달된 값 확인
-        console.log("Props 값:", { propUserId, propNestId });
-        console.log("Current 값:", { currentUserId, currentNestId });
+        // console.log("Props 값:", { propUserId, propNestId });
+        // console.log("Current 값:", { currentUserId, currentNestId });
 
         // 우선순위: props로 전달된 값 > 사용자 정보에서 가져온 값
         const effectiveUserId = propUserId || currentUserId;
@@ -491,7 +491,7 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         const effectiveNestId = propNestId || currentNestId || effectiveUserId;
 
         // 디버그 정보 추가 - 유효한 값 확인
-        console.log("Effective 값:", { effectiveUserId, effectiveNestId });
+        // console.log("Effective 값:", { effectiveUserId, effectiveNestId });
 
         // API 스펙에 맞게 Query Parameter 수정
         const params: Record<string, any> = {
@@ -509,13 +509,13 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
         }
 
         // 디버깅 정보 출력
-        console.log("API 요청 파라미터:", params);
-        console.log("토큰:", localStorage.getItem("token"));
+        // console.log("API 요청 파라미터:", params);
+        // console.log("토큰:", localStorage.getItem("token"));
 
         // axios 인터셉터가 토큰을 자동으로 추가하므로 명시적 헤더 설정 제거
         const response = await api.get("/api/nest", { params });
 
-        console.log("API 응답:", response.data);
+        // console.log("API 응답:", response.data);
 
         if (response.data.success) {
           if (response.data.data && response.data.data.content) {
@@ -555,9 +555,9 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
           throw new Error(response.data.error?.message || "데이터를 불러오는데 실패했습니다.");
         }
       } catch (err: any) {
-        console.error("Failed to fetch nest books:", err);
-        console.error("Error details:", err.response?.data || err.message);
-        console.error("Error status:", err.response?.status);
+        // console.error("Failed to fetch nest books:", err);
+        // console.error("Error details:", err.response?.data || err.message);
+        // console.error("Error status:", err.response?.status);
 
         // 403 에러 (인증 관련) 처리
         if (err.response && (err.response.status === 403 || err.response.status === 401)) {
@@ -587,13 +587,13 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
 
     // 컴포넌트 마운트 시에 nestId 값이 존재하는지 로그로 확인
     useEffect(() => {
-      console.log("NestBookList 마운트 - Props 확인:", { propUserId, propNestId });
+      // console.log("NestBookList 마운트 - Props 확인:", { propUserId, propNestId });
     }, [propUserId, propNestId]);
 
     // 컴포넌트 마운트 시 사용자 정보를 먼저 조회하고, 그 후 도서 목록 조회
     useEffect(() => {
       const initializeData = async () => {
-        console.log("initializeData 실행 - 현재 props:", { propUserId, propNestId });
+        // console.log("initializeData 실행 - 현재 props:", { propUserId, propNestId });
         
         // props로 userId나 nestId가 전달되지 않은 경우 사용자 정보 조회
         if (!propUserId && !propNestId) {
@@ -674,8 +674,8 @@ const NestBookList = forwardRef<{ fetchNestBooks: () => void }, NestBookListProp
           throw new Error(response.data.error?.message || "도서 삭제에 실패했습니다.");
         }
       } catch (err: any) {
-        console.error("Failed to delete book from nest:", err);
-        console.error("Error details:", err.response?.data || err.message);
+        // console.error("Failed to delete book from nest:", err);
+        // console.error("Error details:", err.response?.data || err.message);
 
         // 오류 메시지 모달 표시
         openModal('error', err.response?.data?.error?.message || "도서 삭제에 실패했습니다.");

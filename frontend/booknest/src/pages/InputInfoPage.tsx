@@ -272,7 +272,7 @@ const InputInfoPage = () => {
         },
       });
 
-      console.log("닉네임 중복 확인 응답:", response.data); // 디버깅용
+      // console.log("닉네임 중복 확인 응답:", response.data); // 디버깅용
 
       if (response.data.success) {
         const isDuplicate = response.data.data; // true면 중복
@@ -281,7 +281,7 @@ const InputInfoPage = () => {
         setErrorMessage(isDuplicate ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다.");
       }
     } catch (error) {
-      console.error("닉네임 중복 확인 오류:", error);
+      // console.error("닉네임 중복 확인 오류:", error);
       setIsNicknameValidated(false);
       setErrorMessage("닉네임 중복 확인 중 오류가 발생했습니다.");
     }
@@ -436,7 +436,7 @@ const InputInfoPage = () => {
     try {
       const response = await api.put("/api/user/update", payload);
       if (response.data.success) {
-        console.log("회원 정보가 성공적으로 업데이트되었습니다.");
+        // console.log("회원 정보가 성공적으로 업데이트되었습니다.");
         navigate("/eval-book");
       }
     } catch (error: any) {

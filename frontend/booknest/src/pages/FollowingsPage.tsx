@@ -92,7 +92,7 @@ const FollowingPage = () => {
         }
       }
     } catch (error) {
-      console.error("팔로우/언팔로우 작업 실패:", error);
+      // console.error("팔로우/언팔로우 작업 실패:", error);
     }
   };
 
@@ -113,7 +113,7 @@ const FollowingPage = () => {
           setFollowings(response.data.data.content);
         }
       } catch (error) {
-        console.error("Failed to fetch followings:", error);
+        // console.error("Failed to fetch followings:", error);
       }
     };
 

@@ -103,10 +103,10 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         const response = await api.get<{ success: boolean; data: UserInfo; error: null }>("/api/user/info");
         if (response.data.success && response.data.data) {
           setUserInfo(response.data.data);
-          console.log("User data fetched for nest:", response.data.data);
+          // console.log("User data fetched for nest:", response.data.data);
         }
       } catch (err) {
-        console.error("사용자 정보 조회 실패:", err);
+        // console.error("사용자 정보 조회 실패:", err);
       }
     };
 
@@ -138,7 +138,7 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         rating: currentRating.toString(),
       };
 
-      console.log("Sending request with data:", requestData);
+      // console.log("Sending request with data:", requestData);
       const response = await api.post("/api/nest", requestData);
 
       if (response.data.success) {
@@ -148,31 +148,31 @@ const AddToNestButton: React.FC<AddToNestButtonProps> = ({ bookId, currentRating
         setShowSuccessModal(true);
       }
     } catch (error: any) {
-      console.error("Full error:", error);
-      console.error("Error details:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        headers: error.response?.headers,
-        requestHeaders: error.config?.headers,
-        message: error.message,
-      });
+      // console.error("Full error:", error);
+      // console.error("Error details:", {
+      //   status: error.response?.status,
+      //   data: error.response?.data,
+      //   headers: error.response?.headers,
+      //   requestHeaders: error.config?.headers,
+      //   message: error.message,
+      // });
 
       if (error.response?.status === 409) {
         alert("이미 둥지에 등록된 도서입니다.");
       } else if (error.response?.status === 400) {
-        console.error("Request data that caused 400:", error.config?.data);
+        // console.error("Request data that caused 400:", error.config?.data);
         alert("잘못된 요청입니다. 필수 정보를 확인해주세요.");
       } else if (error.response?.status === 401) {
         alert("로그인이 필요한 서비스입니다.");
         navigate(ROUTES.LOGIN);
       } else if (error.response?.status === 403) {
-        if (import.meta.env.DEV) {
-          console.log("Development environment detected");
-          console.log("Request URL:", error.config?.url);
-          console.log("Request method:", error.config?.method);
-          console.log("Request data:", error.config?.data);
-          console.log("Complete request headers:", error.config?.headers);
-        }
+        // if (import.meta.env.DEV) {
+        //   console.log("Development environment detected");
+        //   console.log("Request URL:", error.config?.url);
+        //   console.log("Request method:", error.config?.method);
+        //   console.log("Request data:", error.config?.data);
+        //   console.log("Complete request headers:", error.config?.headers);
+        // }
         alert("권한이 없습니다. 인증 토큰을 확인해주세요.");
       } else {
         alert("둥지 등록 중 오류가 발생했습니다.");
