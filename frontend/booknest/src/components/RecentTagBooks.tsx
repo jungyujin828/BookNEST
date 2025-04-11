@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { useAuthStore } from '../store/useAuthStore';
+import { ROUTES } from '../constants/paths';
 
 interface Book {
   book_id: number;
@@ -248,6 +249,82 @@ const ErrorMessage = styled.div`
   }
 `;
 
+// Replace with nicer error UI
+const FriendlyErrorContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  margin: 16px 0;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  width: 100%;
+  
+  @media (min-width: 768px) {
+    padding: 40px 24px;
+    margin: 24px 0;
+  }
+`;
+
+const ErrorContent = styled.div`
+  max-width: 500px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const ErrorIcon = styled.div`
+  font-size: 64px;
+  margin-bottom: 16px;
+  color: #7bc47f;
+`;
+
+const ErrorTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+  width: 100%;
+  word-break: keep-all;
+  white-space: normal;
+  
+  @media (min-width: 768px) {
+    font-size: 20px;
+  }
+`;
+
+const ErrorText = styled.p`
+  font-size: 16px;
+  color: #666666;
+  margin-bottom: 24px;
+  width: 100%;
+  line-height: 1.5;
+  word-break: keep-all;
+  white-space: normal;
+  padding: 0 8px;
+`;
+
+const ActionButton = styled.button`
+  background-color: #7bc47f;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  &:hover {
+    background-color: #6ab36e;
+  }
+`;
+
 const LoadingMessage = styled.div`
   text-align: center;
   padding: 32px;
@@ -399,7 +476,12 @@ const RecentTagBooks = () => {
         }
       } catch (err) {
         console.error('API Error:', err);
-        setError('서버 오류가 발생했습니다.');
+        // 500 에러일 경우 회원가입 당일 메시지 표시
+        if (err.response && err.response.status === 500) {
+          setError('오늘의 추천은 회원가입한 날에는 볼 수 없어요. 내일 만나요!');
+        } else {
+          setError('서버 오류가 발생했습니다.');
+        }
         setBooks([]);
       } finally {
         setLoading(false);
@@ -414,7 +496,27 @@ const RecentTagBooks = () => {
   }
 
   if (error) {
-    return <ErrorMessage>{error}</ErrorMessage>;
+    // Check if it's the signup day message
+    const isSignupDayMessage = error.includes('회원가입한 날에는 볼 수 없어요');
+    
+    return (
+      <FriendlyErrorContainer>
+        <ErrorContent>
+          <ErrorIcon>
+            {isSignupDayMessage ? '🌱' : '📚'}
+          </ErrorIcon>
+          <ErrorTitle>
+            {isSignupDayMessage ? '내일부터 만나요!' : '잠시 문제가 발생했어요'}
+          </ErrorTitle>
+          <ErrorText>{error}</ErrorText>
+          {isSignupDayMessage && (
+            <ActionButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>
+              평가하러 가기
+            </ActionButton>
+          )}
+        </ErrorContent>
+      </FriendlyErrorContainer>
+    );
   }
 
   if (!books.length) {
