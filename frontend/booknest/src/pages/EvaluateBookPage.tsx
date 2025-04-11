@@ -66,7 +66,7 @@ const EvaluateBookPage = () => {
         setBooks(paginatedData.content);
         setTotalPages(paginatedData.totalPages);
       } catch (error) {
-        console.error("데이터를 불러오는데 실패했습니다:", error);
+        // console.error("데이터를 불러오는데 실패했습니다:", error);
         setError("데이터를 불러오는데 실패했습니다. 다시 시도해주세요.");
       } finally {
         setLoading(false);
@@ -212,7 +212,7 @@ const EvaluateBookPage = () => {
   const [ratedBooks, setRatedBooks] = useState<Set<number>>(new Set());
 
   const handleRatingChange = (bookId: number, rating: number) => {
-    console.log(`Book ${bookId} rated: ${rating}`);
+    // console.log(`Book ${bookId} rated: ${rating}`);
 
     // 평점이 0이면 취소로 간주하고 해당 책을 ratedBooks에서 제거
     if (rating === 0) {

@@ -155,7 +155,7 @@ const CommentForm = ({
         content: content.trim()
       };
 
-      console.log('Sending request with data:', requestData);
+      // console.log('Sending request with data:', requestData);
 
       if (isEdit && reviewId) {
         // 수정 요청
@@ -195,9 +195,9 @@ const CommentForm = ({
         }
       }
     } catch (err) {
-      console.error('Full error object:', err);
+      // console.error('Full error object:', err);
       if (axios.isAxiosError(err)) {
-        console.log('Response data:', err.response?.data);
+        // console.log('Response data:', err.response?.data);
         const errorMessage = err.response?.data?.error?.message || '서버 오류가 발생했습니다.';
         setError(errorMessage);
       } else {
@@ -228,7 +228,7 @@ const CommentForm = ({
         setError(response.data.error?.message || '한줄평 삭제에 실패했습니다.');
       }
     } catch (err) {
-      console.error('Delete API Error:', err);
+      // console.error('Delete API Error:', err);
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
           setError('로그인이 필요한 서비스입니다.');

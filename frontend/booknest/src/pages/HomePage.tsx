@@ -63,7 +63,7 @@ const HomePage = () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
-        console.error("No token found");
+        // console.error("No token found");
         return;
       }
 
@@ -72,14 +72,14 @@ const HomePage = () => {
       });
 
       if (response.data.success) {
-        console.log("Fetched user info:", response.data.data);
+        // console.log("Fetched user info:", response.data.data);
         setUserDetail(response.data.data);
       }
     } catch (error) {
       if (error.response?.status === 403) {
-        console.error("Authentication failed. Please login again.");
+        // console.error("Authentication failed. Please login again.");
       } else {
-        console.error("Failed to fetch user info:", error);
+        // console.error("Failed to fetch user info:", error);
       }
     }
   };

@@ -57,7 +57,7 @@ const DeleteAccountModal = ({ onClose }: { onClose: () => void }) => {
         onClose();
       }
     } catch (error) {
-      console.error("회원탈퇴 실패:", error);
+      // console.error("회원탈퇴 실패:", error);
     }
   };
 

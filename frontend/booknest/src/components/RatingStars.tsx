@@ -133,10 +133,10 @@ const RatingStars: React.FC<RatingStarsProps> = ({
           // onRatingChange는 초기 로딩시에만 호출하거나 제거
         }
       } catch (error) {
-        console.error("Failed to fetch rating:", error);
+        // console.error("Failed to fetch rating:", error);
         // 404 에러는 평점이 없는 경우이므로 무시
         if (error.response?.status !== 404) {
-          console.error("Error fetching rating:", error);
+          // console.error("Error fetching rating:", error);
         }
       }
     };
@@ -162,19 +162,19 @@ const RatingStars: React.FC<RatingStarsProps> = ({
       setUserRating(bookId, score);
       onRatingChange(score);
 
-      console.log("Submitting rating:", {
-        bookId,
-        score,
-        currentRating,
-        method: currentRating > 0 ? "PUT" : "POST",
-      });
+      // console.log("Submitting rating:", {
+      //   bookId,
+      //   score,
+      //   currentRating,
+      //   method: currentRating > 0 ? "PUT" : "POST",
+      // });
 
       const method = currentRating > 0 ? "put" : "post";
       const response = await api[method](`/api/book/${bookId}/rating`, {
         score: score,
       });
 
-      console.log("Rating response:", response.data);
+      // console.log("Rating response:", response.data);
 
       if (!response.data.success) {
         throw new Error(
@@ -185,10 +185,10 @@ const RatingStars: React.FC<RatingStarsProps> = ({
       // API 호출 성공 후 평균 평점 업데이트를 위해 onRatingChange 다시 호출
       onRatingChange(score);
     } catch (error) {
-      console.error(
-        `Failed to ${currentRating > 0 ? "update" : "create"} rating:`,
-        error
-      );
+      // console.error(
+      //   `Failed to ${currentRating > 0 ? "update" : "create"} rating:`,
+      //   error
+      // );
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
     }
@@ -209,7 +209,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
         );
       }
 
-      console.log("평점 삭제 성공:", response.data);
+      // console.log("평점 삭제 성공:", response.data);
 
       // UI 즉시 업데이트를 위한 추가 처리
       // 1. 현재 평점 상태 초기화
@@ -222,7 +222,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
       // 모달 닫기
       closeModal();
     } catch (error) {
-      console.error("평점 삭제 실패:", error);
+      // console.error("평점 삭제 실패:", error);
       // 에러 발생 시 원래 상태로 복원
       setUserRating(bookId, currentRating);
       onRatingChange(currentRating);
@@ -246,7 +246,7 @@ const RatingStars: React.FC<RatingStarsProps> = ({
       // 사용자에게 확인 메시지 표시
       openModal('confirm', "평점을 취소하시겠습니까?");
     } catch (error) {
-      console.error("평점 취소 처리 실패:", error);
+      // console.error("평점 취소 처리 실패:", error);
       openModal('error', "오류가 발생했습니다. 다시 시도해주세요.");
     }
   };

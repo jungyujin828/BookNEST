@@ -418,7 +418,7 @@ const LoginPage = () => {
   }, []);
 
   const handleChangeBackground = useCallback(() => {
-    console.log("change");
+    // console.log("change");
     setIsChanging(true);
     setTimeout(() => {
       setCurrentBg((prev) => (prev % 5) + 1);
@@ -439,12 +439,12 @@ const LoginPage = () => {
   }, []);
 
   useEffect(() => {
-    console.log("interval set");
+    // console.log("interval set");
     // 화면 자동 변경 시간 20초로 설정
     const intervalId = setInterval(handleChangeBackground, 20000);
 
     return () => {
-      console.log("interval cleared");
+      // console.log("interval cleared");
       clearInterval(intervalId);
     };
   }, [handleChangeBackground]); // Add handleChangeBackground to dependencies

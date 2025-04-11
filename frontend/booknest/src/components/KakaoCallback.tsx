@@ -80,7 +80,7 @@ const KakaoCallback = () => {
             }
             navigate(ROUTES.HOME);
           } catch (userInfoError) {
-            console.error("Failed to fetch user info:", userInfoError);
+            // console.error("Failed to fetch user info:", userInfoError);
             login(accessToken, user);
             navigate(ROUTES.HOME);
           }
@@ -92,7 +92,7 @@ const KakaoCallback = () => {
         );
       }
     } catch (err: any) {
-      console.error("Kakao login error:", err);
+      // console.error("Kakao login error:", err);
 
       // 에러 메시지 구체화
       if (err.response?.status === 401) {

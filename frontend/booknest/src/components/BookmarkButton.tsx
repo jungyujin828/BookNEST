@@ -54,7 +54,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId, isBookMarked })
         setIsBookmarked(isCurrentBookMarked);
       }
     } catch (error) {
-      console.error("Failed to fetch bookmarks:", error);
+      // console.error("Failed to fetch bookmarks:", error);
       // 로그인하지 않은 경우 등은 에러로 간주하지 않고 북마크 해제 상태로 표시
       setIsBookmarked(false);
     } finally {
@@ -96,7 +96,7 @@ const BookmarkButton: React.FC<BookmarkButtonProps> = ({ bookId, isBookMarked })
         throw new Error("Failed to toggle bookmark");
       }
     } catch (error) {
-      console.error("Failed to toggle bookmark:", error);
+      // console.error("Failed to toggle bookmark:", error);
       // 에러 발생 시 상태 되돌리기
       setIsBookmarked(!isBookmarked);
     }
