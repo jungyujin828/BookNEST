@@ -208,6 +208,7 @@ const TodaysPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetail, setShowDetail] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // 추가
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -222,6 +223,11 @@ const TodaysPage = () => {
       } catch (error) {
         // console.error("추천 도서 목록을 불러오는데 실패했습니다:", error);
         setIsLoading(false);
+        
+        // Add error state to display the message
+        if (error.response && error.response.status === 500) {
+          setErrorMessage("오늘의 추천은 회원가입한 날에는 볼 수 없어요.");
+        }
       }
     };
 
@@ -251,6 +257,75 @@ const TodaysPage = () => {
   const EmptyImage = styled.img`
     height: 100%;
   `;
+  
+  const ErrorContainer = styled.div`
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    padding: 24px;
+    overflow-y: auto;
+  `;
+  
+  const ErrorContent = styled.div`
+    max-width: 500px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  `;
+  
+  const ErrorIcon = styled.div`
+    font-size: 72px;
+    margin-bottom: 24px;
+    color: #7bc47f;
+  `;
+  
+  const ErrorTitle = styled.h3`
+    font-size: 24px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 16px;
+    width: 100%;
+    word-break: keep-all;
+    white-space: normal;
+  `;
+  
+  const ErrorMessageText = styled.p`
+    font-size: 18px;
+    color: #666666;
+    text-align: center;
+    margin-bottom: 32px;
+    width: 100%;
+    line-height: 1.6;
+    word-break: keep-all;
+    white-space: normal;
+  `;
+
+  // Show error message if present
+  if (errorMessage) {
+    return (
+      <ErrorContainer>
+        <ErrorContent>
+          <ErrorIcon>🌱</ErrorIcon>
+          <ErrorTitle>내일부터 만나요!</ErrorTitle>
+          <ErrorMessageText>{errorMessage}</ErrorMessageText>
+          <EvaluateButton onClick={() => navigate(ROUTES.EVALUATE_BOOK)}>
+            <p>
+              더 많은 책을 평가하면 추천을 받을 수 있어요! <br /> ⭐ 평가하기
+            </p>
+          </EvaluateButton>
+        </ErrorContent>
+      </ErrorContainer>
+    );
+  }
 
   if (!books.length || isLoading) {
     return (
