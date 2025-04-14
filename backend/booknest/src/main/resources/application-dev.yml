@@ -9,7 +9,7 @@ spring:
 
   data:
     redis:
-      host: localhost # 권장 x ip 주소로...
+      host: localhost
 
   sql:
     init:
@@ -31,8 +31,8 @@ logging:
 
 oauth:
   kakao:
-    redirect-uri: http://localhost:5173/oauth/kakao/callback  # 운영 도메인으로 변경
+    redirect-uri: http://localhost:5173/oauth/kakao/callback
   google:
-    redirect-uri: http://localhost:5173/oauth/google/callback  # 운영 도메인으로 변경
+    redirect-uri: http://localhost:5173/oauth/google/callback
   naver:
     redirect-uri: http://localhost:5173/oauth/naver/callback
