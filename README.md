@@ -93,7 +93,7 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 ---
 
 ### **1. 독창적 실험가 카나리아**
-![카나리아 이미지](BookNEST/frontend/booknest/src/assets/images/archetype/canary.png)  
+![카나리아 이미지](frontend/booknest/src/assets/images/archetype/canary.png)  
 **"이 문장을 읽는 순간, 당신은 나의 독자가 된다. 그러므로 나는 당신을 창조할 수 있다."**  
 — 이탈로 칼비노, 『어느 겨울밤 한 여행자가』
 
