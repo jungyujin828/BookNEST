@@ -156,7 +156,21 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 ---
 
 ### **3. 실시간 도서 추천**
-*(GIF 추가 예정)*
+
+<div style="display: flex; justify-content: space-between;">
+  <div style="text-align: center; width: 30%;">
+    <img src="ui-gifs/추천페이지1.gif" width="100%" alt="추천하는 도서들">
+    <p>로맨스 태그 위주로 도서 추천</p>
+  </div>
+  <div style="text-align: center; width: 30%;">
+    <img src="ui-gifs/추천페이지2.gif" width="100%" alt="유저 행동에 따른 추천">
+    <p>다른 태그의 도서를 평점주고 둥지에 담음</p>
+  </div>
+  <div style="text-align: center; width: 30%;">
+    <img src="ui-gifs/추천페이지3.gif" width="100%" alt="추천 태그가 바뀌는 화면">
+    <p>유저 행동에 따라 다른 태그의 도서 추천</p>
+  </div>
+</div>
 
 **기능:**
 - 유저의 행동을 분석하여 실시간으로 맞춤 도서를 추천합니다.
