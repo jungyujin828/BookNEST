@@ -157,21 +157,6 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 
 ### **3. 실시간 도서 추천**
 
-<div style="display: flex; justify-content: space-between; gap: 10px;">
-  <div style="text-align: center; width: 30%;">
-    <img src="ui-gifs/추천페이지1.gif" width="100%" alt="추천하는 도서들">
-    <p>추천하는 도서들</p>
-  </div>
-  <div style="text-align: center; width: 30%;">
-    <img src="ui-gifs/추천페이지2.gif" width="100%" alt="유저 행동에 따른 추천">
-    <p>유저 행동에 따른 추천</p>
-  </div>
-  <div style="text-align: center; width: 30%;">
-    <img src="ui-gifs/추천페이지3.gif" width="100%" alt="추천 태그가 바뀌는 화면">
-    <p>추천 태그가 바뀌는 화면</p>
-  </div>
-</div>
-
 **기능:**
 - 유저의 행동을 분석하여 실시간으로 맞춤 도서를 추천합니다.
 - 특정 **태그의 도서를 자주 검색**하거나 **둥지에 담은 태그**에 맞춰 추천
@@ -179,6 +164,7 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 ---
 
 ### **4. 둥지 페이지**
+![태그 검색 GIF](ui-gifs/둥지페이지.gif)
 **기능:**
 - 유저가 읽고 기록하고 싶은 도서를 보관하는 페이지
 - **정렬 옵션**:
