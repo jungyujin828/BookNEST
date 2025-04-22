@@ -221,13 +221,13 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 **모바일 버전**에서의 반응형 UI를 구현하여, 다양한 화면 크기에서 잘 동작하도록 최적화된 UI를 제공합니다.
 
 <div style="display: flex; justify-content: space-between; gap: 10px;">
-  <div style="width: 30%;">
+  <div style="width: 10%;">
     <img src="ui-gifs/모바일 메인페이지.gif" width="100%" alt="모바일 메인 페이지 GIF">
   </div>
-  <div style="width: 30%;">
+  <div style="width: 10%;">
     <img src="ui-gifs/모바일 로그인페이지.gif" width="100%" alt="모바일 로그인 페이지 GIF">
   </div>
-  <div style="width: 30%;">
+  <div style="width: 10%;">
     <img src="ui-gifs/모바일 북디테일.gif" width="100%" alt="모바일 북 디테일 GIF">
   </div>
 </div>
@@ -235,6 +235,7 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 **기능:**
 - **모바일 화면에서도 잘 구현된 UI**: 다양한 화면 크기에서 **반응형 UI**로 잘 작동하도록 최적화되었습니다.
 - 각 페이지가 **모바일**에서 **원활하게 동작**하며, **사용자의 편의성**을 고려하여 최적화되었습니다.
+
 
   
 ---
