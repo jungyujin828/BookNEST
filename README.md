@@ -94,14 +94,14 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 
 | 아키타입        | 이미지                                               | 글귀                                                       | 독자 성향                                                      |
 |-----------------|------------------------------------------------------|------------------------------------------------------------|---------------------------------------------------------------|
-| **카나리아**     | <img src="frontend/booknest/src/assets/images/archetype/canary.png" width="100">  <br> <sub>독창적 실험가 <br>카나리아</sub> | **"이 문장을 읽는 순간, 당신은 나의 독자가 된다. 그러므로 나는 당신을 창조할 수 있다."** <br> — 이탈로 칼비노, 『어느 겨울밤 한 여행자가』 | 창조적이고 실험적인 방식으로 새로운 것을 시도하는 독자 |
-| **알바트로스**   | <img src="frontend/booknest/src/assets/images/archetype/albatross.png" width="100"> <br> <sub>세계관 탐험가 알바트로스</sub> | **"길을 나서지 않으면 결코 알 수 없다. 세상은 너무나도 넓으니까."** <br> — J.R.R. 톨킨, 『반지의 제왕』 | 복잡한 세계관과 설정을 탐구하며 모험을 즐기는 독자 |
-| **독수리**       | <img src="frontend/booknest/src/assets/images/archetype/eagle.png" width="100"> <br> <sub>현실주의자 독수리</sub> | **“글쎄요, 난 이곳에서 당신들이 누리는 그런 거짓된 가짜 행복을 느끼기보다는 차라리 불행해지고 싶은데요.”** <br> — 올더스 헉슬리, 『멋진 신세계』 | 사회적 문제를 분석하고 현실을 냉철하게 바라보는 독자 |
-| **흰 오목눈이**   | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> <br> <sub>따뜻한 감성가 흰 오목눈이</sub> | **"네가 사랑하는 것은 너를 울게 한다. 하지만 결국 너를 가장 강하게 만드는 것도 그것이다."** <br> — 빅토르 위고, 『노트르담 드 파리』 | 감동적이고 따뜻한 이야기나 감정적 교감을 중요시하는 독자 |
-| **부엉이**       | <img src="frontend/booknest/src/assets/images/archetype/owl.png" width="100"> <br> <sub>논리적 사색가 부엉이</sub> | **"진정으로 아는 사람은 자기가 모른다는 것을 아는 사람이다."** <br> — 소크라테스, 『소크라테스의 변론』 | 논리적이고 철학적인 사고를 즐기며 깊이 있는 사색을 좋아하는 독자 |
-| **까마귀**       | <img src="frontend/booknest/src/assets/images/archetype/raven.png" width="100"> <br> <sub>냉철한 분석가 까마귀</sub> | **"진실은 종종 가장 보이지 않는 곳에 숨겨져 있다."** <br> — 아서 코난 도일, 『셜록 홈즈』 시리즈 | 미스터리와 반전을 즐기며, 사실을 파헤치는 과정을 좋아하는 독자 |
-| **앵무새**       | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> <br> <sub>명랑한 이야기꾼 앵무새</sub> | **"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."** <br> — 루이스 캐럴, 『이상한 나라의 앨리스』 | 유머와 즐거운 이야기를 선호하는 가볍고 긍정적인 독자 |
-| **플라밍고**     | <img src="frontend/booknest/src/assets/images/archetype/flamingo.png" width="100"> <br> <sub>감각의 여정자 플라밍고</sub> | **”이 광대한 우주 무한한 시간 속에서 당신과 같은 시간, 같은 행성 위에 살아가는 것을 기뻐하며”** <br> — 칼 세이건, 『코스모스』 | 감각적이고 신비로운 분위기를 선호하며, 초현실적인 이야기에 이끌리는 독자 |
+| **독창적 실험가 <br>카나리아**     | <img src="frontend/booknest/src/assets/images/archetype/canary.png" width="100"> | **"이 문장을 읽는 순간, 당신은 나의 독자가 된다. 그러므로 나는 당신을 창조할 수 있다."** <br> — 이탈로 칼비노, 『어느 겨울밤 한 여행자가』 | 창조적이고 실험적인 방식으로 새로운 것을 시도하는 독자 |
+| **세계관 탐험가 알바트로스**   | <img src="frontend/booknest/src/assets/images/archetype/albatross.png" width="100"> | **"길을 나서지 않으면 결코 알 수 없다. 세상은 너무나도 넓으니까."** <br> — J.R.R. 톨킨, 『반지의 제왕』 | 복잡한 세계관과 설정을 탐구하며 모험을 즐기는 독자 |
+| **현실주의자 독수리**       | <img src="frontend/booknest/src/assets/images/archetype/eagle.png" width="100"> | **“글쎄요, 난 이곳에서 당신들이 누리는 그런 거짓된 가짜 행복을 느끼기보다는 차라리 불행해지고 싶은데요.”** <br> — 올더스 헉슬리, 『멋진 신세계』 | 사회적 문제를 분석하고 현실을 냉철하게 바라보는 독자 |
+| **따뜻한 감성가 흰 오목눈이**   | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> | **"네가 사랑하는 것은 너를 울게 한다. 하지만 결국 너를 가장 강하게 만드는 것도 그것이다."** <br> — 빅토르 위고, 『노트르담 드 파리』 | 감동적이고 따뜻한 이야기나 감정적 교감을 중요시하는 독자 |
+| **논리적 사색가 부엉이**       | <img src="frontend/booknest/src/assets/images/archetype/owl.png" width="100"> | **"진정으로 아는 사람은 자기가 모른다는 것을 아는 사람이다."** <br> — 소크라테스, 『소크라테스의 변론』 | 논리적이고 철학적인 사고를 즐기며 깊이 있는 사색을 좋아하는 독자 |
+| **냉철한 분석가 까마귀**       | <img src="frontend/booknest/src/assets/images/archetype/raven.png" width="100"> | **"진실은 종종 가장 보이지 않는 곳에 숨겨져 있다."** <br> — 아서 코난 도일, 『셜록 홈즈』 시리즈 | 미스터리와 반전을 즐기며, 사실을 파헤치는 과정을 좋아하는 독자 |
+| **명랑한 이야기꾼 앵무새**       | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> | **"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."** <br> — 루이스 캐럴, 『이상한 나라의 앨리스』 | 유머와 즐거운 이야기를 선호하는 가볍고 긍정적인 독자 |
+| **감각의 여정자 플라밍고**     | <img src="frontend/booknest/src/assets/images/archetype/flamingo.png" width="100"> | **”이 광대한 우주 무한한 시간 속에서 당신과 같은 시간, 같은 행성 위에 살아가는 것을 기뻐하며”** <br> — 칼 세이건, 『코스모스』 | 감각적이고 신비로운 분위기를 선호하며, 초현실적인 이야기에 이끌리는 독자 |
 
 ---
 
