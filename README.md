@@ -88,7 +88,7 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 | **따뜻한 감성가 <br>흰 오목눈이**   | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> | **"네가 사랑하는 것은 너를 울게 한다. 하지만 결국 너를 가장 강하게 만드는 것도 그것이다."** <br> — 빅토르 위고, 『노트르담 드 파리』 | 감동적이고 따뜻한 이야기나 감정적 교감을 중요시하는 독자 |
 | **논리적 사색가 <br>부엉이**       | <img src="frontend/booknest/src/assets/images/archetype/owl.png" width="100"> | **"진정으로 아는 사람은 자기가 모른다는 것을 아는 사람이다."** <br> — 소크라테스, 『소크라테스의 변론』 | 논리적이고 철학적인 사고를 즐기며 깊이 있는 사색을 좋아하는 독자 |
 | **냉철한 분석가 <br>까마귀**       | <img src="frontend/booknest/src/assets/images/archetype/raven.png" width="100"> | **"진실은 종종 가장 보이지 않는 곳에 숨겨져 있다."** <br> — 아서 코난 도일, 『셜록 홈즈』 시리즈 | 미스터리와 반전을 즐기며, 사실을 파헤치는 과정을 좋아하는 독자 |
-| **명랑한 이야기꾼 <br>앵무새**       | <img src="frontend/booknest/src/assets/images/archetype/longtail.png" width="100"> | **"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."** <br> — 루이스 캐럴, 『이상한 나라의 앨리스』 | 유머와 즐거운 이야기를 선호하는 가볍고 긍정적인 독자 |
+| **명랑한 이야기꾼 <br>앵무새**       | <img src="frontend/booknest/src/assets/images/archetype/parrot.png" width="100"> | **"약간의 어리석음은 괜찮아. 우리는 모두 조금씩 이상하니까."** <br> — 루이스 캐럴, 『이상한 나라의 앨리스』 | 유머와 즐거운 이야기를 선호하는 가볍고 긍정적인 독자 |
 | **감각의 여정자 플라밍고**     | <img src="frontend/booknest/src/assets/images/archetype/flamingo.png" width="100"> | **”이 광대한 우주 무한한 시간 속에서 당신과 같은 시간, 같은 행성 위에 살아가는 것을 기뻐하며”** <br> — 칼 세이건, 『코스모스』 | 감각적이고 신비로운 분위기를 선호하며, 초현실적인 이야기에 이끌리는 독자 |
 
 ---
@@ -175,7 +175,7 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 ---
 
 ### **4. 실시간 도서 추천**
-![실시간 추천페이지 GIF](ui-gifs/실시간추천천페이지.gif)
+![실시간 추천페이지 GIF](ui-gifs/실시간추천페이지.gif)
 
 **기능:**
 - 유저의 행동을 분석하여 실시간으로 맞춤 도서를 추천합니다.
