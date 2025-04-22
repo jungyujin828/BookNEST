@@ -1,4 +1,5 @@
 # 🪹 BookNest - 당신의 다음 책을 먼저 건네는 서비스
+![BookNEST](ui-gifs/BookNEST.png)
 
 > **나의 취향이 가득한 책 둥지를 틀다.**  
 > BookNest는 감성, 주제, 세계관을 이해하고  
