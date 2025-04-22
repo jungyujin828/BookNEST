@@ -121,7 +121,11 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 
 ---
 ### **1. 메인 페이지**
-![메인 페이지 GIF](ui-gifs/메인페이지.gif)
+
+<div style="display: flex; justify-content: space-around;">
+  <img src="ui-gifs/메인페이지.gif" width="65%" alt="메인 페이지 GIF">
+  <img src="ui-gifs/모바일 메인페이지.gif" width="25%" alt="모바일 메인 페이지 GIF">
+</div>
 
 **기능:**
 - **추천 도서 필터링**:
