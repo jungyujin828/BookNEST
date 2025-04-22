@@ -221,18 +221,19 @@ _"단지 베스트셀러가 아니라, 내 감정에 맞는 책을 누군가 먼
 **모바일 버전**에서의 반응형 UI를 구현하여, 다양한 화면 크기에서 잘 동작하도록 최적화된 UI를 제공합니다.
 
 <div style="display: flex; justify-content: space-between; gap: 10px;">
-  <div style="text-align: center; width: 30%;">
+  <div style="text-align: center; width: 48%;">
     <img src="ui-gifs/모바일 메인페이지.gif" width="100%" alt="모바일 메인 페이지 GIF">
     <p>모바일 메인 페이지</p>
   </div>
-  <div style="text-align: center; width: 30%;">
+  <div style="text-align: center; width: 48%;">
     <img src="ui-gifs/모바일 로그인페이지.gif" width="100%" alt="모바일 로그인 페이지 GIF">
     <p>모바일 로그인 페이지</p>
   </div>
-  <div style="text-align: center; width: 30%;">
-    <img src="ui-gifs/모바일 북디테일페이지.gif" width="100%" alt="모바일 북 디테일 페이지 GIF">
-    <p>모바일 북 디테일 페이지</p>
-  </div>
+</div>
+
+<div style="text-align: center; width: 48%; margin-top: 10px;">
+  <img src="ui-gifs/모바일 북디테일.gif" width="100%" alt="모바일 북 디테일 GIF">
+  <p>모바일 북 디테일</p>
 </div>
 
 **기능:**
